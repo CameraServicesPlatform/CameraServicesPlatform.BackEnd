@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="ConfigurationModel\" />
+    <Folder Include="DTO\Request\" />
+    <Folder Include="Mapping\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CameraServicesPlatform.BackEnd.BusinessObject\CameraServicesPlatform.BackEnd.BusinessObject.csproj" />
+  </ItemGroup>
+
+</Project>

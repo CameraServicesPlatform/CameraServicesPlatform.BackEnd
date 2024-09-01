@@ -1,0 +1,6 @@
+@CameraServicesPlatform.BackEnd.API_HostAddress = http://localhost:5038
+
+GET {{CameraServicesPlatform.BackEnd.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

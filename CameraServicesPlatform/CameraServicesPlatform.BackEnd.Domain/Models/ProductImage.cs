@@ -1,17 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class ProductImage
-    {
-    [Key] public Guid ProductImagesID { get; set; }
-        public Guid ProductID { get; set; }
-        public string Image { get; set; }
+public class ProductImage
+{
+    [Key]
+    public Guid ProductImagesID { get; set; }
 
-        public Product Product { get; set; }
-    }
+    public Guid ProductID { get; set; }
+
+    [ForeignKey(nameof(ProductID))]
+    public Product Product { get; set; }
+
+    [MaxLength(255)]
+    public string Image { get; set; }
+}
 

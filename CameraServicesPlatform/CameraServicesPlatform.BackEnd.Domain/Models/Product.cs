@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
@@ -8,7 +9,14 @@ public class Product
     public Guid ProductID { get; set; }
 
     public Guid ShopID { get; set; }
+    [ForeignKey(nameof(ShopID))]
+    public Shop Shop { get; set; }
+
     public Guid CategoryID { get; set; }
+
+    [ForeignKey(nameof(CategoryID))]
+    public Category Category { get; set; }
+
 
     [MaxLength(255)]
     public string ProductName { get; set; }
@@ -22,17 +30,13 @@ public class Product
 
     public int Quantity { get; set; }
 
-    public ProductStatus Status { get; set; }
+    public ProductStatusEnum Status { get; set; }
 
     public decimal Rating { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    [ForeignKey(nameof(ShopID))]
-    public Shop Shop { get; set; }
-    [ForeignKey(nameof(CategoryID))]
-    public Category Category { get; set; }
 
     public virtual ICollection<ProductSpecification> ProductSpecifications { get; set; }
 

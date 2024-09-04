@@ -1,4 +1,4 @@
-﻿namespace CameraServicesPlatform.BackEnd.Domain.Enum;
+﻿namespace CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 public enum ProductStatusEnum
 {
     Available,

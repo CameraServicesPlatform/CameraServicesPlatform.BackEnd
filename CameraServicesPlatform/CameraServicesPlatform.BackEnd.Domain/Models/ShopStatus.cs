@@ -1,4 +1,4 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class ShopStatus
+public class ShopStatus
     {
     [Key] public Guid ShopStatusID { get; set; }
         public Guid ShopID { get; set; }

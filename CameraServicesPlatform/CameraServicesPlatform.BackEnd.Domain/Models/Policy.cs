@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,13 +10,18 @@ using System.Threading.Tasks;
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class Policy
     {
-    [Key] public Guid PolicyID { get; set; }
-        public PolicyType PolicyType { get; set; }
-        public string PolicyContent { get; set; }
-        public DateTime EffectiveDate { get; set; }
-        public Guid UserID { get; set; }
+    [Key]
+    public Guid PolicyID { get; set; }
 
-        // Navigation Property
-        public User User { get; set; }
-    }
+    public PolicyType PolicyType { get; set; }
+
+    public string PolicyContent { get; set; }
+
+    public DateTime EffectiveDate { get; set; }
+
+    public Guid UserID { get; set; }
+
+    [ForeignKey(nameof(UserID))]
+    public User User { get; set; }
+}
 

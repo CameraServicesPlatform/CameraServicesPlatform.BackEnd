@@ -14,7 +14,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models;
 
     public Guid OrderID { get; set; }
 
-    [ForeignKey(nameof(OrderID))]
+    [ForeignKey(nameof(ContractID))]
     public Order Order { get; set; }
 
     public string ContractTerms { get; set; }

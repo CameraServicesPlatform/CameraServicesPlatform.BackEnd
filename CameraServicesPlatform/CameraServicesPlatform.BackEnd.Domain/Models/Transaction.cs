@@ -1,4 +1,6 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Transaction;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class Transaction
+public class Transaction
     {
     [Key]
     public Guid TransactionID { get; set; }

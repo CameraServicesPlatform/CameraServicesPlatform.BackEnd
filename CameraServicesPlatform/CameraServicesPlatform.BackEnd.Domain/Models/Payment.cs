@@ -1,30 +1,29 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class Payment
-    {
-        public Guid PaymentID { get; set; }
-        public Guid? OrderID { get; set; }
-    public Order? Order { get; set; }
+public class Payment
+{
+    [Key]
+    public Guid PaymentID { get; set; }
 
-    public Guid? ShopID { get; set; }
+    public Guid ShopID { get; set; }
 
     [ForeignKey(nameof(ShopID))]
-    public Shop? Shop { get; set; }
+    public Shop Shop { get; set; }
+
+    public Guid? OrderID { get; set; }
+
+    [ForeignKey(nameof(OrderID))]
+    public Order? Order { get; set; }
 
     public Guid? UserID { get; set; }
 
     [ForeignKey(nameof(UserID))]
     public User? User { get; set; }
 
-    public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
+    public DateTime PaymentDate { get; set; }
 
     public decimal PaymentAmount { get; set; }
 
@@ -36,8 +35,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models;
 
     public string? PaymentDetails { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    [MaxLength(255)]
     public string? Image { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

@@ -1,23 +1,39 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class ProductStatus
-    {
-    [Key] public Guid ProductStatusID { get; set; }
-        public Guid ProductID { get; set; }
-        public StatusType StatusType { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        public string Reason { get; set; }
-        public Guid HandledBy { get; set; }
+public class ProductStatus
+{
+    [Key]
+    public Guid ProductStatusID { get; set; }
+    public Guid ShopID { get; set; }
+    [ForeignKey(nameof(ShopID))]
+    public Shop Shop { get; set; }
+    public Guid ProductID { get; set; }
 
-        public Product Product { get; set; }
-        public User User { get; set; }
-    }
+    [ForeignKey(nameof(ProductID))]
+    public Product Product { get; set; }
+
+    public StatusType StatusType { get; set; }
+
+    public DateTime StartDate { get; set; } = DateTime.UtcNow;
+
+    public DateTime? EndDate { get; set; }
+
+    public string Reason { get; set; }
+
+    public Guid HandledBy { get; set; }
+
+    [ForeignKey(nameof(HandledBy))]
+    public User User { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+}
 

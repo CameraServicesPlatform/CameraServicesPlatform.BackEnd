@@ -6,8 +6,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Models.BaseModel
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Models.BaseModel;
     public abstract class BaseEntity
     {
         public DateTime CreateDate { get; set; }
@@ -21,4 +20,3 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Models.BaseModel
         [ForeignKey(nameof(UpdateBy))]
         public User? UpdateByAccount { get; set; }
     }
-}

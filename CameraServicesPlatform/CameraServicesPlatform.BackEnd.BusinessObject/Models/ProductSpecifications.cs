@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class ProductSpecifications
     {
         public Guid ProductSpecificationsID { get; set; }
@@ -13,6 +12,6 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
         public string Name { get; set; }
         public string Detail { get; set; }
 
-         public Product Product { get; set; }
+        public Product Product { get; set; }
     }
-}
+

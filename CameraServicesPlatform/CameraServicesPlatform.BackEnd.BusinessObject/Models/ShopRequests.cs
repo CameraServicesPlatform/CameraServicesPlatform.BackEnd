@@ -1,12 +1,11 @@
-﻿using CameraServicesPlatform.BackEnd.BusinessObject.Enum;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class ShopRequests
     {
         public Guid ShopRequestID { get; set; }
@@ -18,8 +17,7 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
         public DateTime? ReviewDate { get; set; }
         public string ReviewNotes { get; set; }
 
-        // Navigation Properties
-        public User User { get; set; }
-         public User Reviewer { get; set; }
+         public User User { get; set; }
+        public User Reviewer { get; set; }
     }
-}
+

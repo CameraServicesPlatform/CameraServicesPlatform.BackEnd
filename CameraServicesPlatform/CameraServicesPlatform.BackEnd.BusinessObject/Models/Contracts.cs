@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class Contracts
     {
-        public Guid ContractID { get; set; }  
+        public Guid ContractID { get; set; }
         public string ContractTerms { get; set; }
         public string PenaltyPolicy { get; set; }
         public DateTime CreatedAt { get; set; }
@@ -16,4 +15,4 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
 
         public Orders Order { get; set; }
     }
-}
+

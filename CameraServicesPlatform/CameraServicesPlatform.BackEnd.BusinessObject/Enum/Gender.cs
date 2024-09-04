@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Enum
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Enum;
+ 
     public enum Gender
     {
         Male,
@@ -13,4 +13,4 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Enum
         Other,
         PreferNotToSay
     }
-}
+ 

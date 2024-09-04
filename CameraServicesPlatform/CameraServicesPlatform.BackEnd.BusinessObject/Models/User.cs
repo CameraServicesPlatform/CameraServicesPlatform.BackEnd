@@ -1,4 +1,4 @@
-﻿using CameraServicesPlatform.BackEnd.BusinessObject.Enum;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -6,8 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class User : IdentityUser
     {
         public Guid UserId { get; set; }
@@ -30,6 +29,6 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
         public string? RefreshToken { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
 
-         public virtual ICollection<Shop> Shops { get; set; }
+        public virtual ICollection<Shop> Shops { get; set; }
     }
-}
+

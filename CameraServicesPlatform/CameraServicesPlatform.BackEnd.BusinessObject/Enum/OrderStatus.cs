@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Enum
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Enum;
     public enum OrderStatus
     {
         Pending,
@@ -13,4 +12,4 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Enum
         Completed,
         Cancelled
     }
-}
+ 

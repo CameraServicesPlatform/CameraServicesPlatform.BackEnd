@@ -1,12 +1,11 @@
-﻿using CameraServicesPlatform.BackEnd.BusinessObject.Enum;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class Policies
     {
         public Guid PolicyID { get; set; }
@@ -18,4 +17,4 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
         // Navigation Property
         public User User { get; set; }
     }
-}
+

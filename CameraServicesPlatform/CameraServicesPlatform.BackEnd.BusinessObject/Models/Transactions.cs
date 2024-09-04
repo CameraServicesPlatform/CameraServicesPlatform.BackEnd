@@ -1,12 +1,11 @@
-﻿using CameraServicesPlatform.BackEnd.BusinessObject.Enum;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class Transactions
     {
         public Guid TransactionID { get; set; }
@@ -23,7 +22,6 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
         public string VNPAYOrderInfo { get; set; }
         public string VNPAYChecksum { get; set; }
 
-        // Navigation Property
         public Orders Order { get; set; }
     }
-}
+

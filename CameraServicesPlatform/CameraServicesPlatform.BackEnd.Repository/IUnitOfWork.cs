@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.Domain.Enum;
-    public enum TransactionStatus
+namespace CameraServicesPlatform.BackEnd.Application;
+ 
+    public interface IUnitOfWork
     {
-        Success,
-        Unsuccess
+        Task<int> SaveChangesAsync();
     }
-
+ 

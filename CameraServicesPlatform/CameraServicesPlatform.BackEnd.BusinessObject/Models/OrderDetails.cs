@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class OrderDetails
     {
         public Guid OrderDetailsID { get; set; }
@@ -17,7 +16,7 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
         public decimal ProductPriceTotal { get; set; }
         public int RentalPeriod { get; set; }
 
-         public Orders Order { get; set; }
+        public Orders Order { get; set; }
         public Product Product { get; set; }
     }
-}
+

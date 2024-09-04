@@ -9,7 +9,9 @@
   <ItemGroup>
     <Folder Include="ConfigurationModel\" />
     <Folder Include="DTO\Request\" />
-    <Folder Include="Mapping\" />
+    <Folder Include="Enum\" />
+    <Folder Include="Validator\" />
+    <Folder Include="Utils\" />
   </ItemGroup>
 
   <ItemGroup>

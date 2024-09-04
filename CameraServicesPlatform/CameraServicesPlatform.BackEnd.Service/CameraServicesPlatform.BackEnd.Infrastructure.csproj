@@ -7,12 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <Folder Include="Mapping\" />
+    <Folder Include="UnitOfWork\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CameraServicesPlatform.BackEnd.BusinessObject\CameraServicesPlatform.BackEnd.Domain.csproj" />
-    <ProjectReference Include="..\CameraServicesPlatform.BackEnd.Common\CameraServicesPlatform.BackEnd.Common.csproj" />
+    <ProjectReference Include="..\CameraServicesPlatform.BackEnd.Repository\CameraServicesPlatform.BackEnd.Application.csproj" />
   </ItemGroup>
 
 </Project>

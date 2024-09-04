@@ -1,12 +1,11 @@
-﻿using CameraServicesPlatform.BackEnd.BusinessObject.Enum;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class Shop
     {
         public Guid ShopID { get; set; }
@@ -23,8 +22,7 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public decimal AccountBalance { get; set; }
 
-        // Navigation properties
-        public virtual User User { get; set; }
+         public virtual User User { get; set; }
         public virtual ICollection<Product> Products { get; set; }
     }
-}
+

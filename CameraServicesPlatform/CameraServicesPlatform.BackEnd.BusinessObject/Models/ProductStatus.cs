@@ -1,12 +1,11 @@
-﻿using CameraServicesPlatform.BackEnd.BusinessObject.Enum;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
-{
+namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class ProductStatus
     {
         public Guid ProductStatusID { get; set; }
@@ -17,7 +16,7 @@ namespace CameraServicesPlatform.BackEnd.BusinessObject.Models
         public string Reason { get; set; }
         public Guid HandledBy { get; set; }
 
-         public Product Product { get; set; }
+        public Product Product { get; set; }
         public User User { get; set; }
     }
-}
+

@@ -6,12 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class ProductSpecifications
+    public class ProductImage
     {
-    [Key] public Guid ProductSpecificationsID { get; set; }
+    [Key] public Guid ProductImagesID { get; set; }
         public Guid ProductID { get; set; }
-        public string Name { get; set; }
-        public string Detail { get; set; }
+        public string Image { get; set; }
 
         public Product Product { get; set; }
     }

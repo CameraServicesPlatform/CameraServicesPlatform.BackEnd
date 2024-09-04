@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class ShopRequests
+    public class ShopRequest
     {
     [Key] public Guid ShopRequestID { get; set; }
         public Guid UserID { get; set; }

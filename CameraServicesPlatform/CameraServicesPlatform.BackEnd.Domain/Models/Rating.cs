@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class Ratings
+    public class Rating
     {
     [Key] public Guid RatingID { get; set; }
         public Guid ProductID { get; set; }

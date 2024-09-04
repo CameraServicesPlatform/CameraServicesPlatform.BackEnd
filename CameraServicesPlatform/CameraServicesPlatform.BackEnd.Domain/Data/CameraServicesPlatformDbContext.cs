@@ -21,21 +21,21 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
         }
 
         public DbSet<Product> Products { get; set; }
-        public DbSet<ProductSpecifications> ProductSpecifications { get; set; }
-        public DbSet<ProductImages> ProductImages { get; set; }
-        public DbSet<Categories> Categories { get; set; }
-        public DbSet<Orders> Orders { get; set; }
-        public DbSet<OrderDetails> OrderDetails { get; set; }
-        public DbSet<Contracts> Contracts { get; set; }
-        public DbSet<ReturnDetails> ReturnDetails { get; set; }
-        public DbSet<Transactions> Transactions { get; set; }
-        public DbSet<Ratings> Ratings { get; set; }
-        public DbSet<Reports> Reports { get; set; }
-        public DbSet<Policies> Policies { get; set; }
+        public DbSet<ProductSpecification> ProductSpecifications { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<Domain.Models.Contract> Contracts { get; set; }
+        public DbSet<ReturnDetail> ReturnDetails { get; set; }
+        public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
+        public DbSet<Report> Reports { get; set; }
+        public DbSet<Policy> Policies { get; set; }
         public DbSet<ProductStatus> ProductStatuses { get; set; }
         public DbSet<ShopStatus> ShopStatuses { get; set; }
         
-        public DbSet<ShopRequests> ShopRequests { get; set; }
+        public DbSet<ShopRequest> ShopRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

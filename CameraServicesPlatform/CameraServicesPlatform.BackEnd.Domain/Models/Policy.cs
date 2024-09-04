@@ -7,15 +7,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class Reports
+    public class Policy
     {
-    [Key] public Guid ReportID { get; set; }
+    [Key] public Guid PolicyID { get; set; }
+        public PolicyType PolicyType { get; set; }
+        public string PolicyContent { get; set; }
+        public DateTime EffectiveDate { get; set; }
         public Guid UserID { get; set; }
-        public ReportType ReportType { get; set; }
-        public string ReportDetails { get; set; }
-        public DateTime ReportDate { get; set; }
-        public ReportStatus Status { get; set; }
 
+        // Navigation Property
         public User User { get; set; }
     }
 

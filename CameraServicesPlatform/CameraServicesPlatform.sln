@@ -13,6 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraServicesPlatform.Back
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraServicesPlatform.BackEnd.Infrastructure", "CameraServicesPlatform.BackEnd.Infrastructure\CameraServicesPlatform.BackEnd.Infrastructure.csproj", "{9A332511-11F2-4D51-971F-9F9FA9B070DD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F389082C-8467-4E6E-9337-31DE10E0F13C}"
+	ProjectSection(SolutionItems) = preProject
+		note.txt = note.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

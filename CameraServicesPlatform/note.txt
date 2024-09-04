@@ -1,0 +1,3 @@
+﻿project Domain
+
+sử dụng EntityFrawork

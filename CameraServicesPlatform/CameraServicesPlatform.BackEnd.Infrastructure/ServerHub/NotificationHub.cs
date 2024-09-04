@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.Infrastructure.ServerHub
+namespace CameraServicesPlatform.BackEnd.Infrastructure.ServerHub;
 public class NotificationHub : Hub
 {
 }

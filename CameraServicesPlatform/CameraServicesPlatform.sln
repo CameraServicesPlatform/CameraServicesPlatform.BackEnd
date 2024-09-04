@@ -7,11 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraServicesPlatform.Back
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraServicesPlatform.BackEnd.API", "CameraServicesPlatform.BackEnd.API\CameraServicesPlatform.BackEnd.API.csproj", "{44572442-11C8-4466-BC32-8BC44DA0AE6D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraServicesPlatform.BackEnd.Domain", "CameraServicesPlatform.BackEnd.BusinessObject\CameraServicesPlatform.BackEnd.Domain.csproj", "{AC2865D1-0298-4FF6-988E-5D482B5502BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraServicesPlatform.BackEnd.Application", "CameraServicesPlatform.BackEnd.Application\CameraServicesPlatform.BackEnd.Application.csproj", "{AC14727F-1546-4591-8418-388B56FC7737}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraServicesPlatform.BackEnd.Application", "CameraServicesPlatform.BackEnd.Repository\CameraServicesPlatform.BackEnd.Application.csproj", "{D58B473E-D4D2-4332-9E51-49E68D2D919E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraServicesPlatform.BackEnd.Domain", "CameraServicesPlatform.BackEnd.Domain\CameraServicesPlatform.BackEnd.Domain.csproj", "{CE716C0C-0A13-4939-84DE-F49FA9A9F9D8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraServicesPlatform.BackEnd.Infrastructure", "CameraServicesPlatform.BackEnd.Service\CameraServicesPlatform.BackEnd.Infrastructure.csproj", "{920EFB58-ECC2-40FC-A9C3-52BAA24A0C10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraServicesPlatform.BackEnd.Infrastructure", "CameraServicesPlatform.BackEnd.Infrastructure\CameraServicesPlatform.BackEnd.Infrastructure.csproj", "{9A332511-11F2-4D51-971F-9F9FA9B070DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,18 +27,18 @@ Global
 		{44572442-11C8-4466-BC32-8BC44DA0AE6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44572442-11C8-4466-BC32-8BC44DA0AE6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44572442-11C8-4466-BC32-8BC44DA0AE6D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{AC2865D1-0298-4FF6-988E-5D482B5502BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{AC2865D1-0298-4FF6-988E-5D482B5502BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{AC2865D1-0298-4FF6-988E-5D482B5502BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{AC2865D1-0298-4FF6-988E-5D482B5502BA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D58B473E-D4D2-4332-9E51-49E68D2D919E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D58B473E-D4D2-4332-9E51-49E68D2D919E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D58B473E-D4D2-4332-9E51-49E68D2D919E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D58B473E-D4D2-4332-9E51-49E68D2D919E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{920EFB58-ECC2-40FC-A9C3-52BAA24A0C10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{920EFB58-ECC2-40FC-A9C3-52BAA24A0C10}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{920EFB58-ECC2-40FC-A9C3-52BAA24A0C10}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{920EFB58-ECC2-40FC-A9C3-52BAA24A0C10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC14727F-1546-4591-8418-388B56FC7737}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC14727F-1546-4591-8418-388B56FC7737}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC14727F-1546-4591-8418-388B56FC7737}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC14727F-1546-4591-8418-388B56FC7737}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE716C0C-0A13-4939-84DE-F49FA9A9F9D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE716C0C-0A13-4939-84DE-F49FA9A9F9D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE716C0C-0A13-4939-84DE-F49FA9A9F9D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE716C0C-0A13-4939-84DE-F49FA9A9F9D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A332511-11F2-4D51-971F-9F9FA9B070DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A332511-11F2-4D51-971F-9F9FA9B070DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A332511-11F2-4D51-971F-9F9FA9B070DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A332511-11F2-4D51-971F-9F9FA9B070DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

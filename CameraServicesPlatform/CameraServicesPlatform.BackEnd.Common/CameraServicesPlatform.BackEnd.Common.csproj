@@ -15,7 +15,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CameraServicesPlatform.BackEnd.BusinessObject\CameraServicesPlatform.BackEnd.BusinessObject.csproj" />
+    <ProjectReference Include="..\CameraServicesPlatform.BackEnd.Domain\CameraServicesPlatform.BackEnd.Domain.csproj" />
   </ItemGroup>
+
+
 
 </Project>

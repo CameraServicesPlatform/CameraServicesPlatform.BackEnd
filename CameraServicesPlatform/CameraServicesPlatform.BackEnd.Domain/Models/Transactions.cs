@@ -1,6 +1,7 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class Transactions
     {
-        public Guid TransactionID { get; set; }
+    [Key] public Guid TransactionID { get; set; }
         public Guid OrderID { get; set; }
         public DateTime TransactionDate { get; set; }
         public decimal Amount { get; set; }

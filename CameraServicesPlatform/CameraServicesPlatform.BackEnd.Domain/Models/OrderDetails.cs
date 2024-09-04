@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class OrderDetails
     {
-        public Guid OrderDetailsID { get; set; }
+    [Key] public Guid OrderDetailsID { get; set; }
         public Guid OrderID { get; set; }
         public Guid ProductID { get; set; }
         public decimal ProductPrice { get; set; }

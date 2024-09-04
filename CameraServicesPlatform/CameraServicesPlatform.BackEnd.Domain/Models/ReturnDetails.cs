@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class ReturnDetails
     {
-        public Guid ReturnID { get; set; }
+    [Key] public Guid ReturnID { get; set; }
         public Guid OrderID { get; set; }
         public DateTime ReturnDate { get; set; }
         public string Condition { get; set; }

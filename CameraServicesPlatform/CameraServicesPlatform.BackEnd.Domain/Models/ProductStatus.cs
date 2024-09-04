@@ -1,6 +1,7 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class ProductStatus
     {
-        public Guid ProductStatusID { get; set; }
+    [Key] public Guid ProductStatusID { get; set; }
         public Guid ProductID { get; set; }
         public StatusType StatusType { get; set; }
         public DateTime StartDate { get; set; }

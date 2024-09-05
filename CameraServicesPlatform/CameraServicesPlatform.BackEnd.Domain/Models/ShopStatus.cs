@@ -10,7 +10,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models;
 public class ShopStatus
     {
     [Key] public Guid ShopStatusID { get; set; }
-        public Guid ShopID { get; set; }
+        public Guid SupplierID { get; set; }
         public StatusType StatusType { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
@@ -18,7 +18,7 @@ public class ShopStatus
         public Guid HandledBy { get; set; }
 
         // Navigation Properties
-        public Shop Shop { get; set; }
-        public User User { get; set; }
+        public Supplier Shop { get; set; }
+        public Account User { get; set; }
     }
 

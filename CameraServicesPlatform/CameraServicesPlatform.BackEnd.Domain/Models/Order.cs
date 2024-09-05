@@ -14,10 +14,10 @@ public class Order
     [Key]
     public Guid OrderID { get; set; }
 
-    public Guid UserID { get; set; }
+    public Guid AccountID { get; set; }
 
-    [ForeignKey(nameof(UserID))]
-    public User User { get; set; }
+    [ForeignKey(nameof(AccountID))]
+    public Account User { get; set; }
 
     public DateTime OrderDate { get; set; }
 

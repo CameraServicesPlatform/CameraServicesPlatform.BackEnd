@@ -8,20 +8,20 @@ public class Payment
     [Key]
     public Guid PaymentID { get; set; }
 
-    public Guid ShopID { get; set; }
+    public Guid SupplierID { get; set; }
 
-    [ForeignKey(nameof(ShopID))]
-    public Shop Shop { get; set; }
+    [ForeignKey(nameof(SupplierID))]
+    public Supplier Shop { get; set; }
 
     public Guid? OrderID { get; set; }
 
     [ForeignKey(nameof(OrderID))]
     public Order? Order { get; set; }
 
-    public Guid? UserID { get; set; }
+    public Guid? AccountID { get; set; }
 
-    [ForeignKey(nameof(UserID))]
-    public User? User { get; set; }
+    [ForeignKey(nameof(AccountID))]
+    public Account? User { get; set; }
 
     public DateTime PaymentDate { get; set; }
 

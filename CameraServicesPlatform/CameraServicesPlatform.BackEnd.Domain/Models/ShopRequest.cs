@@ -10,7 +10,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public class ShopRequest
     {
     [Key] public Guid ShopRequestID { get; set; }
-        public Guid UserID { get; set; }
+        public Guid AccountID { get; set; }
         public Guid RoleRequestID { get; set; }
         public RequestStatus RequestStatus { get; set; }
         public DateTime RequestDate { get; set; }
@@ -18,7 +18,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models;
         public DateTime? ReviewDate { get; set; }
         public string ReviewNotes { get; set; }
 
-         public User User { get; set; }
-        public User Reviewer { get; set; }
+         public Account User { get; set; }
+        public Account Reviewer { get; set; }
     }
 

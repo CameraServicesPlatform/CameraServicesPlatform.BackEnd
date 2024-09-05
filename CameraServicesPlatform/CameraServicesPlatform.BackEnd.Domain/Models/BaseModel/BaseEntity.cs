@@ -14,9 +14,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models.BaseModel;
         public string CreateBy { get; set; } = null!;
 
         [ForeignKey(nameof(CreateBy))]
-        public User? CreateByAccount { get; set; }
+        public Account? CreateByAccount { get; set; }
         public string? UpdateBy { get; set; }
 
         [ForeignKey(nameof(UpdateBy))]
-        public User? UpdateByAccount { get; set; }
+        public Account? UpdateByAccount { get; set; }
     }

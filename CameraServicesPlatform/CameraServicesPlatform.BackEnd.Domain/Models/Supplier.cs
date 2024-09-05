@@ -8,15 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-public class Shop
+public class Supplier
 {
     [Key]
-    public Guid ShopID { get; set; }
+    public Guid SupplierID { get; set; }
 
-    public Guid UserID { get; set; }
+    public Guid AccountID { get; set; }
 
-    [ForeignKey(nameof(UserID))]
-    public User User { get; set; }
+    [ForeignKey(nameof(AccountID))]
+    public Account User { get; set; }
 
     [MaxLength(255)]
     public string ShopName { get; set; }

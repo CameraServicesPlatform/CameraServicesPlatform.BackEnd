@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.DAO.Data
 {
-    public class CameraServicesPlatformDbContext : IdentityDbContext<User>
+    public class CameraServicesPlatformDbContext : IdentityDbContext<Account>
     {
         public CameraServicesPlatformDbContext(DbContextOptions<CameraServicesPlatformDbContext> options)
             : base(options)

@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-public class User : IdentityUser
+public class Account : IdentityUser
 {
     [Key]
-public Guid UserId { get; set; }
+public Guid AccountID { get; set; }
 
 [MaxLength(255)]
 public override string UserName { get; set; }
@@ -48,7 +48,7 @@ public string? ProfileImage { get; set; }
 public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-public virtual ICollection<Shop> Shops { get; set; }
+public virtual ICollection<Supplier> Shops { get; set; }
 public virtual ICollection<Payment> Payments { get; set; }
 public virtual ICollection<Order> Orders { get; set; }
 public virtual ICollection<Rating> Ratings { get; set; }

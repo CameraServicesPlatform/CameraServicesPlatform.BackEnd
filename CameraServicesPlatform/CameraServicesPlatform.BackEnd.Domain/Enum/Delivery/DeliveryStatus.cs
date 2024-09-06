@@ -4,11 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.Domain.Enum;
-    public enum RequestStatus
+namespace CameraServicesPlatform.BackEnd.Domain.Enum.Delivery
+{
+    public enum DeliveryStatus
     {
         Pending,
-        Approved,
-        Rejected
+        Shipped,
+        Delivered,
+        Returned
     }
 
+}

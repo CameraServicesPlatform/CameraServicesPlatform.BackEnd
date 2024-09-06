@@ -10,6 +10,9 @@ public enum OrderStatus
     Pending,
     Approved,
     Completed,
+    Placed,
+    Shipped,
+    Delivered,
     Cancelled
 }
 

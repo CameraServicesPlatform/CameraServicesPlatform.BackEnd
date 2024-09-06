@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Enum.Status;
-public enum ShopStatusEnum
+public enum RequestStatus
 {
-    Active,
-    Suspended,
-    Blocked,
-    Stop
+    Pending,
+    Approved,
+    Rejected
 }
+

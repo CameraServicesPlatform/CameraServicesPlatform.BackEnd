@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-public class ShopStatus
+public class SupplierStatus
     {
-    [Key] public Guid ShopStatusID { get; set; }
+    [Key] public Guid SupplierStatusID { get; set; }
         public Guid SupplierID { get; set; }
         public StatusType StatusType { get; set; }
         public DateTime StartDate { get; set; }
@@ -17,8 +17,8 @@ public class ShopStatus
         public string Reason { get; set; }
         public Guid HandledBy { get; set; }
 
-        // Navigation Properties
-        public Supplier Shop { get; set; }
-        public Account User { get; set; }
+    // Navigation Properties
+    public   ICollection<Supplier> Suppliers { get; set; }
+    public Account Account { get; set; }
     }
 

@@ -8,7 +8,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Enum.Report;
 public enum ReportType
 {
     Product,
-    Shop,
+    Supplier,
     System,
     Other
 }

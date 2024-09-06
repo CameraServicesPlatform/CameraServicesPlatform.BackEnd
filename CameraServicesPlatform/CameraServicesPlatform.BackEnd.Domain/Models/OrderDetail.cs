@@ -24,7 +24,7 @@ public class OrderDetail
 
     public decimal ProductPrice { get; set; }
 
-    public int ProductQuantity { get; set; }
+    public string ProductQuality { get; set; }
 
     public decimal Discount { get; set; }
 

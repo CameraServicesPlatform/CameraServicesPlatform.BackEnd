@@ -9,8 +9,9 @@ public class Product
     public Guid ProductID { get; set; }
 
     public Guid SupplierID { get; set; }
+
     [ForeignKey(nameof(SupplierID))]
-    public Supplier Shop { get; set; }
+    public Supplier Supplier { get; set; }
 
     public Guid CategoryID { get; set; }
 

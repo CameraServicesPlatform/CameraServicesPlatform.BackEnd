@@ -1,38 +1,31 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
 public class Supplier
 {
     [Key]
     public Guid SupplierID { get; set; }
-
     public Guid AccountID { get; set; }
 
+
     [ForeignKey(nameof(AccountID))]
-    public Account User { get; set; }
+    public Account Account { get; set; }
+
+    [Required]
+    [MaxLength(255)]
+    public string SupplierName { get; set; }
+
+    public string SupplierDescription { get; set; }
 
     [MaxLength(255)]
-    public string ShopName { get; set; }
-
-    public string? ShopDescription { get; set; }
-
-    [MaxLength(255)]
-    public string? ShopAddress { get; set; }
-
+    public string SupplierAddress { get; set; }
     [MaxLength(20)]
     public string? ContactNumber { get; set; }
 
     [MaxLength(255)]
-    public string? ShopLogo { get; set; }
-
-    public ShopStatus ShopStatus { get; set; }
+    public string SupplierLogo { get; set; }
+    public SupplierStatus SupplierStatus { get; set; }
 
     public string? BlockReason { get; set; }
     public DateTime? BlockedAt { get; set; }
@@ -40,8 +33,12 @@ public class Supplier
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public decimal AccountBalance { get; set; }
 
-    public virtual ICollection<Product> Products { get; set; }
-    public virtual ICollection<HistoryTransaction> HistoryTransactions { get; set; }
-    public virtual ICollection<Payment> Payments { get; set; }
+    public ICollection<Product> Products { get; set; }
+    public ICollection<HistoryTransaction> HistoryTransactions { get; set; }
+    public ICollection<Payment> Payments { get; set; }
+    public ICollection<Coupon> Coupons { get; set; }
+    public ICollection<Delivery> Deliveries { get; set; }
+    public ICollection<SupplierStatus> SupplierStatuses { get; set; }
+    public ICollection<SupplierRequest> SupplierRequests { get; set; }
 }
 

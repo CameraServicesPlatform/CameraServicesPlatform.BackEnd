@@ -16,7 +16,7 @@ public class Report
     public Guid AccountID { get; set; }
 
     [ForeignKey(nameof(AccountID))]
-    public Account User { get; set; }
+    public Account Account { get; set; }
 
     public ReportType ReportType { get; set; }
 

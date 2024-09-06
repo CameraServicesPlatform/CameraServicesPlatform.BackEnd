@@ -17,7 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public Guid SupplierID { get; set; }
 
     [ForeignKey(nameof(SupplierID))]
-    public Supplier Shop { get; set; }
+    public Supplier Supplier { get; set; }
 
     public decimal Price { get; set; }
 

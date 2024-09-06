@@ -4,12 +4,14 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Azure.Core.HttpHeader;
 
 namespace CameraServicesPlatform.BackEnd.DAO.Data
 {
@@ -20,11 +22,16 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
         {
         }
 
+        public DbSet<Account> Accounts { get; set; }
+        public DbSet<Role> Roles { get; set; }
+        public DbSet<Supplier> Suppliers { get; set; }
+        public DbSet<Member> Members { get; set; }
+        public DbSet<Staff> Staffs { get; set; }
+        public DbSet<Order> Orders { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductSpecification> ProductSpecifications { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Domain.Models.Contract> Contracts { get; set; }
         public DbSet<ReturnDetail> ReturnDetails { get; set; }
@@ -33,9 +40,10 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
         public DbSet<Report> Reports { get; set; }
         public DbSet<Policy> Policies { get; set; }
         public DbSet<ProductStatus> ProductStatuses { get; set; }
-        public DbSet<ShopStatus> ShopStatuses { get; set; }
-        
-        public DbSet<ShopRequest> ShopRequests { get; set; }
+        public DbSet<SupplierStatus> SupplierStatuses { get; set; }
+        public DbSet<SupplierRequest> SupplierRequests { get; set; }
+        public DbSet<Delivery> Deliveries { get; set; }
+        public DbSet<Coupon> Coupons { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -64,8 +72,8 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
                 new IdentityRole
                 {
                     Id = "d43e6f7g-89hi-01jk-23lm-nopqrstuv",
-                    Name = "SHOP",
-                    NormalizedName = "SHOP"
+                    Name = "Supplier",
+                    NormalizedName = "Supplier"
                 }
             );
         }

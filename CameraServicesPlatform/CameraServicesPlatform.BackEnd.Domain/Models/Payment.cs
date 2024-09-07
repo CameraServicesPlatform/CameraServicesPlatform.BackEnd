@@ -8,22 +8,22 @@ public class Payment
     [Key]
     public Guid PaymentID { get; set; }
 
-    public Guid ShopID { get; set; }
-
-    [ForeignKey(nameof(ShopID))]
-    public Shop Shop { get; set; }
-
     public Guid? OrderID { get; set; }
 
     [ForeignKey(nameof(OrderID))]
-    public Order? Order { get; set; }
+    public Order Order { get; set; }
 
-    public Guid? UserID { get; set; }
+    public Guid SupplierID { get; set; }
 
-    [ForeignKey(nameof(UserID))]
-    public User? User { get; set; }
+    [ForeignKey(nameof(SupplierID))]
+    public Supplier Supplier { get; set; }
 
-    public DateTime PaymentDate { get; set; }
+    public Guid? AccountID { get; set; }
+
+    [ForeignKey(nameof(AccountID))]
+    public Account Account { get; set; }
+
+    public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
 
     public decimal PaymentAmount { get; set; }
 
@@ -33,9 +33,10 @@ public class Payment
 
     public PaymentMethod PaymentMethod { get; set; }
 
-    public string? PaymentDetails { get; set; }
-
-    public string? Image { get; set; }
+    public string PaymentDetails { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [MaxLength(255)]
+    public string Image { get; set; }
 }

@@ -14,10 +14,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models;
     [Key]
     public Guid HistoryTransactionId { get; set; }
 
-    public Guid ShopID { get; set; }
+    public Guid SupplierID { get; set; }
 
-    [ForeignKey(nameof(ShopID))]
-    public Shop Shop { get; set; }
+    [ForeignKey(nameof(SupplierID))]
+    public Supplier Supplier { get; set; }
 
     public decimal Price { get; set; }
 

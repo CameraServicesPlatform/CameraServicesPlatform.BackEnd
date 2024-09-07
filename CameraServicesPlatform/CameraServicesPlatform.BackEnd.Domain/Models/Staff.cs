@@ -7,25 +7,32 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class Rating
-    {
+public class Staff
+{
     [Key]
-    public Guid RatingID { get; set; }
-
-    public Guid ProductID { get; set; }
-
-    [ForeignKey(nameof(ProductID))]
-    public Product Product { get; set; }
+    public Guid StaffID { get; set; }
 
     public Guid AccountID { get; set; }
 
     [ForeignKey(nameof(AccountID))]
-    public Account Account { get; set; }
 
-    public int RatingValue { get; set; }
+    [MaxLength(255)]
+    public string JobTitle { get; set; }
+
+    [MaxLength(255)]
+    public string Department { get; set; }
+
+    public string StaffStatus { get; set; }
+
+    public DateTime HireDate { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public string ReviewComment { get; set; }
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
- }
+    public bool IsAdmin { get; set; }
 
+    public Account Account { get; set; }
+
+
+}

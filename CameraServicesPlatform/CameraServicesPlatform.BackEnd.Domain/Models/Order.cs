@@ -1,23 +1,15 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models;
 public class Order
-    {
+{
     [Key]
     public Guid OrderID { get; set; }
 
-    public Guid UserID { get; set; }
-
-    [ForeignKey(nameof(UserID))]
-    public User User { get; set; }
+    [Required]
+    public Guid SupplierID { get; set; }
 
     public DateTime OrderDate { get; set; }
 
@@ -38,15 +30,14 @@ public class Order
     public DeliveryMethod DeliveryMethod { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-    public virtual ICollection<OrderDetail> OrderDetails { get; set; }
-
-    public virtual Contract Contract { get; set; }
-
-    public virtual ICollection<Transaction> Transactions { get; set; }
-
-    public virtual ReturnDetail ReturnDetail { get; set; }
+     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    //
+    public   Supplier Supplier { get; set; }     
+    public Account Account { get; set; }
+    public ICollection<OrderDetail> OrderDetails { get; set; }
+    public ICollection<ReturnDetail> ReturnDetails { get; set; }
+    public ICollection<Contract> Contracts { get; set; }
+    public ICollection<Transaction> Transactions { get; set; }
+    public ICollection<Delivery> Deliveries { get; set; }
 }
 

@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.Domain.Enum;
-    public enum PolicyType
+namespace CameraServicesPlatform.BackEnd.Domain.Enum
+{
+    public enum DiscountType
     {
-        System,
-        Supplier
+        Percentage,
+        Fixed
     }
- 
+}

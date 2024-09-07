@@ -12,9 +12,9 @@ public class ProductStatus
 {
     [Key]
     public Guid ProductStatusID { get; set; }
-    public Guid ShopID { get; set; }
-    [ForeignKey(nameof(ShopID))]
-    public Shop Shop { get; set; }
+    public Guid SupplierID { get; set; }
+    [ForeignKey(nameof(SupplierID))]
+    public Supplier Supplier { get; set; }
     public Guid ProductID { get; set; }
 
     [ForeignKey(nameof(ProductID))]
@@ -31,7 +31,7 @@ public class ProductStatus
     public Guid HandledBy { get; set; }
 
     [ForeignKey(nameof(HandledBy))]
-    public User User { get; set; }
+    public Account Account { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

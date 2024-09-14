@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
@@ -13,16 +9,14 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid AccountRoleID { get; set; }
 
-        public Guid AccountID { get; set; }
+        [ForeignKey(nameof(Account))]
+        public string AccountID { get; set; }  
 
-        [ForeignKey(nameof(AccountID))]
-        public Account Account { get; set; }
+        public virtual Account Account { get; set; }
 
-        public Guid RoleID { get; set; }
+        [ForeignKey(nameof(Role))]
+        public Guid RoleID { get; set; } 
 
-        [ForeignKey(nameof(RoleID))]
-        public Role Role { get; set; }
-
-        public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
+        public virtual Role Role { get; set; }
     }
 }

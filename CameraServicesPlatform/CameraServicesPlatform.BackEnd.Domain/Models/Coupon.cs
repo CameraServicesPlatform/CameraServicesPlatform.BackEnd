@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,12 +17,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Required]
         [MaxLength(50)]
         public string CouponCode { get; set; }
+
         public string Description { get; set; }
 
         [Required]
         public decimal DiscountAmount { get; set; }
+
         [Required]
-        [Column(TypeName = "ENUM('Percentage', 'Fixed')")]
         public DiscountType DiscountType { get; set; }
 
         public int? MaxUsageLimit { get; set; }
@@ -43,8 +45,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        // Navigation property
-        [ForeignKey(nameof(SupplierID))]
+         [ForeignKey(nameof(SupplierID))]
         public virtual Supplier Supplier { get; set; }
     }
 }

@@ -1,21 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace CameraServicesPlatform.BackEnd.Domain.Models;
-public class ProductSpecification
+namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
-    [Key]
-    public Guid ProductSpecificationsID { get; set; }
+    public class ProductSpecification
+    {
+        [Key]
+        public Guid ProductSpecificationID { get; set; }
 
-    public Guid ProductID { get; set; }
+        public Guid ProductID { get; set; }
 
-    [MaxLength(255)]
-    public string Name { get; set; }
+        [ForeignKey(nameof(ProductID))]
+        public Product Product { get; set; }
 
-    public string? Detail { get; set; }
+        [MaxLength(255)]
+        public string Specification { get; set; }
 
-    [ForeignKey(nameof(ProductID))]
-    public Product Product { get; set; }
-
+        public string? Details { get; set; }
+    }
 }
-

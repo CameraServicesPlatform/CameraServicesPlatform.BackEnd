@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
@@ -13,11 +9,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid WishlistID { get; set; }
 
+        [Required]
         public Guid MemberID { get; set; }
 
         [ForeignKey(nameof(MemberID))]
         public Member Member { get; set; }
 
+        [Required]
         public Guid ProductID { get; set; }
 
         [ForeignKey(nameof(ProductID))]

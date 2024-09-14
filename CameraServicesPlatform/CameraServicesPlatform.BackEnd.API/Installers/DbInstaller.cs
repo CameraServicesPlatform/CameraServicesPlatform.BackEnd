@@ -1,5 +1,5 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Data;
-using CameraServicesPlatform.BackEnd.Domain.Models;
+﻿using CameraServicesPlatform.BackEnd.DAO.Data;
+ using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

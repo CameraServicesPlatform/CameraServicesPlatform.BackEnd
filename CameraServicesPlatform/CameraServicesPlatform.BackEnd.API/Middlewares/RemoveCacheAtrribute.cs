@@ -1,34 +1,39 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CameraServicesPlatform.BackEnd.Application.IService;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using TravelCapstone.BackEnd.Application.IServices;
-using TravelCapstone.BackEnd.Common.ConfigurationModel;
-using TravelCapstone.BackEnd.Common.DTO.Response;
+using Microsoft.Extensions.Configuration;
 
-namespace CameraServicesPlatform.BackEnd.API.Middlewares;
-
-public class RemoveCacheAtrribute : Attribute, IAsyncActionFilter
+namespace CameraServicesPlatform.BackEnd.API.Middlewares
 {
-
-    private readonly string pathEndPoint;
-
-    public RemoveCacheAtrribute(string pathEndPoint)
+    public class RemoveCacheAtrribute : Attribute, IAsyncActionFilter
     {
-        this.pathEndPoint = $"/{pathEndPoint}/";
-    }
+        private readonly string pathEndPoint;
+        private readonly IConfiguration _configuration;
 
-    public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
-    {
-        var cacheConfiguration = context.HttpContext.RequestServices.GetRequiredService<RedisConfiguration>();
-        if (!cacheConfiguration.Enabled)
+        public RemoveCacheAtrribute(string pathEndPoint, IConfiguration configuration)
         {
-            await next();
-            return;
+            this.pathEndPoint = $"/{pathEndPoint}/";
+            _configuration = configuration;
         }
-        var cacheService = context.HttpContext.RequestServices.GetRequiredService<IResponseCacheService>();
-        var result = await next();
-        if (result.Result is ObjectResult okObjectResult)
+
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            await cacheService.RemoveCacheResponseAsync(pathEndPoint);
+            // Fetch cache setting from appsettings.json
+            bool isCacheEnabled = _configuration.GetValue<bool>("RedisCacheSettings:Enabled");
+
+            if (!isCacheEnabled)
+            {
+                await next();
+                return;
+            }
+
+            var cacheService = context.HttpContext.RequestServices.GetRequiredService<IResponseCacheService>();
+            var result = await next();
+
+            if (result.Result is ObjectResult okObjectResult)
+            {
+                await cacheService.RemoveCacheResponseAsync(pathEndPoint);
+            }
         }
     }
 }

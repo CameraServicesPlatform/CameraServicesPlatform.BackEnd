@@ -15,7 +15,7 @@ using static Azure.Core.HttpHeader;
 
 namespace CameraServicesPlatform.BackEnd.DAO.Data
 {
-    public class CameraServicesPlatformDbContext : IdentityDbContext<Account>
+    public class CameraServicesPlatformDbContext : IdentityDbContext<Account>, IDbContext
     {
         public CameraServicesPlatformDbContext(DbContextOptions<CameraServicesPlatformDbContext> options)
             : base(options)

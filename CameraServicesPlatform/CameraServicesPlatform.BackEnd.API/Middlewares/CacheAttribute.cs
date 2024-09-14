@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Common.ConfigurationModel;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System.Text;
-using TravelCapstone.BackEnd.Application.IServices;
-using TravelCapstone.BackEnd.Common.ConfigurationModel;
-using TravelCapstone.BackEnd.Common.DTO.Response;
+ using System.Text;
+ 
 
 namespace CameraServicesPlatform.BackEnd.API.Middlewares;
 

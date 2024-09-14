@@ -2,7 +2,7 @@
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.Service;
-using CameraServicesPlatform.BackEnd.Domain.Data;
+using CameraServicesPlatform.BackEnd.DAO.Data;
 using CameraServicesPlatform.BackEnd.Infrastructure.Repositories;
 using CameraServicesPlatform.BackEnd.Infrastructure.UnitOfWork;
 
@@ -22,7 +22,6 @@ public class ServiceInstaller : IInstaller
 
         services.AddScoped<IEmailService, EmailService>();
 
-        services.AddScoped<ISmsService, SmsService>();
 
         services.AddScoped<IFileService, FileService>();
 

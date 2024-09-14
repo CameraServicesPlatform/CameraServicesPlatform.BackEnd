@@ -7,9 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="ConfigurationModel\" />
     <Folder Include="Enum\" />
-    <Folder Include="Validator\" />
   </ItemGroup>
 
   <ItemGroup>

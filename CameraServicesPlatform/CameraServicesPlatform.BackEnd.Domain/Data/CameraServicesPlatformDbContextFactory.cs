@@ -1,4 +1,4 @@
-﻿/*using CameraServicesPlatform.BackEnd.DAO.Data;
+﻿using CameraServicesPlatform.BackEnd.DAO.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -10,7 +10,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Data
     {
         public CameraServicesPlatformDbContext CreateDbContext(string[] args)
         {
-            // Build configuration to read from appsettings.json or another source
+            // Build configuration from appsettings.json
             IConfigurationRoot configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json")
@@ -18,14 +18,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Data
 
             var optionsBuilder = new DbContextOptionsBuilder<CameraServicesPlatformDbContext>();
 
-            // Get the connection string from the configuration
+            // Use the connection string from appsettings.json
             var connectionString = configuration.GetConnectionString("DefaultConnection");
-
-            // Configure the DbContext with the connection string
             optionsBuilder.UseSqlServer(connectionString);
 
             return new CameraServicesPlatformDbContext(optionsBuilder.Options);
         }
     }
 }
-*/

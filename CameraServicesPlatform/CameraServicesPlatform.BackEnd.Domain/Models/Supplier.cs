@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
@@ -43,8 +42,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid? ProductID { get; set; }
         public Guid? HistoryTransactionID { get; set; }
         public Guid? PaymentID { get; set; }
-        public Guid? CouponID { get; set; }
-        public Guid? DeliveryID { get; set; }
+        public Guid? VourcherID { get; set; }
         public Guid? SupplierRequestID { get; set; }
 
         [ForeignKey(nameof(ProductID))]
@@ -56,13 +54,17 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [ForeignKey(nameof(PaymentID))]
         public Payment Payment { get; set; }
 
-        [ForeignKey(nameof(CouponID))]
-        public Coupon Coupon { get; set; }
+        [ForeignKey(nameof(VourcherID))]
+        public Vourcher Vourcher { get; set; }
 
-        [ForeignKey(nameof(DeliveryID))]
-        public Delivery Delivery { get; set; }
 
         [ForeignKey(nameof(SupplierRequestID))]
         public SupplierRequest SupplierRequest { get; set; }
+
+        // New relationship with SupplierDeliveriesMethod
+        public Guid? SupplierDeliveriesMethodID { get; set; }
+
+        [ForeignKey(nameof(SupplierDeliveriesMethodID))]
+        public SupplierDeliveriesMethod SupplierDeliveriesMethod { get; set; }
     }
 }

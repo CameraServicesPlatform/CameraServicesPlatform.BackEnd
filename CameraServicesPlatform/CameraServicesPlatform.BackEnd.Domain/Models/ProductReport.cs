@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
-    public class ProductStatus
+    public class ProductReport
     {
         [Key]
         public Guid ProductStatusID { get; set; }

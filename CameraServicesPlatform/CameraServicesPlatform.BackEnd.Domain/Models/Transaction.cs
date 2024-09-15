@@ -19,29 +19,26 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Order Order { get; set; }
 
         public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
-
         public decimal Amount { get; set; }
 
         public TransactionType TransactionType { get; set; }
-
         public PaymentStatus PaymentStatus { get; set; }
-
         public PaymentMethod PaymentMethod { get; set; }
 
         [MaxLength(255)]
         public string? VNPAYTransactionID { get; set; }
 
-        [MaxLength(255)]
-        public string? VNPAYResponseCode { get; set; }
-
-        public VNPAYTransactionStatus VNPAYTransactionStatus { get; set; }
-
+        public VNPAYTransactionStatus? VNPAYTransactionStatus { get; set; }
         public DateTime? VNPAYTransactionTime { get; set; }
 
-        [MaxLength(255)]
-        public string? VNPAYOrderInfo { get; set; }
+        // Foreign key to Bank
+        [ForeignKey("Bank")]
+        public Guid BankId { get; set; }
+        public virtual BankInformation BankInformation { get; set; }
 
-        [MaxLength(255)]
-        public string? VNPAYChecksum { get; set; }
+        // Foreign key to Member
+        [ForeignKey("Member")]
+        public Guid MemberId { get; set; }
+        public virtual Member Member { get; set; }
     }
 }

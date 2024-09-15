@@ -5,18 +5,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
-    public class Coupon
+    public class Vourcher
     {
         [Key]
         [Required]
-        public Guid CouponID { get; set; }
+        public Guid VourcherID { get; set; }
 
         [Required]
         public Guid SupplierID { get; set; }
 
         [Required]
         [MaxLength(50)]
-        public string CouponCode { get; set; }
+        public string VourcherCode { get; set; }
 
         public string Description { get; set; }
 
@@ -44,8 +44,5 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-         [ForeignKey(nameof(SupplierID))]
-        public virtual Supplier Supplier { get; set; }
     }
 }

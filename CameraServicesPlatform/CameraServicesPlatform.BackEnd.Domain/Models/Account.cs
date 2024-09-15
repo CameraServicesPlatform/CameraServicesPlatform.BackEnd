@@ -16,6 +16,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         [ForeignKey("Role")]
         public Guid RoleID { get; set; }
+        public Role Role { get; set; }
 
         public Gender Gender { get; set; }
         public bool IsDeleted { get; set; } = false;
@@ -34,9 +35,5 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-        public Role Role { get; set; }
-
-        // No collections defined here
     }
 }

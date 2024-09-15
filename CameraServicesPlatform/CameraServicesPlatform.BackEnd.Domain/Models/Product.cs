@@ -30,7 +30,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [MaxLength(255)]
         public string? Brand { get; set; }
 
-        public int Quantity { get; set; }
+        public string Quality { get; set; }
 
         public ProductStatusEnum Status { get; set; }
 
@@ -39,7 +39,5 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-        // Removed ICollection properties
     }
 }

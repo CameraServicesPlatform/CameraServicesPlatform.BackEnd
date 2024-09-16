@@ -15,7 +15,7 @@ using static Azure.Core.HttpHeader;
 
 namespace CameraServicesPlatform.BackEnd.DAO.Data
 {
-    public class CameraServicesPlatformDbContext : IdentityDbContext<Account>
+    public class CameraServicesPlatformDbContext : IdentityDbContext<Account>, IDbContext
     {
         public CameraServicesPlatformDbContext(DbContextOptions<CameraServicesPlatformDbContext> options)
             : base(options)
@@ -39,11 +39,11 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Policy> Policies { get; set; }
-        public DbSet<ProductStatus> ProductStatuses { get; set; }
+        public DbSet<ProductReport> ProductStatuses { get; set; }
         public DbSet<SupplierStatus> SupplierStatuses { get; set; }
         public DbSet<SupplierRequest> SupplierRequests { get; set; }
         public DbSet<Delivery> Deliveries { get; set; }
-        public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<Vourcher> Vourchers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

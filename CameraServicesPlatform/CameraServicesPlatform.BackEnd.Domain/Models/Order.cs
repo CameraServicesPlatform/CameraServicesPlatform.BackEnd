@@ -1,43 +1,78 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
+using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace CameraServicesPlatform.BackEnd.Domain.Models;
-public class Order
+namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
-    [Key]
-    public Guid OrderID { get; set; }
+    public class Order
+    {
+        [Key]
+        public Guid OrderID { get; set; }
 
-    [Required]
-    public Guid SupplierID { get; set; }
+        [Required]
+        public Guid SupplierID { get; set; }
 
-    public DateTime OrderDate { get; set; }
+        [Required]
+        public Guid AccountID { get; set; }  // Add AccountID property
 
-    public OrderStatus OrderStatus { get; set; }
+        public DateTime OrderDate { get; set; }
 
-    public decimal TotalAmount { get; set; }
+        public OrderStatus OrderStatus { get; set; }
 
-    public OrderType OrderType { get; set; }
+        public decimal TotalAmount { get; set; }
 
-    public DateTime? RentalStartDate { get; set; }
+        public OrderType OrderType { get; set; }
 
-    public DateTime? RentalEndDate { get; set; }
+        //rental
+        public DateTime? RentalStartDate { get; set; }
 
-    public DateTime? ReturnDate { get; set; }
+        public DateTime? RentalEndDate { get; set; }
 
-    public string? ShippingAddress { get; set; }
+        // Thời gian tính theo  
+        public RentalDurationUnit DurationUnit { get; set; } // Thời gian tính theo (giờ, ngày, tuần, tháng)
+        // Số lượng của thời gian
+        public int DurationValue { get; set; }
 
-    public DeliveryMethod DeliveryMethod { get; set; }
+        public DateTime? ReturnDate { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    //
-    public   Supplier Supplier { get; set; }     
-    public Account Account { get; set; }
-    public ICollection<OrderDetail> OrderDetails { get; set; }
-    public ICollection<ReturnDetail> ReturnDetails { get; set; }
-    public ICollection<Contract> Contracts { get; set; }
-    public ICollection<Transaction> Transactions { get; set; }
-    public ICollection<Delivery> Deliveries { get; set; }
+        public string? ShippingAddress { get; set; }
+
+        public DeliveryMethod DeliveryMethod { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation properties
+        [ForeignKey(nameof(SupplierID))]
+        public virtual Supplier Supplier { get; set; }
+
+        [ForeignKey(nameof(AccountID))]  // Fix the ForeignKey attribute
+        public virtual Account Account { get; set; }
+
+        // Foreign keys for related entities
+        public Guid? OrderDetailID { get; set; }
+        public Guid? ReturnDetailID { get; set; }
+        public Guid? ContractID { get; set; }
+        public Guid? TransactionID { get; set; }
+        public Guid? DeliveriesMethodID { get; set; }
+
+        // Navigation properties for single related entities
+        [ForeignKey(nameof(OrderDetailID))]
+        public virtual OrderDetail OrderDetail { get; set; }
+
+        [ForeignKey(nameof(ReturnDetailID))]
+        public virtual ReturnDetail ReturnDetail { get; set; }
+
+        [ForeignKey(nameof(ContractID))]
+        public virtual Contract Contract { get; set; }
+
+        [ForeignKey(nameof(TransactionID))]
+        public virtual Transaction Transaction { get; set; }
+
+        [ForeignKey(nameof(DeliveriesMethodID))]
+        public virtual DeliveriesMethod DeliveriesMethod { get; set; }
+    }
 }
-

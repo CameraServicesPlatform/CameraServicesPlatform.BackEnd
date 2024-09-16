@@ -20,7 +20,12 @@ public class Member
     public DateTime JoinedAt { get; set; }
 
     public bool IsActive { get; set; }
- 
-    public ICollection<Wishlist> Wishlists { get; set; }
-    public ICollection<OrderHistory> OrderHistories { get; set; }
+
+    [ForeignKey("Wishlist")]
+    public Guid? WishlistID { get; set; }  
+    public Wishlist Wishlist { get; set; }   
+
+    [ForeignKey("OrderHistory")]
+    public Guid? OrderHistoryID { get; set; }   
+    public OrderHistory OrderHistory { get; set; }
 }

@@ -8,9 +8,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Enum
 {
     public enum RequestType
     {
-        Purchase,
-        Return,
-        Inquiry
+        Pending,
+        Approved,
+        Rejected
     }
 
 }

@@ -1,8 +1,8 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
-using System.ComponentModel.DataAnnotations;
+using CameraServicesPlatform.BackEnd.Domain.Models;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
-namespace CameraServicesPlatform.BackEnd.Domain.Models;
 public class Product
 {
     [Key]
@@ -18,7 +18,6 @@ public class Product
     [ForeignKey(nameof(CategoryID))]
     public Category Category { get; set; }
 
-
     [MaxLength(255)]
     public string ProductName { get; set; }
 
@@ -29,7 +28,7 @@ public class Product
     [MaxLength(255)]
     public string? Brand { get; set; }
 
-    public int Quantity { get; set; }
+    public string Quality { get; set; }
 
     public ProductStatusEnum Status { get; set; }
 
@@ -39,12 +38,9 @@ public class Product
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public virtual ICollection<ProductSpecification> ProductSpecifications { get; set; }
+    // Thêm liên kết đến RentalPrice
+    public Guid? RentalPriceID { get; set; }
 
-    public virtual ICollection<ProductImage> ProductImages { get; set; }
-
-    public virtual ICollection<OrderDetail> OrderDetails { get; set; }
-
-    public virtual ICollection<Rating> Ratings { get; set; }
+    [ForeignKey(nameof(RentalPriceID))]
+    public RentalPrice RentalPrice { get; set; }
 }
-

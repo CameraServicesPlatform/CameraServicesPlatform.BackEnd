@@ -18,6 +18,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models;
     public string PolicyContent { get; set; }
 
     public DateTime EffectiveDate { get; set; }
+    public DateTime Value  { get; set; }
+
 
     public Guid AccountID { get; set; }
 

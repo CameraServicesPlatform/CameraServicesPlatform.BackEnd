@@ -25,9 +25,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public OrderType OrderType { get; set; }
 
+        //rental
         public DateTime? RentalStartDate { get; set; }
 
         public DateTime? RentalEndDate { get; set; }
+
+        // Thời gian tính theo  
+        public RentalDurationUnit DurationUnit { get; set; } // Thời gian tính theo (giờ, ngày, tuần, tháng)
+        // Số lượng của thời gian
+        public int DurationValue { get; set; }
 
         public DateTime? ReturnDate { get; set; }
 
@@ -51,7 +57,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid? ReturnDetailID { get; set; }
         public Guid? ContractID { get; set; }
         public Guid? TransactionID { get; set; }
-        public Guid? DeliveryID { get; set; }
+        public Guid? DeliveriesMethodID { get; set; }
 
         // Navigation properties for single related entities
         [ForeignKey(nameof(OrderDetailID))]
@@ -66,7 +72,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [ForeignKey(nameof(TransactionID))]
         public virtual Transaction Transaction { get; set; }
 
-        [ForeignKey(nameof(DeliveryID))]
-        public virtual Delivery Delivery { get; set; }
+        [ForeignKey(nameof(DeliveriesMethodID))]
+        public virtual DeliveriesMethod DeliveriesMethod { get; set; }
     }
 }

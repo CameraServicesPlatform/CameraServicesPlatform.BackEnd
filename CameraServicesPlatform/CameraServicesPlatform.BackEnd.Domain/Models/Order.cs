@@ -15,7 +15,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid SupplierID { get; set; }
 
         [Required]
-        public Guid AccountID { get; set; }  // Add AccountID property
+        public Guid MemberID { get; set; }
 
         public DateTime OrderDate { get; set; }
 
@@ -25,15 +25,14 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public OrderType OrderType { get; set; }
 
-        //rental
+        // Rental
         public DateTime? RentalStartDate { get; set; }
 
         public DateTime? RentalEndDate { get; set; }
 
-        // Thời gian tính theo  
-        public RentalDurationUnit DurationUnit { get; set; } // Thời gian tính theo (giờ, ngày, tuần, tháng)
-        // Số lượng của thời gian
-        public int DurationValue { get; set; }
+        // Time duration
+        public RentalDurationUnit DurationUnit { get; set; } // Time unit (hour, day, week, month)
+        public int DurationValue { get; set; } // Quantity of time
 
         public DateTime? ReturnDate { get; set; }
 
@@ -49,30 +48,30 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [ForeignKey(nameof(SupplierID))]
         public virtual Supplier Supplier { get; set; }
 
-        [ForeignKey(nameof(AccountID))]  // Fix the ForeignKey attribute
-        public virtual Account Account { get; set; }
+        [ForeignKey(nameof(MemberID))]
+        public virtual Member Member { get; set; }
 
         // Foreign keys for related entities
         public Guid? OrderDetailID { get; set; }
         public Guid? ReturnDetailID { get; set; }
-        public Guid? ContractID { get; set; }
+        public Guid? ContractID { get; set; }  // Foreign key for Contract
         public Guid? TransactionID { get; set; }
         public Guid? DeliveriesMethodID { get; set; }
 
-        // Navigation properties for single related entities
+        // Navigation properties for related entities
         [ForeignKey(nameof(OrderDetailID))]
-        public virtual OrderDetail OrderDetail { get; set; }
+        public   OrderDetail OrderDetail { get; set; }
 
         [ForeignKey(nameof(ReturnDetailID))]
-        public virtual ReturnDetail ReturnDetail { get; set; }
+        public   ReturnDetail ReturnDetail { get; set; }
 
-        [ForeignKey(nameof(ContractID))]
-        public virtual Contract Contract { get; set; }
+        [ForeignKey(nameof(ContractID))]  // Use the correct foreign key property here
+        public   Contract Contract { get; set; }
 
         [ForeignKey(nameof(TransactionID))]
-        public virtual Transaction Transaction { get; set; }
+        public   Transaction Transaction { get; set; }
 
         [ForeignKey(nameof(DeliveriesMethodID))]
-        public virtual DeliveriesMethod DeliveriesMethod { get; set; }
+        public   DeliveriesMethod DeliveriesMethod { get; set; }
     }
 }

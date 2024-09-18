@@ -8,17 +8,17 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
     public class ProductReport
     {
         [Key]
-        public Guid ProductStatusID { get; set; }
+        public Guid ProductReportID { get; set; }
 
         public Guid SupplierID { get; set; }
 
         [ForeignKey(nameof(SupplierID))]
-        public Supplier Supplier { get; set; } 
+        public Supplier? Supplier { get; set; } // Made nullable
 
         public Guid ProductID { get; set; }
 
         [ForeignKey(nameof(ProductID))]
-        public Product Product { get; set; } 
+        public Product? Product { get; set; } // Made nullable
 
         public StatusType StatusType { get; set; }
 
@@ -26,12 +26,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public DateTime? EndDate { get; set; }
 
-        public string Reason { get; set; }
+        public string? Reason { get; set; } // Made nullable
 
-        public Guid HandledBy { get; set; }
+        // Foreign key for the Account that handled this report
+        [ForeignKey(nameof(Account))]
+        public Guid? AccountID { get; set; }
 
-        [ForeignKey(nameof(HandledBy))]
-        public Account Account { get; set; } 
+        public Account? HandledBy { get; set; } // Made nullable
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

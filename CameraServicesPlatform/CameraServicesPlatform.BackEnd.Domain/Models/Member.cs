@@ -1,31 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.Domain.Models;
-public class Member
+namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
-    [Key]
-    public Guid MemberID { get; set; }
+    public class Member
+    {
+        [Key]
+        public Guid MemberID { get; set; }
 
-    [ForeignKey("Account")]
-    public Guid AccountID { get; set; }
+        [ForeignKey(nameof(Account))]
+        public string? AccountID { get; set; }
 
-    public Account Account { get; set; }
- 
-    public DateTime JoinedAt { get; set; }
+        public Account Account { get; set; }
 
-    public bool IsActive { get; set; }
+        public DateTime JoinedAt { get; set; }
 
-    [ForeignKey("Wishlist")]
-    public Guid? WishlistID { get; set; }  
-    public Wishlist Wishlist { get; set; }   
+        public bool IsActive { get; set; }
 
-    [ForeignKey("OrderHistory")]
-    public Guid? OrderHistoryID { get; set; }   
-    public OrderHistory OrderHistory { get; set; }
+        [ForeignKey(nameof(Wishlist))]
+        public Guid? WishlistID { get; set; }
+        public Wishlist Wishlist { get; set; }
+
+        [ForeignKey(nameof(OrderHistory))]
+        public Guid? OrderHistoryID { get; set; }
+        public OrderHistory OrderHistory { get; set; }
+
+        [ForeignKey(nameof(Order))]
+        public Guid? OrderID { get; set; }
+        public Order Order { get; set; }
+    }
 }

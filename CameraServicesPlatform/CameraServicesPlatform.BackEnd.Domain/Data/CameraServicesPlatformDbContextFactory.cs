@@ -10,16 +10,14 @@ namespace CameraServicesPlatform.BackEnd.Domain.Data
     {
         public CameraServicesPlatformDbContext CreateDbContext(string[] args)
         {
-            // Build configuration from appsettings.json
+            // Đảm bảo đúng đường dẫn tới thư mục chứa appsettings.json
             IConfigurationRoot configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
+                .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../CameraServicesPlatform.BackEnd.API")) // Đường dẫn đến API project
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<CameraServicesPlatformDbContext>();
-
-            // Use the connection string from appsettings.json
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            var connectionString = configuration.GetConnectionString("DB");
             optionsBuilder.UseSqlServer(connectionString);
 
             return new CameraServicesPlatformDbContext(optionsBuilder.Options);

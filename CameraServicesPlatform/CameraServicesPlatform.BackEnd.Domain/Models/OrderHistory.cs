@@ -29,8 +29,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public decimal TotalAmount { get; set; }
 
         [Required]
-        [MaxLength(1000)] // Optional: Restrict string length
-        public string OrderDetails { get; set; }
+         public string OrderDetails { get; set; }
 
         [Required]
         public OrderStatus OrderStatus { get; set; }

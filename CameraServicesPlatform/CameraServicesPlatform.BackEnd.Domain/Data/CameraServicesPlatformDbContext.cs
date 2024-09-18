@@ -2,16 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Data;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Azure.Core.HttpHeader;
 
 namespace CameraServicesPlatform.BackEnd.DAO.Data
 {
@@ -23,7 +13,9 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
         }
 
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<Role> Roles { get; set; }
+        //public DbSet<AccountRole> AccountRoles { get; set; }
+
+        //public DbSet<Role> Roles { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<Member> Members { get; set; }
         public DbSet<Staff> Staffs { get; set; }
@@ -39,10 +31,10 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Policy> Policies { get; set; }
-        public DbSet<ProductReport> ProductStatuses { get; set; }
-        public DbSet<SupplierStatus> SupplierStatuses { get; set; }
+        public DbSet<ProductReport> ProductReports { get; set; }
+        public DbSet<SupplierReport> SupplierReports { get; set; }
         public DbSet<SupplierRequest> SupplierRequests { get; set; }
-        public DbSet<Delivery> Deliveries { get; set; }
+        public DbSet<DeliveriesMethod> DeliveriesMethod { get; set; }
         public DbSet<Vourcher> Vourchers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -76,6 +68,30 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
                     NormalizedName = "Supplier"
                 }
             );
+
+            builder.Entity<Staff>()
+            .HasOne(s => s.Account)
+            .WithMany()
+            .HasForeignKey(s => s.AccountID)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Transaction>()
+            .HasOne(t => t.Order)
+            .WithMany()  
+            .HasForeignKey(t => t.OrderID)
+            .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Transaction>()
+                .HasOne(t => t.BankInformation)
+                .WithMany()   
+                .HasForeignKey(t => t.BankId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Transaction>()
+                .HasOne(t => t.Member)
+                .WithMany()   
+                .HasForeignKey(t => t.MemberId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

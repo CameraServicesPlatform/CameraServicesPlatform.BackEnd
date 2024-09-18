@@ -8,7 +8,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid SupplierID { get; set; }
 
-        [Required]
+        [ForeignKey(nameof(AccountID))]
         public Guid AccountID { get; set; }
 
         [Required]
@@ -36,7 +36,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public decimal AccountBalance { get; set; }
 
-        [ForeignKey(nameof(AccountID))]
         public Account Account { get; set; }
 
         public Guid? ProductID { get; set; }

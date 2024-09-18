@@ -13,12 +13,12 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid SupplierID { get; set; }
 
         [ForeignKey(nameof(SupplierID))]
-        public Supplier Supplier { get; set; } 
+        public Supplier Supplier { get; set; }
 
         public Guid ProductID { get; set; }
 
         [ForeignKey(nameof(ProductID))]
-        public Product Product { get; set; } 
+        public Product Product { get; set; }
 
         public StatusType StatusType { get; set; }
 
@@ -28,10 +28,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public string Reason { get; set; }
 
-        public Guid HandledBy { get; set; }
+        // Foreign key for the Account that handled this report
+        [ForeignKey(nameof(HandledByID))]
+        public Guid? HandledByID { get; set; }
 
-        [ForeignKey(nameof(HandledBy))]
-        public Account Account { get; set; } 
+         public Account HandledBy { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

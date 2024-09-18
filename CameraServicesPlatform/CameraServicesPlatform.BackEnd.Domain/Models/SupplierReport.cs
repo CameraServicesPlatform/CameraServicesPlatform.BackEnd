@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
-    public class SupplierStatus
+    public class SupplierReport
     {
         [Key]
-        public Guid SupplierStatusID { get; set; }
+        public Guid SupplierReportID { get; set; }
 
         [Required]
         public Guid SupplierID { get; set; }
@@ -25,10 +25,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public string? Reason { get; set; }
 
-        [Required]
+        [ForeignKey(nameof(HandledBy))]
         public Guid HandledBy { get; set; }
 
-        [ForeignKey(nameof(HandledBy))]
         public Account HandledByAccount { get; set; }
     }
 }

@@ -12,11 +12,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid ProductID { get; set; }
 
         [ForeignKey(nameof(ProductID))]
-        public Product Product { get; set; } 
-
-        public Guid AccountID { get; set; }
+        public Product Product { get; set; }
 
         [ForeignKey(nameof(AccountID))]
+        public Guid AccountID { get; set; }
+
         public Account Account { get; set; } 
 
         public int RatingValue { get; set; }

@@ -1,5 +1,4 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,20 +9,20 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid PaymentID { get; set; }
 
+        [ForeignKey(nameof(OrderID))]
         public Guid? OrderID { get; set; }
 
-        [ForeignKey(nameof(OrderID))]
-        public Order Order { get; set; } 
-
-        public Guid SupplierID { get; set; }
+        public Order Order { get; set; }
 
         [ForeignKey(nameof(SupplierID))]
-        public Supplier Supplier { get; set; } 
+        public Guid SupplierID { get; set; }
 
-        public Guid? AccountID { get; set; }
+        public Supplier Supplier { get; set; }
 
         [ForeignKey(nameof(AccountID))]
-        public Account Account { get; set; } 
+        public Guid? AccountID { get; set; }
+
+        public Account Account { get; set; }
 
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
 

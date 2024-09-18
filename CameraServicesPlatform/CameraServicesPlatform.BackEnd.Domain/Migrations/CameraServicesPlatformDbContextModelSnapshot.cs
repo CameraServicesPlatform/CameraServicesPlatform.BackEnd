@@ -188,6 +188,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Contract", b =>
                 {
                     b.Property<Guid>("ContractID")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ContractTerms")
@@ -208,6 +209,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("ContractID");
+
+                    b.HasIndex("OrderID");
 
                     b.ToTable("Contracts");
                 });
@@ -275,11 +278,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccountId")
-                        .IsRequired()
+                    b.Property<string>("AccountID")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsActive")
@@ -299,9 +298,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("MemberID");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("AccountID");
 
                     b.HasIndex("OrderHistoryID");
+
+                    b.HasIndex("OrderID");
 
                     b.HasIndex("WishlistID");
 
@@ -380,8 +381,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("DeliveriesMethodID");
 
-                    b.HasIndex("MemberID")
-                        .IsUnique();
+                    b.HasIndex("MemberID");
 
                     b.HasIndex("OrderDetailID");
 
@@ -473,10 +473,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccountId")
+                    b.Property<string>("AccountID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -515,9 +512,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("PaymentID");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("AccountID");
 
                     b.HasIndex("OrderID");
+
+                    b.HasIndex("SupplierID");
 
                     b.ToTable("Payment");
                 });
@@ -569,8 +568,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductReport", b =>
                 {
-                    b.Property<Guid>("ProductStatusID")
+                    b.Property<Guid>("ProductReportID")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AccountID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -579,18 +581,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("HandledByID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("HandledById")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Reason")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
@@ -605,7 +602,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("ProductStatusID");
+                    b.HasKey("ProductReportID");
 
                     b.HasIndex("HandledById");
 
@@ -613,7 +610,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("ProductStatuses");
+                    b.ToTable("ProductReports");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductSpecification", b =>
@@ -646,10 +643,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccountId")
+                    b.Property<string>("AccountID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -668,7 +662,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("RatingID");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("AccountID");
 
                     b.HasIndex("ProductID");
 
@@ -712,10 +706,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AccountID")
+                    b.Property<Guid?>("AccountId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AccountId")
+                    b.Property<string>("AccountId1")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -734,7 +728,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("ReportID");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("AccountId1");
 
                     b.ToTable("Reports");
                 });
@@ -777,10 +771,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccountId")
+                    b.Property<string>("AccountID")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
@@ -813,7 +804,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("StaffID");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("AccountID");
 
                     b.ToTable("Staffs");
                 });
@@ -827,11 +818,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<decimal>("AccountBalance")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("AccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AccountId")
-                        .IsRequired()
+                    b.Property<string>("AccountID")
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("BlockReason")
@@ -889,13 +876,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("SupplierID");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("AccountID");
 
                     b.HasIndex("HistoryTransactionID");
 
-                    b.HasIndex("PaymentID")
-                        .IsUnique()
-                        .HasFilter("[PaymentID] IS NOT NULL");
+                    b.HasIndex("PaymentID");
 
                     b.HasIndex("ProductID");
 
@@ -1016,9 +1001,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid>("BankId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BankInformationBankId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("MemberId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1049,7 +1031,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("TransactionID");
 
-                    b.HasIndex("BankInformationBankId");
+                    b.HasIndex("BankId");
 
                     b.HasIndex("MemberId");
 
@@ -1366,7 +1348,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
                         .WithMany()
-                        .HasForeignKey("ContractID")
+                        .HasForeignKey("OrderID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1388,19 +1370,23 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AccountID");
 
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.OrderHistory", "OrderHistory")
                         .WithMany()
                         .HasForeignKey("OrderHistoryID");
+
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderID");
 
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Wishlist", "Wishlist")
                         .WithMany()
                         .HasForeignKey("WishlistID");
 
                     b.Navigation("Account");
+
+                    b.Navigation("Order");
 
                     b.Navigation("OrderHistory");
 
@@ -1418,8 +1404,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasForeignKey("DeliveriesMethodID");
 
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Member", "Member")
-                        .WithOne("Order")
-                        .HasForeignKey("CameraServicesPlatform.BackEnd.Domain.Models.Order", "MemberID")
+                        .WithMany()
+                        .HasForeignKey("MemberID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1498,7 +1484,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId")
+                        .HasForeignKey("AccountID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1506,9 +1492,17 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .WithMany()
                         .HasForeignKey("OrderID");
 
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Account");
 
                     b.Navigation("Order");
+
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductImage", b =>
@@ -1526,9 +1520,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "HandledBy")
                         .WithMany()
-                        .HasForeignKey("HandledById")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("HandledById");
 
                     b.HasOne("Product", "Product")
                         .WithMany()
@@ -1564,7 +1556,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId")
+                        .HasForeignKey("AccountID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1594,7 +1586,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId")
+                        .HasForeignKey("AccountId1")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1616,7 +1608,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId")
+                        .HasForeignKey("AccountID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -1627,17 +1619,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AccountID");
 
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.HistoryTransaction", "HistoryTransaction")
                         .WithMany()
                         .HasForeignKey("HistoryTransactionID");
 
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Payment", "Payment")
-                        .WithOne("Supplier")
-                        .HasForeignKey("CameraServicesPlatform.BackEnd.Domain.Models.Supplier", "PaymentID");
+                        .WithMany()
+                        .HasForeignKey("PaymentID");
 
                     b.HasOne("Product", "Product")
                         .WithMany()
@@ -1723,20 +1713,20 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.BankInformation", "BankInformation")
                         .WithMany()
-                        .HasForeignKey("BankInformationBankId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("BankId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Member", "Member")
                         .WithMany()
                         .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderID")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("BankInformation");
@@ -1839,18 +1829,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Navigation("RentalPrice");
 
                     b.Navigation("Supplier");
-                });
-
-            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Member", b =>
-                {
-                    b.Navigation("Order")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Payment", b =>
-                {
-                    b.Navigation("Supplier")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

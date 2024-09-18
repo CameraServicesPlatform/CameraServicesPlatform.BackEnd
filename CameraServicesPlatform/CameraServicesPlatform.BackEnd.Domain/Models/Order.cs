@@ -45,33 +45,33 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties
-        [ForeignKey(nameof(Supplier))]
+        [ForeignKey(nameof(SupplierID))]
         public virtual Supplier Supplier { get; set; }
 
-        [ForeignKey(nameof(Member))]
+        [ForeignKey(nameof(MemberID))]
         public virtual Member Member { get; set; }
 
         // Foreign keys for related entities
         public Guid? OrderDetailID { get; set; }
         public Guid? ReturnDetailID { get; set; }
-        public Guid? ContractID { get; set; }
+        public Guid? ContractID { get; set; }  // Foreign key for Contract
         public Guid? TransactionID { get; set; }
         public Guid? DeliveriesMethodID { get; set; }
 
         // Navigation properties for related entities
-        [ForeignKey(nameof(OrderDetail))]
-        public virtual OrderDetail OrderDetail { get; set; }
+        [ForeignKey(nameof(OrderDetailID))]
+        public   OrderDetail OrderDetail { get; set; }
 
-        [ForeignKey(nameof(ReturnDetail))]
-        public virtual ReturnDetail ReturnDetail { get; set; }
+        [ForeignKey(nameof(ReturnDetailID))]
+        public   ReturnDetail ReturnDetail { get; set; }
 
-        [ForeignKey(nameof(Contract))]
-        public virtual Contract Contract { get; set; }
+        [ForeignKey(nameof(ContractID))]  // Use the correct foreign key property here
+        public   Contract Contract { get; set; }
 
         [ForeignKey(nameof(TransactionID))]
-        public virtual Transaction Transaction { get; set; }
+        public   Transaction Transaction { get; set; }
 
-        [ForeignKey(nameof(DeliveriesMethod))]
-        public virtual DeliveriesMethod DeliveriesMethod { get; set; }
+        [ForeignKey(nameof(DeliveriesMethodID))]
+        public   DeliveriesMethod DeliveriesMethod { get; set; }
     }
 }

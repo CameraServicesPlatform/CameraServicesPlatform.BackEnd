@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
@@ -8,8 +9,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid SupplierID { get; set; }
 
-        [ForeignKey(nameof(AccountID))]
-        public Guid AccountID { get; set; }
+         [ForeignKey(nameof(Account))]
+        public string? AccountID { get; set; }  
+        public Account Account { get; set; }
 
         [Required]
         [MaxLength(255)]
@@ -36,7 +38,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public decimal AccountBalance { get; set; }
 
-        public Account Account { get; set; }
 
         public Guid? ProductID { get; set; }
         public Guid? HistoryTransactionID { get; set; }
@@ -55,7 +56,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         [ForeignKey(nameof(VourcherID))]
         public Vourcher Vourcher { get; set; }
-
 
         [ForeignKey(nameof(SupplierRequestID))]
         public SupplierRequest SupplierRequest { get; set; }

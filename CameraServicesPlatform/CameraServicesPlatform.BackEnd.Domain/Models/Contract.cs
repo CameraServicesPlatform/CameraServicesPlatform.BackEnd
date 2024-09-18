@@ -6,10 +6,10 @@ public class Contract
 {
     [Key]
     public Guid ContractID { get; set; }
+    [ForeignKey(nameof(Order))]
 
     public Guid OrderID { get; set; }
 
-    [ForeignKey(nameof(ContractID))]
     public Order Order { get; set; }
 
     public string ContractTerms { get; set; }

@@ -31,7 +31,7 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Policy> Policies { get; set; }
-        public DbSet<ProductReport> ProductStatuses { get; set; }
+        public DbSet<ProductReport> ProductReports { get; set; }
         public DbSet<SupplierReport> SupplierReports { get; set; }
         public DbSet<SupplierRequest> SupplierRequests { get; set; }
         public DbSet<DeliveriesMethod> DeliveriesMethod { get; set; }
@@ -68,8 +68,30 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
                     NormalizedName = "Supplier"
                 }
             );
-           
 
+            builder.Entity<Staff>()
+            .HasOne(s => s.Account)
+            .WithMany()
+            .HasForeignKey(s => s.AccountID)
+            .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Transaction>()
+            .HasOne(t => t.Order)
+            .WithMany()  
+            .HasForeignKey(t => t.OrderID)
+            .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Transaction>()
+                .HasOne(t => t.BankInformation)
+                .WithMany()   
+                .HasForeignKey(t => t.BankId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Entity<Transaction>()
+                .HasOne(t => t.Member)
+                .WithMany()   
+                .HasForeignKey(t => t.MemberId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

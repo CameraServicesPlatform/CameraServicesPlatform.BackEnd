@@ -9,19 +9,19 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid PaymentID { get; set; }
 
-        [ForeignKey(nameof(OrderID))]
+        // Foreign key for Order
+        [ForeignKey(nameof(Order))]
         public Guid? OrderID { get; set; }
-
         public Order Order { get; set; }
 
-        [ForeignKey(nameof(SupplierID))]
+        // Foreign key for Supplier
+        [ForeignKey(nameof(Supplier))]
         public Guid SupplierID { get; set; }
-
         public Supplier Supplier { get; set; }
 
-        [ForeignKey(nameof(AccountID))]
-        public Guid? AccountID { get; set; }
-
+        // Adjust foreign key to match the type of Account's primary key
+        [ForeignKey(nameof(Account))]
+        public string AccountID { get; set; } // Changed to string
         public Account Account { get; set; }
 
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow;

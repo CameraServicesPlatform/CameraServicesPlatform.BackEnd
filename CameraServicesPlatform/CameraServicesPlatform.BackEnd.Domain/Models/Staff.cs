@@ -9,8 +9,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid StaffID { get; set; }
 
-        [ForeignKey(nameof(AccountID))]
-        public Guid AccountID { get; set; }
+        [ForeignKey(nameof(Account))]
+        public string AccountID { get; set; }   
 
         public Account Account { get; set; }
 

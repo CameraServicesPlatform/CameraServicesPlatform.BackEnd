@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Common.DTO.Request;
-public class SignUpRequestDto
+public class SignUpRequestDTO
 {
     public string Email { get; set; } = null!;
     public string FirstName { get; set; } = null!;

@@ -1,16 +1,9 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Transaction;
-using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Transaction;
 
-namespace CameraServicesPlatform.BackEnd.Domain.Models;
-    public class HistoryTransaction
-    {
+public class HistoryTransaction
+{
     [Key]
     public Guid HistoryTransactionId { get; set; }
 
@@ -24,8 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models;
     [MaxLength(255)]
     public string TransactionDescription { get; set; }
 
-    public Enum.Transaction.TransactionStatus Status { get; set; }
+    public TransactionStatus Status { get; set; }
 
-    public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
-

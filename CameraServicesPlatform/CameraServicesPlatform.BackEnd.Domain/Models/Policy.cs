@@ -13,7 +13,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public PolicyType PolicyType { get; set; }
 
         public string PolicyContent { get; set; }
-
+        // doi tuong ap dung chinh sach
+        public ApplicableObject ApplicableObject { get; set; }
         public DateTime EffectiveDate { get; set; }
         public DateTime Value { get; set; }
 

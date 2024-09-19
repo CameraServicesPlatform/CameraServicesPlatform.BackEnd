@@ -12,30 +12,27 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Required]
         public Guid OrderID { get; set; }
 
-        [ForeignKey(nameof(OrderID))]
-        public Order Order { get; set; }  
+         [ForeignKey(nameof(OrderID))]
+        public virtual Order Order { get; set; }
 
         [Required]
         public Guid ProductID { get; set; }
 
-        [ForeignKey(nameof(ProductID))]
-        public Product Product { get; set; }  
+         [ForeignKey(nameof(ProductID))]
+        public virtual Product Product { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal ProductPrice { get; set; }
+         public decimal ProductPrice { get; set; }
 
         [Required]
-        [MaxLength(255)] // Optional: Restrict string length
+        [MaxLength(255)]
         public string ProductQuality { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal Discount { get; set; }
+         public decimal Discount { get; set; }
 
         [Required]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal ProductPriceTotal { get; set; }
+         public decimal ProductPriceTotal { get; set; }
 
         public int? RentalPeriod { get; set; }
     }

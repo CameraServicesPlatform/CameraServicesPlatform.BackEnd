@@ -19,15 +19,12 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IDbContext, CameraServicesPlatformDbContext>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-
         services.AddScoped<IEmailService, EmailService>();
-
-
         services.AddScoped<IFileService, FileService>();
-
-
         services.AddScoped<IExcelService, ExcelService>();
-
         services.AddScoped<IConfigurationService, ConfigurationService>();
+
+        //========18/9/2024//
+        services.AddScoped<IAccountService, AccountService>();
     }
 }

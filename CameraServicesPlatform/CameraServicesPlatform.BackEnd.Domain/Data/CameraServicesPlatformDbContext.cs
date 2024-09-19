@@ -25,7 +25,7 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
         public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
-        public DbSet<Domain.Models.Contract> Contracts { get; set; }
+        public DbSet<Contract> Contracts { get; set; }
         public DbSet<ReturnDetail> ReturnDetails { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Rating> Ratings { get; set; }
@@ -52,14 +52,14 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
                 new IdentityRole
                 {
                     Id = "b21c4d5e-67fg-89hi-01jk-lmnopqrstuv",
-                    Name = "CUSTOMER",
-                    NormalizedName = "CUSTOMER"
+                    Name = "MEMBER",
+                    NormalizedName = "Member"
                 },
                 new IdentityRole
                 {
                     Id = "c32d5e6f-78gh-90ij-12kl-mnopqrstuv",
                     Name = "STAFF",
-                    NormalizedName = "STAFF"
+                    NormalizedName = "Staff"
                 },
                 new IdentityRole
                 {
@@ -69,29 +69,29 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
                 }
             );
 
-            builder.Entity<Staff>()
-            .HasOne(s => s.Account)
-            .WithMany()
-            .HasForeignKey(s => s.AccountID)
-            .OnDelete(DeleteBehavior.Cascade);
+            //builder.Entity<Staff>()
+            //.HasOne(s => s.Account)
+            //.WithMany()
+            //.HasForeignKey(s => s.AccountID)
+            //.OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Transaction>()
-            .HasOne(t => t.Order)
-            .WithMany()  
-            .HasForeignKey(t => t.OrderID)
-            .OnDelete(DeleteBehavior.NoAction);
+            //builder.Entity<Transaction>()
+            //.HasOne(t => t.Order)
+            //.WithMany()  
+            //.HasForeignKey(t => t.OrderID)
+            //.OnDelete(DeleteBehavior.NoAction);
 
-            builder.Entity<Transaction>()
-                .HasOne(t => t.BankInformation)
-                .WithMany()   
-                .HasForeignKey(t => t.BankId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //builder.Entity<Transaction>()
+            //    .HasOne(t => t.BankInformation)
+            //    .WithMany()   
+            //    .HasForeignKey(t => t.BankId)
+            //    .OnDelete(DeleteBehavior.NoAction);
 
-            builder.Entity<Transaction>()
-                .HasOne(t => t.Member)
-                .WithMany()   
-                .HasForeignKey(t => t.MemberId)
-                .OnDelete(DeleteBehavior.NoAction);
+            //builder.Entity<Transaction>()
+            //    .HasOne(t => t.Member)
+            //    .WithMany()   
+            //    .HasForeignKey(t => t.MemberId)
+            //    .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

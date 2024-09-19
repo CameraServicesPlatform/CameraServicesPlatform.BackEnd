@@ -1,3 +1,6 @@
 ﻿project Domain
 
 sử dụng EntityFrawork
+---------
+18/09/2024
+Không chạy được project API với https thì delete bin and obj sau có chạy lạy 

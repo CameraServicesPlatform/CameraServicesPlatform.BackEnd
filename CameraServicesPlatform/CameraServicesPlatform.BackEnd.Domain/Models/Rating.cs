@@ -14,8 +14,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public Product Product { get; set; }
 
-        // Change the type of AccountID to string
-        [ForeignKey(nameof(Account))]
+         [ForeignKey(nameof(Account))]
         public string AccountID { get; set; }
 
         public Account Account { get; set; }

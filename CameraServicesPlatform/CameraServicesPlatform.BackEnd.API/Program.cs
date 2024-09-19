@@ -2,6 +2,7 @@ using CameraServicesPlatform.BackEnd.API.Installers;
 using CameraServicesPlatform.BackEnd.DAO.Data;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Infrastructure.ServerHub;
+using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -31,8 +32,9 @@ app.UseSwagger(op => op.SerializeAsV2 = false);
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-    options.RoutePrefix = string.Empty;
+    options.RoutePrefix = "swagger"; 
 });
+
 app.UseCors(MyAllowSpecificOrigins);
 
 app.UseHttpsRedirection();

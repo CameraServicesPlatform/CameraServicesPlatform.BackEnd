@@ -38,9 +38,5 @@ public class Product
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    // Thêm liên kết đến RentalPrice
-    public Guid? RentalPriceID { get; set; }
-
-    [ForeignKey(nameof(RentalPriceID))]
-    public RentalPrice RentalPrice { get; set; }
+    // Managed Foreign Key relation with Supplier via SupplierID
 }

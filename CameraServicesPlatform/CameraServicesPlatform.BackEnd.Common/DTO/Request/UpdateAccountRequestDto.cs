@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Common.DTO.Request;
-    public class UpdateAccountRequestDto
+    public class UpdateAccountRequestDTO
     {
         public string Email { get; set; } = null!;
         public string? FirstName { get; set; }

@@ -11,7 +11,7 @@ public class DbInstaller : IInstaller
     {
         services.AddDbContext<CameraServicesPlatformDbContext>(option =>
         {
-            option.UseSqlServer(configuration["ConnectionStrings:DB"]);
+            option.UseSqlServer(configuration["ConnectionStrings:DBVPS"]);
         });
 
         services.AddIdentity<Account, IdentityRole>().AddEntityFrameworkStores<CameraServicesPlatformDbContext>()

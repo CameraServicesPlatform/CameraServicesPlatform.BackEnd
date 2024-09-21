@@ -1,0 +1,46 @@
+﻿version: '3.4'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    hostname: cameracapstone-db
+    container_name: cameracapstone
+    user: root
+    networks:
+      - demo
+    environment:
+      SA_PASSWORD: "sa@root123@"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql/data
+      - mssql-log:/var/opt/mssql/log
+      - mssql-secrets:/var/opt/mssql/secrets
+
+  cameracapstone-be:
+    image: ${DOCKER_REGISTRY-}cameracapstone
+    build:
+      context: .
+      dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile
+    container_name: cameracapstone-be
+    networks:
+      - demo
+    ports:
+      - "2602:8080"   # Ánh xạ cổng 8080 trong container sang cổng 32795 trên máy chủ
+      - "443:443"      # Cổng HTTPS, nếu cần
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DBVPS=Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;
+       
+  
+networks:
+  demo:
+    driver: bridge
+
+volumes:
+  sqlserverdata:
+  mssql-log:
+  mssql-secrets:

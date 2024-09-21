@@ -4,3 +4,8 @@ sử dụng EntityFrawork
 ---------
 18/09/2024
 Không chạy được project API với https thì delete bin and obj sau có chạy lạy 
+-------
+vps account 
+run terminal 
+ssh root@14.225.220.108
+password:  

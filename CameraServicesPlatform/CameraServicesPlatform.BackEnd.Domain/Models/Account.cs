@@ -14,10 +14,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
-        /*[ForeignKey("Role")]
-        public Guid RoleID { get; set; }
-        public Role Role { get; set; }
-*/
+ 
         public Gender Gender { get; set; }
         public bool IsDeleted { get; set; } = false;
         public bool IsVerified { get; set; } = false;

@@ -1,4 +1,6 @@
 using CameraServicesPlatform.BackEnd.API.Installers;
+using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.DAO.Data;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Infrastructure.ServerHub;

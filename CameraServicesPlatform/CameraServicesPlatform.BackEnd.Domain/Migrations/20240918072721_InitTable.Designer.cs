@@ -255,7 +255,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -370,7 +370,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<Guid?>("TransactionID")
                         .HasColumnType("uniqueidentifier");
@@ -492,7 +492,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("PaymentAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<DateTime>("PaymentDate")
                         .HasColumnType("datetime2");
@@ -682,13 +682,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("PricePerDay")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<decimal?>("PricePerMonth")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<decimal?>("PricePerWeek")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
@@ -753,7 +753,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("PenaltyApplied")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<DateTime>("ReturnDate")
                         .HasColumnType("datetime2");
@@ -819,7 +819,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("AccountBalance")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<string>("AccountID")
                         .HasColumnType("nvarchar(450)");
@@ -999,7 +999,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<Guid>("BankId")
                         .HasColumnType("uniqueidentifier");
@@ -1057,7 +1057,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<int>("DiscountType")
                         .HasColumnType("int");
@@ -1072,7 +1072,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal?>("MinOrderAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<Guid>("SupplierID")
                         .HasColumnType("uniqueidentifier");
@@ -1296,7 +1296,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<string>("ProductDescription")
                         .HasColumnType("nvarchar(max)");
@@ -1311,7 +1311,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Rating")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType(null);
 
                     b.Property<Guid?>("RentalPriceID")
                         .HasColumnType("uniqueidentifier");

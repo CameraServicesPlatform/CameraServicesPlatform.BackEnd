@@ -1,14 +1,24 @@
-namespace CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum;
 
-public class AccountResponse
+namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
-    public string Id { get; set; } = null!;
-    public string PhoneNumber { get; set; } = null!;
-    public string FirstName { get; set; } = null!;
-    public string LastName { get; set; } = null!;
-    public bool Gender { get; set; }
-    public bool IsVerified { get; set; }
-    public string UserName { get; set; } = null!;
-    public string Email { get; set; } = null!;
-    public object Role { get; set; }
+    public class AccountResponse
+    {
+        public string Id { get; set; } = null!;                  
+        public string AccountName { get; set; } = null!;        
+        public string PhoneNumber { get; set; } = null!;        
+        public string FirstName { get; set; } = null!;           
+        public string LastName { get; set; } = null!;           
+        public Gender Gender { get; set; }
+        public object Role { get; set; }
+
+        public bool IsDeleted { get; set; }                     
+        public bool IsVerified { get; set; }                   
+        public string UserName { get; set; } = null!;          
+        public string Email { get; set; } = null!;             
+        public string? ProfileImage { get; set; }               
+        public string Address { get; set; } = null!;           
+        public DateTime CreatedAt { get; set; }                  
+        public DateTime UpdatedAt { get; set; }                 
+    }
 }

@@ -9,11 +9,17 @@ namespace CameraServicesPlatform.BackEnd.Application.IService;
 
 public interface IAccountService
 {
+    //check
+    Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize);
+    Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle);
+
+
+    //no check 
     Task<AppActionResult> Login(LoginRequestDTO loginRequest);
 
     public Task<AppActionResult> VerifyLoginGoogle(string email, string verifyCode);
 
-    Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle);
+    
 
     Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO applicationUser);
 
@@ -21,7 +27,7 @@ public interface IAccountService
 
     Task<AppActionResult> GetAccountByUserId(string id);
 
-    Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize);
+   
 
     Task<AppActionResult> GetNewToken(string refreshToken, string userId);
 

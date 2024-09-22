@@ -1,4 +1,6 @@
 using CameraServicesPlatform.BackEnd.API.Installers;
+using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.DAO.Data;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Infrastructure.ServerHub;
@@ -23,6 +25,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InstallerServicesInAssembly(builder.Configuration);
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 var app = builder.Build();
 

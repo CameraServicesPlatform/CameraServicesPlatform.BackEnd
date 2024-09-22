@@ -156,7 +156,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("BankInformation", (string)null);
+                    b.ToTable("BankInformation");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Category", b =>
@@ -174,7 +174,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("CategoryID");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.DeliveriesMethod", b =>
@@ -200,7 +200,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("DeliveriesMethodID");
 
-                    b.ToTable("DeliveriesMethod", (string)null);
+                    b.ToTable("DeliveriesMethod");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Order", b =>
@@ -254,8 +254,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid>("SupplierID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType(null);
+                    b.Property<double?>("TotalAmount")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -268,7 +268,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.OrderDetail", b =>
@@ -277,8 +277,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("Discount")
-                        .HasColumnType(null);
+                    b.Property<double>("Discount")
+                        .HasColumnType("float");
 
                     b.Property<Guid>("OrderID")
                         .HasColumnType("uniqueidentifier");
@@ -286,11 +286,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("ProductPrice")
-                        .HasColumnType(null);
+                    b.Property<double>("ProductPrice")
+                        .HasColumnType("float");
 
-                    b.Property<decimal>("ProductPriceTotal")
-                        .HasColumnType(null);
+                    b.Property<double>("ProductPriceTotal")
+                        .HasColumnType("float");
 
                     b.Property<string>("ProductQuality")
                         .IsRequired()
@@ -306,7 +306,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("OrderDetails", (string)null);
+                    b.ToTable("OrderDetails");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Policy", b =>
@@ -333,7 +333,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("PolicyID");
 
-                    b.ToTable("Policies", (string)null);
+                    b.ToTable("Policies");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductImage", b =>
@@ -353,7 +353,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("ProductImages", (string)null);
+                    b.ToTable("ProductImages");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductReport", b =>
@@ -400,7 +400,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("ProductReports", (string)null);
+                    b.ToTable("ProductReports");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductSpecification", b =>
@@ -423,7 +423,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("ProductSpecifications", (string)null);
+                    b.ToTable("ProductSpecifications");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Rating", b =>
@@ -455,7 +455,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("Ratings", (string)null);
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Report", b =>
@@ -484,7 +484,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.ToTable("Reports", (string)null);
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ReturnDetail", b =>
@@ -503,8 +503,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid>("OrderID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("PenaltyApplied")
-                        .HasColumnType(null);
+                    b.Property<double>("PenaltyApplied")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("ReturnDate")
                         .HasColumnType("datetime2");
@@ -516,7 +516,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("OrderID");
 
-                    b.ToTable("ReturnDetails", (string)null);
+                    b.ToTable("ReturnDetails");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Staff", b =>
@@ -557,7 +557,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("AccountID");
 
-                    b.ToTable("Staffs", (string)null);
+                    b.ToTable("Staffs");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.SupplierReport", b =>
@@ -594,7 +594,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("SupplierReports", (string)null);
+                    b.ToTable("SupplierReports");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Vourcher", b =>
@@ -610,8 +610,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("DiscountAmount")
-                        .HasColumnType(null);
+                    b.Property<double>("DiscountAmount")
+                        .HasColumnType("float");
 
                     b.Property<int>("DiscountType")
                         .HasColumnType("int");
@@ -625,8 +625,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<int?>("MaxUsageLimit")
                         .HasColumnType("int");
 
-                    b.Property<decimal?>("MinOrderAmount")
-                        .HasColumnType(null);
+                    b.Property<double?>("MinOrderAmount")
+                        .HasColumnType("float");
 
                     b.Property<Guid?>("SupplierID")
                         .HasColumnType("uniqueidentifier");
@@ -647,7 +647,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("VourcherID");
 
-                    b.ToTable("Vourchers", (string)null);
+                    b.ToTable("Vourchers");
                 });
 
             modelBuilder.Entity("Contract", b =>
@@ -677,7 +677,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("OrderID");
 
-                    b.ToTable("Contracts", (string)null);
+                    b.ToTable("Contracts");
                 });
 
             modelBuilder.Entity("Member", b =>
@@ -743,7 +743,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("AccountID");
 
-                    b.ToTable("Members", (string)null);
+                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -927,8 +927,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<int>("OrderStatus")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("TotalAmount")
-                        .HasColumnType(null);
+                    b.Property<double>("TotalAmount")
+                        .HasColumnType("float");
 
                     b.HasKey("OrderHistoryID");
 
@@ -937,7 +937,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("OrderID");
 
-                    b.ToTable("OrderHistory", (string)null);
+                    b.ToTable("OrderHistory");
                 });
 
             modelBuilder.Entity("Product", b =>
@@ -955,8 +955,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("Price")
-                        .HasColumnType(null);
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
 
                     b.Property<string>("ProductDescription")
                         .HasColumnType("nvarchar(max)");
@@ -969,8 +969,12 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("Rating")
-                        .HasColumnType(null);
+                    b.Property<double>("Rating")
+                        .HasColumnType("float");
+
+                    b.Property<string>("SerialNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -987,7 +991,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Supplier", b =>
@@ -996,8 +1000,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("AccountBalance")
-                        .HasColumnType(null);
+                    b.Property<double>("AccountBalance")
+                        .HasColumnType("float");
 
                     b.Property<string>("AccountID")
                         .HasColumnType("nvarchar(450)");
@@ -1043,7 +1047,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("VourcherID");
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("SupplierRequest", b =>
@@ -1075,7 +1079,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("SupplierRequests", (string)null);
+                    b.ToTable("SupplierRequests");
                 });
 
             modelBuilder.Entity("Transaction", b =>
@@ -1084,8 +1088,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("Amount")
-                        .HasColumnType(null);
+                    b.Property<double>("Amount")
+                        .HasColumnType("float");
 
                     b.Property<Guid>("BankId")
                         .HasColumnType("uniqueidentifier");
@@ -1129,7 +1133,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.HasIndex("OrderID")
                         .IsUnique();
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.BankInformation", b =>

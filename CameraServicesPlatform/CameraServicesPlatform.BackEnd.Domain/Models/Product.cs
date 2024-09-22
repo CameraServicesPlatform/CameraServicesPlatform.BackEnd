@@ -7,9 +7,10 @@ public class Product
 {
     [Key]
     public Guid ProductID { get; set; }
-    public int SerialNumber { get; set; }
+    public string SerialNumber { get; set; }
 
     public Guid SupplierID { get; set; }
+
 
     [ForeignKey(nameof(SupplierID))]
     public Supplier? Supplier { get; set; }

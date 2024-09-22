@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.DAO.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    partial class CameraServicesPlatformDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240922073638_AddSerialNumberToProducts")]
+    partial class AddSerialNumberToProducts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -162,7 +165,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("MemberId");
 
-                    b.ToTable("BankInformation", (string)null);
+                    b.ToTable("BankInformation");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Category", b =>
@@ -182,7 +185,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("CategoryID");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.DeliveriesMethod", b =>
@@ -209,7 +212,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("DeliveriesMethodID");
 
-                    b.ToTable("DeliveriesMethod", (string)null);
+                    b.ToTable("DeliveriesMethod");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Order", b =>
@@ -277,7 +280,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.OrderDetail", b =>
@@ -316,7 +319,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("OrderDetails", (string)null);
+                    b.ToTable("OrderDetails");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Policy", b =>
@@ -343,7 +346,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("PolicyID");
 
-                    b.ToTable("Policies", (string)null);
+                    b.ToTable("Policies");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductImage", b =>
@@ -364,7 +367,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("ProductImages", (string)null);
+                    b.ToTable("ProductImages");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductReport", b =>
@@ -411,7 +414,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("ProductReports", (string)null);
+                    b.ToTable("ProductReports");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductSpecification", b =>
@@ -435,7 +438,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("ProductSpecifications", (string)null);
+                    b.ToTable("ProductSpecifications");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Rating", b =>
@@ -467,7 +470,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("ProductID");
 
-                    b.ToTable("Ratings", (string)null);
+                    b.ToTable("Ratings");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Report", b =>
@@ -500,7 +503,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("AccountId1");
 
-                    b.ToTable("Reports", (string)null);
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ReturnDetail", b =>
@@ -532,7 +535,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("OrderID");
 
-                    b.ToTable("ReturnDetails", (string)null);
+                    b.ToTable("ReturnDetails");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Staff", b =>
@@ -576,7 +579,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("AccountID");
 
-                    b.ToTable("Staffs", (string)null);
+                    b.ToTable("Staffs");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.SupplierReport", b =>
@@ -613,7 +616,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("SupplierReports", (string)null);
+                    b.ToTable("SupplierReports");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Vourcher", b =>
@@ -666,7 +669,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("VourcherID");
 
-                    b.ToTable("Vourchers", (string)null);
+                    b.ToTable("Vourchers");
                 });
 
             modelBuilder.Entity("Contract", b =>
@@ -696,7 +699,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("OrderID");
 
-                    b.ToTable("Contracts", (string)null);
+                    b.ToTable("Contracts");
                 });
 
             modelBuilder.Entity("Member", b =>
@@ -718,7 +721,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("AccountID");
 
-                    b.ToTable("Members", (string)null);
+                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -912,7 +915,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("OrderID");
 
-                    b.ToTable("OrderHistory", (string)null);
+                    b.ToTable("OrderHistory");
                 });
 
             modelBuilder.Entity("Product", b =>
@@ -967,7 +970,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Supplier", b =>
@@ -1026,7 +1029,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("VourcherID");
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("SupplierRequest", b =>
@@ -1058,7 +1061,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("SupplierID");
 
-                    b.ToTable("SupplierRequests", (string)null);
+                    b.ToTable("SupplierRequests");
                 });
 
             modelBuilder.Entity("Transaction", b =>
@@ -1113,7 +1116,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.HasIndex("OrderID")
                         .IsUnique();
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.BankInformation", b =>

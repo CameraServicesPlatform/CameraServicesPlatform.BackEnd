@@ -10,5 +10,6 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
     public interface IProductService
     {
         Task<AppActionResult> GetAllProduct(int pageIndex, int pageSize);
+        Task<AppActionResult> GetProductByName(string filter, int pageIndex, int pageSize);
     }
 }

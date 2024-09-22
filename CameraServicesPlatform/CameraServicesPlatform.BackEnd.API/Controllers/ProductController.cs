@@ -22,5 +22,17 @@ public class ProductController : ControllerBase
     {
         return await _productService.GetAllProduct(pageIndex, pageSize);
     }
+
+    [HttpGet("get-product-by-name")]
+    public async Task<AppActionResult> GetProductByName(string filter, int pageIndex = 1, int pageSize = 10)
+    {
+        return await _productService.GetProductByName(filter, pageIndex, pageSize);
+    }
+
+    [HttpPost("create-product")]
+    public async Task<AppActionResult> CreateProduct(string filter, int pageIndex = 1, int pageSize = 10)
+    {
+        return await _productService.GetProductByName(filter, pageIndex, pageSize);
+    }
 }
 

@@ -7,8 +7,10 @@ public class Product
 {
     [Key]
     public Guid ProductID { get; set; }
+    public string SerialNumber { get; set; }
 
     public Guid SupplierID { get; set; }
+
 
     [ForeignKey(nameof(SupplierID))]
     public Supplier? Supplier { get; set; }
@@ -38,4 +40,5 @@ public class Product
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    // Managed Foreign Key relation with Supplier via SupplierID
 }

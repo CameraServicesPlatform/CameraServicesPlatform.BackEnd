@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
@@ -14,7 +13,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public Product Product { get; set; }
 
-         [ForeignKey(nameof(Account))]
+        [ForeignKey(nameof(Account))]
         public string AccountID { get; set; }
 
         public Account Account { get; set; }

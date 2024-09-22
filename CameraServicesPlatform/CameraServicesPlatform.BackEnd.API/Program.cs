@@ -2,9 +2,7 @@ using CameraServicesPlatform.BackEnd.API.Installers;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.DAO.Data;
-using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Infrastructure.ServerHub;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.EntityFrameworkCore;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -19,7 +17,7 @@ builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
     // Other configurations...
 }));
 // Add services to the container.
- 
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -34,7 +32,7 @@ app.UseSwagger(op => op.SerializeAsV2 = false);
 app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-    options.RoutePrefix = "swagger"; 
+    options.RoutePrefix = "swagger";
 });
 
 app.UseCors(MyAllowSpecificOrigins);

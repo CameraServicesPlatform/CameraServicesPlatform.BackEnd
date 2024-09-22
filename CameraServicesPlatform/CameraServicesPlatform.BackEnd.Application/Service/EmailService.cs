@@ -1,10 +1,8 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.ConfigurationModel;
 using CameraServicesPlatform.BackEnd.Common.Utils;
-using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-using System.Net.Mail;
 
 
 namespace CameraServicesPlatform.BackEnd.Application.Service;

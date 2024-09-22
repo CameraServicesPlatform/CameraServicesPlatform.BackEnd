@@ -10,6 +10,7 @@ using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Identity;
 using Newtonsoft.Json;
 using Utility = CameraServicesPlatform.BackEnd.Common.Utils.Utility;
@@ -50,6 +51,62 @@ public class AccountService : GenericBackendService, IAccountService
         _mapper = mapper;
     }
 
+    public async Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle)
+    {
+        var result = new AppActionResult();
+        try
+        {
+            // ... existing code ...
+
+            bool memberAdded = await AddMemberInformation(user);
+            if (!memberAdded)
+            {
+                result = BuildAppActionResultError(result, $"Tạo thông tin thành viên không thành công. Vui lòng kiểm tra thông tin.");
+            }
+        }
+        catch (Exception ex)
+        {
+            result = BuildAppActionResultError(result, $"Lỗi: {ex.Message}");
+        }
+
+        return result;
+    }
+
+    private async Task<bool> AddMemberInformation(Account user)
+    {
+        bool isSuccessful = false;
+        try
+        {
+            var member = new Member
+            {
+                MemberID = Guid.NewGuid(),
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Address = "",
+                Dob = DateTime.MinValue,
+                AccountID = user.Id,
+                IsAdult = true,
+                IsVerfiedPhoneNumber = true,
+                IsVerifiedEmail = true,
+                Gender = user.Gender,
+                Money = 0
+            };
+
+            var memberRepository = Resolve<IRepository<Member>>();
+            await memberRepository!.Insert(member);
+            await _unitOfWork.SaveChangesAsync();
+            isSuccessful = true; // Set to true after successful insertion
+        }
+        catch (Exception ex)
+        {
+            // Log the error message for debugging
+            Console.WriteLine($"Error adding member: {ex.Message}");
+            isSuccessful = false;
+        }
+        return isSuccessful;
+    }
 
 
 
@@ -138,96 +195,7 @@ public class AccountService : GenericBackendService, IAccountService
         return result;
     }
 
-    public async Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle)
-    {
-        var result = new AppActionResult();
-        try
-        {
-            if (await _accountRepository.GetByExpression(r => r!.UserName == signUpRequest.Email) != null)
-                result = BuildAppActionResultError(result, "Email hoặc username không tồn tại!");
-
-            if (!BuildAppActionResultIsError(result))
-            {
-                var emailService = Resolve<IEmailService>();
-                var verifyCode = string.Empty;
-                if (!isGoogle) verifyCode = Guid.NewGuid().ToString("N").Substring(0, 6);
-
-                var user = new Account
-                {
-                    Email = signUpRequest.Email,
-                    UserName = signUpRequest.Email,
-                    FirstName = signUpRequest.FirstName,
-                    LastName = signUpRequest.LastName,
-                    PhoneNumber = signUpRequest.PhoneNumber,
-                    Gender = signUpRequest.Gender,
-                    VerifyCode = verifyCode,
-                    IsVerified = isGoogle ? true : false
-                };
-                var resultCreateUser = await _userManager.CreateAsync(user, signUpRequest.Password);
-                if (resultCreateUser.Succeeded)
-                {
-                    result.Result = user;
-                    if (!isGoogle)
-                        emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
-                            TemplateMappingHelper.GetTemplateOTPEmail(
-                                TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
-                                user.FirstName));
-                }
-                else
-                {
-                    result = BuildAppActionResultError(result, $"Tạo tài khoản không thành công");
-                }
-
-                var resultCreateRole = await _userManager.AddToRoleAsync(user, "CUSTOMER");
-                if (!resultCreateRole.Succeeded) result = BuildAppActionResultError(result, $"Cấp quyền khách hàng không thành công");
-                bool customerAdded = await AddMemberInformation(user);
-                if (!customerAdded)
-                {
-                    result = BuildAppActionResultError(result, $"Tạo thông tin khách hàng không thành công");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            result = BuildAppActionResultError(result, ex.Message);
-        }
-
-        return result;
-    }
-
-    private async Task<bool> AddMemberInformation(Account user)
-    {
-        bool isSuccessful = false;
-        try
-        {
-            var member = new Member
-            {
-                MemberID = Guid.NewGuid(),
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Address = "",
-                Dob = DateTime.MinValue,
-                AccountID = user.Id,
-                IsAdult = true,
-                IsVerfiedPhoneNumber = true,
-                IsVerifiedEmail = true,
-                Gender = user.Gender,
-                Money = 0
-
-            };
-            var memberRepository = Resolve<IRepository<Member>>();
-            await memberRepository!.Insert(member);
-            await _unitOfWork.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            isSuccessful = false;
-        }
-        return isSuccessful;
-    }
-
+    
     public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO accountRequest)
     {
         var result = new AppActionResult();

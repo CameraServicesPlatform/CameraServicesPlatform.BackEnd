@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CameraServicesPlatform.BackEnd.Domain.Enum
+﻿namespace CameraServicesPlatform.BackEnd.Domain.Enum
 {
     public enum ApplicableObject
     {
-        System, 
+        System,
         Member,
         Supllier,
     }

@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CameraServicesPlatform.BackEnd.Domain.Enum;
-    public enum VNPAYTransactionStatus
-    {
-        Success,
-        Failed,
-        Pending
-    }
+﻿namespace CameraServicesPlatform.BackEnd.Domain.Enum;
+public enum VNPAYTransactionStatus
+{
+    Success,
+    Failed,
+    Pending
+}
 

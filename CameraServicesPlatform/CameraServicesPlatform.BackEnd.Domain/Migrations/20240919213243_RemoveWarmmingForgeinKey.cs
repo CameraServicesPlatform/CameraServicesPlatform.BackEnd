@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -418,7 +417,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     HistoryTransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Price = table.Column<decimal>( nullable: false),
+                    Price = table.Column<decimal>(nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     TransactionDescription = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
                 },
@@ -443,7 +442,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Image = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    PaymentAmount = table.Column<decimal>( nullable: false),
+                    PaymentAmount = table.Column<decimal>(nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PaymentDetails = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PaymentMethod = table.Column<int>(type: "int", nullable: false),
@@ -479,9 +478,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     RentalPriceID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PricePerDay = table.Column<decimal>( nullable: false),
-                    PricePerMonth = table.Column<decimal>( nullable: true),
-                    PricePerWeek = table.Column<decimal>( nullable: true),
+                    PricePerDay = table.Column<decimal>(nullable: false),
+                    PricePerMonth = table.Column<decimal>(nullable: true),
+                    PricePerWeek = table.Column<decimal>(nullable: true),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>

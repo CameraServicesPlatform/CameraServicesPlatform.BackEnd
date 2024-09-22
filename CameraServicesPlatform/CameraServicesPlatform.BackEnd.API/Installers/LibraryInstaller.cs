@@ -2,8 +2,8 @@
 using CameraServicesPlatform.BackEnd.Infrastructure.Mapping;
 using DinkToPdf;
 using DinkToPdf.Contracts;
- using OfficeOpenXml;
- 
+using OfficeOpenXml;
+
 namespace CameraServicesPlatform.BackEnd.API.Installers;
 
 public class LibraryInstaller : IInstaller

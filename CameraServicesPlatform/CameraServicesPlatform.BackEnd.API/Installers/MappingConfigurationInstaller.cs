@@ -21,7 +21,7 @@ public class MappingConfigurationInstaller : IInstaller
         var firebaseAdminSdkConfiguration = new FirebaseAdminSDK();
         configuration.GetSection("FirebaseAdminSDK").Bind(firebaseAdminSdkConfiguration);
         services.AddSingleton(firebaseAdminSdkConfiguration);
-         
+
         var vnPayConfiguration = new VnPayConfiguration();
         configuration.GetSection("Vnpay").Bind(vnPayConfiguration);
         services.AddSingleton(vnPayConfiguration);

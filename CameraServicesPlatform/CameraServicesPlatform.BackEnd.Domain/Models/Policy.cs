@@ -1,7 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
@@ -18,6 +16,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime EffectiveDate { get; set; }
         public DateTime Value { get; set; }
 
-         
+
     }
 }

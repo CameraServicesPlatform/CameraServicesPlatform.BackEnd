@@ -1,7 +1,6 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Configuration;
 
 namespace CameraServicesPlatform.BackEnd.API.Middlewares
 {

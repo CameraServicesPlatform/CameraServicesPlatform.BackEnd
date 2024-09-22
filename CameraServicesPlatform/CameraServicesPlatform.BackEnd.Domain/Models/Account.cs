@@ -1,8 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using Microsoft.AspNetCore.Identity;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
@@ -14,21 +11,21 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
- 
+
         public Gender Gender { get; set; }
         public bool IsDeleted { get; set; } = false;
         public bool IsVerified { get; set; } = false;
 
-        [MaxLength(255)]
+
         public string? VerifyCode { get; set; }
 
-        [MaxLength(255)]
-        public string? RefreshToken { get; set; }
-        public DateTime RefreshTokenExpiryTime { get; set; }
 
-        [MaxLength(255)]
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryTime { get; set; }
+
+
         public string? ProfileImage { get; set; }
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

@@ -1,6 +1,6 @@
 ﻿using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using RestSharp;
- 
+
 namespace CameraServicesPlatform.BackEnd.Application.Service;
 
 public class GenericBackendService

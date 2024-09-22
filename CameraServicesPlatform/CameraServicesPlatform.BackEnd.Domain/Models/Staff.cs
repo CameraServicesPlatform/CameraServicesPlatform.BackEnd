@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
@@ -10,18 +9,18 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid StaffID { get; set; }
 
         [ForeignKey(nameof(Account))]
-        public string AccountID { get; set; }   
+        public string AccountID { get; set; }
 
         public Account Account { get; set; }
 
-        [Required]
-        [MaxLength(255)]
+
+
         public string JobTitle { get; set; }
 
-        [MaxLength(255)]
+
         public string Department { get; set; }
 
-        [MaxLength(255)]
+
         public string StaffStatus { get; set; }
 
         public DateTime HireDate { get; set; }

@@ -69,29 +69,7 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
                 }
             );
 
-            //builder.Entity<Staff>()
-            //.HasOne(s => s.Account)
-            //.WithMany()
-            //.HasForeignKey(s => s.AccountID)
-            //.OnDelete(DeleteBehavior.Cascade);
 
-            //builder.Entity<Transaction>()
-            //.HasOne(t => t.Order)
-            //.WithMany()  
-            //.HasForeignKey(t => t.OrderID)
-            //.OnDelete(DeleteBehavior.NoAction);
-
-            //builder.Entity<Transaction>()
-            //    .HasOne(t => t.BankInformation)
-            //    .WithMany()   
-            //    .HasForeignKey(t => t.BankId)
-            //    .OnDelete(DeleteBehavior.NoAction);
-
-            //builder.Entity<Transaction>()
-            //    .HasOne(t => t.Member)
-            //    .WithMany()   
-            //    .HasForeignKey(t => t.MemberId)
-            //    .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

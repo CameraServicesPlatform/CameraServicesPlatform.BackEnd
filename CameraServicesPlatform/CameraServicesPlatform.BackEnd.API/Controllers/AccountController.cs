@@ -2,8 +2,8 @@
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using Microsoft.AspNetCore.Mvc;
- 
- 
+
+
 [Route("account")]
 [ApiController]
 public class AccountController : ControllerBase
@@ -22,7 +22,7 @@ public class AccountController : ControllerBase
     {
         return await _accountService.CreateAccount(request, false);
     }
-
+    //checked 
     [HttpGet("get-all-account")]
     public async Task<AppActionResult> GetAllAccount(int pageIndex = 1, int pageSize = 10)
     {
@@ -101,9 +101,9 @@ public class AccountController : ControllerBase
         return await _accountService.GoogleCallBack(accessTokenFromGoogle);
     }
 
-     
+
     [HttpPost("generate-otp")]
-    public async Task<AppActionResult> GenerateOTP([FromBody]string phoneNumber)
+    public async Task<AppActionResult> GenerateOTP([FromBody] string phoneNumber)
     {
         return await _accountService.GenerateOTP(phoneNumber);
     }

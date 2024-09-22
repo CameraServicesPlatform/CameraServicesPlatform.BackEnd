@@ -12,7 +12,7 @@ public class ProductImage
     [ForeignKey(nameof(ProductID))]
     public Product Product { get; set; }
 
-    [MaxLength(255)]
+
     public string Image { get; set; }
 }
 

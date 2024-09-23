@@ -22,9 +22,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Order> _orderRepository;
         private readonly IRepository<OrderDetail> _orderDetailRepository;
         private readonly IMapper _mapper;
-        private readonly IRepository<Account> _accountRepository;
-        private readonly IRepository<Supplier> _supplierRepository;
-        private readonly IRepository<Product> _productRepository;
         private readonly IUnitOfWork _unitOfWork;
         public OrderService(
             IRepository<Order> orderRepository,
@@ -39,9 +36,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
-            _accountRepository = accountRepository;
-            _supplierRepository = supplierRepository;
-            _productRepository = productRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -64,7 +58,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 if (createdOrder == null)
                 {
-                    throw new Exception("Order not found after creation.");
+                    throw new Exception("Không tìm thấy đơn hàng bạn vừa đặt. Hãy tạo lại đơn hàng của bạn");
                 }
 
                 var orderDetails = _mapper.Map<List<OrderDetail>>(request.OrderDetailRequests);
@@ -80,7 +74,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new Exception("Không tạo đơn hàng thành công");
             }
 
             return result;

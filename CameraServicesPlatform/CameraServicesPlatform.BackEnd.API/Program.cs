@@ -17,14 +17,7 @@ builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
     // Other configurations...
 }));
 // Add services to the container.
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(8080); // HTTP
-    options.ListenAnyIP(8081, listenOptions =>
-    {
-        listenOptions.UseHttps("/https/https-cer.pfx", "binhan");
-    });
-});
+
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

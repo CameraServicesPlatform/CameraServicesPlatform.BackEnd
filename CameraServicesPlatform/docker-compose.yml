@@ -1,51 +1,19 @@
-﻿version: '3.4'
+﻿version: '3.8'  # Specify the Docker Compose version
 
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    hostname: cameracapstone-db
-    container_name: cameracapstone
-    user: root
-    networks:
-      - demo
-    environment:
-      SA_PASSWORD: "sa@root123@"
-      ACCEPT_EULA: "Y"
-    ports:
-      - "1433:1433"
-    volumes:
-      - sqlserverdata:/var/opt/mssql/data
-      - mssql-log:/var/opt/mssql/log
-      - mssql-secrets:/var/opt/mssql/secrets
-
-  cameracapstone-be:
-    image: ${DOCKER_REGISTRY-}cameracapstone
+  camera_services:
     build:
-      context: .
-      dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile
-    container_name: cameracapstone-be
-    networks:
-      - demo
+      context: .  # Current directory
+      dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile  # Name of your Dockerfile
     ports:
-      - "3000:8080"  # HTTP
-      - "3001:8081"  # HTTPS
-      - "2602:8080"  # External access to HTTP
-      - "443:8081"   # External HTTPS port if needed
-    depends_on:
-      - sqlserver
+      - "2602:8080"
+      - "3000:8080"  # Map host port 3000 to container port 8080 (local)
+      - "8081:8081"  # Map host port 8081 to container port 8081 (optional)
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DBVPS: Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;
-      ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/https-cer.pfx"
-      ASPNETCORE_Kestrel__Certificates__Default__Password: binhan
-    volumes:
-      - /https/https-cer.pfx:/https  # Mount the certificate into the container
+      - ASPNETCORE_ENVIRONMENT=Development  # Set environment variable
+    networks:
+      - camera_network  # Use a specific network
 
 networks:
-  demo:
-    driver: bridge
-
-volumes:
-  sqlserverdata:
-  mssql-log:
-  mssql-secrets:
+  camera_network:
+    driver: bridge  # Use the bridge driver for networking

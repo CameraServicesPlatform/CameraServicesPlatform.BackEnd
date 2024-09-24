@@ -1,4 +1,4 @@
-﻿version: '3.4'
+version: '3.4'
 
 services:
   sqlserver:
@@ -27,13 +27,14 @@ services:
     networks:
       - demo
     ports:
-      - "2602:8080"  # External access to HTTP
-      - "443:8081"   # External HTTPS port if needed
+      - "3000:8080"    # Internal API access
+      - "2602:8080"    # Map container port 8080 to host port 2602
+      - "443:443"      # External access for HTTPS
     depends_on:
       - sqlserver
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DBVPS: Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;
+      ConnectionStrings__DBVPS: "Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=sa@root123@;TrustServerCertificate=True;"
 
 networks:
   demo:

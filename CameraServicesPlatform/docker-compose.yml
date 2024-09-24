@@ -34,10 +34,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DBVPS: Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;
-      ASPNETCORE_Kestrel__Certificates__Default__Path: "/https/https-cer.pfx"
-      ASPNETCORE_Kestrel__Certificates__Default__Password: binhan
     volumes:
-      - /https/https-cer.pfx:/https  # Mount the certificate into the container
 
 networks:
   demo:

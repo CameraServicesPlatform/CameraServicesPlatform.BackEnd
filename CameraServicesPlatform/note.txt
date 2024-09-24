@@ -43,3 +43,22 @@ remote:      Visit the repository settings page, https://github.com/CameraServic
  3. dotnet ef database update --startup-project ../CameraServicesPlatform.BackEnd.API
 
  nếu lỗi thì xóa database và tạo lại:  dotnet ef migrations remove
+ ------
+ db deloy 
+ services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    hostname: cameracapstone-db
+    container_name: cameracapstone
+    user: root
+    networks:
+      - demo
+    environment:
+      SA_PASSWORD: "sa@root123@"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql/data
+      - mssql-log:/var/opt/mssql/log
+      - mssql-secrets:/var/opt/mssql/secrets

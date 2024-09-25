@@ -1,0 +1,44 @@
+version: '3.4'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    hostname: cameracapstone-db
+    container_name: cameracapstone
+    user: root
+    networks:
+      - demo
+    environment:
+      SA_PASSWORD: "sa@root123@"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql/data
+      - mssql-log:/var/opt/mssql/log
+      - mssql-secrets:/var/opt/mssql/secrets
+
+  cameracapstone-be:
+    image: ${DOCKER_REGISTRY-}cameracapstone
+    build:
+      context: .  # Current directory
+      dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile  # Name of your Dockerfile
+    ports:
+      - "3000:8080"  # Map 3000 to HTTP (8080) inside the container
+      - "3001:8081"  # Map 3001 to HTTPS (8081) inside the container
+      - "2602:8080"  # For external access
+      - "443:443"    # HTTPS port if needed
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DBVPS=Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;
+  
+networks:
+  demo:
+    driver: bridge
+
+volumes:
+  sqlserverdata:
+  mssql-log:
+  mssql-secrets:

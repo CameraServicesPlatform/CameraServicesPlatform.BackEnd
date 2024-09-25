@@ -1,44 +1,42 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
     public class Vourcher
     {
         [Key]
-        [Required]
+
         public Guid VourcherID { get; set; }
 
-        [Required]
-        public Guid SupplierID { get; set; }
 
-        [Required]
+        public Guid? SupplierID { get; set; }
+
+
         [MaxLength(50)]
         public string VourcherCode { get; set; }
 
         public string Description { get; set; }
 
-        [Required]
-        public decimal DiscountAmount { get; set; }
 
-        [Required]
+        public double DiscountAmount { get; set; }
+
+
         public DiscountType DiscountType { get; set; }
 
         public int? MaxUsageLimit { get; set; }
 
         public int? UsagePerCustomer { get; set; }
 
-        public decimal? MinOrderAmount { get; set; }
+        public double? MinOrderAmount { get; set; }
 
-        [Required]
+
         public DateTime ValidFrom { get; set; }
 
-        [Required]
+
         public DateTime ExpirationDate { get; set; }
 
-        [Required]
+
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

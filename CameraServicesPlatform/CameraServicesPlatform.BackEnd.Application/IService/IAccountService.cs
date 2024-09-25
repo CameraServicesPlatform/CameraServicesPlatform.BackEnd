@@ -1,19 +1,22 @@
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
-using CameraServicesPlatform.BackEnd.Domain.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 
 namespace CameraServicesPlatform.BackEnd.Application.IService;
 
 public interface IAccountService
 {
+    Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle);
+
+    //check
+    Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize);
+
+    //no check 
     Task<AppActionResult> Login(LoginRequestDTO loginRequest);
 
     public Task<AppActionResult> VerifyLoginGoogle(string email, string verifyCode);
 
-    Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle);
+
 
     Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO applicationUser);
 
@@ -21,7 +24,7 @@ public interface IAccountService
 
     Task<AppActionResult> GetAccountByUserId(string id);
 
-    Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize);
+
 
     Task<AppActionResult> GetNewToken(string refreshToken, string userId);
 
@@ -36,7 +39,7 @@ public interface IAccountService
     Task<AppActionResult> GoogleCallBack(string accessTokenFromGoogle);
 
     public Task<AppActionResult> SendEmailForActiveCode(string email);
- 
+
     public Task<AppActionResult> GetAccountsByRoleName(string roleName, int pageNumber, int pageSize);
     public Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize);
     public Task<AppActionResult> GenerateOTP(string phoneNumber);

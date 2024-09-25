@@ -9,7 +9,7 @@
 //        [Key]
 //        public Guid RoleID { get; set; }  
 
-//        [MaxLength(255)]
+//
 //        public string RoleName { get; set; }  
 
 //        public string RoleDescription { get; set; }

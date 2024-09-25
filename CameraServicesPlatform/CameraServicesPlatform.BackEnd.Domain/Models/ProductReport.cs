@@ -1,5 +1,4 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
-using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -13,12 +12,12 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid SupplierID { get; set; }
 
         [ForeignKey(nameof(SupplierID))]
-        public Supplier? Supplier { get; set; } // Made nullable
+        public Supplier? Supplier { get; set; }
 
         public Guid ProductID { get; set; }
 
         [ForeignKey(nameof(ProductID))]
-        public Product? Product { get; set; } // Made nullable
+        public Product? Product { get; set; }
 
         public StatusType StatusType { get; set; }
 
@@ -26,13 +25,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public DateTime? EndDate { get; set; }
 
-        public string? Reason { get; set; } // Made nullable
+        public string? Reason { get; set; }
 
         // Foreign key for the Account that handled this report
         [ForeignKey(nameof(Account))]
         public Guid? AccountID { get; set; }
 
-        public Account? HandledBy { get; set; } // Made nullable
+        public Account? HandledBy { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

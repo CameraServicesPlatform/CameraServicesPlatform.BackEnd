@@ -4,3 +4,61 @@ sử dụng EntityFrawork
 ---------
 18/09/2024
 Không chạy được project API với https thì delete bin and obj sau có chạy lạy 
+-------
+vps account 
+run terminal 
+ssh root@14.225.220.108
+password:  
+------------
+deloy vps
+1. ssh root@14.225.220.108
+2. nhập pasword
+3. ls - chọn CameraServicesPlatform.BackEnd
+4. cd CameraServicesPlatform.BackEnd -> ls
+5. cd CameraServicesPlatform -> ls
+6.  docker compose build
+7.  docker compose up -d
+8.  docker compose ps
+---------
+lỗi git push 
+[remote: - GITHUB PUSH PROTECTION
+remote:   —————————————————————————————————————————
+remote:     Resolve the following violations before pushing again
+remote:
+remote:     - Push cannot contain secrets
+remote:
+remote:
+remote:      (?) Learn how to resolve a blocked push
+remote:      https://docs.github.com/code-security/secret-scanning/working-with-secret-scanning-and-push-protection/working-with-push-protection-from-the-command-line#resolving-a-blocked-push
+remote:
+remote:      (?) This repository does not have Secret Scanning enabled, but is eligible. Enable Secret Scanning to view and manage detected secrets.
+remote:      Visit the repository settings page, https://github.com/CameraServicesPlatform/CameraServicesPlatform.BackEnd/settings/security_analysis]
+ 
+ copply open link nayg chọn access https://github.com/CameraServicesPlatform/CameraServicesPlatform.BackEnd/security/secret-scanning/unblock-secret/2mOOPRdWznxHfRrhwNn7WhhoLyi
+
+ ------------------
+ update model - database
+ 1. cd CameraServicesPlatform.BackEnd.Domain
+ 2. dotnet ef migrations add [nameupdatedatabase] --startup-project ../CameraServicesPlatform.BackEnd.API
+ 3. dotnet ef database update --startup-project ../CameraServicesPlatform.BackEnd.API
+
+ nếu lỗi thì xóa database và tạo lại:  dotnet ef migrations remove
+ ------
+ db deloy 
+ services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    hostname: cameracapstone-db
+    container_name: cameracapstone
+    user: root
+    networks:
+      - demo
+    environment:
+      SA_PASSWORD: "sa@root123@"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql/data
+      - mssql-log:/var/opt/mssql/log
+      - mssql-secrets:/var/opt/mssql/secrets

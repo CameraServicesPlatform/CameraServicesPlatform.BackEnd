@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
@@ -8,13 +7,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid Id { get; set; }
 
-        [MaxLength(255)]  
+
         public string Name { get; set; } = null!;
 
-        [MaxLength(255)] 
+
         public string PreValue { get; set; } = null!;
 
-        [MaxLength(255)] 
+
         public string ActiveValue { get; set; } = null!;
 
         public DateTime ActiveDate { get; set; }

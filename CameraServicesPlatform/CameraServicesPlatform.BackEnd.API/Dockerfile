@@ -2,7 +2,7 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-Acount app
+USER app
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -13,6 +13,10 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["CameraServicesPlatform.BackEnd.API/CameraServicesPlatform.BackEnd.API.csproj", "CameraServicesPlatform.BackEnd.API/"]
+COPY ["CameraServicesPlatform.BackEnd.Application/CameraServicesPlatform.BackEnd.Application.csproj", "CameraServicesPlatform.BackEnd.Application/"]
+COPY ["CameraServicesPlatform.BackEnd.Common/CameraServicesPlatform.BackEnd.Common.csproj", "CameraServicesPlatform.BackEnd.Common/"]
+COPY ["CameraServicesPlatform.BackEnd.Domain/CameraServicesPlatform.BackEnd.Domain.csproj", "CameraServicesPlatform.BackEnd.Domain/"]
+COPY ["CameraServicesPlatform.BackEnd.Infrastructure/CameraServicesPlatform.BackEnd.Infrastructure.csproj", "CameraServicesPlatform.BackEnd.Infrastructure/"]
 RUN dotnet restore "./CameraServicesPlatform.BackEnd.API/CameraServicesPlatform.BackEnd.API.csproj"
 COPY . .
 WORKDIR "/src/CameraServicesPlatform.BackEnd.API"

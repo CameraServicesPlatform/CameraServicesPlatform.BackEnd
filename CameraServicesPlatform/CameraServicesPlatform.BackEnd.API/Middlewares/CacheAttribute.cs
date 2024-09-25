@@ -2,8 +2,8 @@
 using CameraServicesPlatform.BackEnd.Common.ConfigurationModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
- using System.Text;
- 
+using System.Text;
+
 
 namespace CameraServicesPlatform.BackEnd.API.Middlewares;
 

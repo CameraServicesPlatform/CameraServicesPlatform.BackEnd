@@ -1,13 +1,8 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
-using Newtonsoft.Json.Serialization;
+﻿using CameraServicesPlatform.BackEnd.Application.IService;
+using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CameraServicesPlatform.BackEnd.Application.IService;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {

@@ -115,11 +115,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     VourcherCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    DiscountAmount = table.Column<decimal>( nullable: false),
+                    DiscountAmount = table.Column<decimal>(nullable: false),
                     DiscountType = table.Column<int>(type: "int", nullable: false),
                     MaxUsageLimit = table.Column<int>(type: "int", nullable: true),
                     UsagePerCustomer = table.Column<int>(type: "int", nullable: true),
-                    MinOrderAmount = table.Column<decimal>( nullable: true),
+                    MinOrderAmount = table.Column<decimal>(nullable: true),
                     ValidFrom = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -322,7 +322,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     HistoryTransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Price = table.Column<decimal>( nullable: false),
+                    Price = table.Column<decimal>(nullable: false),
                     TransactionDescription = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -361,10 +361,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     OrderDetailsID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProductPrice = table.Column<decimal>( nullable: false),
+                    ProductPrice = table.Column<decimal>(nullable: false),
                     ProductQuality = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
-                    Discount = table.Column<decimal>( nullable: false),
-                    ProductPriceTotal = table.Column<decimal>( nullable: false),
+                    Discount = table.Column<decimal>(nullable: false),
+                    ProductPriceTotal = table.Column<decimal>(nullable: false),
                     RentalPeriod = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -380,7 +380,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     MemberID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TotalAmount = table.Column<decimal>( nullable: false),
+                    TotalAmount = table.Column<decimal>(nullable: false),
                     OrderDetails = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     OrderStatus = table.Column<int>(type: "int", nullable: false)
                 },
@@ -404,7 +404,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     MemberID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OrderStatus = table.Column<int>(type: "int", nullable: false),
-                    TotalAmount = table.Column<decimal>( nullable: false),
+                    TotalAmount = table.Column<decimal>(nullable: false),
                     OrderType = table.Column<int>(type: "int", nullable: false),
                     RentalStartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     RentalEndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -455,7 +455,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     OrderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ReturnDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Condition = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PenaltyApplied = table.Column<decimal>( nullable: false),
+                    PenaltyApplied = table.Column<decimal>(nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -477,7 +477,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     TransactionID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TransactionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Amount = table.Column<decimal>( nullable: false),
+                    Amount = table.Column<decimal>(nullable: false),
                     TransactionType = table.Column<int>(type: "int", nullable: false),
                     PaymentStatus = table.Column<int>(type: "int", nullable: false),
                     PaymentMethod = table.Column<int>(type: "int", nullable: false),
@@ -516,7 +516,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AccountID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PaymentAmount = table.Column<decimal>( nullable: false),
+                    PaymentAmount = table.Column<decimal>(nullable: false),
                     PaymentType = table.Column<int>(type: "int", nullable: false),
                     PaymentStatus = table.Column<int>(type: "int", nullable: false),
                     PaymentMethod = table.Column<int>(type: "int", nullable: false),
@@ -584,18 +584,20 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 columns: table => new
                 {
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SerialNumber = table.Column<string>(type: "nvarchar(255)", nullable: false),
                     SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CategoryID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     ProductDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Price = table.Column<decimal>( nullable: false),
+                    Price = table.Column<decimal>(nullable: false),
                     Brand = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Quality = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    Rating = table.Column<decimal>( nullable: false),
+                    Rating = table.Column<decimal>(nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RentalPriceID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+
                 },
                 constraints: table =>
                 {
@@ -662,9 +664,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     RentalPriceID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PricePerDay = table.Column<decimal>( nullable: false),
-                    PricePerWeek = table.Column<decimal>( nullable: true),
-                    PricePerMonth = table.Column<decimal>( nullable: true),
+                    PricePerDay = table.Column<decimal>(nullable: false),
+                    PricePerWeek = table.Column<decimal>(nullable: true),
+                    PricePerMonth = table.Column<decimal>(nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -782,7 +784,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     BlockedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AccountBalance = table.Column<decimal>( nullable: false),
+                    AccountBalance = table.Column<decimal>(nullable: false),
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     HistoryTransactionID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     PaymentID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),

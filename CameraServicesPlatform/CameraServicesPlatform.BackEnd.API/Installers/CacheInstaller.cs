@@ -1,9 +1,4 @@
-﻿using CameraServicesPlatform.BackEnd.Application.IService;
-using CameraServicesPlatform.BackEnd.Application.Service;
-using StackExchange.Redis;
-using StackExchange.Redis.Extensions.Core.Configuration;
-
-namespace CameraServicesPlatform.BackEnd.API.Installers;
+﻿namespace CameraServicesPlatform.BackEnd.API.Installers;
 
 public class CacheInstaller : IInstaller
 {

@@ -1,7 +1,7 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
 using CameraServicesPlatform.BackEnd.Domain.Models;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class Payment
 {
@@ -14,16 +14,16 @@ public class Payment
     public Order Order { get; set; }
 
     // Foreign key for Supplier
-    public Guid SupplierID { get; set; }  
-    public Supplier Supplier { get; set; }  
+    public Guid SupplierID { get; set; }
+    public Supplier Supplier { get; set; }
 
-     [ForeignKey(nameof(Account))]
-    public string AccountID { get; set; }  
+    [ForeignKey(nameof(Account))]
+    public string AccountID { get; set; }
     public Account Account { get; set; }
 
     public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
 
-    public decimal PaymentAmount { get; set; }
+    public double PaymentAmount { get; set; }
 
     public PaymentType PaymentType { get; set; }
 
@@ -35,7 +35,7 @@ public class Payment
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [MaxLength(255)]
+
     public string Image { get; set; }
 }
 

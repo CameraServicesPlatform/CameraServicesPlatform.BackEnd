@@ -26,5 +26,7 @@ public class ServiceInstaller : IInstaller
 
         //========18/9/2024//
         services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<IProductService, ProductService>();
+
     }
 }

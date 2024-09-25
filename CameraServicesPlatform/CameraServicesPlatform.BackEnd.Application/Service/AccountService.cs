@@ -1,27 +1,18 @@
 using AutoMapper;
-using FirebaseAdmin;
-using FirebaseAdmin.Auth;
-using Google.Apis.Auth.OAuth2;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using OfficeOpenXml;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using System.Text;
-
-using Utility = CameraServicesPlatform.BackEnd.Common.Utils.Utility;
+using CameraServicesPlatform.BackEnd.Application.IRepository;
 //using Firebase.Auth;
-using StackExchange.Redis;
 //using NPOI.SS.Formula.Functions;
 using CameraServicesPlatform.BackEnd.Application.IService;
-using CameraServicesPlatform.BackEnd.Application.IRepository;
-using CameraServicesPlatform.BackEnd.Domain.Models;
-using CameraServicesPlatform.BackEnd.Common.DTO.Response;
-using CameraServicesPlatform.BackEnd.Common.DTO.Request;
-using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Common.ConfigurationModel;
+using CameraServicesPlatform.BackEnd.Common.DTO.Request;
+using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Common.Utils;
+using CameraServicesPlatform.BackEnd.Domain.Models;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.Identity;
+using Newtonsoft.Json;
+using Utility = CameraServicesPlatform.BackEnd.Common.Utils.Utility;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service;
 
@@ -44,7 +35,7 @@ public class AccountService : GenericBackendService, IAccountService
         IEmailService emailService,
         IExcelService excelService,
         IFileService fileService,
-        IMapper mapper, 
+        IMapper mapper,
         IServiceProvider serviceProvider
     ) : base(serviceProvider)
     {
@@ -59,6 +50,40 @@ public class AccountService : GenericBackendService, IAccountService
         _mapper = mapper;
     }
 
+
+
+
+    // checked 
+    public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
+    {
+        var result = new AppActionResult();
+        var list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
+
+        var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+        var roleRepository = Resolve<IRepository<IdentityRole>>();
+        var listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
+        var listMap = _mapper.Map<List<AccountResponse>>(list.Items);
+        foreach (var item in listMap)
+        {
+            var userRole = new List<IdentityRole>();
+            var role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
+            foreach (var itemRole in role.Items!)
+            {
+                var roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
+                if (roleUser != null) userRole.Add(roleUser);
+            }
+
+            item.Role = userRole;
+        }
+
+        result.Result =
+            new PagedResult<AccountResponse>
+            { Items = listMap, TotalPages = list.TotalPages };
+        return result;
+    }
+
+
+    //--------------
     public async Task<AppActionResult> Login(LoginRequestDTO loginRequest)
     {
         var result = new AppActionResult();
@@ -134,7 +159,7 @@ public class AccountService : GenericBackendService, IAccountService
                     FirstName = signUpRequest.FirstName,
                     LastName = signUpRequest.LastName,
                     PhoneNumber = signUpRequest.PhoneNumber,
-                    //Gender = signUpRequest.Gender.,
+                    Gender = signUpRequest.Gender,
                     VerifyCode = verifyCode,
                     IsVerified = isGoogle ? true : false
                 };
@@ -153,13 +178,13 @@ public class AccountService : GenericBackendService, IAccountService
                     result = BuildAppActionResultError(result, $"Tạo tài khoản không thành công");
                 }
 
-                //var resultCreateRole = await _userManager.AddToRoleAsync(user, "CUSTOMER");
-                //if (!resultCreateRole.Succeeded) result = BuildAppActionResultError(result, $"Cấp quyền khách hàng không thành công");
-                //bool customerAdded = await AddCustomerInformation(user);
-                //if (!customerAdded)
-                //{
-                //    result = BuildAppActionResultError(result, $"Tạo thông tin khách hàng không thành công");
-                //}
+                var resultCreateRole = await _userManager.AddToRoleAsync(user, "CUSTOMER");
+                if (!resultCreateRole.Succeeded) result = BuildAppActionResultError(result, $"Cấp quyền khách hàng không thành công");
+                bool customerAdded = await AddMemberInformation(user);
+                if (!customerAdded)
+                {
+                    result = BuildAppActionResultError(result, $"Tạo thông tin khách hàng không thành công");
+                }
             }
         }
         catch (Exception ex)
@@ -170,27 +195,38 @@ public class AccountService : GenericBackendService, IAccountService
         return result;
     }
 
-    //private async Task<bool> AddCustomerInformation(Account user)
-    //{
-    //    bool isSuccessful = false;
-    //    try
-    //    {
-    //        var customer = new Member
-    //        {
-    //            AccountID = user.Id,
+    private async Task<bool> AddMemberInformation(Account user)
+    {
+        bool isSuccessful = false;
+        try
+        {
+            var member = new Member
+            {
+                MemberID = Guid.NewGuid(),
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Address = "",
+                Dob = DateTime.MinValue,
+                AccountID = user.Id,
+                IsAdult = true,
+                IsVerfiedPhoneNumber = true,
+                IsVerifiedEmail = true,
+                Gender = user.Gender,
+                Money = 0
 
-
-    //        };
-    //        var customerRepository = Resolve<IRepository<Member>>();
-    //        await customerRepository!.Insert(customer);
-    //        await _unitOfWork.SaveChangesAsync();
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        isSuccessful = false;
-    //    }
-    //    return isSuccessful;
-    //}
+            };
+            var memberRepository = Resolve<IRepository<Member>>();
+            await memberRepository!.Insert(member);
+            await _unitOfWork.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            isSuccessful = false;
+        }
+        return isSuccessful;
+    }
 
     public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO accountRequest)
     {
@@ -234,34 +270,6 @@ public class AccountService : GenericBackendService, IAccountService
             result = BuildAppActionResultError(result, ex.Message);
         }
 
-        return result;
-    }
-
-    public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
-    {
-        var result = new AppActionResult();
-        var list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
-
-        var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-        var roleRepository = Resolve<IRepository<IdentityRole>>();
-        var listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
-        var listMap = _mapper.Map<List<AccountResponse>>(list.Items);
-        foreach (var item in listMap)
-        {
-            var userRole = new List<IdentityRole>();
-            var role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
-            foreach (var itemRole in role.Items!)
-            {
-                var roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
-                if (roleUser != null) userRole.Add(roleUser);
-            }
-
-            item.Role = userRole;
-        }
-
-        result.Result =
-            new PagedResult<AccountResponse>
-            { Items = listMap, TotalPages = list.TotalPages };
         return result;
     }
 
@@ -502,7 +510,7 @@ public class AccountService : GenericBackendService, IAccountService
                             {
                                 Email = userEmail,
                                 FirstName = name!,
-                                Gender = true,
+                                Gender = Domain.Enum.Gender.Female,
                                 LastName = string.Empty,
                                 Password = "Google123@",
                                 PhoneNumber = string.Empty
@@ -618,7 +626,7 @@ public class AccountService : GenericBackendService, IAccountService
         return result;
     }
 
-     
+
     public async Task<AppActionResult> GetAccountsByRoleName(string roleName, int pageNumber, int pageSize)
     {
         var result = new AppActionResult();
@@ -682,15 +690,13 @@ public class AccountService : GenericBackendService, IAccountService
 
         return result;
     }
-
-
     public async Task<AppActionResult> GenerateOTP(string phoneNumber)
     {
         AppActionResult result = new AppActionResult();
         var code = Guid.NewGuid().ToString("N").Substring(0, 6);
         //var smsService = Resolve<ISmsService>();
-        //var response = await smsService!.SendMessage($"Mã xác thực tại hệ thống Camera-Service-Platform của bạn là {code}",
-        //    phoneNumber);
+        //var response = await smsService!.SendMessage($"Mã xác thực tại hệ thống Cóc Travel của bạn là {code}",
+        //phoneNumber);
 
         //if (response.IsSuccess)
         //{

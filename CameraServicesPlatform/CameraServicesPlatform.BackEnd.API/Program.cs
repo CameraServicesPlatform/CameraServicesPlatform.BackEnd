@@ -16,6 +16,8 @@ builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
         .AllowAnyHeader()
         .AllowCredentials();
 }));
+// Add services to the container.
+
 
  
 

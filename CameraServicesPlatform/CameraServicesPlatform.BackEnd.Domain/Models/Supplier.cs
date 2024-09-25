@@ -11,20 +11,15 @@ public class Supplier
     public string? AccountID { get; set; }
     public Account? Account { get; set; }
 
+    public required string SupplierName { get; set; }
 
-
-    public string SupplierName { get; set; }
-
-    public string SupplierDescription { get; set; }
-
-
-    public string SupplierAddress { get; set; }
+    public required string SupplierDescription { get; set; }
+    public required string SupplierAddress { get; set; }
 
     [MaxLength(20)]
     public string? ContactNumber { get; set; }
 
-
-    public string SupplierLogo { get; set; }
+    public required string SupplierLogo { get; set; }
 
     public string? BlockReason { get; set; }
 
@@ -33,7 +28,6 @@ public class Supplier
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
     public double AccountBalance { get; set; }
 
     public Guid? VourcherID { get; set; }
@@ -41,6 +35,5 @@ public class Supplier
     [ForeignKey(nameof(VourcherID))]
     public Vourcher? Vourcher { get; set; }
 
-    // Removed the ForeignKey and navigation property for SupplierDeliveriesMethod
-    // SupplierDeliveriesMethods are managed by the SupplierDeliveriesMethod class via SupplierID
+
 }

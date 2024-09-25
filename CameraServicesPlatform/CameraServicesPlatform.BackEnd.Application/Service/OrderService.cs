@@ -3,17 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
-using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Models;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Identity;
-using OfficeOpenXml.Packaging.Ionic.Zip;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -53,7 +43,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 var order = _mapper.Map<Order>(request);
                 order.OrderDate = DateTime.Now;
-                order.OrderStatus = 0; 
+                order.OrderStatus = 0;
 
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);

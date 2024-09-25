@@ -3,12 +3,22 @@
     "http": {
       "commandName": "Project",
       "launchBrowser": true,
-      "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5275", // URL cho môi trường phát triển local
-      "launchUrl": "swagger", // Mở Swagger khi khởi động
+      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "http://localhost:5038"
+    },
+    "https": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "dotnetRunMessages": true,
+      "applicationUrl": "https://localhost:7254;http://localhost:5038"
     },
     "IIS Express": {
       "commandName": "IISExpress",
@@ -21,21 +31,21 @@
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "http://14.225.220.108:2602/swagger", // URL cho Docker container
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
       "environmentVariables": {
-        "ASPNETCORE_HTTP_PORTS": "8080" // Cổng mà ứng dụng chạy trong Docker container
+        "ASPNETCORE_HTTPS_PORTS": "8081",
+        "ASPNETCORE_HTTP_PORTS": "8080"
       },
-      "publishAllPorts": true, // Publish tất cả các cổng
-      "useSSL": true // Sử dụng SSL trong Docker container nếu được cấu hình
-    }
+      "publishAllPorts": true
+     }
   },
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:43731",
-      "sslPort": 44380
+      "applicationUrl": "http://localhost:10237",
+      "sslPort": 44313
     }
   }
 }

@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Common.DTO.Request;
+
 using CameraServicesPlatform.BackEnd.Domain.Models;
+
 
 
 namespace CameraServicesPlatform.BackEnd.Infrastructure.Mapping;
@@ -26,9 +29,13 @@ public class MappingConfig
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
             .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt));
 
+            ///Mapper Order
+            config.CreateMap<CreateOrderBuyRequest, Order>();
+            ///Mapper OrderDetail
+            config.CreateMap<OrderDetailRequest, OrderDetail>();
         });
         // Trong class MappingConfig
-
+        
         return mappingConfig;
     }
 }

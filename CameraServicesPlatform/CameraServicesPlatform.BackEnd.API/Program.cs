@@ -25,6 +25,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InstallerServicesInAssembly(builder.Configuration);
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 var app = builder.Build();
 

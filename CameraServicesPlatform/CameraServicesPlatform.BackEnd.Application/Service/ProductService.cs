@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -28,6 +29,51 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+
+        public async Task<AppActionResult> CreateProduct(ProductResponseDto productResponse)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                // Resolving the repository for Product
+                var listProduct = Resolve<IRepository<Product>>();
+
+                // Creating a new Product object
+                Product product = new Product()
+                {
+                    ProductID = Guid.NewGuid(), // Generates a new GUID for the product
+                    SerialNumber = productResponse.SerialNumber,
+                    SupplierID = productResponse.SupplierID,
+                    CategoryID = productResponse.CategoryID,
+                    ProductName = productResponse.ProductName,
+                    ProductDescription = productResponse.ProductDescription,
+                    Price = productResponse.Price,
+                    Brand = productResponse.Brand,
+                    Quality = "moi", // Static value for now, you might want to adjust this
+                    Status = productResponse.Status,
+                    Rating = 0, // Initial rating set to 0
+                    CreatedAt = DateTime.Now, // Set the current time
+                    UpdatedAt = DateTime.Now // Set the current time
+                };
+
+                // Insert product into repository asynchronously
+                await listProduct.Insert(product);
+
+                // Assign result and mark as success
+                result.Result = product;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                // Handle errors and return error response
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result; // Return the result object
+        }
+
+
+
         public async Task<AppActionResult> GetAllProduct(int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
@@ -61,6 +107,44 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+
+        public async Task<AppActionResult> GetProductById(string id, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                // Convert the string ID to Guid
+                if (!Guid.TryParse(id, out Guid productId))
+                {
+                    result = BuildAppActionResultError(result, "Invalid product ID format.");
+                    return result;
+                }
+
+                // Fetch paginated result with the converted Guid
+                var pagedResult = await _repository.GetAllDataByExpression(
+                    a => a.ProductID == productId, // Use the Guid instead of string
+                    pageIndex,
+                    pageSize,
+                    orderBy: a => a.Supplier!.SupplierName, // Sorting by Supplier name
+                    isAscending: true, // Order ascending
+                    includes: new Expression<Func<Product, object>>[] // Including related entities
+                    {
+                a => a.Supplier,
+                a => a.Category
+                    }
+                );
+
+                result.Result = pagedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
 
         public async Task<AppActionResult> GetProductByName(string? productNameFilter, int pageIndex, int pageSize)
         {

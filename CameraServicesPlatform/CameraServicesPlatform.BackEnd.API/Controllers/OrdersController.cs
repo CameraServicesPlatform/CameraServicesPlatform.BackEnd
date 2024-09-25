@@ -1,8 +1,6 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using OfficeOpenXml.Packaging.Ionic.Zip;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {

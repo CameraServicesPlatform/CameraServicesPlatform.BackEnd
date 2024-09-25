@@ -2,13 +2,7 @@
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
-using System;
-using System.Collections.Generic;
-using System.Drawing.Printing;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -41,15 +35,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Creating a new Product object
                 Product product = new Product()
                 {
-                    ProductID = Guid.NewGuid(), // Generates a new GUID for the product
+                    ProductID = Guid.NewGuid(),  
                     SerialNumber = productResponse.SerialNumber,
-                    SupplierID = productResponse.SupplierID,
-                    CategoryID = productResponse.CategoryID,
+                    SupplierID = string.IsNullOrEmpty(productResponse.SupplierID) ? null : Guid.Parse(productResponse.SupplierID),
+                    CategoryID = string.IsNullOrEmpty(productResponse.CategoryID) ? null : Guid.Parse(productResponse.CategoryID),
                     ProductName = productResponse.ProductName,
                     ProductDescription = productResponse.ProductDescription,
                     Price = productResponse.Price,
                     Brand = productResponse.Brand,
-                    Quality = "moi", // Static value for now, you might want to adjust this
+                    Quality = "New", // Static value for now, you might want to adjust this
                     Status = productResponse.Status,
                     Rating = 0, // Initial rating set to 0
                     CreatedAt = DateTime.Now, // Set the current time

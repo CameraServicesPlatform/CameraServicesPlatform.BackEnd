@@ -8,7 +8,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid DeliveriesMethodID { get; set; }
 
 
-        [MaxLength(100)]
+
         public string MethodName { get; set; }
 
 

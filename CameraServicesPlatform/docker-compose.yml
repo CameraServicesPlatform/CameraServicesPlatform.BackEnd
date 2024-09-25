@@ -9,10 +9,14 @@ services:
     networks:
       - demo
     environment:
-      SA_PASSWORD: "sa_root123@"
+      SA_PASSWORD: "sa@root123@"
       ACCEPT_EULA: "Y"
     ports:
+<<<<<<< HEAD
       - "1434:1433"
+=======
+      - "1433"
+>>>>>>> 681bdbd692ef62e2b11e9aa9ef09370bffaef120
     volumes:
       - sqlserverdata:/var/opt/mssql/data
       - mssql-log:/var/opt/mssql/log
@@ -29,7 +33,7 @@ services:
     ports:
       - "3000:8080"
       - "2602:8080"
-      - "443:443"
+      - "3001:8081"
     depends_on:
       - sqlserver
     environment:

@@ -1,4 +1,4 @@
-﻿version: '3.4'
+version: '3.8'  # You can specify the version if you want to
 
 services:
   sqlserver:
@@ -9,7 +9,7 @@ services:
     networks:
       - demo
     environment:
-      SA_PASSWORD: "sa@root123@"
+      SA_PASSWORD: "sa_root123@"
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
@@ -18,8 +18,8 @@ services:
       - mssql-log:/var/opt/mssql/log
       - mssql-secrets:/var/opt/mssql/secrets
 
-  cameracapstone-be:
-    image: ${DOCKER_REGISTRY-}cameracapstone
+  cameraservicesplatform.backend.api:
+    image: ${DOCKER_REGISTRY-}cameraservicesplatformbackendapi
     build:
       context: .
       dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile
@@ -27,14 +27,14 @@ services:
     networks:
       - demo
     ports:
-      - "2602:8080"
       - "3000:8080"
+      - "2602:8080"
+      - "443:443"
     depends_on:
-      sqlserver:
-        condition: service_started
+      - sqlserver
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DBVPS: "Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;"
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DBVPS=Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=sa@root123@;TrustServerCertificate=True;
 
 networks:
   demo:
@@ -44,3 +44,4 @@ volumes:
   sqlserverdata:
   mssql-log:
   mssql-secrets:
+

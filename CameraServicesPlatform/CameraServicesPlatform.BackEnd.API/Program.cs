@@ -3,12 +3,14 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.DAO.Data;
 using CameraServicesPlatform.BackEnd.Infrastructure.ServerHub;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
-var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
 // CORS policy
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
 {
     builder.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175")
@@ -16,44 +18,58 @@ builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
         .AllowAnyHeader()
         .AllowCredentials();
 }));
-// Add services to the container.
 
-
-
-
+// Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.InstallerServicesInAssembly(builder.Configuration);
+builder.Services.InstallerServicesInAssembly(builder.Configuration); // Assuming this installs your services
 builder.Services.AddScoped<IOrderService, OrderService>();
+
+// Configure DbContext with SQL Server (update your connection string as needed)
+builder.Services.AddDbContext<CameraServicesPlatformDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionVPS")));
+
+ 
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
-app.UseSwagger(op => op.SerializeAsV2 = false);
-app.UseSwaggerUI(options =>
+if (app.Environment.IsDevelopment())
 {
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-    options.RoutePrefix = "swagger";
-});
+    app.UseSwagger(op => op.SerializeAsV2 = false);
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = "swagger";
+    });
+}
 
+// Apply CORS policy
 app.UseCors(MyAllowSpecificOrigins);
+
+// Middleware configuration
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Map controllers
 app.MapControllers();
 app.MapHub<NotificationHub>(nameof(NotificationHub));
+
+// Apply database migrations on startup
 ApplyMigration();
+
 app.Run();
 
 void ApplyMigration()
 {
     using (var scope = app.Services.CreateScope())
     {
-        var _db = scope.ServiceProvider.GetRequiredService<CameraServicesPlatformDbContext>();
-        if (_db.Database.GetPendingMigrations().Any())
+        var db = scope.ServiceProvider.GetRequiredService<CameraServicesPlatformDbContext>();
+        if (db.Database.GetPendingMigrations().Any())
         {
-            _db.Database.Migrate();
+            db.Database.Migrate();
         }
     }
 }

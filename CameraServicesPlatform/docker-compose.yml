@@ -1,39 +1,46 @@
-version: "3.8"
+﻿version: '3.4'
 
 services:
-  # Database Service
-  cameraservicesplatform.backend.database:
+  sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: cameraservicesplatform.backend.db
+    hostname: sqlserver-db
+    container_name: sqlserver
+    user: root
+    networks:
+      - demo
     environment:
+      SA_PASSWORD: "sa@root123@"
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "Root1234!"  # Strong SA password
+    ports:
+      - "1433"
     volumes:
-      - cameraservicesplatform.backend.db:/var/opt/mssql  # Use a named volume for persistence
-    ports:
-      - "1433:1433"  # Expose SQL Server default port
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Root1234!' -Q 'SELECT 1'"]
-      interval: 10s
-      retries: 5
-      start_period: 40s
-      timeout: 10s
+      - sqlserverdata:/var/opt/mssql/data
+      - mssql-log:/var/opt/mssql/log
+      - mssql-secrets:/var/opt/mssql/secrets
 
-  # API Service
-  cameraservicesplatform.backend.api:
+  cameraservicesplatform-be:
+    image: ${DOCKER_REGISTRY-}cameraservicesplatform-be
     build:
-      context: .  # Path to the API project folder
-      dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile  # Specify Dockerfile name
-    depends_on:
-      cameraservicesplatform.backend.database:
-        condition: service_healthy  # Wait for the database to be healthy
-    environment:
-      ASPNETCORE_ENVIRONMENT: "Production"
-      ConnectionStrings__DefaultConnection: "Server=cameraservicesplatform.backend.database,1433;Database=YourDatabaseName;User Id=sa;Password=Root1234!"  # Correct connection string
+      context: .
+      dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile
+    container_name: cameraservicesplatform-be
+    networks:
+      - demo
     ports:
-      - "2602:8080"  # Map the HTTP port to 2602 on the VPS
-    restart: always  # Restart the container on failure
+      - "2602:8080"   # Ánh xạ cổng 8080 trong container sang cổng 32795 trên máy chủ
+      - "443:443"      # Cổng HTTPS, nếu cần
+    depends_on:
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DBVPS=Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;
+       
+  
+networks:
+  demo:
+    driver: bridge
 
 volumes:
-  cameraservicesplatform.backend.db:  # Use named volumes for persistence
-
+  sqlserverdata:
+  mssql-log:
+  mssql-secrets:

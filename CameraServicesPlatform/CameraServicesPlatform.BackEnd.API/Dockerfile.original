@@ -6,6 +6,9 @@ USER app
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
+# Set environment variable to use HTTP
+ENV ASPNETCORE_URLS=http://+:8080
+
 
 
 # This stage is used to build the service project

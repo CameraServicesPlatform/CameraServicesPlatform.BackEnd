@@ -4,13 +4,7 @@
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
       "serviceActions": {
-        "cameraservicesplatform.backend.api": "StartDebugging" // Action to start debugging
-      },
-      "dockerComposeFile": "docker-compose.yml", // Specify the path to your Docker Compose file
-      "project": "CameraServicesPlatform.BackEnd", // Your project name
-      "launchBrowser": true, // Optional: Open the browser when starting
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development" // Set environment variables as needed
+        "cameraservicesplatform.backend.api": "StartDebugging"
       }
     }
   }

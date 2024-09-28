@@ -62,3 +62,18 @@ remote:      Visit the repository settings page, https://github.com/CameraServic
       - sqlserverdata:/var/opt/mssql/data
       - mssql-log:/var/opt/mssql/log
       - mssql-secrets:/var/opt/mssql/secrets
+      --------------------------
+      Source Code Structure: 
+      /CameraServicesPlatform
+├── CameraServicesPlatform.BackEnd.API
+│   └── Dockerfile
+├── CameraServicesPlatform.BackEnd.Application
+│   └── CameraServicesPlatform.BackEnd.Application.csproj
+├── CameraServicesPlatform.BackEnd.Common
+│   └── CameraServicesPlatform.BackEnd.Common.csproj
+├── CameraServicesPlatform.BackEnd.Domain
+│   └── CameraServicesPlatform.BackEnd.Domain.csproj
+├── CameraServicesPlatform.BackEnd.Infrastructure
+│   └── CameraServicesPlatform.BackEnd.Infrastructure.csproj
+├── docker-compose.yml
+

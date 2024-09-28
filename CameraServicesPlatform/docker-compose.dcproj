@@ -4,7 +4,7 @@
     <ProjectVersion>2.1</ProjectVersion>
     <DockerTargetOS>Linux</DockerTargetOS>
     <DockerPublishLocally>False</DockerPublishLocally>
-    <ProjectGuid>126a5798-482c-4727-87f7-227ef3abbd2c</ProjectGuid>
+    <ProjectGuid>f35cd9b5-ca49-45fe-9bdb-80376db0ea43</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
     <DockerServiceName>cameraservicesplatform.backend.api</DockerServiceName>

@@ -9,13 +9,14 @@ using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
-    public class ProductResponseDto
+    public class ProductUpdateResponseDto
     {
+        public Guid ProductID { get; set; }
         public string SerialNumber { get; set; }
 
-        public Guid SupplierID { get; set; }
+        public Guid? SupplierID { get; set; }
 
-        public Guid CategoryID { get; set; }
+        public Guid? CategoryID { get; set; }
 
         public string ProductName { get; set; }
 
@@ -26,7 +27,11 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 
         public string? Brand { get; set; }
 
+        public string Quality { get; set; }
+
         public ProductStatusEnum Status { get; set; }
+
+        public double Rating { get; set; }
 
     }
 }

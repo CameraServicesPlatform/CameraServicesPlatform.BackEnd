@@ -45,25 +45,25 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
             builder.Entity<IdentityRole>().HasData(
                 new IdentityRole
                 {
-                    Id = "a12b3c4d-56ef-78gh-90ij-klmnopqrstuv",
+                    Id = "1cf2de31-b0d8-4447-8f2f-c41df905a3a5",
                     Name = "ADMIN",
                     NormalizedName = "ADMIN"
                 },
                 new IdentityRole
                 {
-                    Id = "b21c4d5e-67fg-89hi-01jk-lmnopqrstuv",
+                    Id = "e64b36a7-ed67-47d2-b92e-d2f6caa3eda9",
                     Name = "MEMBER",
                     NormalizedName = "Member"
                 },
                 new IdentityRole
                 {
-                    Id = "c32d5e6f-78gh-90ij-12kl-mnopqrstuv",
+                    Id = "086b7a13-79af-4610-851d-204d9d84b865",
                     Name = "STAFF",
                     NormalizedName = "Staff"
                 },
                 new IdentityRole
                 {
-                    Id = "d43e6f7g-89hi-01jk-23lm-nopqrstuv",
+                    Id = "74bd6d3a-1119-449b-9743-3956d74e7575",
                     Name = "Supplier",
                     NormalizedName = "Supplier"
                 }

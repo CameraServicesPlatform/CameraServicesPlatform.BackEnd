@@ -27,6 +27,8 @@ public class AccountService : GenericBackendService, IAccountService
     private readonly IEmailService _emailService;
     private readonly IExcelService _excelService;
     private readonly IFileService _fileService;
+    private readonly BackEndLogger _logger;  
+
     public AccountService(
         IRepository<Account> accountRepository,
         IUnitOfWork unitOfWork,
@@ -36,8 +38,9 @@ public class AccountService : GenericBackendService, IAccountService
         IExcelService excelService,
         IFileService fileService,
         IMapper mapper,
+         BackEndLogger logger,
         IServiceProvider serviceProvider
-    ) : base(serviceProvider)
+     ) : base(serviceProvider)
     {
         _accountRepository = accountRepository;
         _unitOfWork = unitOfWork;
@@ -48,94 +51,7 @@ public class AccountService : GenericBackendService, IAccountService
         _fileService = fileService;
         _tokenDto = new TokenDTO();
         _mapper = mapper;
-    }
-
-
-
-
-    // checked 
-    public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
-    {
-        var result = new AppActionResult();
-        var list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
-
-        var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-        var roleRepository = Resolve<IRepository<IdentityRole>>();
-        var listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
-        var listMap = _mapper.Map<List<AccountResponse>>(list.Items);
-        foreach (var item in listMap)
-        {
-            var userRole = new List<IdentityRole>();
-            var role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
-            foreach (var itemRole in role.Items!)
-            {
-                var roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
-                if (roleUser != null) userRole.Add(roleUser);
-            }
-
-            item.Role = userRole;
-        }
-
-        result.Result =
-            new PagedResult<AccountResponse>
-            { Items = listMap, TotalPages = list.TotalPages };
-        return result;
-    }
-
-
-    //--------------
-    public async Task<AppActionResult> Login(LoginRequestDTO loginRequest)
-    {
-        var result = new AppActionResult();
-        try
-        {
-            var user = await _accountRepository.GetByExpression(u =>
-                u!.Email.ToLower() == loginRequest.Email.ToLower() && u.IsDeleted == false);
-            if (user == null)
-                result = BuildAppActionResultError(result, $" {loginRequest.Email} này không tồn tại trong hệ thống");
-            else if (user.IsVerified == false)
-                result = BuildAppActionResultError(result, "Tài khoản này chưa được xác thực !");
-
-            var passwordSignIn =
-                await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, false, false);
-            if (!passwordSignIn.Succeeded) result = BuildAppActionResultError(result, "Đăng nhâp thất bại");
-            if (!BuildAppActionResultIsError(result)) result = await LoginDefault(loginRequest.Email, user);
-        }
-        catch (Exception ex)
-        {
-            result = BuildAppActionResultError(result, ex.Message);
-        }
-
-        return result;
-    }
-
-    public async Task<AppActionResult> VerifyLoginGoogle(string email, string verifyCode)
-    {
-        var result = new AppActionResult();
-        try
-        {
-            var user = await _accountRepository.GetByExpression(u =>
-                u!.Email.ToLower() == email.ToLower() && u.IsDeleted == false);
-            if (user == null)
-                result = BuildAppActionResultError(result, $"Email này không tồn tại");
-            else if (user.IsVerified == false)
-                result = BuildAppActionResultError(result, "Tài khoản này chưa xác thực !");
-            else if (user.VerifyCode != verifyCode)
-                result = BuildAppActionResultError(result, "Mã xác thực sai!");
-
-            if (!BuildAppActionResultIsError(result))
-            {
-                result = await LoginDefault(email, user);
-                user!.VerifyCode = null;
-                await _unitOfWork.SaveChangesAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            result = BuildAppActionResultError(result, ex.Message);
-        }
-
-        return result;
+        _logger = logger;
     }
 
     public async Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle)
@@ -143,8 +59,9 @@ public class AccountService : GenericBackendService, IAccountService
         var result = new AppActionResult();
         try
         {
+            // Check if the email or username already exists
             if (await _accountRepository.GetByExpression(r => r!.UserName == signUpRequest.Email) != null)
-                result = BuildAppActionResultError(result, "Email hoặc username không tồn tại!");
+                result = BuildAppActionResultError(result, "Email hoặc username đã tồn tại!");
 
             if (!BuildAppActionResultIsError(result))
             {
@@ -152,6 +69,7 @@ public class AccountService : GenericBackendService, IAccountService
                 var verifyCode = string.Empty;
                 if (!isGoogle) verifyCode = Guid.NewGuid().ToString("N").Substring(0, 6);
 
+                // Create the new user
                 var user = new Account
                 {
                     Email = signUpRequest.Email,
@@ -161,29 +79,38 @@ public class AccountService : GenericBackendService, IAccountService
                     PhoneNumber = signUpRequest.PhoneNumber,
                     Gender = signUpRequest.Gender,
                     VerifyCode = verifyCode,
-                    IsVerified = isGoogle ? true : false
+                    IsVerified = isGoogle
                 };
+
                 var resultCreateUser = await _userManager.CreateAsync(user, signUpRequest.Password);
                 if (resultCreateUser.Succeeded)
                 {
                     result.Result = user;
+
+                    // Send verification email if not using Google sign-in
                     if (!isGoogle)
-                        emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+                    {
+                        await emailService.SendEmailAsync(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
                             TemplateMappingHelper.GetTemplateOTPEmail(
                                 TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
                                 user.FirstName));
+                    }
                 }
                 else
                 {
-                    result = BuildAppActionResultError(result, $"Tạo tài khoản không thành công");
+                    result = BuildAppActionResultError(result, "Tạo tài khoản không thành công");
                 }
 
-                var resultCreateRole = await _userManager.AddToRoleAsync(user, "CUSTOMER");
-                if (!resultCreateRole.Succeeded) result = BuildAppActionResultError(result, $"Cấp quyền khách hàng không thành công");
+                // Add user to 'MEMBER' role
+                var resultCreateRole = await _userManager.AddToRoleAsync(user, "MEMBER");
+                if (!resultCreateRole.Succeeded)
+                    result = BuildAppActionResultError(result, "Cấp quyền thành viên không thành công");
+
+                // Add user to MemberInformation table
                 bool customerAdded = await AddMemberInformation(user);
                 if (!customerAdded)
                 {
-                    result = BuildAppActionResultError(result, $"Tạo thông tin khách hàng không thành công");
+                    result = BuildAppActionResultError(result, "Tạo thông tin thành viên không thành công");
                 }
             }
         }
@@ -215,14 +142,17 @@ public class AccountService : GenericBackendService, IAccountService
                 IsVerifiedEmail = true,
                 Gender = user.Gender,
                 Money = 0
-
             };
+
             var memberRepository = Resolve<IRepository<Member>>();
             await memberRepository!.Insert(member);
             await _unitOfWork.SaveChangesAsync();
+
+            isSuccessful = true; // Mark success
         }
         catch (Exception ex)
         {
+            _logger.LogError($"Failed to add member information: {ex.Message}", this);
             isSuccessful = false;
         }
         return isSuccessful;
@@ -659,10 +589,9 @@ public class AccountService : GenericBackendService, IAccountService
         return result;
     }
 
-    public async Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize)
+    public async Task<AppActionResult> GetAccountsByRoleId(string Id, int pageNumber, int pageSize)
     {
         var result = new AppActionResult();
-
         try
         {
             var roleRepository = Resolve<IRepository<IdentityRole>>();
@@ -687,7 +616,6 @@ public class AccountService : GenericBackendService, IAccountService
         {
             result = BuildAppActionResultError(result, ex.Message);
         }
-
         return result;
     }
     public async Task<AppActionResult> GenerateOTP(string phoneNumber)
@@ -713,5 +641,107 @@ public class AccountService : GenericBackendService, IAccountService
 
         return result;
     }
+    // checked 
+    public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
+    {
+        var result = new AppActionResult();
+        var list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
+
+        var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+        var roleRepository = Resolve<IRepository<IdentityRole>>();
+        var listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
+        var listMap = _mapper.Map<List<AccountResponse>>(list.Items);
+        foreach (var item in listMap)
+        {
+            var userRole = new List<IdentityRole>();
+            var role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
+            foreach (var itemRole in role.Items!)
+            {
+                var roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
+                if (roleUser != null) userRole.Add(roleUser);
+            }
+
+            item.Role = userRole;
+        }
+
+        result.Result =
+            new PagedResult<AccountResponse>
+            { Items = listMap, TotalPages = list.TotalPages };
+        return result;
+    }
+
+    public async Task<AppActionResult> Login(LoginRequestDTO loginRequest)
+    {
+        var result = new AppActionResult();
+
+        try
+        {
+            // Lấy thông tin người dùng dựa trên email
+            var user = await _accountRepository.GetByExpression(u =>
+                u.Email.ToLower() == loginRequest.Email.ToLower() && !u.IsDeleted);
+
+            if (user == null)
+            {
+                result = BuildAppActionResultError(result, "Không tìm thấy người dùng.");
+                return result;
+            }
+
+            // Kiểm tra xem tài khoản đã được xác thực chưa
+            if (!user.IsVerified)
+            {
+                result = BuildAppActionResultError(result, "Tài khoản chưa được xác thực.");
+                return result;
+            }
+
+            // Xác thực mật khẩu bằng SignInManager
+            var passwordSignIn = await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, false, false);
+            if (!passwordSignIn.Succeeded)
+            {
+                result = BuildAppActionResultError(result, "Mật khẩu không hợp lệ.");
+                return result;
+            }
+
+            // Tiến hành các thao tác đăng nhập
+            result = await LoginDefault(loginRequest.Email, user);
+        }
+        catch (Exception ex)
+        {
+            result = BuildAppActionResultError(result, ex.Message);
+        }
+
+        return result;
+    }
+
+
+
+    public async Task<AppActionResult> VerifyLoginGoogle(string email, string verifyCode)
+    {
+        var result = new AppActionResult();
+        try
+        {
+            var user = await _accountRepository.GetByExpression(u =>
+                u!.Email.ToLower() == email.ToLower() && u.IsDeleted == false);
+            if (user == null)
+                result = BuildAppActionResultError(result, $"Email này không tồn tại");
+            else if (user.IsVerified == false)
+                result = BuildAppActionResultError(result, "Tài khoản này chưa xác thực !");
+            else if (user.VerifyCode != verifyCode)
+                result = BuildAppActionResultError(result, "Mã xác thực sai!");
+
+            if (!BuildAppActionResultIsError(result))
+            {
+                result = await LoginDefault(email, user);
+                user!.VerifyCode = null;
+                await _unitOfWork.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            result = BuildAppActionResultError(result, ex.Message);
+        }
+
+        return result;
+    }
 
 }
+

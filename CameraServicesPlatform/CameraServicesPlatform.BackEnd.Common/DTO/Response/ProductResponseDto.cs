@@ -1,11 +1,4 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
-using CameraServicesPlatform.BackEnd.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
@@ -13,9 +6,10 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
     {
         public string SerialNumber { get; set; }
 
-        public Guid SupplierID { get; set; }
+         public Guid SupplierID { get; set; }
 
         public Guid CategoryID { get; set; }
+ 
 
         public string ProductName { get; set; }
 

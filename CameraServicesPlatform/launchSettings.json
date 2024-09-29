@@ -4,14 +4,12 @@
       "commandName": "Project",
       "launchBrowser": true,
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5275",
-      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:5275", // URL cho môi trường phát triển local
+      "launchUrl": "swagger", // Mở Swagger khi khởi động
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
-
     },
-
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
@@ -23,13 +21,12 @@
     "Container (Dockerfile)": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+      "launchUrl": "http://14.225.220.108:2602/swagger",  
       "environmentVariables": {
-
-        "ASPNETCORE_HTTP_PORTS": "8080"
+        "ASPNETCORE_HTTP_PORTS": "8080"  
       },
-      "publishAllPorts": true,
-      "useSSL": true
+      "publishAllPorts": true, 
+      "useSSL": true  
     }
   },
   "$schema": "http://json.schemastore.org/launchsettings.json",

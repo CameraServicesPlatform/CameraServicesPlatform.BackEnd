@@ -12,15 +12,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string AccountID { get; set; }
 
         public Account Account { get; set; }
-
-
-
+ 
         public string JobTitle { get; set; }
-
-
+         
         public string Department { get; set; }
-
-
+         
         public string StaffStatus { get; set; }
 
         public DateTime HireDate { get; set; }

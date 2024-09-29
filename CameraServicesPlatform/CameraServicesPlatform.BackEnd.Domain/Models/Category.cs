@@ -8,7 +8,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid CategoryID { get; set; }
 
 
-        public string CategoryName { get; set; }
+        public required string CategoryName { get; set; }
 
 
         public string? CategoryDescription { get; set; }

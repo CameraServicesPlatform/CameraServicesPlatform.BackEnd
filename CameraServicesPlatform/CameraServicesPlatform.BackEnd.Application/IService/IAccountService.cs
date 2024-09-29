@@ -41,7 +41,7 @@ public interface IAccountService
     public Task<AppActionResult> SendEmailForActiveCode(string email);
 
     public Task<AppActionResult> GetAccountsByRoleName(string roleName, int pageNumber, int pageSize);
-    public Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize);
+    public Task<AppActionResult> GetAccountsByRoleId(string Id, int pageNumber, int pageSize);
     public Task<AppActionResult> GenerateOTP(string phoneNumber);
 
 

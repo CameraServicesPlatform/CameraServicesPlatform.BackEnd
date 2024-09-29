@@ -1,8 +1,6 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
-using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using Microsoft.AspNetCore.Mvc;
-using System.Drawing.Printing;
 
 
 [Route("product")]

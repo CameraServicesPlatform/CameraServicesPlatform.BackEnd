@@ -1,4 +1,4 @@
-version: '3.8'  # Optional but can be kept for clarity
+version: '3.8'
 
 services:
   sqlserver:
@@ -8,7 +8,7 @@ services:
     networks:
       - demo
     environment:
-      SA_PASSWORD: ${SA_PASSWORD}
+      SA_PASSWORD: "sa@root123@"
       ACCEPT_EULA: "Y"
     ports:
       - "1433"
@@ -17,16 +17,17 @@ services:
       - mssql-log:/var/opt/mssql/log
       - mssql-secrets:/var/opt/mssql/secrets
 
-  cameraservicesplatform-be:  # Use a consistent service name
-    image: ${DOCKER_REGISTRY-}cameraservicesplatformbackendapi
+  camera.api:  # Updated service name to match the image name
     build:
       context: .
       dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile
+    container_name: camera.api
+
     networks:
       - demo
     ports:
-      - "2602:8080"   # Map port 8080 in the container to port 2602 on the host
-      - "443:443"      # HTTPS port, if needed
+      - "2602:8080"
+      - "443:443"
     depends_on:
       - sqlserver
     environment:

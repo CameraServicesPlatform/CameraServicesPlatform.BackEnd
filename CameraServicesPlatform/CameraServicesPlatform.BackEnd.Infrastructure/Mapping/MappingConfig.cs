@@ -33,6 +33,9 @@ public class MappingConfig
             config.CreateMap<CreateOrderBuyRequest, Order>();
             ///Mapper OrderDetail
             config.CreateMap<OrderDetailRequest, OrderDetail>();
+            ///Mapper Rating
+            config.CreateMap<RatingRequest, Rating>();
+            config.CreateMap<Rating, RatingResponse>();
         });
         // Trong class MappingConfig
         

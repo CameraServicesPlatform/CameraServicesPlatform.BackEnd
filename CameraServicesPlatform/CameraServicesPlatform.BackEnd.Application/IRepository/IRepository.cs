@@ -1,8 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace CameraServicesPlatform.BackEnd.Application.IRepository;

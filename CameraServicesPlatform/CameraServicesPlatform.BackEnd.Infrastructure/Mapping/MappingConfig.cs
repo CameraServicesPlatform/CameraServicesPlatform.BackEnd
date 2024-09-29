@@ -11,7 +11,7 @@ public class MappingConfig
 {
     public static MapperConfiguration RegisterMap()
     {
-        var mappingConfig = new MapperConfiguration(config =>
+        MapperConfiguration mappingConfig = new(config =>
         {
             //ACCOUNT
             config.CreateMap<Account, AccountResponse>()
@@ -22,17 +22,13 @@ public class MappingConfig
             .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender))
             .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => src.IsDeleted))
             .ForMember(dest => dest.IsVerified, opt => opt.MapFrom(src => src.IsVerified))
+     .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address));
 
-            .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address));
-            
- 
-             .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address));
- 
             ///Mapper Order
-            config.CreateMap<CreateOrderBuyRequest, Order>();
+            _ = config.CreateMap<CreateOrderBuyRequest, Order>();
             ///Mapper OrderDetail
-            config.CreateMap<OrderDetailRequest, OrderDetail>();
-         });
+            _ = config.CreateMap<OrderDetailRequest, OrderDetail>();
+        });
         // Trong class MappingConfig
 
         return mappingConfig;

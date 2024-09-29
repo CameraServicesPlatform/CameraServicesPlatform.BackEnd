@@ -2,14 +2,14 @@
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
- 
 using CameraServicesPlatform.BackEnd.DAO.Data;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Printing;
 using System.Linq;
- 
 using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -42,21 +42,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 Product product = new Product()
                 {
- 
-                    ProductID = Guid.NewGuid(), 
- 
+                    ProductID = Guid.NewGuid(),
                     SerialNumber = productResponse.SerialNumber,
-                    SupplierID = string.IsNullOrEmpty(productResponse.SupplierID) ? null : Guid.Parse(productResponse.SupplierID),
-                    CategoryID = string.IsNullOrEmpty(productResponse.CategoryID) ? null : Guid.Parse(productResponse.CategoryID),
+                    SupplierID = productResponse.SupplierID,
+                    CategoryID = productResponse.CategoryID,
                     ProductName = productResponse.ProductName,
                     ProductDescription = productResponse.ProductDescription,
                     Price = productResponse.Price,
                     Brand = productResponse.Brand,
-                    Quality = "New", // Static value for now, you might want to adjust this
+                    Quality = "moi",
                     Status = productResponse.Status,
-                    Rating = 0, 
-                    CreatedAt = DateTime.Now, 
-                    UpdatedAt = DateTime.Now 
+                    Rating = 0,
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
                 };
 
                 await listProduct.Insert(product);
@@ -72,7 +70,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
 
 
-            return result; 
+            return result;
         }
 
         public async Task<AppActionResult> UpdateProduct(ProductUpdateResponseDto productResponse)
@@ -111,7 +109,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-                
+
                 result = BuildAppActionResultError(result, ex.Message);
             }
 
@@ -124,18 +122,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = null; 
+                Expression<Func<Product, bool>>? filter = null;
 
                 var pagedResult = await _repository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.Supplier!.SupplierName, 
-                    isAscending: true, 
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
                     includes: new Expression<Func<Product, object>>[]
                     {
-                a => a.Supplier, 
-                a => a.Category   
+                a => a.Supplier,
+                a => a.Category
                     }
                 );
 
@@ -162,12 +160,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var pagedResult = await _repository.GetAllDataByExpression(
-                    a => a.ProductID == productId, 
+                    a => a.ProductID == productId,
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.Supplier!.SupplierName, 
-                    isAscending: true, 
-                    includes: new Expression<Func<Product, object>>[] 
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
+                    includes: new Expression<Func<Product, object>>[]
                     {
                 a => a.Supplier,
                 a => a.Category
@@ -199,15 +197,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var pagedResult = await _repository.GetAllDataByExpression(
-                    filter, 
+                    filter,
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.Supplier!.SupplierName, 
-                    isAscending: true, 
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
                     includes: new Expression<Func<Product, object>>[]
                     {
                 a => a.Supplier,
-                a => a.Category  
+                a => a.Category
                     }
                 );
 

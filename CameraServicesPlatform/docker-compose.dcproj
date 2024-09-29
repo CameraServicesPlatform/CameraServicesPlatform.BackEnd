@@ -7,7 +7,7 @@
     <ProjectGuid>7214f908-f58e-4f50-9aeb-d247da47d318</ProjectGuid>
     <DockerLaunchAction>LaunchBrowser</DockerLaunchAction>
     <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/swagger</DockerServiceUrl>
-    <DockerServiceName>cameraservicesplatform.backend.api</DockerServiceName>
+    <DockerServiceName>camera.api</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="docker-compose.override.yml">

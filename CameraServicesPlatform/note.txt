@@ -38,9 +38,9 @@ remote:      Visit the repository settings page, https://github.com/CameraServic
 
  ------------------
  update model - database
- 1. cd CameraServicesPlatform.BackEnd.Domain
- 2. dotnet ef migrations add [nameupdatedatabase] --startup-project ../CameraServicesPlatform.BackEnd.API
- 3. dotnet ef database update --startup-project ../CameraServicesPlatform.BackEnd.API
+  cd CameraServicesPlatform.BackEnd.Domain
+  dotnet ef migrations add [nameupdatedatabase] --startup-project ../CameraServicesPlatform.BackEnd.API
+ dotnet ef database update --startup-project ../CameraServicesPlatform.BackEnd.API
 
  nếu lỗi thì xóa database và tạo lại:  dotnet ef migrations remove
  ------

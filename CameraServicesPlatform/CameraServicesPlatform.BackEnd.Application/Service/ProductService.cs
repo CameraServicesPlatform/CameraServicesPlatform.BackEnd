@@ -2,6 +2,13 @@
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+ 
+using CameraServicesPlatform.BackEnd.DAO.Data;
+using System;
+using System.Collections.Generic;
+using System.Drawing.Printing;
+using System.Linq;
+ 
 using System.Linq.Expressions;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
@@ -12,11 +19,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private IRepository<Product> _repository;
         private IUnitOfWork _unitOfWork;
 
+
         public ProductService(
             IRepository<Product> repository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            IServiceProvider serviceProvider
+            IServiceProvider serviceProvider,
+            IDbContext context
         ) : base(serviceProvider)
         {
             _repository = repository;
@@ -29,13 +38,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                // Resolving the repository for Product
                 var listProduct = Resolve<IRepository<Product>>();
 
-                // Creating a new Product object
                 Product product = new Product()
                 {
-                    ProductID = Guid.NewGuid(),  
+ 
+                    ProductID = Guid.NewGuid(), 
+ 
                     SerialNumber = productResponse.SerialNumber,
                     SupplierID = string.IsNullOrEmpty(productResponse.SupplierID) ? null : Guid.Parse(productResponse.SupplierID),
                     CategoryID = string.IsNullOrEmpty(productResponse.CategoryID) ? null : Guid.Parse(productResponse.CategoryID),
@@ -45,27 +54,69 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     Brand = productResponse.Brand,
                     Quality = "New", // Static value for now, you might want to adjust this
                     Status = productResponse.Status,
-                    Rating = 0, // Initial rating set to 0
-                    CreatedAt = DateTime.Now, // Set the current time
-                    UpdatedAt = DateTime.Now // Set the current time
+                    Rating = 0, 
+                    CreatedAt = DateTime.Now, 
+                    UpdatedAt = DateTime.Now 
                 };
 
-                // Insert product into repository asynchronously
                 await listProduct.Insert(product);
+                await _unitOfWork.SaveChangesAsync();
 
-                // Assign result and mark as success
-                result.Result = product;
+                result.Result = productResponse;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
             {
-                // Handle errors and return error response
                 result = BuildAppActionResultError(result, ex.Message);
             }
 
-            return result; // Return the result object
+
+
+            return result; 
         }
 
+        public async Task<AppActionResult> UpdateProduct(ProductUpdateResponseDto productResponse)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var productRepository = Resolve<IRepository<Product>>();
+
+                Product productExist = await productRepository.GetById(productResponse.ProductID);
+
+                if (productExist == null)
+                {
+                    result.IsSuccess = false;
+                    return result;
+                }
+
+                productExist.SerialNumber = productResponse.SerialNumber;
+                productExist.SupplierID = productResponse.SupplierID;
+                productExist.CategoryID = productResponse.CategoryID;
+                productExist.ProductName = productResponse.ProductName;
+                productExist.ProductDescription = productResponse.ProductDescription;
+                productExist.Price = productResponse.Price;
+                productExist.Brand = productResponse.Brand;
+                productExist.Quality = productResponse.Quality;
+                productExist.Status = productResponse.Status;
+                productExist.Rating = productResponse.Rating;
+                productExist.UpdatedAt = DateTime.Now;
+
+                await productRepository.Update(productExist);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                result.Result = productExist;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
 
 
         public async Task<AppActionResult> GetAllProduct(int pageIndex, int pageSize)
@@ -73,24 +124,21 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                // Đặt filter là null nếu không có điều kiện lọc
-                Expression<Func<Product, bool>>? filter = null; // Thay Product bằng kiểu thực thể thực tế
+                Expression<Func<Product, bool>>? filter = null; 
 
-                // Gọi hàm GetAllDataByExpression với các tham số đúng
                 var pagedResult = await _repository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.Supplier!.SupplierName, // Sắp xếp theo SupplierName
-                    isAscending: true, // Thay đổi giá trị nếu bạn muốn sắp xếp giảm dần
+                    orderBy: a => a.Supplier!.SupplierName, 
+                    isAscending: true, 
                     includes: new Expression<Func<Product, object>>[]
                     {
-                a => a.Supplier, // Bao gồm Supplier
-                a => a.Category   // Bao gồm Category
+                a => a.Supplier, 
+                a => a.Category   
                     }
                 );
 
-                // Gán kết quả vào result
                 result.Result = pagedResult;
                 result.IsSuccess = true;
             }
@@ -107,21 +155,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                // Convert the string ID to Guid
                 if (!Guid.TryParse(id, out Guid productId))
                 {
                     result = BuildAppActionResultError(result, "Invalid product ID format.");
                     return result;
                 }
 
-                // Fetch paginated result with the converted Guid
                 var pagedResult = await _repository.GetAllDataByExpression(
-                    a => a.ProductID == productId, // Use the Guid instead of string
+                    a => a.ProductID == productId, 
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.Supplier!.SupplierName, // Sorting by Supplier name
-                    isAscending: true, // Order ascending
-                    includes: new Expression<Func<Product, object>>[] // Including related entities
+                    orderBy: a => a.Supplier!.SupplierName, 
+                    isAscending: true, 
+                    includes: new Expression<Func<Product, object>>[] 
                     {
                 a => a.Supplier,
                 a => a.Category
@@ -145,32 +191,121 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                // Kiểm tra nếu productNameFilter là null hoặc rỗng, không áp dụng điều kiện lọc (lấy tất cả sản phẩm)
                 Expression<Func<Product, bool>>? filter = null;
 
                 if (!string.IsNullOrEmpty(productNameFilter))
                 {
-                    // Nếu productNameFilter có giá trị, áp dụng điều kiện lọc theo ProductName
                     filter = a => a.ProductName.Contains(productNameFilter);
                 }
 
-                // Gọi hàm GetAllDataByExpression với điều kiện filter (nếu có)
                 var pagedResult = await _repository.GetAllDataByExpression(
-                    filter, // Áp dụng filter nếu có, null sẽ lấy tất cả sản phẩm
+                    filter, 
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.Supplier!.SupplierName, // Sắp xếp theo SupplierName
-                    isAscending: true, // Sắp xếp tăng dần
+                    orderBy: a => a.Supplier!.SupplierName, 
+                    isAscending: true, 
                     includes: new Expression<Func<Product, object>>[]
                     {
-                a => a.Supplier, // Bao gồm Supplier
-                a => a.Category  // Bao gồm Category
+                a => a.Supplier,
+                a => a.Category  
                     }
                 );
 
-                // Gán kết quả vào result
                 result.Result = pagedResult;
                 result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetProductByCategoryName(string? categoryFilter, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Product, bool>>? filter = null;
+
+                if (!string.IsNullOrEmpty(categoryFilter))
+                {
+                    filter = a => a.Category.CategoryName == categoryFilter;
+                }
+
+                var pagedResult = await _repository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
+                    includes: new Expression<Func<Product, object>>[]
+                    {
+                a => a.Supplier,
+                a => a.Category
+                    }
+                );
+
+                result.Result = pagedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetProductByCategoryId(string? categoryFilter, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Product, bool>>? filter = null;
+                Guid.TryParse(categoryFilter, out Guid categoryNameFilter);
+
+                if (!string.IsNullOrEmpty(categoryFilter))
+                {
+                    filter = a => a.CategoryID == categoryNameFilter;
+                }
+
+                var pagedResult = await _repository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
+                    includes: new Expression<Func<Product, object>>[]
+                    {
+                a => a.Supplier,
+                a => a.Category
+                    }
+                );
+
+                result.Result = pagedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> DeleteProduct(string productId)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var productRepository = Resolve<IRepository<Product>>();
+                Guid.TryParse(productId, out Guid id);
+                await productRepository.DeleteById(id);
+                await _unitOfWork.SaveChangesAsync();
+                result.IsSuccess = true;
+                result.Result = "Product deleted successfully.";
             }
             catch (Exception ex)
             {

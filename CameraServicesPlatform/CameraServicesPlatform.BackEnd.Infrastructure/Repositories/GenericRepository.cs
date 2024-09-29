@@ -68,7 +68,7 @@ public class GenericRepository<T> : IRepository<T> where T : class
 
     public async Task<T> Insert(T entity)
     {
-        await _dbSet.AddAsync(entity);
+         await _dbSet.AddAsync(entity);
         return entity;
     }
 

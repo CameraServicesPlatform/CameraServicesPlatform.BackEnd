@@ -491,7 +491,7 @@ public class AccountService : GenericBackendService, IAccountService
         return result;
     }
 
-    public async Task<AppActionResult> AssignRoleForUserId(string userId, IList<string> roleId)
+     public async Task<AppActionResult> AssignRoleForUserId(string userId, IList<string> roleId)
     {
         var result = new AppActionResult();
         try
@@ -673,36 +673,19 @@ public class AccountService : GenericBackendService, IAccountService
     public async Task<AppActionResult> Login(LoginRequestDTO loginRequest)
     {
         var result = new AppActionResult();
-
         try
         {
-            // Lấy thông tin người dùng dựa trên email
             var user = await _accountRepository.GetByExpression(u =>
-                u.Email.ToLower() == loginRequest.Email.ToLower() && !u.IsDeleted);
-
+                u!.Email.ToLower() == loginRequest.Email.ToLower() && u.IsDeleted == false);
             if (user == null)
-            {
-                result = BuildAppActionResultError(result, "Không tìm thấy người dùng.");
-                return result;
-            }
+                result = BuildAppActionResultError(result, $" {loginRequest.Email} này không tồn tại trong hệ thống");
+            else if (user.IsVerified == false)
+                result = BuildAppActionResultError(result, "Tài khoản này chưa được xác thực !");
 
-            // Kiểm tra xem tài khoản đã được xác thực chưa
-            if (!user.IsVerified)
-            {
-                result = BuildAppActionResultError(result, "Tài khoản chưa được xác thực.");
-                return result;
-            }
-
-            // Xác thực mật khẩu bằng SignInManager
-            var passwordSignIn = await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, false, false);
-            if (!passwordSignIn.Succeeded)
-            {
-                result = BuildAppActionResultError(result, "Mật khẩu không hợp lệ.");
-                return result;
-            }
-
-            // Tiến hành các thao tác đăng nhập
-            result = await LoginDefault(loginRequest.Email, user);
+            var passwordSignIn =
+                await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, false, false);
+            if (!passwordSignIn.Succeeded) result = BuildAppActionResultError(result, "Đăng nhâp thất bại");
+            if (!BuildAppActionResultIsError(result)) result = await LoginDefault(loginRequest.Email, user);
         }
         catch (Exception ex)
         {

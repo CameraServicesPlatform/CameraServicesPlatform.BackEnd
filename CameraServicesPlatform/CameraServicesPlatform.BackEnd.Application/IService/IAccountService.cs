@@ -24,8 +24,6 @@ public interface IAccountService
 
     Task<AppActionResult> GetAccountByUserId(string id);
 
-
-
     Task<AppActionResult> GetNewToken(string refreshToken, string userId);
 
     Task<AppActionResult> ForgotPassword(ForgotPasswordDTO dto);

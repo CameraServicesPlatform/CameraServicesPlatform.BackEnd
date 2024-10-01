@@ -24,7 +24,6 @@ services:
     networks:
       - demo
     ports:
-      - "3005:8080"
       - "2602:8080"
       - "443:8081"
     depends_on:

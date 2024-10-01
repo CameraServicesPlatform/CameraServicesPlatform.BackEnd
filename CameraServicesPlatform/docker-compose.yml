@@ -1,96 +1,43 @@
 version: '3.8'
 
 services:
-  # SQL Server configuration
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     hostname: sqlserver-db
     container_name: sqlserver
-    user: "root"
     networks:
       - demo
     environment:
       SA_PASSWORD: "sa@root123@"
       ACCEPT_EULA: "Y"
     ports:
-      - "1435:1433"  # Expose a different port (1435) on the host to avoid conflicts
+      - "1435:1433"
     volumes:
-      - ./containers/capstone.backend.db:/var/opt/mssql/data  # Adjusted volume mapping path
+      - ./containers/capstone.backend.db:/var/opt/mssql/data
 
-  # Camera API configuration
   camera.api: 
     image: "${DOCKER_REGISTRY:-}camera.api"
     build:
-      context: .  # Build the API image from the current directory
+      context: .  
       dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile
     container_name: camera.api
     networks:
       - demo
     ports:
-      - "3005:8080"  # Exposing HTTP port for the API
-      - "2602:8080"  # Alternative port mapping
-      - "443:8081"   # HTTPS port mapping
+      - "3005:8080"
+      - "2602:8080"
+      - "443:8081"
     depends_on:
       - sqlserver
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      # Connection string pointing to the SQL Server container
       ConnectionStrings__DBVPS: "Server=sqlserver-db;Database=CameraCapstone;User Id=sa;Password=sa@root123@;TrustServerCertificate=True;"
 
-# Define the network to allow communication between services
 networks:
   demo:
     driver: bridge
 
-# Define volumes for persistent data storage
 volumes:
-  sqlserverdata:  # Volume for SQL Server data
-  mssql-log:      # Log volume for SQL Server
-  mssql-secrets:  # Secrets volume for SQL Server
-
-
-
-# version: '3.8'
-
-# services:
-#   sqlserver:
-#     image: mcr.microsoft.com/mssql/server:2019-latest
-#     hostname: sqlserver-db
-#     container_name: sqlserver
-#     user: "root"
-#     networks:
-#       - demo
-#     environment:
-#       SA_PASSWORD: "sa@root123@"
-#       ACCEPT_EULA: "Y"
-#     ports:
-#       - "1435:1433"
-#     volumes:
-#       - ./.containers/travelcapstone.backend.db:/var/lib/mssql/data
-
-#   camera.api: 
-#     image: "${DOCKER_REGISTRY:-}camera.api"
-#     build:
-#       context: .
-#       dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile
-#     container_name: camera.api
-#     networks:
-#       - demo
-#     ports:
-#       - "3005:8080"
-#       - "2602:8080" 
-#       - "443:8081"
-#     depends_on:
-#       - sqlserver
-#     environment:
-#       ASPNETCORE_ENVIRONMENT: Development
-#       ConnectionStrings__DBVPS: "Server=sqlserver-db;Database=CameraCapstone;User Id=sa;Password=sa@root123@;TrustServerCertificate=True;"
-
-# networks:
-#   demo:
-#     driver: bridge
-
-# volumes:
-#   sqlserverdata:
-#   mssql-log:
-#   mssql-secrets:
+  sqlserverdata:
+  mssql-log:
+  mssql-secrets:

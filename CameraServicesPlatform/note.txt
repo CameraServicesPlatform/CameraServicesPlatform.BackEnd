@@ -16,6 +16,10 @@ deloy vps
 3. ls - chọn CameraServicesPlatform.BackEnd
 4. cd CameraServicesPlatform.BackEnd -> ls
 5. cd CameraServicesPlatform -> ls
+sudo apt update
+sudo apt install docker-compose
+docker-compose --version
+
 6.  docker compose build
 7.  docker compose up -d
 8.  docker compose ps

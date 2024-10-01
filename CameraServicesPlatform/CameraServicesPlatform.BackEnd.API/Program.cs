@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
 {
-    builder.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5275" )
+    builder.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5275")
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials();
@@ -30,14 +30,14 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddDbContext<CameraServicesPlatformDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DBVPS")));
 
- 
+
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(op => op.SerializeAsV2 = true);
+    app.UseSwagger(op => op.SerializeAsV2 = false);
     app.UseSwaggerUI(options =>
     {
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");

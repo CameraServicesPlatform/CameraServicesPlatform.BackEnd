@@ -11,7 +11,7 @@ services:
       SA_PASSWORD: "sa@root123@"
       ACCEPT_EULA: "Y"
     ports:
-      - "1444:1433"
+      - "1433:1433"
     volumes:
       - ./containers/capstone.backend.db:/var/opt/mssql/data
 
@@ -30,7 +30,7 @@ services:
       - sqlserver
     environment:
       ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DBVPS: "Server=14.225.220.108,1444;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;"
+      ConnectionStrings__DBVPS: "Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;"
 
 networks:
   demo:

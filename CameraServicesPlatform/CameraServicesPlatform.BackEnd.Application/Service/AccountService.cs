@@ -7,10 +7,12 @@ using CameraServicesPlatform.BackEnd.Common.ConfigurationModel;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Common.Utils;
+using CameraServicesPlatform.BackEnd.DAO.Data;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Utility = CameraServicesPlatform.BackEnd.Common.Utils.Utility;
 
@@ -27,7 +29,8 @@ public class AccountService : GenericBackendService, IAccountService
     private readonly IEmailService _emailService;
     private readonly IExcelService _excelService;
     private readonly IFileService _fileService;
-    private readonly BackEndLogger _logger;  
+    private readonly BackEndLogger _logger;
+    private readonly CameraServicesPlatformDbContext _dbcontext;
 
     public AccountService(
         IRepository<Account> accountRepository,
@@ -39,6 +42,7 @@ public class AccountService : GenericBackendService, IAccountService
         IFileService fileService,
         IMapper mapper,
          BackEndLogger logger,
+         CameraServicesPlatformDbContext dbcontext,
         IServiceProvider serviceProvider
      ) : base(serviceProvider)
     {
@@ -52,6 +56,51 @@ public class AccountService : GenericBackendService, IAccountService
         _tokenDto = new TokenDTO();
         _mapper = mapper;
         _logger = logger;
+        _dbcontext = dbcontext;
+    }
+    public async Task<AppActionResult> ChangePassword(ChangePasswordDTO changePasswordDto)
+    {
+        var result = new AppActionResult();
+
+        try
+        {
+            // Find user using UserManager instead of repository
+            var user = await _userManager.FindByEmailAsync(changePasswordDto.Email);
+
+            if (user == null || user.IsDeleted)
+            {
+                result = BuildAppActionResultError(result,
+                    $"Tài khoản có email {changePasswordDto.Email} không tồn tại!");
+            }
+            else
+            {
+                // Proceed with the password change
+                var changePassword = await _userManager.ChangePasswordAsync(user,
+                    changePasswordDto.OldPassword, changePasswordDto.NewPassword);
+
+                if (changePassword.Succeeded)
+                {
+                    // Password change was successful, add success message
+                    result.IsSuccess = true;
+                    result.Messages.Add("Thay đổi mật khẩu thành công");
+                }
+                else
+                {
+                    result = BuildAppActionResultError(result, "Thay đổi mật khẩu thất bại");
+                }
+            }
+
+            if (!BuildAppActionResultIsError(result))
+            {
+                await _unitOfWork.SaveChangesAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            result = BuildAppActionResultError(result, ex.Message);
+        }
+
+        return result;
     }
 
     public async Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle)
@@ -202,37 +251,7 @@ public class AccountService : GenericBackendService, IAccountService
 
         return result;
     }
-
-    public async Task<AppActionResult> ChangePassword(ChangePasswordDTO changePasswordDto)
-    {
-        var result = new AppActionResult();
-
-        try
-        {
-            if (await _accountRepository.GetByExpression(c =>
-                    c!.Email == changePasswordDto.Email && c.IsDeleted == false) == null)
-                result = BuildAppActionResultError(result,
-                    $"Tài khoản có email {changePasswordDto.Email} không tồn tại!");
-            if (!BuildAppActionResultIsError(result))
-            {
-                var user = await _accountRepository.GetByExpression(c =>
-                    c!.Email == changePasswordDto.Email && c.IsDeleted == false);
-                var changePassword = await _userManager.ChangePasswordAsync(user!, changePasswordDto.OldPassword,
-                    changePasswordDto.NewPassword);
-                if (!changePassword.Succeeded)
-                    result = BuildAppActionResultError(result, "Thay đổi mật khẩu thất bại");
-            }
-
-            await _unitOfWork.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            result = BuildAppActionResultError(result, ex.Message);
-        }
-
-        return result;
-    }
-
+     
     public async Task<AppActionResult> GetNewToken(string refreshToken, string userId)
     {
         var result = new AppActionResult();
@@ -676,16 +695,27 @@ public class AccountService : GenericBackendService, IAccountService
         try
         {
             var user = await _accountRepository.GetByExpression(u =>
-                u!.Email.ToLower() == loginRequest.Email.ToLower() && u.IsDeleted == false);
+                u.Email.ToLower() == loginRequest.Email.ToLower() && !u.IsDeleted);
             if (user == null)
-                result = BuildAppActionResultError(result, $" {loginRequest.Email} này không tồn tại trong hệ thống");
-            else if (user.IsVerified == false)
-                result = BuildAppActionResultError(result, "Tài khoản này chưa được xác thực !");
-
-            var passwordSignIn =
-                await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, false, false);
-            if (!passwordSignIn.Succeeded) result = BuildAppActionResultError(result, "Đăng nhâp thất bại");
-            if (!BuildAppActionResultIsError(result)) result = await LoginDefault(loginRequest.Email, user);
+            {
+                result = BuildAppActionResultError(result, $"The email {loginRequest.Email} does not exist in the system");
+            }
+            else if (!user.IsVerified)
+            {
+                result = BuildAppActionResultError(result, "This account has not been verified");
+            }
+            else
+            {
+                var passwordSignIn = await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, false, false);
+                if (!passwordSignIn.Succeeded)
+                {
+                    result = BuildAppActionResultError(result, "Login failed");
+                }
+                else
+                {
+                    result = await LoginDefault(loginRequest.Email, user);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -694,7 +724,6 @@ public class AccountService : GenericBackendService, IAccountService
 
         return result;
     }
-
 
 
     public async Task<AppActionResult> VerifyLoginGoogle(string email, string verifyCode)

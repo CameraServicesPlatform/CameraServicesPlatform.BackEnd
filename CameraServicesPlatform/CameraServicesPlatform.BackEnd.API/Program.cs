@@ -28,7 +28,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 
 // Configure DbContext with SQL Server (update your connection string as needed)
 builder.Services.AddDbContext<CameraServicesPlatformDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DBVPS")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DB")));
 
 
 

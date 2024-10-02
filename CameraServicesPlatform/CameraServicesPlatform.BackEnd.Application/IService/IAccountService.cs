@@ -19,12 +19,13 @@ public interface IAccountService
     public Task<AppActionResult> GetAccountsByRoleId(string Id, int pageNumber, int pageSize);
 
     Task<AppActionResult> Login(LoginRequestDTO loginRequest);
+    Task<AppActionResult> ChangePassword(ChangePasswordDTO changePasswordDto);
+    Task<AppActionResult> GetNewToken(string refreshToken, string userId);
+
     //-----------------------------
 
-    Task<AppActionResult> ChangePassword(ChangePasswordDTO changePasswordDto);
 
 
-    Task<AppActionResult> GetNewToken(string refreshToken, string userId);
 
     Task<AppActionResult> ForgotPassword(ForgotPasswordDTO dto);
 

@@ -6,7 +6,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
     [Route("category")]
     [ApiController]
-    public class CategoryController : Controller
+    public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
 

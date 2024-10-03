@@ -1,5 +1,7 @@
 ﻿using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+ 
 using CameraServicesPlatform.BackEnd.Domain.Models;
+ 
 using System.Linq.Expressions;
 
 namespace CameraServicesPlatform.BackEnd.Application.IRepository;

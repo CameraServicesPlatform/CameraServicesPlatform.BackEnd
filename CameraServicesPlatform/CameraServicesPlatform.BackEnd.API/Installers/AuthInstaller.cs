@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using CameraServicesPlatform.BackEnd.API.Installers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-
-namespace CameraServicesPlatform.BackEnd.API.Installers;
 
 public class AuthInstaller : IInstaller
 {
@@ -12,20 +11,30 @@ public class AuthInstaller : IInstaller
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
             options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(options =>
+        })
+        .AddJwtBearer(options =>
         {
-            options.SaveToken = true;
-            options.RequireHttpsMetadata = false;
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidateAudience = true,
-                ValidAudience = configuration["JWT:Audience"],
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
                 ValidIssuer = configuration["JWT:Issuer"],
+                ValidAudience = configuration["JWT:Audience"],
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]))
             };
+        })
+        .AddCookie(options =>
+        {
+            // Cookie settings can be configured here if needed
+        })
+        .AddGoogle(options =>
+        {
+            IConfigurationSection googleAuthNSection = configuration.GetSection("Authentication:Google");
+            options.ClientId = googleAuthNSection["ClientId"];
+            options.ClientSecret = googleAuthNSection["ClientSecret"];
+            options.CallbackPath = "/signin-google";
         });
-        services.AddAuthorization();
     }
 }

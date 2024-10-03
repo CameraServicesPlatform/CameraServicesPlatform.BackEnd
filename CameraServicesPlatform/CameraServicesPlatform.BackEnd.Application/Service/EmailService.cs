@@ -45,4 +45,32 @@ public class EmailService : GenericBackendService, IEmailService
             _logger.LogError(ex.Message, this);
         }
     }
+
+    public async Task SendEmailAsync(string recipient, string subject, string body)
+    {
+        try
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Camera service platform Company", _emailConfiguration.User));
+            message.To.Add(new MailboxAddress("Khách hàng", recipient));
+            message.Subject = subject;
+            message.Importance = MessageImportance.High;
+
+            var bodyBuilder = new BodyBuilder();
+            bodyBuilder.HtmlBody = body;
+            message.Body = bodyBuilder.ToMessageBody();
+
+            using (var client = new MailKit.Net.Smtp.SmtpClient())
+            {
+                await client.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+                await client.AuthenticateAsync(_emailConfiguration.User, _emailConfiguration.ApplicationPassword);
+                await client.SendAsync(message);
+                await client.DisconnectAsync(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message, this);
+        }
+    }
 }

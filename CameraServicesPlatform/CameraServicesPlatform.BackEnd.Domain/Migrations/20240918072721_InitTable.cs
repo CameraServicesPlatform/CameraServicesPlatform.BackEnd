@@ -31,6 +31,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    //Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AccountName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -774,7 +775,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 columns: table => new
                 {
                     SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AccountID = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    AccountID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     SupplierName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     SupplierDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SupplierAddress = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),

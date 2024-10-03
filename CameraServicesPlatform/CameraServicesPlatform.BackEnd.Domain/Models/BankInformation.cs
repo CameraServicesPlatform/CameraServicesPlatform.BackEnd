@@ -8,18 +8,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid BankId { get; set; }
 
+        public required string BankName { get; set; }
 
-        public string BankName { get; set; }
+         public required string AccountNumber { get; set; }
 
-        [MaxLength(100)]
-        public string AccountNumber { get; set; }
-
-
-        public string AccountHolder { get; set; }
+        public required string AccountHolder { get; set; }
 
         // Foreign key to Member
         [ForeignKey("Member")]
         public Guid MemberId { get; set; }
-        public virtual Member Member { get; set; }
+        public  Member Member { get; set; }
     }
 }

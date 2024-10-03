@@ -30,19 +30,12 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("AccountName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasMaxLength(256)
@@ -92,9 +85,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("ProfileImage")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
@@ -106,9 +96,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(256)
@@ -142,8 +129,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<string>("AccountNumber")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BankName")
                         .IsRequired()
@@ -192,8 +178,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<string>("MethodName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -775,25 +760,25 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "a12b3c4d-56ef-78gh-90ij-klmnopqrstuv",
+                            Id = "1cf2de31-b0d8-4447-8f2f-c41df905a3a5",
                             Name = "ADMIN",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "b21c4d5e-67fg-89hi-01jk-lmnopqrstuv",
+                            Id = "e64b36a7-ed67-47d2-b92e-d2f6caa3eda9",
                             Name = "MEMBER",
                             NormalizedName = "Member"
                         },
                         new
                         {
-                            Id = "c32d5e6f-78gh-90ij-12kl-mnopqrstuv",
+                            Id = "086b7a13-79af-4610-851d-204d9d84b865",
                             Name = "STAFF",
                             NormalizedName = "Staff"
                         },
                         new
                         {
-                            Id = "d43e6f7g-89hi-01jk-23lm-nopqrstuv",
+                            Id = "74bd6d3a-1119-449b-9743-3956d74e7575",
                             Name = "Supplier",
                             NormalizedName = "Supplier"
                         });
@@ -949,7 +934,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<string>("Brand")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("CategoryID")
+                    b.Property<Guid?>("CategoryID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -979,7 +964,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("SupplierID")
+                    b.Property<Guid?>("SupplierID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -1003,8 +988,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<double>("AccountBalance")
                         .HasColumnType("float");
 
-                    b.Property<string>("AccountID")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<Guid>("AccountID")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("BlockReason")
                         .HasColumnType("nvarchar(max)");
@@ -1401,15 +1386,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Category", "Category")
                         .WithMany()
-                        .HasForeignKey("CategoryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CategoryID");
 
                     b.HasOne("Supplier", "Supplier")
                         .WithMany()
-                        .HasForeignKey("SupplierID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SupplierID");
 
                     b.Navigation("Category");
 

@@ -29,7 +29,7 @@ builder.Services.AddScoped<ISmsService, SmsService>();
 
 // Configure DbContext with SQL Server (update your connection string as needed)
 builder.Services.AddDbContext<CameraServicesPlatformDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DB")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DBVPS")));
 
 
 

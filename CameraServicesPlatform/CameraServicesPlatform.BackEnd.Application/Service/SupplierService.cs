@@ -71,7 +71,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 if (!Guid.TryParse(id, out Guid supplierId))
                 {
-                    result = BuildAppActionResultError(result, "Invalid product ID format.");
+                    result = BuildAppActionResultError(result, "Invalid supplier ID format.");
                     return result;
                 }
 
@@ -216,8 +216,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
-
-
 
             return result;
         }

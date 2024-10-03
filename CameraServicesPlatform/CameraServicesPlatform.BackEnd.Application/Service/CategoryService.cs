@@ -68,10 +68,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             try
             {
-                // Expression filter is initialized as null, meaning no filtering will occur.
                 Expression<Func<Category, bool>>? filter = null;
 
-                // Fetch paged results using the filter (if any), ordering, and includes (empty in this case)
                 var pagedResult = await _repository.GetAllDataByExpression(
                     filter,
                     pageIndex,
@@ -87,7 +85,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-                // Handle exceptions and return the error result
+                
                 result = BuildAppActionResultError(result, ex.Message);
             }
 

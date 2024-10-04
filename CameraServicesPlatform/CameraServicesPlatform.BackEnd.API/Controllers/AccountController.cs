@@ -29,7 +29,7 @@ public class AccountController : ControllerBase
 
         return Ok(result);
     }
-    
+
     [HttpGet("get-all-account")]
     public async Task<AppActionResult> GetAllAccount(int pageIndex = 1, int pageSize = 10)
     {
@@ -43,11 +43,11 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("get-accounts-by-role-id/{roleId}/{pageIndex:int}/{pageSize:int}")]
-    public async Task<AppActionResult> GetAccountsByRoleId(string  roleId, int pageIndex = 1, int pageSize = 10)
+    public async Task<AppActionResult> GetAccountsByRoleId(string roleId, int pageIndex = 1, int pageSize = 10)
     {
         return await _accountService.GetAccountsByRoleId(roleId, pageIndex, pageSize);
     }
-    
+
     [HttpPut("update-account")]
     public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO request)
     {
@@ -61,7 +61,7 @@ public class AccountController : ControllerBase
     }
 
 
-     [HttpPost("login")]
+    [HttpPost("login")]
     public async Task<AppActionResult> Login(LoginRequestDTO request)
     {
         return await _accountService.Login(request);
@@ -78,10 +78,6 @@ public class AccountController : ControllerBase
     {
         return await _accountService.GetNewToken(refreshToken, userId);
     }
-
-
-
-
 
     [HttpPut("forgot-password")]
     public async Task<AppActionResult> ForgotPassword(ForgotPasswordDTO DTO)

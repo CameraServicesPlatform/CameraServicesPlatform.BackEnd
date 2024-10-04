@@ -9,23 +9,22 @@ public interface IAccountService
     Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle);
 
     Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize);
-    
+
     Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO applicationUser);
-    
+
     Task<AppActionResult> GetAccountByUserId(string id);
-    
+
     public Task<AppActionResult> GetAccountsByRoleName(string roleName, int pageNumber, int pageSize);
-    
+
     public Task<AppActionResult> GetAccountsByRoleId(string Id, int pageNumber, int pageSize);
 
     Task<AppActionResult> Login(LoginRequestDTO loginRequest);
-    Task<AppActionResult> ChangePassword(ChangePasswordDTO changePasswordDto);
-    Task<AppActionResult> GetNewToken(string refreshToken, string userId);
-
     //-----------------------------
 
+    Task<AppActionResult> ChangePassword(ChangePasswordDTO changePasswordDto);
 
 
+    Task<AppActionResult> GetNewToken(string refreshToken, string userId);
 
     Task<AppActionResult> ForgotPassword(ForgotPasswordDTO dto);
 

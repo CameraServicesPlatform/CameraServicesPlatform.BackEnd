@@ -41,13 +41,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _categoryService.CreateCategory(productResponse);
         }
 
-        [HttpPost("update-category")]
+        [HttpPut("update-category")]
         public async Task<AppActionResult> UpdateCategory(CategoryUpdateResponseDto categoryResponse)
         {
             return await _categoryService.UpdateCategory(categoryResponse);
         }
 
-        [HttpPost("delete-category")]
+        [HttpDelete("delete-category")]
         public async Task<AppActionResult> DeleteCategory(string productId)
         {
             return await _categoryService.DeleteCategory(productId);

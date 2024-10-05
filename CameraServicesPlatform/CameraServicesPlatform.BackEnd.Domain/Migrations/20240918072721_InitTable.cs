@@ -38,6 +38,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Gender = table.Column<int>(type: "int", nullable: false),
+                    Job = table.Column<int>(type: "int", nullable: false),
+                    Hobby = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     IsVerified = table.Column<bool>(type: "bit", nullable: false),
                     VerifyCode = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
@@ -1486,6 +1488,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             migrationBuilder.DropTable(
                 name: "RentalPrice");
+           
         }
+
     }
 }

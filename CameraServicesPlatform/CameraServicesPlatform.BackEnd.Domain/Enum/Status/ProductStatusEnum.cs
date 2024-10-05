@@ -3,6 +3,7 @@ public enum ProductStatusEnum
 {
     Available,
     Rented,
-    Sold
+    Sold,
+    discontinuedProduct
 }
 

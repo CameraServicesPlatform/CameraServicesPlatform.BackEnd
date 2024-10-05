@@ -52,39 +52,51 @@ public class JwtService : GenericBackendService, IJwtService
         {
             var accountRepository = Resolve<IRepository<Account>>();
             var utility = Resolve<Utility>();
+
             var user = await accountRepository!.GetByExpression(u =>
                 u!.Email.ToLower() == loginRequest.Email.ToLower());
 
-            if (user != null)
+            if (user == null)
             {
-                var roles = await _userManager.GetRolesAsync(user);
-                if (roles != null)
-                {
-                    var claims = new List<Claim>
-                    {
-                        new(ClaimTypes.Email, loginRequest.Email),
-                        new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                        new("AccountId", user.Id)
-                    };
-                    claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.ToUpper())));
-                    var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfiguration.Key!));
-                    var token = new JwtSecurityToken(
-                        _jwtConfiguration.Issuer,
-                        _jwtConfiguration.Audience,
-                        expires: utility!.GetCurrentDateInTimeZone().AddDays(1),
-                        claims: claims,
-                        signingCredentials: new SigningCredentials(authenKey, SecurityAlgorithms.HmacSha512Signature)
-                    );
-                    return new JwtSecurityTokenHandler().WriteToken(token);
-                }
+                _logger.LogError("User not found for email: {Email}", loginRequest.Email);
+                throw new Exception("Invalid credentials."); // Adjust exception as needed
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles != null && roles.Any())
+            {
+                var claims = new List<Claim>
+            {
+                new(ClaimTypes.Email, loginRequest.Email),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new("AccountId", user.Id.ToString())
+            };
+
+                claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.ToUpper())));
+
+                var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfiguration.Key!));
+                var issuer = _jwtConfiguration.Issuer.FirstOrDefault() ?? throw new InvalidOperationException("Issuer is not configured.");
+                var token = new JwtSecurityToken(
+                    issuer,
+                    _jwtConfiguration.Audience,
+                    expires: utility!.GetCurrentDateInTimeZone().AddDays(30),
+                    claims: claims,
+                    signingCredentials: new SigningCredentials(authenKey, SecurityAlgorithms.HmacSha512Signature)
+                );
+
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            else
+            {
+                _logger.LogError("No roles found for user: {Email}", loginRequest.Email);
+                throw new Exception("User has no assigned roles.");
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message, this);
+            _logger.LogError($"Error generating access token for user: {loginRequest.Email}. Exception: {ex.Message}", this);
+            throw; // Rethrow or return a specific error response
         }
-
-        return string.Empty;
     }
 
     public async Task<TokenDTO> GetNewToken(string refreshToken, string accountId)
@@ -109,13 +121,13 @@ public class JwtService : GenericBackendService, IJwtService
                         new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new("AccountId", user.Id)
                     };
-                    claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+                    claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.ToUpper())));
                     var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfiguration.Key!));
-                    var token = new JwtSecurityToken
-                    (
-                        _jwtConfiguration.Issuer,
+                    var issuer = _jwtConfiguration.Issuer.FirstOrDefault() ?? throw new InvalidOperationException("Issuer is not configured.");
+                    var token = new JwtSecurityToken(
+                        issuer,
                         _jwtConfiguration.Audience,
-                        expires: utility!.GetCurrentDateInTimeZone().AddDays(1),
+                        expires: utility!.GetCurrentDateInTimeZone().AddDays(30),
                         claims: claims,
                         signingCredentials: new SigningCredentials(authenKey, SecurityAlgorithms.HmacSha512Signature)
                     );

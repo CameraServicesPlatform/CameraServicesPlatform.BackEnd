@@ -42,13 +42,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _supplierService.CreateSupplier(supplierResponse);
         }
 
-        [HttpPost("update-supplier")]
+        [HttpPut("update-supplier")]
         public async Task<AppActionResult> UpdateSupplier(SupplierUpdateResponseDto supplierResponse)
         {
             return await _supplierService.UpdateSupplier(supplierResponse);
         }
 
-        [HttpPost("delete-supplier")]
+        [HttpDelete("delete-supplier")]
         public async Task<AppActionResult> DeleteSupplier(string supplierId)
         {
             return await _supplierService.DeleteSupplier(supplierId);

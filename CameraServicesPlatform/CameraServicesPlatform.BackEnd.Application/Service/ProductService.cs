@@ -3,6 +3,9 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.DAO.Data;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
+using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Printing;
@@ -16,19 +19,30 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     public class ProductService : GenericBackendService, IProductService
     {
         private readonly IMapper _mapper;
-        private IRepository<Product> _repository;
+        private IRepository<Product> _productRepository;
+        private IRepository<ProductImage> _productImageRepository;
+
+        private IRepository<OrderDetail> _orderDetailRepository;
+        private IRepository<Order> _orderRepository;
+
         private IUnitOfWork _unitOfWork;
 
 
         public ProductService(
-            IRepository<Product> repository,
+            IRepository<Product> productRepository,
+            IRepository<ProductImage> productImageRepository,
+            IRepository<OrderDetail> orderDetailRepository,
+            IRepository<Order> orderRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider,
             IDbContext context
         ) : base(serviceProvider)
         {
-            _repository = repository;
+            _productRepository = productRepository;
+            _productImageRepository = productImageRepository;
+            _orderDetailRepository = orderDetailRepository;
+            _orderRepository = orderRepository; 
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -39,7 +53,27 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 var listProduct = Resolve<IRepository<Product>>();
+                var productNameExist = await _productRepository.GetByExpression(
+                    a => a.ProductName.Equals(productResponse.ProductName) && a.SupplierID.Equals(productResponse.SupplierID),
+                    null
+                );
+                if(productNameExist != null )
+                {
+                    result.IsSuccess = false;
+                    result.Result = "Name product existed into supplier";
+                    return result;
+                }
 
+                var productSerialExist = await _productRepository.GetByExpression(
+                    a => a.SerialNumber.Equals(productResponse.SerialNumber) && a.SupplierID.Equals(productResponse.SupplierID),
+                    null
+                );
+                if (productNameExist != null)
+                {
+                    result.IsSuccess = false;
+                    result.Result = "Product serial number existed into supplier, serial number cann't duplicate";
+                    return result;
+                }
                 Product product = new Product()
                 {
                     ProductID = Guid.NewGuid(),
@@ -88,6 +122,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
+                var productNameExist = await _productRepository.GetByExpression(
+                    a => a.ProductName.Equals(productResponse.ProductName) && a.SupplierID.Equals(productResponse.SupplierID),
+                    null
+                );
+                if (productNameExist != null)
+                {
+                    result.IsSuccess = false;
+                    result.Result = "Name product existed into supplier";
+                    return result;
+                }
+
                 productExist.SerialNumber = productResponse.SerialNumber;
                 productExist.SupplierID = productResponse.SupplierID;
                 productExist.CategoryID = productResponse.CategoryID;
@@ -97,7 +142,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 productExist.Brand = productResponse.Brand;
                 productExist.Quality = productResponse.Quality;
                 productExist.Status = productResponse.Status;
-                productExist.Rating = productResponse.Rating;
                 productExist.UpdatedAt = DateTime.Now;
 
                 await productRepository.Update(productExist);
@@ -123,8 +167,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 Expression<Func<Product, bool>>? filter = null;
-
-                var pagedResult = await _repository.GetAllDataByExpression(
+                List<ProductResponse> listProduct = new List<ProductResponse>();
+                var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
@@ -136,6 +180,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 a => a.Category
                     }
                 );
+                foreach ( var item in pagedResult.Items )
+                {
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(item.ProductID),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                    );
+                    listProduct.Add(new ProductResponse(item,  productImage.Items));
+                }
 
                 result.Result = pagedResult;
                 result.IsSuccess = true;
@@ -159,7 +215,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                var pagedResult = await _repository.GetAllDataByExpression(
+                var pagedResult = await _productRepository.GetAllDataByExpression(
                     a => a.ProductID == productId,
                     pageIndex,
                     pageSize,
@@ -196,7 +252,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     filter = a => a.ProductName.Contains(productNameFilter);
                 }
 
-                var pagedResult = await _repository.GetAllDataByExpression(
+                var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
@@ -232,7 +288,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     filter = a => a.Category.CategoryName == categoryFilter;
                 }
 
-                var pagedResult = await _repository.GetAllDataByExpression(
+                var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
@@ -269,7 +325,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     filter = a => a.CategoryID == categoryNameFilter;
                 }
 
-                var pagedResult = await _repository.GetAllDataByExpression(
+                var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
@@ -298,12 +354,49 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
+                if (!Guid.TryParse(productId, out Guid id))
+                {
+                    result.IsSuccess = false;
+                    result.Result = "Invalid product ID.";
+                    return result;
+                }
+
                 var productRepository = Resolve<IRepository<Product>>();
-                Guid.TryParse(productId, out Guid id);
-                await productRepository.DeleteById(id);
-                await _unitOfWork.SaveChangesAsync();
-                result.IsSuccess = true;
-                result.Result = "Product deleted successfully.";
+
+                var orderDetails = await _orderDetailRepository.GetAllDataByExpression(
+                    a => a.ProductID == id &&
+                         (a.Order.OrderStatus == OrderStatus.Pending || a.Order.OrderStatus == OrderStatus.Approved),
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    includes: new Expression<Func<OrderDetail, object>>[] { a => a.Order }
+                );
+
+                if (orderDetails.Items.Any()) { 
+                
+                    result.IsSuccess = false;
+                    result.Result = "Product is part of a pending or approved order and cannot be deleted.";
+                }
+                 else
+                {
+                    var product = await _productRepository.GetById(id);
+                    if (product != null)
+                    {
+                        product.Status = ProductStatusEnum.discontinuedProduct;
+
+                        productRepository.Update(product); 
+                        await _unitOfWork.SaveChangesAsync();
+
+                        result.IsSuccess = true;
+                        result.Result = "Product deleted successfully.";
+                    }
+                    else
+                    {
+                        result.IsSuccess = false;
+                        result.Result = "Product not found.";
+                    }
+                }
             }
             catch (Exception ex)
             {

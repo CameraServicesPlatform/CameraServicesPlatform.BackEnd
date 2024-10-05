@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
 {
-    builder.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175")
+    builder.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5275")
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials();
@@ -25,12 +25,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InstallerServicesInAssembly(builder.Configuration); // Assuming this installs your services
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<ISmsService, SmsService>();
 
 // Configure DbContext with SQL Server (update your connection string as needed)
 builder.Services.AddDbContext<CameraServicesPlatformDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionVPS")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DBVPS")));
 
- 
+
 
 var app = builder.Build();
 

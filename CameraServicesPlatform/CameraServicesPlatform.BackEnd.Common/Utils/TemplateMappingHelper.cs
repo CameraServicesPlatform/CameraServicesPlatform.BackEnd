@@ -158,7 +158,7 @@ public class TemplateMappingHelper
         <p class=""support"">
           Thank you for your interest in the services of <b><i>Camera service platform</i></b
           >, for any inquiries, please contact
-          <u><i>qk.backend@gmail.com</i></u> for support
+          <u><i>dan1314705@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
@@ -320,7 +320,7 @@ public class TemplateMappingHelper
         <p class=""support"">
           Thank you for your interest in the services of <b><i>Camera service platform</i></b
           >, for any inquiries, please contact
-          <u><i>qk.backend@gmail.com</i></u> for support
+          <u><i>dan1314705@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
@@ -482,7 +482,7 @@ public class TemplateMappingHelper
         <p class=""support"">
           Thank you for your interest in the services of <b><i>Camera service platform</i></b
           >, for any inquiries, please contact
-          <u><i>qk.backend@gmail.com</i></u> for support
+          <u><i>dan1314705@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
@@ -645,7 +645,7 @@ public class TemplateMappingHelper
         <p class=""support"">
           Thank you for your interest in the services of <b><i>Camera service platform</i></b
           >, for any inquiries, please contact
-          <u><i>qk.backend@gmail.com</i></u> for support
+          <u><i>dan1314705@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>
@@ -806,7 +806,7 @@ public class TemplateMappingHelper
         <p class=""support"">
           Thank you for your interest in the services of <b><i>Camera service platform</i></b
           >, for any inquiries, please contact
-          <u><i>qk.backend@gmail.com</i></u> for support
+          <u><i>dan1314705@gmail.com</i></u> for support
         </p>
         <div class=""signature"">
           <p>Best regards,</p>

@@ -1,5 +1,11 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
+ 
+using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
+using Microsoft.AspNetCore.Http;
+ 
 using Microsoft.AspNetCore.Mvc;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
@@ -14,7 +20,17 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             _orderService = orderService;
         }
+        [HttpGet("get-all-order")]
+        public async Task<AppActionResult> GetAllOrder(int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetAllOrder(pageIndex, pageSize);
+        }
 
+        [HttpGet("get-order-by-order-type")]
+        public async Task<AppActionResult> GetOrderByOrderType(OrderType type, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetOrderByOrderType(type, pageIndex, pageSize);
+        }
         [HttpPost("create-order-buy")]
         public async Task<IActionResult> CreateOrder(CreateOrderBuyRequest request)
         {

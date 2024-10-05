@@ -27,7 +27,12 @@ public class MappingConfig
             ///Mapper Order
             _ = config.CreateMap<CreateOrderBuyRequest, Order>();
             ///Mapper OrderDetail
-            _ = config.CreateMap<OrderDetailRequest, OrderDetail>();
+ 
+            config.CreateMap<OrderDetailRequest, OrderDetail>();
+            ///Mapper Rating
+            config.CreateMap<RatingRequest, Rating>();
+            config.CreateMap<Rating, RatingResponse>();
+ 
         });
         // Trong class MappingConfig
 

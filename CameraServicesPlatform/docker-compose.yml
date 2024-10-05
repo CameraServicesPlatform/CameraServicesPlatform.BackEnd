@@ -1,8 +1,8 @@
-version: '3.8'
+version: '3.3'
 
 services:
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+    image: mcr.microsoft.com/mssql/server:2022-latest
     hostname: sqlserver-db
     container_name: sqlserver
     networks:
@@ -11,28 +11,27 @@ services:
       SA_PASSWORD: "sa@root123@"
       ACCEPT_EULA: "Y"
     ports:
-      - "1433"
+      - "1444:1433"
     volumes:
-      - sqlserverdata:/var/opt/mssql/data
-      - mssql-log:/var/opt/mssql/log
-      - mssql-secrets:/var/opt/mssql/secrets
+      - ./containers/capstone.backend.db:/var/opt/mssql/data
 
-  camera.api:  # Updated service name to match the image name
+  camera.api: 
+    image: "${DOCKER_REGISTRY:-}camera.api"
     build:
-      context: .
+      context: .  
       dockerfile: CameraServicesPlatform.BackEnd.API/Dockerfile
     container_name: camera.api
-
     networks:
       - demo
     ports:
       - "2602:8080"
-      - "443:443"
+      - "443:8081"
     depends_on:
       - sqlserver
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DBVPS=Server=14.225.220.108;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DBVPS: "Server=14.225.220.108,1433;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;"
+      ConnectionStrings__DBDocker: "Server=14.225.220.108,1433;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;"
 
 networks:
   demo:

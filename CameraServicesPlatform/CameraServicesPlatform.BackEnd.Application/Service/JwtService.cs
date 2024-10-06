@@ -75,10 +75,11 @@ public class JwtService : GenericBackendService, IJwtService
                 claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.ToUpper())));
 
                 var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfiguration.Key!));
+                var issuer = _jwtConfiguration.Issuer.FirstOrDefault() ?? throw new InvalidOperationException("Issuer is not configured.");
                 var token = new JwtSecurityToken(
-                    _jwtConfiguration.Issuer,
+                    issuer,
                     _jwtConfiguration.Audience,
-                    expires: utility!.GetCurrentDateInTimeZone().AddDays(1),
+                    expires: utility!.GetCurrentDateInTimeZone().AddDays(30),
                     claims: claims,
                     signingCredentials: new SigningCredentials(authenKey, SecurityAlgorithms.HmacSha512Signature)
                 );
@@ -120,13 +121,13 @@ public class JwtService : GenericBackendService, IJwtService
                         new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                         new("AccountId", user.Id)
                     };
-                    claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+                    claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.ToUpper())));
                     var authenKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtConfiguration.Key!));
-                    var token = new JwtSecurityToken
-                    (
-                        _jwtConfiguration.Issuer,
+                    var issuer = _jwtConfiguration.Issuer.FirstOrDefault() ?? throw new InvalidOperationException("Issuer is not configured.");
+                    var token = new JwtSecurityToken(
+                        issuer,
                         _jwtConfiguration.Audience,
-                        expires: utility!.GetCurrentDateInTimeZone().AddDays(1),
+                        expires: utility!.GetCurrentDateInTimeZone().AddDays(30),
                         claims: claims,
                         signingCredentials: new SigningCredentials(authenKey, SecurityAlgorithms.HmacSha512Signature)
                     );

@@ -27,10 +27,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public string? Reason { get; set; }
 
-        // Foreign key for the Account that handled this report
-        [ForeignKey(nameof(Account))]
-        public Guid? AccountID { get; set; }
+        
+        public String? AccountID { get; set; }
 
+        [ForeignKey(nameof(Account))]
         public Account? HandledBy { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

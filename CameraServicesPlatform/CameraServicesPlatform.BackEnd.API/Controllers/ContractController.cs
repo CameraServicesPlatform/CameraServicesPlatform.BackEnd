@@ -99,3 +99,4 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _contractService.GetAllContracts(pageIndex, pageSize);
         }
     }
+}

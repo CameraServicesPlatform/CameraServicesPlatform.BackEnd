@@ -52,13 +52,13 @@ public class ProductController : ControllerBase
         return await _productService.CreateProduct(productResponse);
     }
 
-    [HttpPost("update-product")]
+    [HttpPut("update-product")]
     public async Task<AppActionResult> UpdateProduct(ProductUpdateResponseDto productResponse)
     {
         return await _productService.UpdateProduct(productResponse);
     }
 
-    [HttpPost("delete-product")]
+    [HttpDelete("delete-product")]
     public async Task<AppActionResult> DeleteProduct(string productId)
     {
         return await _productService.DeleteProduct(productId);

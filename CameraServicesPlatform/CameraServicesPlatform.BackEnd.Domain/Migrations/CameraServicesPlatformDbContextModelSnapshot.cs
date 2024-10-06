@@ -51,11 +51,17 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
+                    b.Property<int?>("Hobby")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("Job")
+                        .HasColumnType("int");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -347,17 +353,17 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("AccountID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Account")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AccountID")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("HandledById")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
@@ -379,7 +385,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("ProductReportID");
 
-                    b.HasIndex("HandledById");
+                    b.HasIndex("Account");
 
                     b.HasIndex("ProductID");
 
@@ -598,29 +604,17 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<double>("DiscountAmount")
                         .HasColumnType("float");
 
-                    b.Property<int>("DiscountType")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("ExpirationDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("MaxUsageLimit")
-                        .HasColumnType("int");
-
-                    b.Property<double?>("MinOrderAmount")
-                        .HasColumnType("float");
-
                     b.Property<Guid?>("SupplierID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("UsagePerCustomer")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("ValidFrom")
                         .HasColumnType("datetime2");
@@ -692,6 +686,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<int>("Gender")
                         .HasColumnType("int");
 
+                    b.Property<int?>("Hobby")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -703,6 +700,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<bool?>("IsVerifiedEmail")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("Job")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("JoinedAt")
                         .HasColumnType("datetime2");
@@ -988,8 +988,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<double>("AccountBalance")
                         .HasColumnType("float");
 
-                    b.Property<Guid>("AccountID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("AccountID")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("BlockReason")
                         .HasColumnType("nvarchar(max)");
@@ -1191,7 +1191,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "HandledBy")
                         .WithMany()
-                        .HasForeignKey("HandledById");
+                        .HasForeignKey("Account");
 
                     b.HasOne("Product", "Product")
                         .WithMany()

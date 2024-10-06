@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Account;
 using Microsoft.AspNetCore.Identity;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
@@ -11,6 +12,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
+
+        public JobStatus? Job { get; set; }
+        public HobbyStatus? Hobby { get; set; }
 
         public Gender Gender { get; set; }
         public bool IsDeleted { get; set; } = false;

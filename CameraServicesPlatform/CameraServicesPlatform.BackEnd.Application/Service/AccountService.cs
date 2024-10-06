@@ -498,7 +498,7 @@ public class AccountService : GenericBackendService, IAccountService
 
         if (user.RefreshTokenExpiryTime <= utility!.GetCurrentDateInTimeZone())
         {
-            user.RefreshTokenExpiryTime = utility.GetCurrentDateInTimeZone().AddDays(1);
+            user.RefreshTokenExpiryTime = utility.GetCurrentDateInTimeZone().AddDays(30);
             user.RefreshToken = jwtService.GenerateRefreshToken();
         }
 

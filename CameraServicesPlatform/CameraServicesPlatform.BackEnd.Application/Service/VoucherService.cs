@@ -143,10 +143,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 voucherExist.VourcherCode = voucherResponse.VourcherCode;
                 voucherExist.Description = voucherResponse.Description;
                 voucherExist.DiscountAmount = voucherResponse.DiscountAmount;
-                voucherExist.DiscountType = voucherResponse.DiscountType;
+                /*voucherExist.DiscountType = voucherResponse.DiscountType;
                 voucherExist.MaxUsageLimit = voucherResponse.MaxUsageLimit;
                 voucherExist.UsagePerCustomer = voucherResponse.UsagePerCustomer;
-                voucherExist.MinOrderAmount = voucherResponse.MinOrderAmount;
+                voucherExist.MinOrderAmount = voucherResponse.MinOrderAmount;*/
                 voucherExist.ValidFrom = voucherResponse.ValidFrom;
                 voucherExist.ExpirationDate = voucherResponse.ExpirationDate;
                 voucherExist.IsActive = voucherResponse.IsActive;
@@ -182,10 +182,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     VourcherCode = voucherResponse.VourcherCode,
                     Description = voucherResponse.Description,
                     DiscountAmount = voucherResponse.DiscountAmount,
-                    DiscountType = voucherResponse.DiscountType,
+                    /*DiscountType = voucherResponse.DiscountType,
                     MaxUsageLimit = voucherResponse.MaxUsageLimit,
                     UsagePerCustomer = voucherResponse.UsagePerCustomer,
-                    MinOrderAmount = voucherResponse.MinOrderAmount,
+                    MinOrderAmount = voucherResponse.MinOrderAmount,*/
                     ValidFrom = voucherResponse.ValidFrom,
                     ExpirationDate = voucherResponse.ExpirationDate
                 };

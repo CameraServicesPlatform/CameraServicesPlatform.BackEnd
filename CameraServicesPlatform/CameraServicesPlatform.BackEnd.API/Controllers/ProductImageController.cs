@@ -30,13 +30,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _productImageService.CreateProductImage(productImageResponse);
         }
 
-        [HttpPost("update--product-image")]
+        [HttpPut("update--product-image")]
         public async Task<AppActionResult> UpdateProductImage(ProductImageUpdateDto productImageResponse)
         {
             return await _productImageService.UpdateProductImage(productImageResponse);
         }
 
-        [HttpPost("delete--product-image")]
+        [HttpDelete("delete--product-image")]
         public async Task<AppActionResult> DeleteProductImage(string productImageId)
         {
             return await _productImageService.DeleteProductImage(productImageId);

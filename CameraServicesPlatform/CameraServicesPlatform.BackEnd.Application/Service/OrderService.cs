@@ -20,6 +20,7 @@ using System.Threading.Tasks;
  
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
+using MailKit.Search;
 
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
@@ -287,6 +288,54 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     await Task.Delay(100);
                     await _unitOfWork.SaveChangesAsync();
                 }
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetOrderOfSupplier(Guid SupplierID, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Product, bool>>? filter = null;
+
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    x => x.SupplierID == SupplierID,
+                    pageIndex,
+                    pageSize
+                );
+
+                result.Result = pagedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetOrderByMemberID(Guid MemberID, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Product, bool>>? filter = null;
+
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    x => x.MemberID == MemberID,
+                    pageIndex,
+                    pageSize
+                );
+
+                result.Result = pagedResult;
+                result.IsSuccess = true;
             }
             catch (Exception ex)
             {

@@ -7,6 +7,7 @@ using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -82,8 +83,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var result = new AppActionResult();
             try
             {
-                var rating = await _ratingRepository.GetByExpression(x => x.RatingID == ratingId);
-
+                //var rating = await _ratingRepository.GetByExpression(x => x.RatingID == ratingId);
+                var rating = await _ratingRepository.GetById(ratingId);
                 if (rating == null)
                 {
                     result = BuildAppActionResultError(result, "Không tìm thấy đánh giá");
@@ -203,6 +204,30 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 result.IsSuccess = true;
                 result = BuildAppActionResultError(result, "Xóa phản hồi thành công");
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAllRating(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Rating, bool>>? filter = null;
+
+                var pagedResult = await _ratingRepository.GetAllDataByExpression(
+                    filter: null,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize
+                );
+
+                result.Result = pagedResult;
+                result.IsSuccess = true;
             }
             catch (Exception ex)
             {

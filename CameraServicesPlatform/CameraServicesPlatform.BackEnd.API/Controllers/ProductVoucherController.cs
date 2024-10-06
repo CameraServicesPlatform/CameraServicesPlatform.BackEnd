@@ -30,7 +30,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _productVoucherService.GetProductVoucherById(id, pageIndex, pageSize);
         }
 
-        [HttpGet("get-product-voucher-by-name")]
+        [HttpGet("get-product-voucher-by-product-id")]
         public async Task<AppActionResult> GetProductVoucherByProductId(string ProductId, int pageIndex = 1, int pageSize = 10)
         {
             return await _productVoucherService.GetProductVoucherByProductId(ProductId, pageIndex, pageSize);
@@ -43,13 +43,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _productVoucherService.CreateProductVoucher(voucherResponse);
         }
 
-        [HttpPost("update-product-voucher")]
+        [HttpPut("update-product-voucher")]
         public async Task<AppActionResult> UpdateProductVoucher(ProductVoucherUpdateDto voucherResponse)
         {
             return await _productVoucherService.UpdateProductVoucher(voucherResponse);
         }
 
-        [HttpPost("delete-product-voucher")]
+        [HttpDelete("delete-product-voucher")]
         public async Task<AppActionResult> DeleteProductVoucher(string voucherId)
         {
             return await _productVoucherService.DeleteProductVoucher(voucherId);

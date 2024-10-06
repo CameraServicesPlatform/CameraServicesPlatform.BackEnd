@@ -36,13 +36,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _productSpecificationService.CreateProductSpecification(productSpecificationResponse);
         }
 
-        [HttpPost("update-product-specification")]
+        [HttpPut("update-product-specification")]
         public async Task<AppActionResult> UpdateProductSpecification(ProductSpecificationUpdateDto productSpecificationResponse)
         {
             return await _productSpecificationService.UpdateProductSpecification(productSpecificationResponse);
         }
 
-        [HttpPost("delete-product-specification")]
+        [HttpDelete("delete-product-specification")]
         public async Task<AppActionResult> DeleteProductSpecification(string productSpecificationId)
         {
             return await _productSpecificationService.DeleteProductSpecification(productSpecificationId);

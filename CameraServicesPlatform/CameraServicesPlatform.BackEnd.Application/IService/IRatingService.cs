@@ -14,5 +14,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> UpdateRating(Guid ratingId, RatingRequest request);
         Task<AppActionResult> DeleteRating(Guid ratingId);
         Task<AppActionResult> GetRatingsByProduct(Guid productId, int pageIndex, int pageSize);
+        Task<AppActionResult> GetAllRating(int pageIndex, int pageSize);
+        Task<AppActionResult> GetRatingById(Guid ratingId);
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Category;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -25,10 +26,12 @@ public class Product
 
     public string? ProductDescription { get; set; }
 
-    public double Price { get; set; }
+    public double? PriceRent { get; set; }
+    public double? PriceBuy { get; set; }
 
 
-    public string? Brand { get; set; }
+
+    public BrandEnum? Brand { get; set; }
 
     public string Quality { get; set; }
 

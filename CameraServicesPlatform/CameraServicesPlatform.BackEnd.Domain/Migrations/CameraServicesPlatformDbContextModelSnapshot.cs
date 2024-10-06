@@ -151,6 +151,33 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.ToTable("BankInformation");
                 });
 
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models.ProductVoucher", b =>
+                {
+                    b.Property<Guid>("ProductVoucherID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("ProductID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("VourcherID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ProductVoucherID");
+
+                    b.HasIndex("ProductID");
+
+                    b.HasIndex("VourcherID");
+
+                    b.ToTable("ProductVouchers");
+                });
+
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Category", b =>
                 {
                     b.Property<Guid>("CategoryID")
@@ -931,8 +958,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Brand")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("Brand")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("CategoryID")
                         .HasColumnType("uniqueidentifier");
@@ -940,7 +967,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<double>("Price")
+                    b.Property<double?>("PriceBuy")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("PriceRent")
                         .HasColumnType("float");
 
                     b.Property<string>("ProductDescription")
@@ -1130,6 +1160,25 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .IsRequired();
 
                     b.Navigation("Member");
+                });
+
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models.ProductVoucher", b =>
+                {
+                    b.HasOne("Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Vourcher", "Vourcher")
+                        .WithMany()
+                        .HasForeignKey("VourcherID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Vourcher");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Order", b =>

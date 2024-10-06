@@ -44,5 +44,17 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPut("update-order-status-completed/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderStatusCompleted(Guid orderId)
+        {
+            return await _orderService.UpdateOrderStatus(orderId);
+        }
+
+        [HttpPut("cancel-order/{orderId}")]
+        public async Task<AppActionResult> CancelOrder(Guid orderId)
+        {
+            return await _orderService.CancelOrder(orderId);
+        }
     }
 }

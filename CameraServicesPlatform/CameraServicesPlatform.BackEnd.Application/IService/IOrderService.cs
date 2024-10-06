@@ -10,6 +10,9 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<OrderResponse> CreateOrderBuy(CreateOrderBuyRequest request);
         Task<AppActionResult> GetOrderByOrderType(OrderType orderType, int pageIndex, int pageSize);
         Task<AppActionResult> GetAllOrder(int pageIndex, int pageSize);
+        Task<AppActionResult> UpdateOrderStatus(Guid OrderID);
+        Task<AppActionResult> CancelOrder(Guid OrderID);
+
 
 
     }

@@ -11,9 +11,9 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
     public interface IContractService
     {
         Task<AppActionResult> CreateContract(CreateContractRequestDTO request);
-        Task<AppActionResult> UpdateContract(Guid contractId, ContractRequestDTO request);
-        Task<AppActionResult> DeleteContract(Guid contractId);
-        Task<AppActionResult> GetContractById(Guid contractId);
+        Task<AppActionResult> UpdateContract(string contractId, ContractRequestDTO request);
+        Task<AppActionResult> DeleteContract(string contractId);
+        Task<AppActionResult> GetContractById(string contractId);
         Task<AppActionResult> GetAllContracts(int pageIndex, int pageSize);
     }
 }

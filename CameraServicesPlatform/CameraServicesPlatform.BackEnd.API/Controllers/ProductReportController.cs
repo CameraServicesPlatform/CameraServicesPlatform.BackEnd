@@ -42,13 +42,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _productReportService.CreateProductReport(productReportResponse);
         }
 
-        [HttpPost("update-product-report")]
+        [HttpPut("update-product-report")]
         public async Task<AppActionResult> UpdateProductReport(ProductReportUpdateDto productReportResponse)
         {
             return await _productReportService.UpdateProductReport(productReportResponse);
         }
 
-        [HttpPost("delete-product-report")]
+        [HttpDelete("delete-product-report")]
         public async Task<AppActionResult> DeleteProductReport(string productReportId)
         {
             return await _productReportService.DeleteProductReport(productReportId);

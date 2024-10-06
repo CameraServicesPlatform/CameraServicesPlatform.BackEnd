@@ -9,6 +9,6 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
 {
     public interface IOrderDetailService
     {
-        Task<AppActionResult> GetOrderDetailsByOrderId(Guid orderId, int pageIndex, int pageSize);
+        Task<AppActionResult> GetOrderDetailsByOrderId(string orderId, int pageIndex, int pageSize);
     }
 }

@@ -29,14 +29,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<AppActionResult> GetOrderDetailsByOrderId(Guid orderId, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetOrderDetailsByOrderId(string orderId, int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
             try
             {
+
+                if (!Guid.TryParse(orderId, out Guid OrderId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
                 // Giả sử phương thức trả về PagedResult<OrderDetail>
                 var orderDetailsPagedResult = await _orderDetailRepository.GetAllDataByExpression(
-                    x => x.OrderID == orderId,
+                    x => x.OrderID == OrderId,
                     pageNumber: pageIndex,
                     pageSize: pageSize
                 );

@@ -3,25 +3,17 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
- 
-using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Identity;
-using OfficeOpenXml.Packaging.Ionic.Zip;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
- 
-using CameraServicesPlatform.BackEnd.Domain.Models;
-using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
-using MailKit.Search;
-using StackExchange.Redis;
+
 
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
@@ -208,8 +200,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Order, bool>>? filter = null;
-
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     x => x.OrderType == orderType,
                     pageIndex,

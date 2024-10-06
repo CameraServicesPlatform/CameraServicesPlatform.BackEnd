@@ -25,8 +25,8 @@ public class MappingConfig
      .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address));
 
             ///Mapper Order
-            _ = config.CreateMap<CreateOrderBuyRequest, Order>();
-            _ = config.CreateMap<CreateOrderRentRequest, Order>();
+            config.CreateMap<CreateOrderBuyRequest, Order>();
+            config.CreateMap<CreateOrderRentRequest, Order>();
 
             ///Mapper OrderDetail
 

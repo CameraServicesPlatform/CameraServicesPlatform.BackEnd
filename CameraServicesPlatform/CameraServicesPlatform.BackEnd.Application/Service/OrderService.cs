@@ -183,7 +183,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = null;
+                Expression<Func<Order, bool>>? filter = null;
 
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     filter: null,
@@ -207,7 +207,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = null;
+                Expression<Func<Order, bool>>? filter = null;
 
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     x => x.OrderType == orderType,
@@ -302,7 +302,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = null;
+                Expression<Func<Order, bool>>? filter = null;
 
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     x => x.SupplierID == SupplierID,
@@ -326,7 +326,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = null;
+                Expression<Func<Order, bool>>? filter = null;
 
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     x => x.MemberID == MemberID,

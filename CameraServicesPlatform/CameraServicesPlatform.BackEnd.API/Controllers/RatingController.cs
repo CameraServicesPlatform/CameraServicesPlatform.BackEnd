@@ -79,6 +79,18 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _ratingService.GetRatingsByProduct(productId, pageIndex, pageSize);
         }
+
+        [HttpGet("get-ratings-by-rating-id")]
+        public async Task<AppActionResult> GetRatingsByRatingId(Guid ratingId)
+        {
+            return await _ratingService.GetRatingById(ratingId);
+        }
+
+        [HttpGet("get-all-ratings")]
+        public async Task<AppActionResult> GetAllRatings( int pageIndex = 1, int pageSize = 10)
+        {
+            return await _ratingService.GetAllRating(pageIndex, pageSize);
+        }
     }
 }
 

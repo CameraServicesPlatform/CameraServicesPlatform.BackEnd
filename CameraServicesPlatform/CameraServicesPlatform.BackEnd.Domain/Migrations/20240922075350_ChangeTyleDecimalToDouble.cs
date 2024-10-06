@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿/*using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -18,14 +18,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 oldClrType: typeof(Guid),
                 oldType: "uniqueidentifier");
 
-            migrationBuilder.AlterColumn<double>(
-                name: "MinOrderAmount",
-                table: "Vourchers",
-                type: "float",
-                nullable: true,
-                oldClrType: typeof(decimal),
-                oldType: "decimal(18,2)",
-                oldNullable: true);
+           
 
             migrationBuilder.AlterColumn<string>(
                 name: "VNPAYTransactionID",
@@ -307,14 +300,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 oldType: "uniqueidentifier",
                 oldNullable: true);
 
-            migrationBuilder.AlterColumn<decimal>(
-                name: "MinOrderAmount",
-                table: "Vourchers",
-                type: "decimal(18,2)",
-                nullable: true,
-                oldClrType: typeof(double),
-                oldType: "float",
-                oldNullable: true);
+            
+
 
             migrationBuilder.AlterColumn<string>(
                 name: "VNPAYTransactionID",
@@ -594,3 +581,4 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         }
     }
 }
+*/

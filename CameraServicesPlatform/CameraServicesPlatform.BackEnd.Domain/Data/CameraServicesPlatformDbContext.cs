@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Models;
+using CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,7 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductSpecification> ProductSpecifications { get; set; }
         public DbSet<ProductImage> ProductImages { get; set; }
+        public DbSet<ProductVoucher> ProductVouchers { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
         public DbSet<Contract> Contracts { get; set; }
@@ -68,8 +70,6 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
                     NormalizedName = "Supplier"
                 }
             );
-
-
         }
     }
 }

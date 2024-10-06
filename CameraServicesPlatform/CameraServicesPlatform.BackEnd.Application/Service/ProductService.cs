@@ -82,7 +82,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     CategoryID = productResponse.CategoryID,
                     ProductName = productResponse.ProductName,
                     ProductDescription = productResponse.ProductDescription,
-                    Price = productResponse.Price,
+                    PriceBuy = productResponse.PriceBuy,
+                    PriceRent = productResponse.PriceRent,
                     Brand = productResponse.Brand,
                     Quality = "moi",
                     Status = productResponse.Status,
@@ -138,7 +139,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 productExist.CategoryID = productResponse.CategoryID;
                 productExist.ProductName = productResponse.ProductName;
                 productExist.ProductDescription = productResponse.ProductDescription;
-                productExist.Price = productResponse.Price;
+                if(productResponse.PriceBuy != null)
+                {
+                    productExist.PriceBuy = productResponse.PriceBuy;
+                }
+                if (productResponse.PriceRent != null)
+                {
+                    productExist.PriceRent = productResponse.PriceRent;
+                }
                 productExist.Brand = productResponse.Brand;
                 productExist.Quality = productResponse.Quality;
                 productExist.Status = productResponse.Status;

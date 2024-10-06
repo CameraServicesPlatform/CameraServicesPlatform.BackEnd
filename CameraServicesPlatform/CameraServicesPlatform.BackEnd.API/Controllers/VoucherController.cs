@@ -29,7 +29,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _voucherService.GetVoucherById(id, pageIndex, pageSize);
         }
 
-        [HttpGet("get-voucher-by-name")]
+        [HttpGet("get-voucher-by-supplier-id")]
         public async Task<AppActionResult> GetVoucherBySupplierId(string supplierId, int pageIndex = 1, int pageSize = 10)
         {
             return await _voucherService.GetVoucherBySupplierId(supplierId, pageIndex, pageSize);

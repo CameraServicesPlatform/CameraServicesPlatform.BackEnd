@@ -15,17 +15,22 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     public class RatingService: GenericBackendService, IRatingService
     {
         private readonly IRepository<Rating> _ratingRepository;
+        private readonly IRepository<Order> _orderRepository;
+        private readonly IRepository<OrderDetail> _orderDetailRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         public RatingService(
             IRepository<Rating> ratingRepository,
-           
+            IRepository<Order> orderRepository,
+            IRepository<OrderDetail> orderDetailRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
             _ratingRepository = ratingRepository;
+            _orderRepository = orderRepository;
+            _orderDetailRepository = orderDetailRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -37,6 +42,21 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 if (request.RatingValue > 5)
                 {
                     result = BuildAppActionResultError(result, "giá trị đánh không được lớn hơn 5");
+                    return result;
+                }
+                var hasOrder = await _orderRepository.GetByExpression(x => x.MemberID == request.AccountID);
+
+                if (hasOrder == null)
+                {
+                    result = BuildAppActionResultError(result, "Không thể đánh giá sản phẩm mà bạn chưa đặt hàng");
+                    return result;
+                }
+
+                var hasOrderDetail = await _orderDetailRepository.GetByExpression(x => x.ProductID == request.ProductID);
+
+                if (hasOrderDetail == null)
+                {
+                    result = BuildAppActionResultError(result, "Không thể đánh giá sản phẩm mà bạn chưa đặt hàng");
                     return result;
                 }
 

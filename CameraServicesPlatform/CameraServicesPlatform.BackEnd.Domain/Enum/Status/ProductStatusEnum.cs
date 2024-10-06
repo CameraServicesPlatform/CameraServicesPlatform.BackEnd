@@ -4,7 +4,8 @@ public enum ProductStatusEnum
     Available,
     Rented,
     Sold,
-     Shipping
- 
+     Shipping,
+    discontinuedProduct
+
 }
 

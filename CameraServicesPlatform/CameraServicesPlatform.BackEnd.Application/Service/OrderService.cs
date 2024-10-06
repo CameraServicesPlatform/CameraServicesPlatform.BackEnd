@@ -19,7 +19,8 @@ using System.Text;
 using System.Threading.Tasks;
  
 using CameraServicesPlatform.BackEnd.Domain.Models;
- 
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
+
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -27,13 +28,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IRepository<Order> _orderRepository;
         private readonly IRepository<OrderDetail> _orderDetailRepository;
+        private readonly IRepository<Product> _productRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         public OrderService(
             IRepository<Order> orderRepository,
             IRepository<OrderDetail> orderDetailRepository,
-            IRepository<Account> accountRepository,
-            IRepository<Supplier> supplierRepository,
             IRepository<Product> productRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -42,6 +42,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
+            _productRepository = productRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -77,6 +78,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _orderDetailRepository.InsertRange(orderDetails);
                 await Task.Delay(200);
                 await _unitOfWork.SaveChangesAsync();
+
+                foreach (var orderDetailRequest in request.OrderDetailRequests)
+                {
+                    var product = await _productRepository.GetById(orderDetailRequest.ProductID);
+                    if (product != null)
+                    {
+                        product.Status = ProductStatusEnum.Shipping;  
+                        _productRepository.Update(product);
+                    }
+                }
+                await Task.Delay(100);
+                await _unitOfWork.SaveChangesAsync();
+                result = _mapper.Map<OrderResponse>(createdOrder);
             }
             catch (Exception ex)
             {

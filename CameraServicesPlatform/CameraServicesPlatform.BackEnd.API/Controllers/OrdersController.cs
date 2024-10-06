@@ -31,6 +31,19 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.GetOrderByOrderType(type, pageIndex, pageSize);
         }
+
+        [HttpGet("get-order-of-supplierId")]
+        public async Task<AppActionResult> GetOrderByOfSupplier(Guid SupplierId, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetOrderOfSupplier(SupplierId, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-order-of-member")]
+        public async Task<AppActionResult> GetOrderByMemberId(Guid MemberId, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetOrderByMemberID(MemberId, pageIndex, pageSize);
+        }
+
         [HttpPost("create-order-buy")]
         public async Task<IActionResult> CreateOrder(CreateOrderBuyRequest request)
         {
@@ -43,6 +56,18 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPut("update-order-status-completed/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderStatusCompleted(Guid orderId)
+        {
+            return await _orderService.UpdateOrderStatus(orderId);
+        }
+
+        [HttpPut("cancel-order/{orderId}")]
+        public async Task<AppActionResult> CancelOrder(Guid orderId)
+        {
+            return await _orderService.CancelOrder(orderId);
         }
     }
 }

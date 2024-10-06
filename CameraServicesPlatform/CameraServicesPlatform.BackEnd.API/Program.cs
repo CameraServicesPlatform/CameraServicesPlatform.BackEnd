@@ -25,6 +25,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InstallerServicesInAssembly(builder.Configuration); // Assuming this installs your services
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IRatingService, RatingService>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddScoped<IContractService, ContractService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<ISmsService, SmsService>();
 
 // Configure DbContext with SQL Server (update your connection string as needed)

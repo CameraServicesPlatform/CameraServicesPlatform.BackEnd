@@ -17,24 +17,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             _contractService = contractService;
         }
 
-        [HttpPost("create-contract")]
-        public async Task<IActionResult> CreateContract([FromBody] ContractRequestDTO request)
-        {
-            try
-            {
-                var response = await _contractService.CreateContract(request);
-                if (!response.IsSuccess)
-                {
-                    return BadRequest(response);
-                }
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+        
 
         [HttpPut("update-contract-by-id")]
         public async Task<IActionResult> UpdateContract(Guid contractId, [FromBody] ContractRequestDTO request)

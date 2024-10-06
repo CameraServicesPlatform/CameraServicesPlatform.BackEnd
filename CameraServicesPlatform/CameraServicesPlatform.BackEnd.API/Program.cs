@@ -67,10 +67,12 @@ void ApplyMigration()
 {
     using (var scope = app.Services.CreateScope())
     {
-        var db = scope.ServiceProvider.GetRequiredService<CameraServicesPlatformDbContext>();
-        if (db.Database.GetPendingMigrations().Any())
         {
-            db.Database.Migrate();
+            var db = scope.ServiceProvider.GetRequiredService<CameraServicesPlatformDbContext>();
+            if (db.Database.GetPendingMigrations().Any())
+            {
+                db.Database.Migrate();
+            }
         }
     }
 }

@@ -18,15 +18,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public double DiscountAmount { get; set; }
 
-
-        public DiscountType DiscountType { get; set; }
-
-        public int? MaxUsageLimit { get; set; }
-
-        public int? UsagePerCustomer { get; set; }
-
-        public double? MinOrderAmount { get; set; }
-
         public DateTime ValidFrom { get; set; }
 
         public DateTime ExpirationDate { get; set; }

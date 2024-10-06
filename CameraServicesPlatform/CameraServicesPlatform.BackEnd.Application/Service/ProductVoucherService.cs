@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,14 +13,14 @@ using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
-    public class VoucherService : GenericBackendService, IVoucherService
+    public class ProductVoucherService : GenericBackendService, IProductVoucherService
     {
-        private readonly IRepository<Vourcher> _repository;
+        private readonly IRepository<ProductVoucher> _repository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public VoucherService(
-            IRepository<Vourcher> repository,
+        public ProductVoucherService(
+            IRepository<ProductVoucher> repository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
@@ -31,13 +32,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         }
 
         
-        public async Task<AppActionResult> GetAllVoucher(int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetAllProductVoucher(int pageIndex, int pageSize)
         {
-            var result = new AppActionResult();
-
+            AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Vourcher, bool>>? filter = null;
+                Expression<Func<ProductVoucher, bool>>? filter = null;
 
                 var pagedResult = await _repository.GetAllDataByExpression(
                     filter,
@@ -45,24 +45,27 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     null,
                     isAscending: true,
-                    null
+                    includes: new Expression<Func<ProductVoucher, object>>[]
+                    {
+                         a => a.Product,
+                         a => a.Vourcher
+                    }
                 );
 
-                // Set success result
                 result.Result = pagedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
             {
-
                 result = BuildAppActionResultError(result, ex.Message);
             }
 
             return result;
         }
 
-        public async Task<AppActionResult> GetVoucherById(string id, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductVoucherById(string id, int pageIndex, int pageSize)
         {
+
             AppActionResult result = new AppActionResult();
             try
             {
@@ -92,23 +95,22 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetVoucherBySupplierId(string supplierId, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductVoucherByProductId(string ProductId, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Vourcher, bool>>? filter = null;
-                Guid.TryParse(supplierId, out Guid Id);
-                if (!string.IsNullOrEmpty(supplierId))
+                if (!Guid.TryParse(ProductId, out Guid Id))
                 {
-                    filter = a => a.SupplierID == Id;
+                    result = BuildAppActionResultError(result, "Invalid Product Voucher ID format.");
+                    return result;
                 }
 
                 var pagedResult = await _repository.GetAllDataByExpression(
-                    filter,
+                    a => a.ProductID == Id,
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.DiscountAmount,
+                    null,
                     isAscending: true,
                     null
                 );
@@ -124,39 +126,30 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> UpdateVoucher(VoucherUpdateResponseDto voucherResponse)
+        public async Task<AppActionResult> UpdateProductVoucher(ProductVoucherUpdateDto productVoucherResponse)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                var voucherRepository = Resolve<IRepository<Vourcher>>();
+                var productVoucherRepository = Resolve<IRepository<ProductVoucher>>();
 
-                Vourcher voucherExist = await voucherRepository.GetById(voucherResponse.VourcherID);
+                ProductVoucher productVoucherExist = await productVoucherRepository.GetById(productVoucherResponse.ProductVoucherID);
 
-                if (voucherExist == null)
+                if (productVoucherExist == null)
                 {
                     result.IsSuccess = false;
                     return result;
                 }
 
-                voucherExist.SupplierID = voucherResponse.SupplierID;
-                voucherExist.VourcherCode = voucherResponse.VourcherCode;
-                voucherExist.Description = voucherResponse.Description;
-                voucherExist.DiscountAmount = voucherResponse.DiscountAmount;
-                /*voucherExist.DiscountType = voucherResponse.DiscountType;
-                voucherExist.MaxUsageLimit = voucherResponse.MaxUsageLimit;
-                voucherExist.UsagePerCustomer = voucherResponse.UsagePerCustomer;
-                voucherExist.MinOrderAmount = voucherResponse.MinOrderAmount;*/
-                voucherExist.ValidFrom = voucherResponse.ValidFrom;
-                voucherExist.ExpirationDate = voucherResponse.ExpirationDate;
-                voucherExist.IsActive = voucherResponse.IsActive;
-                voucherExist.UpdatedAt = DateTime.UtcNow;
-
-                await voucherRepository.Update(voucherExist);
+                productVoucherExist.ProductID = productVoucherResponse.ProductID;
+                productVoucherExist.VourcherID = productVoucherResponse.VourcherID;
+                productVoucherExist.UpdatedAt = DateTime.UtcNow;
+               
+                await productVoucherRepository.Update(productVoucherExist);
 
                 await _unitOfWork.SaveChangesAsync();
 
-                result.Result = voucherExist;
+                result.Result = productVoucherExist;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -167,33 +160,24 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
-
-        public async Task<AppActionResult> CreateVoucher(VoucherResponseDto voucherResponse)
+        public async Task<AppActionResult> CreateProductVoucher(ProductVoucherResponseDto voucherResponse)
         {
             AppActionResult result = new AppActionResult();
 
             try
             {
-                var listVoucher = Resolve<IRepository<Vourcher>>();
-                Vourcher voucher = new Vourcher()
+                var listProductVoucher = Resolve<IRepository<ProductVoucher>>();
+                ProductVoucher productVoucher = new ProductVoucher()
                 {
-                    VourcherID = Guid.NewGuid(),
-                    SupplierID = voucherResponse.SupplierID,
-                    VourcherCode = voucherResponse.VourcherCode,
-                    Description = voucherResponse.Description,
-                    DiscountAmount = voucherResponse.DiscountAmount,
-                    /*DiscountType = voucherResponse.DiscountType,
-                    MaxUsageLimit = voucherResponse.MaxUsageLimit,
-                    UsagePerCustomer = voucherResponse.UsagePerCustomer,
-                    MinOrderAmount = voucherResponse.MinOrderAmount,*/
-                    ValidFrom = voucherResponse.ValidFrom,
-                    ExpirationDate = voucherResponse.ExpirationDate
+                    ProductVoucherID = Guid.NewGuid(),
+                    ProductID = voucherResponse.ProductID,
+                    VourcherID = voucherResponse.VourcherID
                 };
 
-                await listVoucher.Insert(voucher);
+                await listProductVoucher.Insert(productVoucher);
                 await _unitOfWork.SaveChangesAsync();
 
-                result.Result = voucher;
+                result.Result = productVoucher;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -201,22 +185,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
-
         }
 
-
-
-        public async Task<AppActionResult> DeleteVoucher(string voucherId)
+        public async Task<AppActionResult> DeleteProductVoucher(string productVoucherId)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                var supplierRepository = Resolve<IRepository<Vourcher>>();
-                Guid.TryParse(voucherId, out Guid id);
-                await supplierRepository.DeleteById(id);
+                var productVoucherRepository = Resolve<IRepository<ProductVoucher>>();
+                Guid.TryParse(productVoucherId, out Guid id);
+                await productVoucherRepository.DeleteById(id);
                 await _unitOfWork.SaveChangesAsync();
                 result.IsSuccess = true;
-                result.Result = "Voucher deleted successfully.";
+                result.Result = "Product Voucher deleted successfully.";
             }
             catch (Exception ex)
             {
@@ -226,6 +207,5 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-       
     }
 }

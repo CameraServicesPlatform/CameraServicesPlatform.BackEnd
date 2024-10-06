@@ -31,6 +31,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DBVPS: "Server=14.225.220.108,1433;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;"
+      ConnectionStrings__DBDocker: "Server=14.225.220.108,1433;Database=CameraCapstone;User Id=sa;Password=root123@;TrustServerCertificate=True;"
 
 networks:
   demo:

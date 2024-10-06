@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Account;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,7 +13,8 @@ public class Member
     public string Address { get; set; } = null!;
     public string PhoneNumber { get; set; } = null!;
     public string Email { get; set; } = null!;
-
+    public JobStatus? Job { get; set; }
+    public HobbyStatus? Hobby { get; set; }
     public Gender Gender { get; set; }
     public DateTime Dob { get; set; }
     public bool IsAdult { get; set; }

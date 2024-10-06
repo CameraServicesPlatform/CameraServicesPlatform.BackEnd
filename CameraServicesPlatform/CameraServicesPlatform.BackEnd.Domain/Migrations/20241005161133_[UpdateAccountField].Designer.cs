@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.DAO.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    partial class CameraServicesPlatformDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241005161133_[UpdateAccountField]")]
+    partial class UpdateAccountField
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -353,17 +356,17 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Account")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("AccountID")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("AccountID")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("HandledById")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
@@ -385,7 +388,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("ProductReportID");
 
-                    b.HasIndex("Account");
+                    b.HasIndex("HandledById");
 
                     b.HasIndex("ProductID");
 
@@ -1203,7 +1206,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "HandledBy")
                         .WithMany()
-                        .HasForeignKey("Account");
+                        .HasForeignKey("HandledById");
 
                     b.HasOne("Product", "Product")
                         .WithMany()

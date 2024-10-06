@@ -38,6 +38,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Gender = table.Column<int>(type: "int", nullable: false),
+                    Job = table.Column<int>(type: "int", nullable: false),
+                    Hobby = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     IsVerified = table.Column<bool>(type: "bit", nullable: false),
                     VerifyCode = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
@@ -117,10 +119,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     VourcherCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DiscountAmount = table.Column<decimal>(nullable: false),
-                    DiscountType = table.Column<int>(type: "int", nullable: false),
-                    MaxUsageLimit = table.Column<int>(type: "int", nullable: true),
-                    UsagePerCustomer = table.Column<int>(type: "int", nullable: true),
-                    MinOrderAmount = table.Column<decimal>(nullable: true),
                     ValidFrom = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -1486,6 +1484,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             migrationBuilder.DropTable(
                 name: "RentalPrice");
+           
         }
+
     }
 }

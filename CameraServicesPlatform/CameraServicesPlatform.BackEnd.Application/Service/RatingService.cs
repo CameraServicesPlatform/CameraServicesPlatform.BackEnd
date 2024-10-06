@@ -6,6 +6,7 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -78,13 +79,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
-        public async Task<AppActionResult> GetRatingById(Guid ratingId)
+        public async Task<AppActionResult> GetRatingById(string ratingId)
         {
             var result = new AppActionResult();
             try
             {
+                if (!Guid.TryParse(ratingId, out Guid RatingID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
                 //var rating = await _ratingRepository.GetByExpression(x => x.RatingID == ratingId);
-                var rating = await _ratingRepository.GetById(ratingId);
+                var rating = await _ratingRepository.GetById(RatingID);
                 if (rating == null)
                 {
                     result = BuildAppActionResultError(result, "Không tìm thấy đánh giá");
@@ -101,12 +107,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
-        public async Task<AppActionResult> GetRatingsByProduct(Guid productId, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetRatingsByProduct(string productId, int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
             try
             {
-                if (productId == Guid.Empty)
+                if (!Guid.TryParse(productId, out Guid RatingProductID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                if (RatingProductID == Guid.Empty)
                 {
                     result.IsSuccess = false;
                     result = BuildAppActionResultError(result, "Không tìm thấy sản phẩm");
@@ -114,7 +125,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var pagedResult = await _ratingRepository.GetAllDataByExpression(
-                    x => x.ProductID == productId,
+                    x => x.ProductID == RatingProductID,
                     pageNumber: pageIndex,
                     pageSize: pageSize
                 );
@@ -151,12 +162,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> UpdateRating(Guid ratingId, RatingRequest request)
+        public async Task<AppActionResult> UpdateRating(string ratingId, RatingRequest request)
         {
             var result = new AppActionResult();
             try
             {
-                var rating = await _ratingRepository.GetByExpression(x => x.RatingID == ratingId);
+                if (!Guid.TryParse(ratingId, out Guid RatingID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var rating = await _ratingRepository.GetByExpression(x => x.RatingID == RatingID);
 
                 if (rating == null)
                 {
@@ -186,12 +202,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
-        public async Task<AppActionResult> DeleteRating(Guid ratingId)
+        public async Task<AppActionResult> DeleteRating(string ratingId)
         {
             var result = new AppActionResult();
             try
             {
-                var rating = await _ratingRepository.GetByExpression(x => x.RatingID == ratingId);
+                if (!Guid.TryParse(ratingId, out Guid RatingID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var rating = await _ratingRepository.GetByExpression(x => x.RatingID == RatingID);
 
                 if (rating == null)
                 {

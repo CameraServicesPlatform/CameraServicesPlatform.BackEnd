@@ -11,11 +11,11 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
     public interface IRatingService
     {
         Task<AppActionResult> CreateRating(RatingRequest request);
-        Task<AppActionResult> UpdateRating(Guid ratingId, RatingRequest request);
-        Task<AppActionResult> DeleteRating(Guid ratingId);
-        Task<AppActionResult> GetRatingsByProduct(Guid productId, int pageIndex, int pageSize);
+        Task<AppActionResult> UpdateRating(string ratingId, RatingRequest request);
+        Task<AppActionResult> DeleteRating(string ratingId);
+        Task<AppActionResult> GetRatingsByProduct(string productId, int pageIndex, int pageSize);
         Task<AppActionResult> GetAllRating(int pageIndex, int pageSize);
-        Task<AppActionResult> GetRatingById(Guid ratingId);
+        Task<AppActionResult> GetRatingById(string ratingId);
 
     }
 }

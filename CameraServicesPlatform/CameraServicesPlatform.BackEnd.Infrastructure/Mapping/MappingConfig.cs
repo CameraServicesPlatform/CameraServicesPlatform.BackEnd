@@ -34,7 +34,9 @@ public class MappingConfig
             ///Mapper Rating
             config.CreateMap<RatingRequest, Rating>();
             config.CreateMap<Rating, RatingResponse>();
- 
+            //Return Detail
+            config.CreateMap<ReturnDetailRequest, ReturnDetail>();
+
         });
         // Trong class MappingConfig
 

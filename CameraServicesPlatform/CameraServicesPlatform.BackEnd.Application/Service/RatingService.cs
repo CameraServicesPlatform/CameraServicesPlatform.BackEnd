@@ -89,7 +89,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
-                //var rating = await _ratingRepository.GetByExpression(x => x.RatingID == ratingId);
+
                 var rating = await _ratingRepository.GetById(RatingID);
                 if (rating == null)
                 {

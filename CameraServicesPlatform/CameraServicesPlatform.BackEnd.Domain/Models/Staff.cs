@@ -8,6 +8,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid StaffID { get; set; }
 
+        public string Name { get; set; } = null!;
+
+
         [ForeignKey(nameof(Account))]
         public string AccountID { get; set; }
 
@@ -26,5 +29,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsAdmin { get; set; }
+        public string Img { get; set; } = null!;
+
     }
 }

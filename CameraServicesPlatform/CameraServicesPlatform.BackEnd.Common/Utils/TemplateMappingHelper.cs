@@ -7,7 +7,7 @@ public class TemplateMappingHelper
         VERIFICATION_CODE,
         FORGOTPASSWORD,
         CONTRACT_CODE,
-        TOURGUIDE_ACCOUNT_CREATION
+        STAFF_ACCOUNT_CREATION
     }
 
     public static string GetTemplateOTPEmail(ContentEmailType type, string body, string name)
@@ -502,7 +502,7 @@ public class TemplateMappingHelper
                 break;
 
                 return content;
-            case ContentEmailType.TOURGUIDE_ACCOUNT_CREATION:
+            case ContentEmailType.STAFF_ACCOUNT_CREATION:
                 content = @"
 <html>
   <head>

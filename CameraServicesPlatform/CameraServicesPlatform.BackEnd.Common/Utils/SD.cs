@@ -4,7 +4,22 @@ namespace CameraServicesPlatform.BackEnd.Common.Utils;
 public class SD
 {
     public static int MAX_RECORD_PER_PAGE = short.MaxValue;
-    public static string DEFAULT_PASSWORD = "Customer@123";
+    public static string DEFAULT_PASSWORD = "Member@123";
+    public class DefaultAccountInformation
+    {
+        public static string PASSWORD = "Staff123@";
+    }
+
+    public class RoleConvert
+    {
+        public static string ADMIN = "ADMIN";
+        public static string MEMBER = "MEMBER";
+        public static string STAFF = "STAFF";
+        public static string SUPPLIER = "SUPPLIER";
+
+    }
+
+
     public static string FormatDateTime(DateTime dateTime)
     {
         return dateTime.ToString("dd/MM/yyyy");
@@ -123,7 +138,17 @@ public class SD
 
 
     }
-
+    public class FirebasePathName
+    {
+        public static string SUPPLIER_PREFIX = "supplier/";
+        public static string NEWS_PREFIX = "news/";
+        public static string BLOG_PREFIX = "blog/";
+        public static string SAMPLE_HOUSE_PREFIX = "sample-house/";
+        public static string STAFF_PREFIX = "staff/";
+        public static string QR_PREFIX = "qr/";
+        public static string EVENT = "event/";
+        public static string SPEAKER = "speaker/";
+    }
 
 }
 

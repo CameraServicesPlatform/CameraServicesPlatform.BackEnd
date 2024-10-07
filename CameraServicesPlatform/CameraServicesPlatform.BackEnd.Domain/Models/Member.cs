@@ -25,6 +25,7 @@ public class Member
     public Account Account { get; set; }
 
     public DateTime JoinedAt { get; set; }
+    public string Img { get; set; } = null!;
 
     public bool IsActive { get; set; }
     public bool? IsVerfiedPhoneNumber { get; set; } = false;

@@ -1,7 +1,7 @@
 using CameraServicesPlatform.BackEnd.API.Installers;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.Service;
-using CameraServicesPlatform.BackEnd.DAO.Data;
+using CameraServicesPlatform.BackEnd.Data;
 using CameraServicesPlatform.BackEnd.Infrastructure.ServerHub;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -24,8 +24,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InstallerServicesInAssembly(builder.Configuration); // Assuming this installs your services
-builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<ISmsService, SmsService>();
+
+
 
 // Configure DbContext with SQL Server (update your connection string as needed)
 builder.Services.AddDbContext<CameraServicesPlatformDbContext>(options =>

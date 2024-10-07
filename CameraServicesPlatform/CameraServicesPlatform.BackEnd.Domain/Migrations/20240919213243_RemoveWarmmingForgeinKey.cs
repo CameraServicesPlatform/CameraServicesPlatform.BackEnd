@@ -552,7 +552,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 keyColumn: "Id",
                 keyValue: "b21c4d5e-67fg-89hi-01jk-lmnopqrstuv",
                 columns: new[] { "Name", "NormalizedName" },
-                values: new object[] { "CUSTOMER", "CUSTOMER" });
+               values: new object[] { "MEMBER", "MEMBER" });
 
             migrationBuilder.UpdateData(
                 table: "AspNetRoles",

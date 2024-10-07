@@ -36,6 +36,13 @@ public class MappingConfig
             config.CreateMap<Rating, RatingResponse>();
             //Return Detail
             config.CreateMap<ReturnDetailRequest, ReturnDetail>();
+            //WishList
+            config.CreateMap<CreateWishlistRequestDTO, Wishlist>();
+            //ReturnDetal
+            config.CreateMap<ReturnDetailRequest, ReturnDetail>();
+
+
+
 
         });
         // Trong class MappingConfig

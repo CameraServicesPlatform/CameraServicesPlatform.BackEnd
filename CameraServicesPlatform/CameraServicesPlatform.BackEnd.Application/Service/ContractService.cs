@@ -63,12 +63,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> UpdateContract(Guid contractId, ContractRequestDTO request)
+        public async Task<AppActionResult> UpdateContract(string contractId, ContractRequestDTO request)
         {
             var result = new AppActionResult();
             try
             {
-                var existingContract = await _contractRepository.GetById(contractId);
+                if (!Guid.TryParse(contractId, out Guid ContractId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var existingContract = await _contractRepository.GetById(ContractId);
                 if (existingContract == null)
                 {
                     result.IsSuccess = false;
@@ -91,12 +96,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> DeleteContract(Guid contractId)
+        public async Task<AppActionResult> DeleteContract(string contractId)
         {
             var result = new AppActionResult();
             try
             {
-                var contract = await _contractRepository.GetById(contractId);
+                if (!Guid.TryParse(contractId, out Guid ContractId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var contract = await _contractRepository.GetById(ContractId);
                 if (contract == null)
                 {
                     result.IsSuccess = false;
@@ -104,7 +114,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                await _contractRepository.DeleteById(contractId);
+                await _contractRepository.DeleteById(ContractId);
                 result.IsSuccess = true;
                 result = BuildAppActionResultError(result, "Hợp đồng đã được xóa!");
             }
@@ -115,12 +125,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetContractById(Guid contractId)
+        public async Task<AppActionResult> GetContractById(string contractId)
         {
             var result = new AppActionResult();
             try
             {
-                var contract = await _contractRepository.GetById(contractId);
+                if (!Guid.TryParse(contractId, out Guid ContractId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var contract = await _contractRepository.GetById(ContractId);
                 if (contract == null)
                 {
                     result.IsSuccess = false;

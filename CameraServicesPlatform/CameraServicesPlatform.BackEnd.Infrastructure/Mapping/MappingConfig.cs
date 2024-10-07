@@ -25,8 +25,8 @@ public class MappingConfig
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address));
 
             ///Mapper Order
-            _ = config.CreateMap<CreateOrderBuyRequest, Order>();
-            _ = config.CreateMap<CreateOrderRentRequest, Order>();
+            config.CreateMap<CreateOrderBuyRequest, Order>();
+            config.CreateMap<CreateOrderRentRequest, Order>();
 
             ///Mapper OrderDetail
 
@@ -34,6 +34,7 @@ public class MappingConfig
             ///Mapper Rating
             config.CreateMap<RatingRequest, Rating>();
             config.CreateMap<Rating, RatingResponse>();
+ 
 
             config.CreateMap<CreateStaffDTO, Staff>()
                  .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
@@ -52,6 +53,10 @@ public class MappingConfig
     .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => false)) 
     .ForMember(dest => dest.IsVerified, opt => opt.MapFrom(src => false))  
     .ForMember(dest => dest.StaffID, opt => opt.Ignore()); // Assuming this is managed elsewhere
+ 
+            //Return Detail
+            config.CreateMap<ReturnDetailRequest, ReturnDetail>();
+ 
 
         });
         // Trong class MappingConfig

@@ -18,4 +18,8 @@ public class UnitOfWork : IUnitOfWork
     {
         return await _context.SaveChangesAsync();
     }
+    public async Task SaveChangeAsync()
+    {
+        await _context.SaveChangesAsync();
+    }
 }

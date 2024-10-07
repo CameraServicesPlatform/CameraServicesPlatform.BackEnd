@@ -96,7 +96,7 @@ public class AccountService : GenericBackendService, IAccountService
             }
 
             accountDb.SupplierID = supplierDb.SupplierID.ToString();  
-            await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangeAsync();
 
         }
         catch (Exception ex)
@@ -419,7 +419,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                 var staff = _mapper.Map<Staff>(dto);
                 staff.AccountID = staffAccount.Id; // Link Staff with the created Account
                 await _staffRepository.Insert(staff);
-                await _unitOfWork.SaveChangesAsync();
+                        await _unitOfWork.SaveChangeAsync();
 
                 // Send account creation email for staff
                 SendAccountCreationEmailForStaff(new List<Account> { staffAccount }); // Update method for staff email
@@ -489,7 +489,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
             {
                 result = await LoginDefault(email, user);
                 user!.VerifyCode = null;
-                await _unitOfWork.SaveChangesAsync();
+                        await _unitOfWork.SaveChangeAsync();
             }
         }
         catch (Exception ex)
@@ -538,8 +538,11 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                     }
                     else
                     {
-                        emailService!.SendEmail(user.Email, SD.SubjectMail.WELCOME,
-                            $"Welcome {user.FirstName}, thank you for signing up with Google!");
+                        emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+        TemplateMappingHelper.GetTemplateOTPEmail(
+            TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
+            user.FirstName) +
+        $"\n\nWelcome {user.FirstName}, thank you for signing up with Google!");
                     }
                 }
                 else
@@ -577,7 +580,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                 result.Result = await _accountRepository.Update(account);
             }
 
-            await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -654,7 +657,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                     result = BuildAppActionResultError(result, "Thay đổi mật khẩu thất bại");
             }
 
-            await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -682,7 +685,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                 result.Result = await jwtService!.GetNewToken(refreshToken, userId);
             }
 
-            await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -714,7 +717,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                     result = BuildAppActionResultError(result, "Thay đổi mật khẩu thất bại. Vui lòng thử lại");
             }
 
-            await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -731,14 +734,18 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
         {
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null || (user != null && user.IsDeleted))
-                result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
-            else if (user.VerifyCode != verifyCode)
-                result = BuildAppActionResultError(result, "Mã xác thực sai!");
-
-            if (!BuildAppActionResultIsError(result))
             {
-                user!.IsVerified = true;
-                user.VerifyCode = null;
+                result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
+            }
+            else if (user.VerifyCode != verifyCode)
+            {
+                result = BuildAppActionResultError(result, "Mã xác thực sai!");
+            }
+            else
+            {
+                user.IsVerified = true; // Set verified status
+                user.VerifyCode = null; // Clear verification code
+                await _userManager.UpdateAsync(user); // Save changes to the database
             }
 
             await _unitOfWork.SaveChangesAsync();
@@ -912,7 +919,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                         result = BuildAppActionResultError(result, $"Cấp quyền với vai trò {role} không thành công");
                 }
 
-            await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -946,7 +953,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                         result = BuildAppActionResultError(result, $"Xóa quyền {role} thất bại");
                 }
 
-            await _unitOfWork.SaveChangesAsync();
+                    await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {

@@ -3,24 +3,17 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
- 
-using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNetCore.Identity;
-using OfficeOpenXml.Packaging.Ionic.Zip;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Net;
 using System.Text;
 using System.Threading.Tasks;
- 
-using CameraServicesPlatform.BackEnd.Domain.Models;
-using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
-using MailKit.Search;
+
 
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
@@ -207,8 +200,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Order, bool>>? filter = null;
-
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     x => x.OrderType == orderType,
                     pageIndex,
@@ -225,13 +216,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
-        public async Task<AppActionResult> GetByOrderId(Guid orderId)
+        public async Task<AppActionResult> GetByOrderId(string orderId)
         {
             AppActionResult result = new AppActionResult();
             try
             {
+                if (!Guid.TryParse(orderId, out Guid OrderId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
                 var order = await _orderRepository.GetByExpression(
-                    filter: o => o.OrderID == orderId,   
+                    filter: o => o.OrderID == OrderId,   
                     includeProperties: o => o.OrderDetail
                 );
                 if (order == null)
@@ -253,12 +249,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> UpdateOrderStatus(Guid OrderID)
+        public async Task<AppActionResult> UpdateOrderStatus(string OrderID)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                var order = await _orderRepository.GetById(OrderID);
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
             if (order != null)
             {
                 order.OrderStatus = OrderStatus.Completed;
@@ -275,12 +276,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> CancelOrder(Guid OrderID)
+        public async Task<AppActionResult> CancelOrder(string OrderID)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                var order = await _orderRepository.GetById(OrderID);
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
                 if (order != null)
                 {
                     order.OrderStatus = OrderStatus.Completed;
@@ -297,15 +303,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetOrderOfSupplier(Guid SupplierID, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetOrderOfSupplier(string SupplierID, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Order, bool>>? filter = null;
-
+                if (!Guid.TryParse(SupplierID, out Guid OrderSupplierID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
-                    x => x.SupplierID == SupplierID,
+                    x => x.SupplierID == OrderSupplierID,
                     pageIndex,
                     pageSize
                 );
@@ -321,15 +330,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetOrderByMemberID(Guid MemberID, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetOrderByMemberID(string MemberID, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Order, bool>>? filter = null;
-
+                if (!Guid.TryParse(MemberID, out Guid OrderMemberID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
-                    x => x.MemberID == MemberID,
+                    x => x.MemberID == OrderMemberID,
                     pageIndex,
                     pageSize
                 );

@@ -17,27 +17,8 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             _contractService = contractService;
         }
 
-        [HttpPost("create-contract")]
-        public async Task<IActionResult> CreateContract([FromBody] ContractRequestDTO request)
-        {
-            try
-            {
-                var response = await _contractService.CreateContract(request);
-                if (!response.IsSuccess)
-                {
-                    return BadRequest(response);
-                }
-
-                return Ok(response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
         [HttpPut("update-contract-by-id")]
-        public async Task<IActionResult> UpdateContract(Guid contractId, [FromBody] ContractRequestDTO request)
+        public async Task<IActionResult> UpdateContract(string contractId, [FromBody] ContractRequestDTO request)
         {
             try
             {
@@ -56,7 +37,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpDelete("delete-contract-by-id")]
-        public async Task<IActionResult> DeleteContract(Guid contractId)
+        public async Task<IActionResult> DeleteContract(string contractId)
         {
             try
             {
@@ -75,7 +56,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-contract-by-id")]
-        public async Task<IActionResult> GetContractById(Guid contractId)
+        public async Task<IActionResult> GetContractById(string contractId)
         {
             try
             {

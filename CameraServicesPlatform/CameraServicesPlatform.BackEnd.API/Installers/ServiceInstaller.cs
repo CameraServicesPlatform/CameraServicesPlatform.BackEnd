@@ -2,7 +2,7 @@
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.Service;
-using CameraServicesPlatform.BackEnd.DAO.Data;
+using CameraServicesPlatform.BackEnd.Data;
 using CameraServicesPlatform.BackEnd.Infrastructure.Repositories;
 using CameraServicesPlatform.BackEnd.Infrastructure.UnitOfWork;
 
@@ -33,7 +33,9 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IProductImageService, ProductImageService>();
         services.AddScoped<IProductVoucherService, ProductVoucherService>();
         services.AddScoped<IProductSpecificationService, ProductSpecificationService>();
-
+        services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<ISmsService, SmsService>();
+        services.AddScoped<IFirebaseService, FirebaseService>();
 
     }
 }

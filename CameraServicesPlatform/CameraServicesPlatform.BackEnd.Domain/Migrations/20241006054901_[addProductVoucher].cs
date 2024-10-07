@@ -10,11 +10,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+            /*migrationBuilder.DropColumn(
                 name: "DiscountType",
-                table: "Vourchers");
+                table: "Vourchers");*/
 
-            migrationBuilder.DropColumn(
+            /*migrationBuilder.DropColumn(
                 name: "MaxUsageLimit",
                 table: "Vourchers");
 
@@ -24,26 +24,26 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             migrationBuilder.DropColumn(
                 name: "UsagePerCustomer",
-                table: "Vourchers");
+                table: "Vourchers");*/
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
+            /*migrationBuilder.AddColumn<int>(
                 name: "DiscountType",
                 table: "Vourchers",
                 type: "int",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0);*/
 
-            migrationBuilder.AddColumn<int>(
+            /*migrationBuilder.AddColumn<int>(
                 name: "MaxUsageLimit",
                 table: "Vourchers",
                 type: "int",
-                nullable: true);
+                nullable: true);*/
 
-            migrationBuilder.AddColumn<double>(
+            /*migrationBuilder.AddColumn<double>(
                 name: "MinOrderAmount",
                 table: "Vourchers",
                 type: "float",
@@ -53,7 +53,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 name: "UsagePerCustomer",
                 table: "Vourchers",
                 type: "int",
-                nullable: true);
+                nullable: true);*/
         }
     }
 }

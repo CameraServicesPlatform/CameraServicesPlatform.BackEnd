@@ -24,9 +24,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InstallerServicesInAssembly(builder.Configuration); // Assuming this installs your services
-
  
-
 // Configure DbContext with SQL Server (update your connection string as needed)
 builder.Services.AddDbContext<CameraServicesPlatformDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DBVPS")));

@@ -54,8 +54,13 @@ public class MappingConfig
     .ForMember(dest => dest.IsVerified, opt => opt.MapFrom(src => false))  
     .ForMember(dest => dest.StaffID, opt => opt.Ignore()); // Assuming this is managed elsewhere
  
-            //Return Detail
+               //WishList
+            config.CreateMap<CreateWishlistRequestDTO, Wishlist>();
+            //ReturnDetal
             config.CreateMap<ReturnDetailRequest, ReturnDetail>();
+
+
+
  
 
         });

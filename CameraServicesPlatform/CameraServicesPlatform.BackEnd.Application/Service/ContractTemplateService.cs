@@ -13,14 +13,12 @@ using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
-    public class ContractService : GenericBackendService, IContractService
+    public class ContractTemplateService : GenericBackendService, IContractTemplateService
     {
         private readonly IMapper _mapper;
-        private readonly IRepository<Contract> _contractRepository;
         private readonly IRepository<ContractTemplate> _contractTemplateRepository;
         private readonly IUnitOfWork _unitOfWork;
-        public ContractService(
-            IRepository<Contract> contractRepository,
+        public ContractTemplateService(
             IRepository<ContractTemplate> contractTemplateRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -28,32 +26,106 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         ) : base(serviceProvider)
         {
             _contractTemplateRepository = contractTemplateRepository;
-            _contractRepository = contractRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<AppActionResult> CreateContract(CreateContractRequestDTO request)
+        public async Task<AppActionResult> CreateContractTemplate(CreateContractTemplateRequestDTO request)
         {
             var result = new AppActionResult();
             try
             {
-                var checkTemplate = await _contractTemplateRepository.GetById(request.ContractTemplateId);
-                if (checkTemplate == null)
+               
+                var contractTemplate = new ContractTemplate
                 {
-                    result.IsSuccess = false;
-                    result = BuildAppActionResultError(result, "Hãy chọn mẫu hợp đồng!");
-                    return result;
-                }
-                var contract = new Contract
-                {
-                    OrderID = request.OrderID,
+                    MemberID = request.MemberID,
                     ContractTerms = request.ContractTerms,
+                    TemplateName = request.TemplateName,
+                    TemplateDetails = request.TemplateDetails,
                     PenaltyPolicy = request.PenaltyPolicy,
                 };
 
-                await _contractRepository.Insert(contract);
+                await _contractTemplateRepository.Insert(contractTemplate);
                 await _unitOfWork.SaveChangesAsync();
+                result.IsSuccess = true;
+                result.Result = contractTemplate;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> DeleteContractTemplate(string contractTemplateId)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(contractTemplateId, out Guid ContractTemplateID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var ctl = await _contractTemplateRepository.GetById(ContractTemplateID);
+                if (ctl == null)
+                {
+                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, "Mẫu hợp đồng không tồn tại!");
+                    return result;
+                }
+
+                await _contractTemplateRepository.DeleteById(ContractTemplateID);
+                await _unitOfWork.SaveChangesAsync();
+                result.IsSuccess = true;
+                result = BuildAppActionResultError(result, "Mẫu hợp đồng đã được xóa!");
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAllContractTemplates(int pageIndex, int pageSize)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var ctl = await _contractTemplateRepository.GetAllDataByExpression(
+                    filter: null,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize
+                );
+
+                result.IsSuccess = true;
+                result.Result = ctl;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> GetContractTemplateById(string contractTemplateId)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(contractTemplateId, out Guid ContractTemplateID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var contract = await _contractTemplateRepository.GetById(ContractTemplateID);
+                if (contract == null)
+                {
+                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, "Mẫu hợp đồng không tồn tại!");
+                    return result;
+                }
+
                 result.IsSuccess = true;
                 result.Result = contract;
             }
@@ -64,111 +136,34 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> UpdateContract(string contractId, ContractRequestDTO request)
+        public async Task<AppActionResult> UpdateContractTemplate(string contractTemplateId, CreateContractTemplateRequestDTO request)
         {
             var result = new AppActionResult();
             try
             {
-                if (!Guid.TryParse(contractId, out Guid ContractId))
+                if (!Guid.TryParse(contractTemplateId, out Guid ContractTemplateID))
                 {
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
-                var existingContract = await _contractRepository.GetById(ContractId);
-                if (existingContract == null)
+                var existingContractTemplate = await _contractTemplateRepository.GetById(ContractTemplateID);
+                if (existingContractTemplate == null)
                 {
                     result.IsSuccess = false;
-                    result = BuildAppActionResultError(result, "Hợp đồng không tồn tại!");
+                    result = BuildAppActionResultError(result, "Mẫu hợp đồng không tồn tại!");
                     return result;
                 }
 
-                existingContract.ContractTerms = request.ContractTerms;
-                existingContract.PenaltyPolicy = request.PenaltyPolicy;
-                existingContract.UpdatedAt = DateTime.UtcNow; 
+                existingContractTemplate.ContractTerms = request.ContractTerms;
+                existingContractTemplate.PenaltyPolicy = request.PenaltyPolicy;
+                existingContractTemplate.TemplateDetails = request.TemplateDetails;
+                existingContractTemplate.TemplateName = request.TemplateName;
+                existingContractTemplate.UpdatedAt = DateTime.UtcNow;
 
-                await _contractRepository.Update(existingContract);
+                await _contractTemplateRepository.Update(existingContractTemplate);
                 await _unitOfWork.SaveChangesAsync();
                 result.IsSuccess = true;
-                result.Result = existingContract; 
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
-            }
-            return result;
-        }
-
-        public async Task<AppActionResult> DeleteContract(string contractId)
-        {
-            var result = new AppActionResult();
-            try
-            {
-                if (!Guid.TryParse(contractId, out Guid ContractId))
-                {
-                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
-                    return result;
-                }
-                var contract = await _contractRepository.GetById(ContractId);
-                if (contract == null)
-                {
-                    result.IsSuccess = false;
-                    result = BuildAppActionResultError(result, "Hợp đồng không tồn tại!");
-                    return result;
-                }
-
-                await _contractRepository.DeleteById(ContractId);
-                await _unitOfWork.SaveChangesAsync();
-                result.IsSuccess = true;
-                result = BuildAppActionResultError(result, "Hợp đồng đã được xóa!");
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
-            }
-            return result;
-        }
-
-        public async Task<AppActionResult> GetContractById(string contractId)
-        {
-            var result = new AppActionResult();
-            try
-            {
-                if (!Guid.TryParse(contractId, out Guid ContractId))
-                {
-                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
-                    return result;
-                }
-                var contract = await _contractRepository.GetById(ContractId);
-                if (contract == null)
-                {
-                    result.IsSuccess = false;
-                    result = BuildAppActionResultError(result, "Hợp đồng không tồn tại!");
-                    return result;
-                }
-
-                result.IsSuccess = true;
-                result.Result = contract; 
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
-            }
-            return result;
-        }
-
-        public async Task<AppActionResult> GetAllContracts(int pageIndex, int pageSize)
-        {
-            var result = new AppActionResult();
-            try
-            {
-                var contracts = await _contractRepository.GetAllDataByExpression(
-                    filter: null,
-                    pageNumber: pageIndex,
-                    pageSize: pageSize
-                );
-
-                result.IsSuccess = true;
-                result.Result = contracts;
+                result.Result = existingContractTemplate;
             }
             catch (Exception ex)
             {

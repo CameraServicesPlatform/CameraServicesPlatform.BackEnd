@@ -1,6 +1,7 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Account;
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
@@ -26,6 +27,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         //public string? ProfileImage { get; set; }
         //public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         //public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
+        public string? SupplierID { get; set; }
+         public Supplier? Supplier { get; set; }
+        public string? StaffID { get; set; }
+         public Staff? Staff { get; set; }
+        public string? Img { get; set; }
     }
 }

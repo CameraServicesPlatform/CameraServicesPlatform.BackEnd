@@ -17,6 +17,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             _contractService = contractService;
         }
 
+ 
         [HttpPut("update-contract-by-id")]
         public async Task<IActionResult> UpdateContract(string contractId, [FromBody] ContractRequestDTO request)
         {

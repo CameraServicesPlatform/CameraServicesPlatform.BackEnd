@@ -1,6 +1,7 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
-using CameraServicesPlatform.BackEnd.DAO.Data;
+using CameraServicesPlatform.BackEnd.Data;
+using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -9,7 +10,7 @@ public class GenericRepository<T> : IRepository<T> where T : class
 {
     private readonly IDbContext _context;
     private readonly DbSet<T> _dbSet;
-
+  
     public GenericRepository(IDbContext context)
     {
         _context = context;
@@ -109,4 +110,6 @@ public class GenericRepository<T> : IRepository<T> where T : class
         _dbSet.RemoveRange(entities);
         return entities.ToList();
     }
+
+    
 }

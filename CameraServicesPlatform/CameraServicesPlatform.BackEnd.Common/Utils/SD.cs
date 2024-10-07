@@ -91,7 +91,7 @@ public class SD
         public static string PASSCODE_FORGOT_PASSWORD = "[CAMERASERVICEPLATFORM] MÃ XÁC THỰC QUÊN MẬT KHẨU";
 
         public static string SIGN_CONTRACT_VERIFICATION_CODE =
-            "[LOVE HOUSE] You are in the process of completing contract procedures".ToUpper();
+            "[CAMERASERVICEPLATFORM] You are in the process of completing contract procedures".ToUpper();
     }
 
     public class WeekForYear

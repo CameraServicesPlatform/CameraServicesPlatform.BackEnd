@@ -530,11 +530,18 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                 {
                     result.Result = user;
                     if (!isGoogle)
+                    {
                         emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
                             TemplateMappingHelper.GetTemplateOTPEmail(
                                 TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
                                 user.FirstName));
-                 }
+                    }
+                    else
+                    {
+                        emailService!.SendEmail(user.Email, SD.SubjectMail.WELCOME,
+                            $"Welcome {user.FirstName}, thank you for signing up with Google!");
+                    }
+                }
                 else
                 {
                     result = BuildAppActionResultError(result, $"Tạo tài khoản không thành công");
@@ -551,6 +558,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
         return result;
     }
+
 
     public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO accountRequest)
     {

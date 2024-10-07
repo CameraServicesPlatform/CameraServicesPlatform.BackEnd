@@ -149,7 +149,7 @@ public class TemplateMappingHelper
 
         <p class=""emailBody"">
           Please enter the code above into the system to proceed to the next step
-          <a href=""https://lovehouse.vercel.app/""
+          <a href=""url""
             ><span style=""font-weight: bold; text-transform: uppercase""
               >here</span
             ></a
@@ -311,7 +311,7 @@ public class TemplateMappingHelper
 
         <p class=""emailBody"">
           Please enter the code above into the system to proceed to the next step
-          <a href=""https://lovehouse.vercel.app/""
+          <a href=""url""
             ><span style=""font-weight: bold; text-transform: uppercase""
               >here</span
             ></a
@@ -473,7 +473,7 @@ public class TemplateMappingHelper
 
         <p class=""emailBody"">
           Please enter the code above into the system to proceed to the next step
-          <a href=""https://lovehouse.vercel.app/""
+          <a href=""url""
             ><span style=""font-weight: bold; text-transform: uppercase""
               >here</span
             ></a
@@ -636,7 +636,7 @@ public class TemplateMappingHelper
 
         <p class=""emailBody"">
           Please enter the code above into the system to proceed to the next step
-          <a href=""https://lovehouse.vercel.app/""
+          <a href=""url""
             ><span style=""font-weight: bold; text-transform: uppercase""
               >here</span
             ></a
@@ -798,7 +798,7 @@ public class TemplateMappingHelper
         <p class=""emailBody"">
          Please enter the system to view the quote and moderate this quote
         </p>
-            <a href=""https://lovehouse.vercel.app/""
+            <a href=""url""
             ><span style=""font-weight: bold; text-transform: uppercase""
               >here</span
             ></a

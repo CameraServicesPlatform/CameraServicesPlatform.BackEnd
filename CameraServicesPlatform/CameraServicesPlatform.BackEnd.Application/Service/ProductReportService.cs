@@ -177,8 +177,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 productReportExist.StatusType = productReportResponse.StatusType;
                 productReportExist.EndDate = productReportResponse.EndDate;
                 productReportExist.Reason = productReportResponse.Reason;
-                
-                
+
+
                 await productReportRepository.Update(productReportExist);
 
                 await _unitOfWork.SaveChangesAsync();

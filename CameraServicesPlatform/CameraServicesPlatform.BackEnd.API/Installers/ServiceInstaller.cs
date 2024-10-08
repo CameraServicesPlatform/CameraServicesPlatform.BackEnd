@@ -33,15 +33,11 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IProductImageService, ProductImageService>();
         services.AddScoped<IProductVoucherService, ProductVoucherService>();
         services.AddScoped<IProductSpecificationService, ProductSpecificationService>();
-<<<<<<< HEAD
         services.AddScoped<IProductReportService, ProductReportService>();
-
-=======
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<ISmsService, SmsService>();
         services.AddScoped<IProductReportService, ProductReportService>();
         services.AddScoped<IFirebaseService, FirebaseService>();
->>>>>>> 8b261c2f276d758a2651634df8cb5d90c82e10a0
 
     }
 }

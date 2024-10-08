@@ -2,6 +2,7 @@
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Data;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
@@ -13,6 +14,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -51,7 +53,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             AppActionResult result = new AppActionResult();
             try
-            {
+               {
                 var listProduct = Resolve<IRepository<Product>>();
                 var productNameExist = await _productRepository.GetByExpression(
                     a => a.ProductName.Equals(productResponse.ProductName) && a.SupplierID.Equals(productResponse.SupplierID),
@@ -91,6 +93,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
+                var firebaseService = Resolve<IFirebaseService>();
+
+                var pathName = SD.FirebasePathName.SUPPLIER_PREFIX + $"{product.ProductID}{Guid.NewGuid()}.jpg";
+                var upload = await firebaseService!.UploadFileToFirebase(productResponse.File, pathName);
+                var Img = upload!.Result!.ToString()!;
 
                 await listProduct.Insert(product);
                 await _unitOfWork.SaveChangesAsync();
@@ -188,6 +195,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 a => a.Category
                     }
                 );
+
                 foreach ( var item in pagedResult.Items )
                 {
                     var productImage = await _productImageRepository.GetAllDataByExpression(
@@ -198,10 +206,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                     );
-                    listProduct.Add(new ProductResponse(item,  productImage.Items));
+                    ProductResponse productResponse = new ProductResponse();
+                    productResponse.product = item;
+                    productResponse.listImage = productImage.Items;
+                    listProduct.Add(productResponse);
                 }
-
-                result.Result = pagedResult;
+                result.Result = listProduct;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -223,19 +233,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                var pagedResult = await _productRepository.GetAllDataByExpression(
-                    a => a.ProductID == productId,
+                var pagedResult = await _productRepository.GetById(productId);
+                var productImage = await _productImageRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(pagedResult.ProductID),
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.Supplier!.SupplierName,
+                    null,
                     isAscending: true,
-                    includes: new Expression<Func<Product, object>>[]
-                    {
-                a => a.Supplier,
-                a => a.Category
-                    }
-                );
-
+                    null
+                    );
+               /* ProductResponse productResponse = new ProductResponse();
+                productResponse.product = pagedResult.Items;
+                productResponse.listImage = productImage.Items;
+                listProduct.Add(productResponse);*/
                 result.Result = pagedResult;
                 result.IsSuccess = true;
             }

@@ -1,4 +1,4 @@
-﻿using CameraServicesPlatform.BackEnd.DAO.Data;
+﻿using CameraServicesPlatform.BackEnd.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;

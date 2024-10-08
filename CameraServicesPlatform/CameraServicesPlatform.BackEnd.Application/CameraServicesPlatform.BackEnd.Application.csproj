@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="DinkToPdf" Version="1.0.8" />
     <PackageReference Include="EPPlus" Version="7.3.1" />
     <PackageReference Include="FirebaseAdmin" Version="3.0.1" />
     <PackageReference Include="MailKit" Version="4.7.1.1" />
@@ -17,10 +18,14 @@
     <PackageReference Include="RestSharp" Version="112.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.7.17" />
     <PackageReference Include="Twilio" Version="7.4.0" />
+
+	  <PackageReference Include="Firebase.Auth" Version="1.0.0" />
+	  <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CameraServicesPlatform.BackEnd.Common\CameraServicesPlatform.BackEnd.Common.csproj" />
+    <ProjectReference Include="..\CameraServicesPlatform.BackEnd.Domain\CameraServicesPlatform.BackEnd.Domain.csproj" />
   </ItemGroup>
 
   

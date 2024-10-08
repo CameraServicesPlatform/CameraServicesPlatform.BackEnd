@@ -37,7 +37,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpPut("update-rating/{ratingId}")]
-        public async Task<IActionResult> UpdateRating(Guid ratingId, [FromBody] RatingRequest request)
+        public async Task<IActionResult> UpdateRating(string ratingId, [FromBody] RatingRequest request)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpDelete("delete-rating-by-id")]
-        public async Task<IActionResult> DeleteRating(Guid ratingId)
+        public async Task<IActionResult> DeleteRating(string ratingId)
         {
             try
             {
@@ -75,9 +75,21 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-ratings-by-product-id")]
-        public async Task<AppActionResult> GetRatingsByProduct(Guid productId, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetRatingsByProduct(string productId, int pageIndex = 1, int pageSize = 10)
         {
             return await _ratingService.GetRatingsByProduct(productId, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-ratings-by-rating-id")]
+        public async Task<AppActionResult> GetRatingsByRatingId(string ratingId)
+        {
+            return await _ratingService.GetRatingById(ratingId);
+        }
+
+        [HttpGet("get-all-ratings")]
+        public async Task<AppActionResult> GetAllRatings( int pageIndex = 1, int pageSize = 10)
+        {
+            return await _ratingService.GetAllRating(pageIndex, pageSize);
         }
     }
 }

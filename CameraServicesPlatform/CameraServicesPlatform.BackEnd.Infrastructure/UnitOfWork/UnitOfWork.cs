@@ -1,7 +1,7 @@
 ﻿
 
 using CameraServicesPlatform.BackEnd.Application;
-using CameraServicesPlatform.BackEnd.DAO.Data;
+using CameraServicesPlatform.BackEnd.Data;
 
 namespace CameraServicesPlatform.BackEnd.Infrastructure.UnitOfWork;
 
@@ -17,5 +17,9 @@ public class UnitOfWork : IUnitOfWork
     public async Task<int> SaveChangesAsync()
     {
         return await _context.SaveChangesAsync();
+    }
+    public async Task SaveChangeAsync()
+    {
+        await _context.SaveChangesAsync();
     }
 }

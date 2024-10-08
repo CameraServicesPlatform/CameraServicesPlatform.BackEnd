@@ -17,17 +17,11 @@ public class AccountController : ControllerBase
         _accountService = accountService;
     }
 
+
     [HttpPost("create-account")]
-    public async Task<IActionResult> CreateAccount([FromBody] SignUpRequestDTO signUpRequest, [FromQuery] bool isGoogle = false)
+    public async Task<AppActionResult> CreateAccount(SignUpRequestDTO request)
     {
-        var result = await _accountService.CreateAccount(signUpRequest, isGoogle);
-
-        if (!result.IsSuccess)
-        {
-            return BadRequest(result);
-        }
-
-        return Ok(result);
+        return await _accountService.CreateAccount(request, false);
     }
 
     [HttpGet("get-all-account")]
@@ -42,8 +36,14 @@ public class AccountController : ControllerBase
         return await _accountService.GetAccountsByRoleName(roleName, pageIndex, pageSize);
     }
 
+    [HttpPost("login")]
+    public async Task<AppActionResult> Login(LoginRequestDTO request)
+    {
+        return await _accountService.Login(request);
+    }
+
     [HttpGet("get-accounts-by-role-id/{roleId}/{pageIndex:int}/{pageSize:int}")]
-    public async Task<AppActionResult> GetAccountsByRoleId(string roleId, int pageIndex = 1, int pageSize = 10)
+    public async Task<AppActionResult> GetAccountsByRoleId(Guid roleId, int pageIndex = 1, int pageSize = 10)
     {
         return await _accountService.GetAccountsByRoleId(roleId, pageIndex, pageSize);
     }
@@ -60,17 +60,10 @@ public class AccountController : ControllerBase
         return await _accountService.GetAccountByUserId(id);
     }
 
-
-    [HttpPost("login")]
-    public async Task<AppActionResult> Login(LoginRequestDTO request)
-    {
-        return await _accountService.Login(request);
-    }
-
     [HttpPut("change-password")]
-    public async Task<AppActionResult> ChangePassword(ChangePasswordDTO DTO)
+    public async Task<AppActionResult> ChangePassword(ChangePasswordDTO dto)
     {
-        return await _accountService.ChangePassword(DTO);
+        return await _accountService.ChangePassword(dto);
     }
 
     [HttpPost("get-new-token/{userId}")]
@@ -80,9 +73,9 @@ public class AccountController : ControllerBase
     }
 
     [HttpPut("forgot-password")]
-    public async Task<AppActionResult> ForgotPassword(ForgotPasswordDTO DTO)
+    public async Task<AppActionResult> ForgotPassword(ForgotPasswordDTO dto)
     {
-        return await _accountService.ForgotPassword(DTO);
+        return await _accountService.ForgotPassword(dto);
     }
 
     [HttpPut("active-account/{email}/{verifyCode}")]
@@ -110,10 +103,15 @@ public class AccountController : ControllerBase
     }
 
 
-    [HttpPost("generate-otp")]
-    public async Task<AppActionResult> GenerateOTP([FromBody] string phoneNumber)
+
+
+    [HttpPost("assign-role")]
+    public async Task<AppActionResult> AssignRole(string userId, string roleName)
     {
-        return await _accountService.GenerateOTP(phoneNumber);
+        return await _accountService.AssignRole(userId, roleName);
     }
+
+
+
 
 }

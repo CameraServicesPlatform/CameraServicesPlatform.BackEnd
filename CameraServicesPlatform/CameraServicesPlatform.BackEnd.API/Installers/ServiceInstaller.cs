@@ -33,6 +33,7 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IProductImageService, ProductImageService>();
         services.AddScoped<IProductVoucherService, ProductVoucherService>();
         services.AddScoped<IProductSpecificationService, ProductSpecificationService>();
+        services.AddScoped<IProductReportService, ProductReportService>();
 
 
     }

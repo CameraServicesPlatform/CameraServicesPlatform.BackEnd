@@ -1,4 +1,4 @@
-﻿/*using AutoMapper;
+﻿using AutoMapper;
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
@@ -177,8 +177,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 productReportExist.StatusType = productReportResponse.StatusType;
                 productReportExist.EndDate = productReportResponse.EndDate;
                 productReportExist.Reason = productReportResponse.Reason;
-                
-                
+
+
                 await productReportRepository.Update(productReportExist);
 
                 await _unitOfWork.SaveChangesAsync();
@@ -196,4 +196,3 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         }
     }
 }
-*/

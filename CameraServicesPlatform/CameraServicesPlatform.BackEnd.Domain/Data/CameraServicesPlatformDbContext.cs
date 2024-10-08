@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace CameraServicesPlatform.BackEnd.DAO.Data
+namespace CameraServicesPlatform.BackEnd.Data
 {
     public class CameraServicesPlatformDbContext : IdentityDbContext<Account>, IDbContext
     {
@@ -49,24 +49,28 @@ namespace CameraServicesPlatform.BackEnd.DAO.Data
                 {
                     Id = "1cf2de31-b0d8-4447-8f2f-c41df905a3a5",
                     Name = "ADMIN",
-                    NormalizedName = "ADMIN"
+                    ConcurrencyStamp = "1cf2de31-b0d8-4447-8f2f-c41df905a3a5",
+                    NormalizedName = "Admin"
                 },
                 new IdentityRole
                 {
                     Id = "e64b36a7-ed67-47d2-b92e-d2f6caa3eda9",
                     Name = "MEMBER",
+                    ConcurrencyStamp = "e64b36a7-ed67-47d2-b92e-d2f6caa3eda9",
                     NormalizedName = "Member"
                 },
                 new IdentityRole
                 {
                     Id = "086b7a13-79af-4610-851d-204d9d84b865",
                     Name = "STAFF",
+                    ConcurrencyStamp = "086b7a13-79af-4610-851d-204d9d84b865",
                     NormalizedName = "Staff"
                 },
                 new IdentityRole
                 {
                     Id = "74bd6d3a-1119-449b-9743-3956d74e7575",
-                    Name = "Supplier",
+                    Name = "SUPPLIER",
+                    ConcurrencyStamp = "74bd6d3a-1119-449b-9743-3956d74e7575",
                     NormalizedName = "Supplier"
                 }
             );

@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace CameraServicesPlatform.BackEnd.DAO.Data
+namespace CameraServicesPlatform.BackEnd.Data
 {
     public interface IDbContext
     {

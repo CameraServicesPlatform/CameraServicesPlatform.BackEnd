@@ -17,7 +17,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-order-details/{orderId}")]
-        public async Task<AppActionResult> GetOrderDetailsByOrderId(Guid orderId, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetOrderDetailsByOrderId(string orderId, int pageIndex, int pageSize)
         {
             return await _orderDetailService.GetOrderDetailsByOrderId(orderId, pageIndex, pageSize);
         }

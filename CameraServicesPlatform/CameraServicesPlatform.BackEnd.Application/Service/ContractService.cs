@@ -6,6 +6,7 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,24 +17,34 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IMapper _mapper;
         private readonly IRepository<Contract> _contractRepository;
+        private readonly IRepository<ContractTemplate> _contractTemplateRepository;
         private readonly IUnitOfWork _unitOfWork;
         public ContractService(
             IRepository<Contract> contractRepository,
+            IRepository<ContractTemplate> contractTemplateRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
+            _contractTemplateRepository = contractTemplateRepository;
             _contractRepository = contractRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<AppActionResult> CreateContract(ContractRequestDTO request)
+        public async Task<AppActionResult> CreateContract(CreateContractRequestDTO request)
         {
             var result = new AppActionResult();
             try
             {
+                var checkTemplate = await _contractTemplateRepository.GetById(request.ContractTemplateId);
+                if (checkTemplate == null)
+                {
+                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, "Hãy chọn mẫu hợp đồng!");
+                    return result;
+                }
                 var contract = new Contract
                 {
                     OrderID = request.OrderID,
@@ -52,16 +63,21 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> UpdateContract(Guid contractId, ContractRequestDTO request)
+        public async Task<AppActionResult> UpdateContract(string contractId, ContractRequestDTO request)
         {
             var result = new AppActionResult();
             try
             {
-                var existingContract = await _contractRepository.GetById(contractId);
+                if (!Guid.TryParse(contractId, out Guid ContractId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var existingContract = await _contractRepository.GetById(ContractId);
                 if (existingContract == null)
                 {
                     result.IsSuccess = false;
-                    result = BuildAppActionResultError(result, "Hợp đồng không tồn tại");
+                    result = BuildAppActionResultError(result, "Hợp đồng không tồn tại!");
                     return result;
                 }
 
@@ -80,22 +96,27 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> DeleteContract(Guid contractId)
+        public async Task<AppActionResult> DeleteContract(string contractId)
         {
             var result = new AppActionResult();
             try
             {
-                var contract = await _contractRepository.GetById(contractId);
+                if (!Guid.TryParse(contractId, out Guid ContractId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var contract = await _contractRepository.GetById(ContractId);
                 if (contract == null)
                 {
                     result.IsSuccess = false;
-                    result = BuildAppActionResultError(result, "Hợp đồng không tồn tại");
+                    result = BuildAppActionResultError(result, "Hợp đồng không tồn tại!");
                     return result;
                 }
 
-                await _contractRepository.DeleteById(contractId);
+                await _contractRepository.DeleteById(ContractId);
                 result.IsSuccess = true;
-                result = BuildAppActionResultError(result, "Hợp đồng đã được xóa");
+                result = BuildAppActionResultError(result, "Hợp đồng đã được xóa!");
             }
             catch (Exception ex)
             {
@@ -104,16 +125,21 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetContractById(Guid contractId)
+        public async Task<AppActionResult> GetContractById(string contractId)
         {
             var result = new AppActionResult();
             try
             {
-                var contract = await _contractRepository.GetById(contractId);
+                if (!Guid.TryParse(contractId, out Guid ContractId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var contract = await _contractRepository.GetById(ContractId);
                 if (contract == null)
                 {
                     result.IsSuccess = false;
-                    result = BuildAppActionResultError(result, "Hợp đồng không tồn tại");
+                    result = BuildAppActionResultError(result, "Hợp đồng không tồn tại!");
                     return result;
                 }
 

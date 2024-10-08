@@ -29,28 +29,31 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<AppActionResult> GetOrderDetailsByOrderId(Guid orderId, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetOrderDetailsByOrderId(string orderId, int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
             try
             {
-                // Giả sử phương thức trả về PagedResult<OrderDetail>
+
+                if (!Guid.TryParse(orderId, out Guid OrderId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
                 var orderDetailsPagedResult = await _orderDetailRepository.GetAllDataByExpression(
-                    x => x.OrderID == orderId,
+                    x => x.OrderID == OrderId,
                     pageNumber: pageIndex,
                     pageSize: pageSize
                 );
 
-                // Kiểm tra null và có item nào không
                 if (orderDetailsPagedResult == null || !orderDetailsPagedResult.Items.Any())
                 {
                     result = BuildAppActionResultError(result, "Không có chi tiết đơn hàng của đơn hàng này");
                     return result;
                 }
 
-                // Truy cập danh sách chi tiết đơn hàng
                 var orderDetailResponses = new List<OrderDetailResponse>();
-                foreach (var od in orderDetailsPagedResult.Items) // Hoặc orderDetailsPagedResult.Results tùy thuộc vào định nghĩa
+                foreach (var od in orderDetailsPagedResult.Items) 
                 {
                     var response = _mapper.Map<OrderDetailResponse>(od);
                     orderDetailResponses.Add(response);

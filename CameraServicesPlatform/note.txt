@@ -44,7 +44,7 @@ remote:      Visit the repository settings page, https://github.com/CameraServic
  ------------------
  update model - database
   cd CameraServicesPlatform.BackEnd.Domain
-  dotnet ef migrations add [addProductVoucher] --startup-project ../CameraServicesPlatform.BackEnd.API
+  dotnet ef migrations add [accountupdate] --startup-project ../CameraServicesPlatform.BackEnd.API
  dotnet ef database update --startup-project ../CameraServicesPlatform.BackEnd.API
 
  nếu lỗi thì xóa database và tạo lại:  dotnet ef migrations remove
@@ -84,3 +84,5 @@ remote:      Visit the repository settings page, https://github.com/CameraServic
 ├── docker-compose.yml
 --------------------------------------------------------------------
 
+org-sup/organization-supplier
+spo-stf/sponsor-staff

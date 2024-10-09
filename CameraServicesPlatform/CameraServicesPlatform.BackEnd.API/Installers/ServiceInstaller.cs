@@ -51,9 +51,12 @@ public class ServiceInstaller : IInstaller
     }
  
         services.AddScoped<ISmsService, SmsService>();
-        services.AddScoped<IProductReportService, ProductReportService>();
-        services.AddScoped<IFirebaseService, FirebaseService>();
+
  
         services.AddScoped<IProductReportService, ProductReportService>();
-     }
+        services.AddScoped<IFirebaseService, FirebaseService>();
+
+        
+    }
+
 }

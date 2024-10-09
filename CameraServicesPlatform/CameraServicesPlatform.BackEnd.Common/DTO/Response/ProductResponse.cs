@@ -1,7 +1,9 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Category;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -11,13 +13,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
     public class ProductResponse
     {
-        Product product;
-        List<ProductImage> listImage = new List<ProductImage>();
+        public Product product { get; set; } = null!;
 
-        public ProductResponse(Product product, List<ProductImage> listImage)
-        {
-            this.product = product;
-            this.listImage = listImage;
-        }
+        public List<ProductImage> listImage { get; set; } = null!;
     }
 }

@@ -45,13 +45,7 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IWishlistService, WishlistService>();
         services.AddScoped<IPolicyService, PolicyService>();
 
-
-
-
-    }
- 
         services.AddScoped<ISmsService, SmsService>();
-
  
         services.AddScoped<IProductReportService, ProductReportService>();
         services.AddScoped<IFirebaseService, FirebaseService>();

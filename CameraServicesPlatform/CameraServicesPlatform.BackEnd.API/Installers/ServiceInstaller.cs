@@ -30,14 +30,26 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ISupplierService, SupplierService>();
         services.AddScoped<IVoucherService, VoucherService>();
+
         services.AddScoped<IProductImageService, ProductImageService>();
         services.AddScoped<IProductVoucherService, ProductVoucherService>();
         services.AddScoped<IProductSpecificationService, ProductSpecificationService>();
-        services.AddScoped<IProductReportService, ProductReportService>();
+
+
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IRatingService, RatingService>();
+        services.AddScoped<IOrderDetailService, OrderDetailService>();
+        services.AddScoped<IContractService, ContractService>();
+        services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IReturnDetailService, ReturnDetailService>();
+        services.AddScoped<IWishlistService, WishlistService>();
+ 
         services.AddScoped<ISmsService, SmsService>();
+
         services.AddScoped<IProductReportService, ProductReportService>();
         services.AddScoped<IFirebaseService, FirebaseService>();
 
+        
     }
+
 }

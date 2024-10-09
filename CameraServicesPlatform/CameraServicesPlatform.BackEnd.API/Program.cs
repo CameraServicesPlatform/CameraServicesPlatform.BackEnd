@@ -3,6 +3,8 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.Data;
 using CameraServicesPlatform.BackEnd.Infrastructure.ServerHub;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
@@ -20,9 +22,17 @@ builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
 }));
 
 
-
+ 
 // Add services to the container
 builder.Services.AddControllers();
+
+builder.Services.AddControllers()
+        .AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
+            options.JsonSerializerOptions.MaxDepth = 64; // Increase if necessary
+        });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.InstallerServicesInAssembly(builder.Configuration); // Assuming this installs your services

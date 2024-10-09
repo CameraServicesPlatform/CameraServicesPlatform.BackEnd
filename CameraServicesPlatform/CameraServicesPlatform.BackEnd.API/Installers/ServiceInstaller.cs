@@ -43,10 +43,20 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IReturnDetailService, ReturnDetailService>();
         services.AddScoped<IWishlistService, WishlistService>();
+        services.AddScoped<IPolicyService, PolicyService>();
+
+
+
+
+    }
  
         services.AddScoped<ISmsService, SmsService>();
-        services.AddScoped<IFirebaseService, FirebaseService>();
+
  
         services.AddScoped<IProductReportService, ProductReportService>();
-     }
+        services.AddScoped<IFirebaseService, FirebaseService>();
+
+        
+    }
+
 }

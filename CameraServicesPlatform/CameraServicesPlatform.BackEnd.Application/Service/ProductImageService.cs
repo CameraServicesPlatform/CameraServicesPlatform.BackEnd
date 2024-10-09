@@ -17,6 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IMapper _mapper;
         private IRepository<ProductImage> _repository;
+
         private IUnitOfWork _unitOfWork;
 
 
@@ -46,7 +47,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     null,
                     isAscending: true,
-                    null
+                    includes: new Expression<Func<ProductImage, object>>[]
+                    {
+                a => a.Product
+                    }
                 );
 
                 result.Result = pagedResult;

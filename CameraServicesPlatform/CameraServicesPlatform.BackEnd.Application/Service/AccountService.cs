@@ -203,8 +203,7 @@ public class AccountService : GenericBackendService, IAccountService
 
         return result; // Trả về kết quả cuối cùng
     }
-
-
+ 
     public async Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle)
     {
         AppActionResult result = new();
@@ -377,8 +376,7 @@ public class AccountService : GenericBackendService, IAccountService
 
         return result;
     }
-
-
+     
     public async Task<AppActionResult> AssignRole(string userId, string roleName)
     {
         AppActionResult result = new();
@@ -515,8 +513,7 @@ public class AccountService : GenericBackendService, IAccountService
         }
         return result;
     }
-
-
+     
     public async Task<bool> AssignStaffRole(List<Account> staffAccountList)
     {
         bool isSuccess = true;
@@ -567,7 +564,6 @@ public class AccountService : GenericBackendService, IAccountService
 
         return isSuccess;
     }
-
     public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
     {
         AppActionResult result = new();

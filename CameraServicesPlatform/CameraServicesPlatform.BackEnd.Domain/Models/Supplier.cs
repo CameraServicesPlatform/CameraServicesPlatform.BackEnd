@@ -11,15 +11,14 @@ public class Supplier
     public string? AccountID { get; set; }
     public Account? Account { get; set; }
 
-    public required string SupplierName { get; set; }
+    public  string SupplierName { get; set; }
 
-    public required string SupplierDescription { get; set; }
-    public required string SupplierAddress { get; set; }
+    public   string? SupplierDescription { get; set; }
+    public   string? SupplierAddress { get; set; }
 
-    [MaxLength(20)]
-    public string? ContactNumber { get; set; }
+     public string? ContactNumber { get; set; }
 
-    public required string SupplierLogo { get; set; }
+    public   string? SupplierLogo { get; set; }
 
     public string? BlockReason { get; set; }
 
@@ -29,7 +28,7 @@ public class Supplier
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     public double AccountBalance { get; set; }
-    public string Img { get; set; } = null!;
+    public string? Img { get; set; } = null!;
 
     public Guid? VourcherID { get; set; }
 

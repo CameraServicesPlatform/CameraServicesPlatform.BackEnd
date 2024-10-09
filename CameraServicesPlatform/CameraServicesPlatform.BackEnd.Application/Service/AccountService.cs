@@ -17,7 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using Utility = CameraServicesPlatform.BackEnd.Common.Utils.Utility;
- 
+
 
 namespace CameraServicesPlatform.BackEnd.Application.Service;
 
@@ -27,7 +27,7 @@ public class AccountService : GenericBackendService, IAccountService
     private readonly IRepository<Account> _accountRepository;
     private readonly IRepository<Supplier> _supplierRepository;
     private readonly IRepository<Staff> _staffRepository;
-     private readonly IMapper _mapper;
+    private readonly IMapper _mapper;
     private readonly SignInManager<Account> _signInManager;
     private readonly TokenDTO _tokenDto;
     private readonly IUnitOfWork _unitOfWork;
@@ -62,7 +62,7 @@ public class AccountService : GenericBackendService, IAccountService
         _accountRepository = accountRepository;
         _supplierRepository = supplierRepository;
         _staffRepository = staffRepository;
-         _unitOfWork = unitOfWork;
+        _unitOfWork = unitOfWork;
         _userManager = userManager;
         _signInManager = signInManager;
         _emailService = emailService;
@@ -75,33 +75,252 @@ public class AccountService : GenericBackendService, IAccountService
         _roleManager = roleManager;
         _context = context;
     }
-    public async Task<AppActionResult> AssignUserIntoSupplier(string userId, string supplierId)
+
+    public async Task<AppActionResult> CreateAccountSupplier(CreateSupplierAccountDTO dto, bool isGoogle)
     {
         var result = new AppActionResult();
-        var supplierRepository = Resolve<IRepository<Supplier>>();  
+
         try
         {
-            var accountDb = await _accountRepository.GetById(userId);
+            // Kiểm tra xem email đã tồn tại chưa
+            if (await _accountRepository.GetAccountByEmail(dto.Email, null, null) != null)
+            {
+                return BuildAppActionResultError(result, "Email đã tồn tại!");
+            }
+
+            var emailService = Resolve<IEmailService>();
+            var verifyCode = string.Empty;
+
+            // Tạo mã xác minh
+            if (!isGoogle)
+                verifyCode = Guid.NewGuid().ToString("N").Substring(0, 6);
+
+            // Mapping DTO sang Account
+            var account = _mapper.Map<Account>(dto);
+            account.VerifyCode = verifyCode;
+            account.IsVerified = isGoogle ? true : false;
+
+            IdentityResult createAccountResult;
+
+            if (!isGoogle)
+            {
+                // Tạo tài khoản với mật khẩu cho các đăng ký chuẩn
+                createAccountResult = await _userManager.CreateAsync(account, dto.Password);
+                if (createAccountResult.Succeeded)
+                {
+                    // Gửi email xác minh
+                    emailService.SendEmail(account.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+                        TemplateMappingHelper.GetTemplateOTPEmail(
+                            TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
+                            verifyCode,
+                            account.FirstName));
+
+                    // Gán quyền SUPPLIER
+                    var roleResult = await _userManager.AddToRoleAsync(account, "SUPPLIER");
+                    if (!roleResult.Succeeded)
+                    {
+                        var roleErrors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                        return BuildAppActionResultError(result, $"Cấp quyền SUPPLIER không thành công: {roleErrors}");
+                    }
+
+                    // Thêm nhà cung cấp vào kho
+                    var supplier = _mapper.Map<Supplier>(dto);
+                    supplier.AccountID = account.Id;
+                    supplier.CreatedAt = DateTime.UtcNow;
+                    supplier.UpdatedAt = DateTime.UtcNow;
+
+                    await _supplierRepository.Insert(supplier);
+                    await _unitOfWork.SaveChangeAsync();
+
+                    // Gán thông tin tài khoản và nhà cung cấp vào kết quả
+                    result.Result = new
+                    {
+                        Account = account,
+                        Supplier = supplier
+                    };
+                }
+                else
+                {
+                    var errors = string.Join(", ", createAccountResult.Errors.Select(e => e.Description));
+                    return BuildAppActionResultError(result, $"Tạo tài khoản không thành công: {errors}");
+                }
+            }
+            else
+            {
+                // Tạo tài khoản không có mật khẩu cho các đăng ký qua Google
+                createAccountResult = await _userManager.CreateAsync(account);
+                if (createAccountResult.Succeeded)
+                {
+                    emailService.SendEmail(account.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+                        TemplateMappingHelper.GetTemplateOTPEmail(
+                            TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
+                            verifyCode,
+                            account.FirstName) +
+                        $"\n\nWelcome {account.FirstName}, thank you for signing up with Google!");
+
+                    // Gán quyền SUPPLIER
+                    var roleResult = await _userManager.AddToRoleAsync(account, "SUPPLIER");
+                    if (!roleResult.Succeeded)
+                    {
+                        var roleErrors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                        return BuildAppActionResultError(result, $"Cấp quyền SUPPLIER không thành công: {roleErrors}");
+                    }
+
+                    // Thêm nhà cung cấp vào kho
+                    var supplier = _mapper.Map<Supplier>(dto);
+                    supplier.AccountID = account.Id;
+                    supplier.CreatedAt = DateTime.UtcNow;
+                    supplier.UpdatedAt = DateTime.UtcNow;
+
+                    await _supplierRepository.Insert(supplier);
+                    await _unitOfWork.SaveChangeAsync();
+
+                    // Gán thông tin tài khoản và nhà cung cấp vào kết quả
+                    result.Result = new
+                    {
+                        Account = account,
+                        Supplier = supplier
+                    };
+                }
+                else
+                {
+                    var errors = string.Join(", ", createAccountResult.Errors.Select(e => e.Description));
+                    return BuildAppActionResultError(result, $"Tạo tài khoản không thành công: {errors}");
+                }
+            }
+        }
+        catch (DbUpdateException dbEx)
+        {
+            var innerException = dbEx.InnerException?.Message ?? "No inner exception available.";
+            _logger.LogError("Error occurred while saving entity changes: {InnerException}: ${dbEx},", innerException);
+            return BuildAppActionResultError(result, $"Đã xảy ra lỗi: {innerException}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("An unexpected error occurred.", ex);
+            return BuildAppActionResultError(result, $"Đã xảy ra lỗi: {ex.Message}");
+        }
+
+        return result; // Trả về kết quả cuối cùng
+    }
+
+
+    public async Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle)
+    {
+        AppActionResult result = new();
+        try
+        {
+            if (await _accountRepository.GetAccountByEmail(signUpRequest.Email, null, null) != null)
+            {
+                result = BuildAppActionResultError(result, "Email hoặc username không tồn tại!");
+            }
+
+            if (!BuildAppActionResultIsError(result))
+            {
+                IEmailService? emailService = Resolve<IEmailService>();
+                string verifyCode = string.Empty;
+                if (!isGoogle)
+                {
+                    verifyCode = Guid.NewGuid().ToString("N")[..6];
+                }
+
+                Account user = new()
+                {
+                    Email = signUpRequest.Email,
+                    UserName = signUpRequest.Email,
+                    FirstName = signUpRequest.FirstName,
+                    LastName = signUpRequest.LastName,
+                    PhoneNumber = signUpRequest.PhoneNumber,
+                    Gender = signUpRequest.Gender,
+                    VerifyCode = verifyCode,
+                    IsVerified = isGoogle
+                };
+                IdentityResult resultCreateUser = await _userManager.CreateAsync(user, signUpRequest.Password);
+                if (resultCreateUser.Succeeded)
+                {
+                    result.Result = user;
+                    if (!isGoogle)
+                    {
+                        emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+                            TemplateMappingHelper.GetTemplateOTPEmail(
+                                TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
+                                user.FirstName));
+                    }
+                    else
+                    {
+                        emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+        TemplateMappingHelper.GetTemplateOTPEmail(
+            TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
+            user.FirstName) +
+        $"\n\nWelcome {user.FirstName}, thank you for signing up with Google!");
+                    }
+                }
+                else
+                {
+                    result = BuildAppActionResultError(result, $"Tạo tài khoản không thành công");
+                }
+
+                IdentityResult resultCreateRole = await _userManager.AddToRoleAsync(user, "MEMBER");
+                if (!resultCreateRole.Succeeded)
+                {
+                    result = BuildAppActionResultError(result, $"Cấp quyền THÀNH VIÊN không thành công");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            result = BuildAppActionResultError(result, ex.Message);
+        }
+
+        return result;
+    }
+
+    public async Task<AppActionResult> AssignUserIntoStaff(string userId, string staffId)
+    {
+        AppActionResult result = new();
+        IRepository<Staff>? staffRepository = Resolve<IRepository<Staff>>();
+        try
+        {
+            Account accountDb = await _accountRepository.GetById(userId);
             if (accountDb == null)
             {
                 result = BuildAppActionResultError(result, $"Không tìm thấy tài khoản với id {userId}");
                 return result;
             }
 
-            var supplierDb = await supplierRepository.GetById(supplierId);  
-            if (supplierDb == null)
+            Staff staffdb = await staffRepository.GetById(staffId);
+            if (staffdb == null)
             {
-                result = BuildAppActionResultError(result, $"Không tìm thấy nhà cung cấp với id {supplierId}"); 
+                result = BuildAppActionResultError(result, $"Không tìm thấy nhà cung cấp với id {staffId}");
                 return result;
             }
 
-            accountDb.SupplierID = supplierDb.SupplierID.ToString();  
-            await _unitOfWork.SaveChangesAsync();
+            accountDb.StaffID = staffdb.StaffID.ToString();
+            await _unitOfWork.SaveChangeAsync();
 
         }
         catch (Exception ex)
         {
             result = BuildAppActionResultError(result, ex.Message);
+        }
+        return result;
+    }
+
+    public async Task<PagedResult<Staff>> GetStaff(int pageNumber, int pageSize)
+    {
+        PagedResult<Staff>? result;
+        try
+        {
+            result = new PagedResult<Staff>();
+            result = await _staffRepository.GetAllDataByExpression(
+               filter: null,
+               pageNumber: pageNumber,
+               pageSize: pageSize
+           );
+        }
+        catch (Exception)
+        {
+            result = null;
         }
         return result;
     }
@@ -112,11 +331,11 @@ public class AccountService : GenericBackendService, IAccountService
     public async Task<AppActionResult> GetAccountByUserId(string id)
     {
 
-        var result = new AppActionResult();
+        AppActionResult result = new();
         try
         {
 
-            var account = await _accountRepository.GetById(id);
+            Account account = await _accountRepository.GetById(id);
             if (account == null)
             {
                 result = BuildAppActionResultError(result, $"Tài khoản với id {id} không tồn tại !");
@@ -125,9 +344,9 @@ public class AccountService : GenericBackendService, IAccountService
 
             if (account.SupplierID != null)
             {
-                 // Fetch supplier data using supplier repository
-                var supplierGuid = Guid.Parse(account.SupplierID);
-                var supplierDb = await _supplierRepository.GetByExpression(p => p.SupplierID == supplierGuid);
+                // Fetch supplier data using supplier repository
+                Guid supplierGuid = Guid.Parse(account.SupplierID);
+                Supplier? supplierDb = await _supplierRepository.GetByExpression(p => p.SupplierID == supplierGuid);
                 if (supplierDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Nhà cung cấp với {account.SupplierID} không tồn tại");
@@ -138,8 +357,8 @@ public class AccountService : GenericBackendService, IAccountService
             else if (account.StaffID != null)
             {
                 // Fetch staff data using staff repository
-                var staffGuid = Guid.Parse(account.StaffID);
-                var staffDb = await _staffRepository.GetByExpression(p => p.StaffID == staffGuid);
+                Guid staffGuid = Guid.Parse(account.StaffID);
+                Staff? staffDb = await _staffRepository.GetByExpression(p => p.StaffID == staffGuid);
                 if (staffDb == null)
                 {
                     result = BuildAppActionResultError(result, $"Nhân Viên với {account.StaffID} không tồn tại");
@@ -162,26 +381,26 @@ public class AccountService : GenericBackendService, IAccountService
 
     public async Task<AppActionResult> AssignRole(string userId, string roleName)
     {
-        AppActionResult result = new AppActionResult();
+        AppActionResult result = new();
         try
         {
-            var accountDb = await _accountRepository.GetById(userId);
+            Account accountDb = await _accountRepository.GetById(userId);
             if (accountDb == null)
             {
                 result = BuildAppActionResultError(result, $"Không tìm thấy tài khoản với id {userId}");
                 return result;
             }
-            var roleRepository = Resolve<IRepository<IdentityRole>>();
+            IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
 
-            var roleDb = await  GetIdentityRoleByName(roleName);
+            IdentityRole roleDb = await GetIdentityRoleByName(roleName);
             if (roleDb == null)
             {
                 result = BuildAppActionResultError(result, $"Không tìm thấy phân quyền với tên {roleName}");
                 return result;
             }
 
-            var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-            var roleListDb = await  GetRoleListByAccountId(userId);
+            IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+            List<string> roleListDb = await GetRoleListByAccountId(userId);
             if (roleListDb.Count() != 0)
             {
                 if (roleListDb.Contains(roleDb.Id))
@@ -191,7 +410,7 @@ public class AccountService : GenericBackendService, IAccountService
                 }
             }
 
-            bool isSuccessful = await  AssignRoleUser(userId, roleDb.Id);
+            bool isSuccessful = await AssignRoleUser(userId, roleDb.Id);
             if (!isSuccessful)
             {
                 result = BuildAppActionResultError(result, $"Thêm phân quyền không thành công, vui lòng thử lại sau");
@@ -221,23 +440,23 @@ public class AccountService : GenericBackendService, IAccountService
     }
     private async Task<bool> AssignRoleUser(string userId, string roleId)
     {
-        var userRole = new IdentityUserRole<string>
+        IdentityUserRole<string> userRole = new()
         {
             UserId = userId,
             RoleId = roleId
         };
 
-        await _context.UserRoles.AddAsync(userRole);
+        _ = await _context.UserRoles.AddAsync(userRole);
         return await _context.SaveChangesAsync() > 0;
     }
 
     private async Task<AppActionResult> LoginDefault(string email, Account? user)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
 
-        var jwtService = Resolve<IJwtService>();
-        var utility = Resolve<Utility>();
-        var token = await jwtService!.GenerateAccessToken(new LoginRequestDTO { Email = email });
+        IJwtService? jwtService = Resolve<IJwtService>();
+        Utility? utility = Resolve<Utility>();
+        string token = await jwtService!.GenerateAccessToken(new LoginRequestDTO { Email = email });
 
         if (user!.RefreshToken == null)
         {
@@ -254,10 +473,10 @@ public class AccountService : GenericBackendService, IAccountService
         _tokenDto.Token = token;
         _tokenDto.RefreshToken = user.RefreshToken;
 
-        var roleListDb = await GetRoleListByAccountId(user.Id);
+        List<string> roleListDb = await GetRoleListByAccountId(user.Id);
 
         // Call the newly defined method
-        var roleNameList = await GetRoleNameListById(roleListDb);
+        List<string> roleNameList = await GetRoleNameListById(roleListDb);
 
         if (roleNameList.Contains("ADMIN"))
         {
@@ -267,24 +486,20 @@ public class AccountService : GenericBackendService, IAccountService
         {
             _tokenDto.MainRole = "STAFF";
         }
-        else if (roleNameList.Count > 0)
-        {
-            _tokenDto.MainRole = roleNameList.FirstOrDefault(n => !n.Equals("MEMBER"));
-        }
         else
         {
-            _tokenDto.MainRole = "MEMBER";
+            _tokenDto.MainRole = roleNameList.Count > 0 ? roleNameList.FirstOrDefault(n => !n.Equals("MEMBER")) : "MEMBER";
         }
 
         result.Result = _tokenDto;
-        await _unitOfWork.SaveChangesAsync();
+        _ = await _unitOfWork.SaveChangesAsync();
 
         return result;
     }
 
     public async Task<PagedResult<Supplier>> GetSupllier(int pageNumber, int pageSize)
     {
-        PagedResult<Supplier> result = null;
+        PagedResult<Supplier>? result;
         try
         {
             result = new PagedResult<Supplier>();
@@ -294,43 +509,26 @@ public class AccountService : GenericBackendService, IAccountService
                 pageSize: pageSize
             );
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             result = null;
         }
         return result;
     }
 
-    public async Task<PagedResult<Staff>> GetStaff(int pageNumber, int pageSize)
-    {
-        PagedResult<Staff> result = null;
-        try
-        {
-            result = new PagedResult<Staff>();
-            result = await _staffRepository.GetAllDataByExpression(
-               filter: null,
-               pageNumber: pageNumber,
-               pageSize: pageSize
-           );
-        }
-        catch (Exception ex)
-        {
-            result = null;
-        }
-        return result;
-    }
+
     public async Task<bool> AssignStaffRole(List<Account> staffAccountList)
     {
         bool isSuccess = true;
         try
         {
             // Get the "staff" role
-            var roleName = "staff";
-            var roleExists = await _roleManager.RoleExistsAsync(roleName);
+            string roleName = "staff";
+            bool roleExists = await _roleManager.RoleExistsAsync(roleName);
             if (!roleExists)
             {
                 // Optionally create the role if it does not exist
-                var roleResult = await _roleManager.CreateAsync(new IdentityRole(roleName));
+                IdentityResult roleResult = await _roleManager.CreateAsync(new IdentityRole(roleName));
                 if (!roleResult.Succeeded)
                 {
                     // Handle role creation failure
@@ -340,12 +538,12 @@ public class AccountService : GenericBackendService, IAccountService
             }
 
             // Assign role to each account
-            foreach (var account in staffAccountList)
+            foreach (Account account in staffAccountList)
             {
-                var accountDb = await _accountRepository.GetByExpression(a => a.PhoneNumber == account.PhoneNumber);
+                Account? accountDb = await _accountRepository.GetByExpression(a => a.PhoneNumber == account.PhoneNumber);
                 if (accountDb != null)
                 {
-                    var result = await _userManager.AddToRoleAsync(accountDb, roleName);
+                    IdentityResult result = await _userManager.AddToRoleAsync(accountDb, roleName);
                     if (!result.Succeeded)
                     {
                         isSuccess = false; // If one assignment fails, set success to false
@@ -364,15 +562,15 @@ public class AccountService : GenericBackendService, IAccountService
             // Log the exception with a message
             _logger.LogError("An error occurred while assigning staff roles.", ex);
         }
-           
+
 
 
         return isSuccess;
     }
 
-public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
+    public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
     {
-        AppActionResult result = new AppActionResult();
+        AppActionResult result = new();
         try
         {
             // Validate the DTO if necessary
@@ -383,7 +581,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
             }
 
             // Create a new Account instance from the DTO
-            var staffAccount = _mapper.Map<Account>(dto);
+            Account staffAccount = _mapper.Map<Account>(dto);
             staffAccount.Id = Guid.NewGuid().ToString();
             staffAccount.UserName = dto.Email; // Using Email as UserName
             staffAccount.IsDeleted = false;
@@ -392,7 +590,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
             // Upload the image and assign the URL to the Account
             string pathName = SD.FirebasePathName.STAFF_PREFIX + staffAccount.Id; // Update prefix to STAF_PREFIX
-            var url = await _firebaseService.UploadFileToFirebase(dto.Img, pathName);
+            AppActionResult url = await _firebaseService.UploadFileToFirebase(dto.Img, pathName);
             if (url.IsSuccess)
             {
                 staffAccount.Img = (string)url.Result;
@@ -404,7 +602,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
             }
 
             // Create the user in Identity
-            var resultCreateUser = await _userManager.CreateAsync(staffAccount, SD.DefaultAccountInformation.PASSWORD);
+            IdentityResult resultCreateUser = await _userManager.CreateAsync(staffAccount, SD.DefaultAccountInformation.PASSWORD);
             if (!resultCreateUser.Succeeded)
             {
                 result = BuildAppActionResultError(result, $"Account creation for staff {dto.Name} failed: {string.Join(", ", resultCreateUser.Errors.Select(e => e.Description))}");
@@ -412,17 +610,17 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
             }
 
             // Assign roles if necessary
-            bool isSuccessful = await AssignStaffRole(new List<Account> { staffAccount }); // Update method to assign staff role
+            bool isSuccessful = await AssignStaffRole([staffAccount]); // Update method to assign staff role
             if (isSuccessful)
             {
                 // Insert the Staff entity into the database
-                var staff = _mapper.Map<Staff>(dto);
+                Staff staff = _mapper.Map<Staff>(dto);
                 staff.AccountID = staffAccount.Id; // Link Staff with the created Account
-                await _staffRepository.Insert(staff);
-                await _unitOfWork.SaveChangesAsync();
+                _ = await _staffRepository.Insert(staff);
+                await _unitOfWork.SaveChangeAsync();
 
                 // Send account creation email for staff
-                SendAccountCreationEmailForStaff(new List<Account> { staffAccount }); // Update method for staff email
+                SendAccountCreationEmailForStaff([staffAccount]); // Update method for staff email
                 result.Result = staffAccount; // Set the result to the created staff account
             }
         }
@@ -436,33 +634,44 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
     {
         try
         {
-            foreach (var account in tourGuideAccountList)
+            foreach (Account account in tourGuideAccountList)
             {
                 _emailService?.SendEmail(account.Email, $"Account information for sponsor {account.FirstName} {account.LastName} at Camera-Service-Platform",
                    TemplateMappingHelper.GetTemplateOTPEmail(TemplateMappingHelper.ContentEmailType.STAFF_ACCOUNT_CREATION,
                        $"Username: {account.Email} \nPassword: {SD.DefaultAccountInformation.PASSWORD}\n Vui lòng không chia sẻ thông tin tài khoản của bạn với bất kì ai", $"{account.FirstName} {account.LastName}"));
             }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
         }
     }
-    
+
     public async Task<AppActionResult> Login(LoginRequestDTO loginRequest)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
         try
         {
-            var user = await _accountRepository.GetAccountByEmail(loginRequest.Email, false, null);
+            Account? user = await _accountRepository.GetAccountByEmail(loginRequest.Email, false, null);
             if (user == null)
+            {
                 result = BuildAppActionResultError(result, $" {loginRequest.Email} này không tồn tại trong hệ thống");
+            }
             else if (user.IsVerified == false)
+            {
                 result = BuildAppActionResultError(result, "Tài khoản này chưa được xác thực !");
+            }
 
-            var passwordSignIn =
+            SignInResult passwordSignIn =
                 await _signInManager.PasswordSignInAsync(loginRequest.Email, loginRequest.Password, false, false);
-            if (!passwordSignIn.Succeeded) result = BuildAppActionResultError(result, "Đăng nhâp thất bại");
-            if (!BuildAppActionResultIsError(result)) result = await LoginDefault(loginRequest.Email, user);
+            if (!passwordSignIn.Succeeded)
+            {
+                result = BuildAppActionResultError(result, "Đăng nhâp thất bại");
+            }
+
+            if (!BuildAppActionResultIsError(result))
+            {
+                result = await LoginDefault(loginRequest.Email, user);
+            }
         }
         catch (Exception ex)
         {
@@ -474,22 +683,28 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
     public async Task<AppActionResult> VerifyLoginGoogle(string email, string verifyCode)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
         try
         {
-            var user = await _accountRepository.GetAccountByEmail(email, false, null);
+            Account? user = await _accountRepository.GetAccountByEmail(email, false, null);
             if (user == null)
+            {
                 result = BuildAppActionResultError(result, $"Email này không tồn tại");
+            }
             else if (user.IsVerified == false)
+            {
                 result = BuildAppActionResultError(result, "Tài khoản này chưa xác thực !");
+            }
             else if (user.VerifyCode != verifyCode)
+            {
                 result = BuildAppActionResultError(result, "Mã xác thực sai!");
+            }
 
             if (!BuildAppActionResultIsError(result))
             {
                 result = await LoginDefault(email, user);
                 user!.VerifyCode = null;
-                await _unitOfWork.SaveChangesAsync();
+                await _unitOfWork.SaveChangeAsync();
             }
         }
         catch (Exception ex)
@@ -500,75 +715,21 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
         return result;
     }
 
-    public async Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle)
-    {
-        var result = new AppActionResult();
-        try
-        {
-            if (await _accountRepository.GetAccountByEmail(signUpRequest.Email, null, null) != null)
-                result = BuildAppActionResultError(result, "Email hoặc username không tồn tại!");
 
-            if (!BuildAppActionResultIsError(result))
-            {
-                var emailService = Resolve<IEmailService>();
-                var verifyCode = string.Empty;
-                if (!isGoogle) verifyCode = Guid.NewGuid().ToString("N").Substring(0, 6);
-
-                var user = new Account
-                {
-                    Email = signUpRequest.Email,
-                    UserName = signUpRequest.Email,
-                    FirstName = signUpRequest.FirstName,
-                    LastName = signUpRequest.LastName,
-                    PhoneNumber = signUpRequest.PhoneNumber,
-                    Gender = signUpRequest.Gender,
-                    VerifyCode = verifyCode,
-                    IsVerified = isGoogle ? true : false
-                };
-                var resultCreateUser = await _userManager.CreateAsync(user, signUpRequest.Password);
-                if (resultCreateUser.Succeeded)
-                {
-                    result.Result = user;
-                    if (!isGoogle)
-                    {
-                        emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
-                            TemplateMappingHelper.GetTemplateOTPEmail(
-                                TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
-                                user.FirstName));
-                    }
-                    else
-                    {
-                        emailService!.SendEmail(user.Email, SD.SubjectMail.WELCOME,
-                            $"Welcome {user.FirstName}, thank you for signing up with Google!");
-                    }
-                }
-                else
-                {
-                    result = BuildAppActionResultError(result, $"Tạo tài khoản không thành công");
-                }
-
-                var resultCreateRole = await _userManager.AddToRoleAsync(user, "MEMBER");
-                if (!resultCreateRole.Succeeded) result = BuildAppActionResultError(result, $"Cấp quyền THÀNH VIÊN không thành công");
-            }
-        }
-        catch (Exception ex)
-        {
-            result = BuildAppActionResultError(result, ex.Message);
-        }
-
-        return result;
-    }
 
 
     public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO accountRequest)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
         try
         {
-            var account =
+            Account account =
                 await _accountRepository.GetAccountByEmail(accountRequest.Email, null, null);
             if (account == null)
+            {
                 result = BuildAppActionResultError(result, $"Tài khoản với email {accountRequest.Email} không tồn tại!");
+            }
+
             if (!BuildAppActionResultIsError(result))
             {
                 account!.FirstName = accountRequest.FirstName;
@@ -577,7 +738,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                 result.Result = await _accountRepository.Update(account);
             }
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -586,24 +747,27 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
         return result;
     }
- 
+
     public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
     {
-        var result = new AppActionResult();
-        var list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
+        AppActionResult result = new();
+        PagedResult<Account> list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
 
-        var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-        var roleRepository = Resolve<IRepository<IdentityRole>>();
-        var listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
-        var listMap = _mapper.Map<List<AccountResponse>>(list.Items);
-        foreach (var item in listMap)
+        IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+        IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
+        PagedResult<IdentityRole> listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
+        List<AccountResponse> listMap = _mapper.Map<List<AccountResponse>>(list.Items);
+        foreach (AccountResponse item in listMap)
         {
-            var userRole = new List<IdentityRole>();
-            var role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
-            foreach (var itemRole in role.Items!)
+            List<IdentityRole> userRole = new();
+            PagedResult<IdentityUserRole<string>> role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
+            foreach (IdentityUserRole<string> itemRole in role.Items!)
             {
-                var roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
-                if (roleUser != null) userRole.Add(roleUser);
+                IdentityRole? roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
+                if (roleUser != null)
+                {
+                    userRole.Add(roleUser);
+                }
             }
 
             item.Role = userRole;
@@ -620,13 +784,9 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
             {
                 item.MainRole = "STAFF";
             }
-            else if (userRole.Count > 0)
-            {
-                item.MainRole = userRole.FirstOrDefault(n => !n.Equals("MEMBER")).Name;
-            }
             else
             {
-                item.MainRole = "MEMBER";
+                item.MainRole = userRole.Count > 0 ? userRole.FirstOrDefault(n => !n.Equals("MEMBER")).Name : "MEMBER";
             }
         }
 
@@ -638,23 +798,28 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
     public async Task<AppActionResult> ChangePassword(ChangePasswordDTO changePasswordDto)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
 
         try
         {
-            var user = await _userManager.FindByEmailAsync(changePasswordDto.Email);
+            Account? user = await _userManager.FindByEmailAsync(changePasswordDto.Email);
             if (user == null || (user != null && user.IsDeleted))
+            {
                 result = BuildAppActionResultError(result,
                     $"Tài khoản có email {changePasswordDto.Email} không tồn tại!");
-            if (!BuildAppActionResultIsError(result))
-            {
-                var changePassword = await _userManager.ChangePasswordAsync(user!, changePasswordDto.OldPassword,
-                    changePasswordDto.NewPassword);
-                if (!changePassword.Succeeded)
-                    result = BuildAppActionResultError(result, "Thay đổi mật khẩu thất bại");
             }
 
-            await _unitOfWork.SaveChangesAsync();
+            if (!BuildAppActionResultIsError(result))
+            {
+                IdentityResult changePassword = await _userManager.ChangePasswordAsync(user!, changePasswordDto.OldPassword,
+                    changePasswordDto.NewPassword);
+                if (!changePassword.Succeeded)
+                {
+                    result = BuildAppActionResultError(result, "Thay đổi mật khẩu thất bại");
+                }
+            }
+
+            await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -666,23 +831,27 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
     public async Task<AppActionResult> GetNewToken(string refreshToken, string userId)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
 
         try
         {
-            var user = await _accountRepository.GetById(userId);
+            Account user = await _accountRepository.GetById(userId);
             if (user == null)
+            {
                 result = BuildAppActionResultError(result, "Tài khoản không tồn tại");
+            }
             else if (user.RefreshToken != refreshToken)
+            {
                 result = BuildAppActionResultError(result, "Mã làm mới không chính xác");
+            }
 
             if (!BuildAppActionResultIsError(result))
             {
-                var jwtService = Resolve<IJwtService>();
+                IJwtService? jwtService = Resolve<IJwtService>();
                 result.Result = await jwtService!.GetNewToken(refreshToken, userId);
             }
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -694,27 +863,35 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
     public async Task<AppActionResult> ForgotPassword(ForgotPasswordDTO dto)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
 
         try
         {
-            var user = await _userManager.FindByEmailAsync(dto.Email);
+            Account? user = await _userManager.FindByEmailAsync(dto.Email);
             if (user == null || (user != null && user.IsDeleted))
+            {
                 result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
+            }
             else if (user.VerifyCode != dto.RecoveryCode)
+            {
                 result = BuildAppActionResultError(result, "Mã xác thực sai!");
+            }
 
             if (!BuildAppActionResultIsError(result))
             {
-                await _userManager.RemovePasswordAsync(user!);
-                var addPassword = await _userManager.AddPasswordAsync(user!, dto.NewPassword);
+                _ = await _userManager.RemovePasswordAsync(user!);
+                IdentityResult addPassword = await _userManager.AddPasswordAsync(user!, dto.NewPassword);
                 if (addPassword.Succeeded)
+                {
                     user!.VerifyCode = null;
+                }
                 else
+                {
                     result = BuildAppActionResultError(result, "Thay đổi mật khẩu thất bại. Vui lòng thử lại");
+                }
             }
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -726,22 +903,26 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
     public async Task<AppActionResult> ActiveAccount(string email, string verifyCode)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
         try
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            Account? user = await _userManager.FindByEmailAsync(email);
             if (user == null || (user != null && user.IsDeleted))
-                result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
-            else if (user.VerifyCode != verifyCode)
-                result = BuildAppActionResultError(result, "Mã xác thực sai!");
-
-            if (!BuildAppActionResultIsError(result))
             {
-                user!.IsVerified = true;
-                user.VerifyCode = null;
+                result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
+            }
+            else if (user.VerifyCode != verifyCode)
+            {
+                result = BuildAppActionResultError(result, "Mã xác thực sai!");
+            }
+            else
+            {
+                user.IsVerified = true; // Set verified status
+                user.VerifyCode = null; // Clear verification code
+                _ = await _userManager.UpdateAsync(user); // Save changes to the database
             }
 
-            await _unitOfWork.SaveChangesAsync();
+            _ = await _unitOfWork.SaveChangesAsync();
         }
         catch (Exception ex)
         {
@@ -753,18 +934,20 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
     public async Task<AppActionResult> SendEmailForgotPassword(string email)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
 
         try
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            Account? user = await _userManager.FindByEmailAsync(email);
             if (user == null || (user != null && user.IsDeleted))
+            {
                 result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
+            }
 
             if (!BuildAppActionResultIsError(result))
             {
-                var emailService = Resolve<IEmailService>();
-                var code = await GenerateVerifyCode(user!.Email, true);
+                IEmailService? emailService = Resolve<IEmailService>();
+                string code = await GenerateVerifyCode(user!.Email, true);
                 emailService?.SendEmail(email, SD.SubjectMail.PASSCODE_FORGOT_PASSWORD,
                     TemplateMappingHelper.GetTemplateOTPEmail(TemplateMappingHelper.ContentEmailType.FORGOTPASSWORD,
                         code, user.FirstName!));
@@ -780,18 +963,20 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
     public async Task<AppActionResult> SendEmailForActiveCode(string email)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
 
         try
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            Account? user = await _userManager.FindByEmailAsync(email);
             if (user == null || (user != null && user.IsDeleted))
+            {
                 result = BuildAppActionResultError(result, "Tài khoản không tồn tại hoặc chưa được xác thực!");
+            }
 
             if (!BuildAppActionResultIsError(result))
             {
-                var emailService = Resolve<IEmailService>();
-                var code = await GenerateVerifyCode(user!.Email, false);
+                IEmailService? emailService = Resolve<IEmailService>();
+                string code = await GenerateVerifyCode(user!.Email, false);
                 emailService!.SendEmail(email, SD.SubjectMail.VERIFY_ACCOUNT,
                     TemplateMappingHelper.GetTemplateOTPEmail(TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
                         code, user.FirstName!));
@@ -807,30 +992,30 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
     public async Task<string> GenerateVerifyCode(string email, bool isForForgettingPassword)
     {
-        var code = string.Empty;
+        string code = string.Empty;
 
-        var user = await _userManager.FindByEmailAsync(email);
+        Account? user = await _userManager.FindByEmailAsync(email);
         if (user != null)
         {
-            code = Guid.NewGuid().ToString("N").Substring(0, 6);
+            code = Guid.NewGuid().ToString("N")[..6];
             user.VerifyCode = code;
         }
 
-        await _unitOfWork.SaveChangesAsync();
+        _ = await _unitOfWork.SaveChangesAsync();
 
         return code;
     }
 
     public async Task<AppActionResult> GoogleCallBack(string accessTokenFromGoogle)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
         try
         {
-            var existingFirebaseApp = FirebaseApp.DefaultInstance;
+            FirebaseApp existingFirebaseApp = FirebaseApp.DefaultInstance;
             if (existingFirebaseApp == null)
             {
-                var config = Resolve<FirebaseAdminSDK>();
-                var credential = GoogleCredential.FromJson(JsonConvert.SerializeObject(new
+                FirebaseAdminSDK? config = Resolve<FirebaseAdminSDK>();
+                GoogleCredential credential = GoogleCredential.FromJson(JsonConvert.SerializeObject(new
                 {
                     type = config!.Type,
                     project_id = config.Project_id,
@@ -843,25 +1028,25 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                     auth_provider_x509_cert_url = config.Auth_provider_x509_cert_url,
                     client_x509_cert_url = config.Client_x509_cert_url
                 }));
-                var firebaseApp = FirebaseApp.Create(new AppOptions
+                FirebaseApp firebaseApp = FirebaseApp.Create(new AppOptions
                 {
                     Credential = credential
                 });
             }
 
-            var verifiedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance
+            FirebaseAdmin.Auth.FirebaseToken verifiedToken = await FirebaseAdmin.Auth.FirebaseAuth.DefaultInstance
                 .VerifyIdTokenAsync(accessTokenFromGoogle);
-            var emailClaim = verifiedToken.Claims.FirstOrDefault(c => c.Key == "email");
-            var nameClaim = verifiedToken.Claims.FirstOrDefault(c => c.Key == "name");
-            var name = nameClaim.Value.ToString();
-            var userEmail = emailClaim.Value.ToString();
+            KeyValuePair<string, object> emailClaim = verifiedToken.Claims.FirstOrDefault(c => c.Key == "email");
+            KeyValuePair<string, object> nameClaim = verifiedToken.Claims.FirstOrDefault(c => c.Key == "name");
+            string? name = nameClaim.Value.ToString();
+            string? userEmail = emailClaim.Value.ToString();
 
             if (userEmail != null)
             {
-                var user = await _accountRepository.GetByExpression(a => a!.Email == userEmail && a.IsDeleted == false);
+                Account? user = await _accountRepository.GetByExpression(a => a!.Email == userEmail && a.IsDeleted == false);
                 if (user == null)
                 {
-                    var resultCreate =
+                    AppActionResult resultCreate =
                         await CreateAccount(
                             new SignUpRequestDTO
                             {
@@ -874,7 +1059,7 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
                             }, true);
                     if (resultCreate.IsSuccess)
                     {
-                        var account = (Account)resultCreate.Result!;
+                        Account account = (Account)resultCreate.Result!;
                         result = await LoginDefault(userEmail, account);
                     }
                 }
@@ -890,29 +1075,36 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
         return result;
     }
 
-   
     public async Task<AppActionResult> AssignRoleForUserId(string userId, IList<string> roleId)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
         try
         {
-            var user = await _accountRepository.GetById(userId);
-            var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-            var identityRoleRepository = Resolve<IRepository<IdentityRole>>();
-            foreach (var role in roleId)
+            Account user = await _accountRepository.GetById(userId);
+            IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+            IRepository<IdentityRole>? identityRoleRepository = Resolve<IRepository<IdentityRole>>();
+            foreach (string role in roleId)
+            {
                 if (await identityRoleRepository!.GetById(role) == null)
+                {
                     result = BuildAppActionResultError(result, $"Vai trò với id {role} không tồn tại");
+                }
+            }
 
             if (!BuildAppActionResultIsError(result))
-                foreach (var role in roleId)
+            {
+                foreach (string role in roleId)
                 {
-                    var roleDb = await identityRoleRepository!.GetById(role);
-                    var resultCreateRole = await _userManager.AddToRoleAsync(user, roleDb.NormalizedName);
+                    IdentityRole roleDb = await identityRoleRepository!.GetById(role);
+                    IdentityResult resultCreateRole = await _userManager.AddToRoleAsync(user, roleDb.NormalizedName);
                     if (!resultCreateRole.Succeeded)
+                    {
                         result = BuildAppActionResultError(result, $"Cấp quyền với vai trò {role} không thành công");
+                    }
                 }
+            }
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -924,29 +1116,40 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
     public async Task<AppActionResult> RemoveRoleForUserId(string userId, IList<string> roleId)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
 
         try
         {
-            var user = await _accountRepository.GetById(userId);
-            var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-            var identityRoleRepository = Resolve<IRepository<IdentityRole>>();
+            Account user = await _accountRepository.GetById(userId);
+            IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+            IRepository<IdentityRole>? identityRoleRepository = Resolve<IRepository<IdentityRole>>();
             if (user == null)
+            {
                 result = BuildAppActionResultError(result, $"Người dùng với {userId} không tồn tại");
-            foreach (var role in roleId)
+            }
+
+            foreach (string role in roleId)
+            {
                 if (await identityRoleRepository.GetById(role) == null)
+                {
                     result = BuildAppActionResultError(result, $"Vai trò với {role} không tồn tại");
+                }
+            }
 
             if (!BuildAppActionResultIsError(result))
-                foreach (var role in roleId)
+            {
+                foreach (string role in roleId)
                 {
-                    var roleDb = await identityRoleRepository!.GetById(role);
-                    var resultCreateRole = await _userManager.RemoveFromRoleAsync(user!, roleDb.NormalizedName);
+                    IdentityRole roleDb = await identityRoleRepository!.GetById(role);
+                    IdentityResult resultCreateRole = await _userManager.RemoveFromRoleAsync(user!, roleDb.NormalizedName);
                     if (!resultCreateRole.Succeeded)
+                    {
                         result = BuildAppActionResultError(result, $"Xóa quyền {role} thất bại");
+                    }
                 }
+            }
 
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangeAsync();
         }
         catch (Exception ex)
         {
@@ -956,24 +1159,22 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
         return result;
     }
 
-    
-     
     public async Task<AppActionResult> GetAccountsByRoleName(string roleName, int pageNumber, int pageSize)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
 
         try
         {
-            var roleRepository = Resolve<IRepository<IdentityRole>>();
-            var roleDb = await roleRepository!.GetByExpression(r => r.NormalizedName.Equals(roleName.ToLower()));
+            IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
+            IdentityRole? roleDb = await roleRepository!.GetByExpression(r => r.NormalizedName.Equals(roleName.ToLower()));
             if (roleDb != null)
             {
-                var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-                var userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
+                IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+                PagedResult<IdentityUserRole<string>> userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
                 if (userRoleDb.Items != null && userRoleDb.Items.Count > 0)
                 {
-                    var accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
-                    var accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
+                    List<string> accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
+                    PagedResult<Account> accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
                     result.Result = accountDb;
                 }
             }
@@ -992,20 +1193,20 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
     public async Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize)
     {
-        var result = new AppActionResult();
+        AppActionResult result = new();
 
         try
         {
-            var roleRepository = Resolve<IRepository<IdentityRole>>();
-            var roleDb = await roleRepository!.GetById(Id);
+            IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
+            IdentityRole roleDb = await roleRepository!.GetById(Id);
             if (roleDb != null)
             {
-                var userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-                var userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
+                IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+                PagedResult<IdentityUserRole<string>> userRoleDb = await userRoleRepository!.GetAllDataByExpression(u => u.RoleId == roleDb.Id, 0, 0, null, false, null);
                 if (userRoleDb.Items != null && userRoleDb.Items.Count > 0)
                 {
-                    var accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
-                    var accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
+                    List<string> accountIds = userRoleDb.Items.Select(u => u.UserId).Distinct().ToList();
+                    PagedResult<Account> accountDb = await _accountRepository.GetAllDataByExpression(a => accountIds.Contains(a.Id), pageNumber, pageSize, null, false, null);
                     result.Result = accountDb;
                 }
             }
@@ -1021,55 +1222,39 @@ public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
 
         return result;
     }
- 
+
     private string EncryptData(string data, string key)
     {
-        using (Aes aes = Aes.Create())
-        {
-            aes.Key = Convert.FromBase64String(key);
-            aes.Padding = PaddingMode.PKCS7;
-            aes.Mode = CipherMode.CBC;
-            aes.IV = new byte[16]; // Assuming a zero IV for simplicity
-            ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+        using Aes aes = Aes.Create();
+        aes.Key = Convert.FromBase64String(key);
+        aes.Padding = PaddingMode.PKCS7;
+        aes.Mode = CipherMode.CBC;
+        aes.IV = new byte[16]; // Assuming a zero IV for simplicity
+        ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
-            using (var ms = new System.IO.MemoryStream())
-            {
-                using (var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
-                {
-                    using (var sw = new System.IO.StreamWriter(cs))
-                    {
-                        sw.Write(data);
-                    }
-                }
-                return Convert.ToBase64String(ms.ToArray());
-            }
+        using MemoryStream ms = new();
+        using (CryptoStream cs = new(ms, encryptor, CryptoStreamMode.Write))
+        {
+            using StreamWriter sw = new(cs);
+            sw.Write(data);
         }
+        return Convert.ToBase64String(ms.ToArray());
     }
-     
+
     private string DecryptData(string encryptedData, string key)
     {
-        using (Aes aes = Aes.Create())
-        {
-            aes.Key = Convert.FromBase64String(key);
-            aes.IV = new byte[16];
-            aes.Padding = PaddingMode.PKCS7;
-            aes.Mode = CipherMode.CBC;// Assuming a zero IV for simplicity
-            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+        using Aes aes = Aes.Create();
+        aes.Key = Convert.FromBase64String(key);
+        aes.IV = new byte[16];
+        aes.Padding = PaddingMode.PKCS7;
+        aes.Mode = CipherMode.CBC;// Assuming a zero IV for simplicity
+        ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
-            using (var ms = new MemoryStream(Convert.FromBase64String(encryptedData)))
-            {
-                using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                {
-                    using (var sr = new StreamReader(cs))
-                    {
-                        return sr.ReadToEnd();
-                    }
-                }
-            }
-        }
+        using MemoryStream ms = new(Convert.FromBase64String(encryptedData));
+        using CryptoStream cs = new(ms, decryptor, CryptoStreamMode.Read);
+        using StreamReader sr = new(cs);
+        return sr.ReadToEnd();
     }
-
-    
 
 
 }

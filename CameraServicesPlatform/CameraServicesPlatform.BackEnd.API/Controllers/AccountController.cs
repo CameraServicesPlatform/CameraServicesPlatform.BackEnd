@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,13 @@ public class AccountController : ControllerBase
     {
         return await _accountService.CreateAccount(request, false);
     }
+    [HttpPost("register/supplier")]
+    public async Task<IActionResult> RegisterSupplier(CreateSupplierAccountDTO dto)
+    {
+        var result = await _accountService.CreateAccountSupplier(dto, false);
+        return Ok(result);
+    }
+
 
     [HttpGet("get-all-account")]
     public async Task<AppActionResult> GetAllAccount(int pageIndex = 1, int pageSize = 10)

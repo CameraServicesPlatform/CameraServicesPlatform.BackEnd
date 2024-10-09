@@ -216,6 +216,46 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+
+        public async Task<AppActionResult> CountProductRentals(Guid productId, int pageIndex, int pageSize)
+        {
+            var result = new AppActionResult();
+
+            try
+            {
+                
+                var orders = await _orderRepository.GetAllDataByExpression(
+                    order => order.OrderType == OrderType.Rental,
+                    pageIndex,
+                   pageSize
+                );
+
+                if (orders.Items == null || !orders.Items.Any())
+                {
+                    result = BuildAppActionResultError(result, "Không tìm thấy đơn hàng nào.");
+                    return result;
+                }
+
+                int totalRentals = orders.Items
+                    .SelectMany(order => order.OrderDetail) 
+                    .Where(detail => detail.ProductID == productId)
+                    .Sum(detail => detail.RentalPeriod ?? 0); 
+
+                result.IsSuccess = true;
+                result.Result = new
+                {
+                    ProductID = productId,
+                    TotalRentals = totalRentals 
+                };
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, $"Lỗi trong quá trình đếm số lần sản phẩm được thuê: {ex.Message}");
+            }
+
+            return result;
+        }
+
         public async Task<AppActionResult> GetByOrderId(string orderId)
         {
             AppActionResult result = new AppActionResult();

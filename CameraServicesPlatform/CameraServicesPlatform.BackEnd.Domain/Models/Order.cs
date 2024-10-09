@@ -39,7 +39,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid? OrderDetailID { get; set; }
         public Guid? DeliveriesMethodID { get; set; }
 
-        public OrderDetail? OrderDetail { get; set; }
+        public virtual ICollection<OrderDetail>? OrderDetail { get; set; }
         public DeliveriesMethod? DeliveriesMethod { get; set; }
 
         public Transaction? Transaction { get; set; }

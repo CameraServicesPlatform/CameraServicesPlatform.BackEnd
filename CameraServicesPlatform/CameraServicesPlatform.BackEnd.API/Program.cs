@@ -22,6 +22,7 @@ builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
 }));
 
 
+ 
 // Add services to the container
 builder.Services.AddControllers();
 

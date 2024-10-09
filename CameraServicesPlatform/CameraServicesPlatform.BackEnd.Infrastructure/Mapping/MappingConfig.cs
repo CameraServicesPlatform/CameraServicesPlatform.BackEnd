@@ -58,10 +58,23 @@ public class MappingConfig
             config.CreateMap<CreateWishlistRequestDTO, Wishlist>();
             //ReturnDetal
             config.CreateMap<ReturnDetailRequest, ReturnDetail>();
+            //Policy
+            config.CreateMap<PolicyRequestDTO, Policy>();
 
 
 
- 
+            // Map from CreateSupplierRequest to Account
+            config.CreateMap<CreateSupplierAccountDTO, Account>()
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.EmailConfirmed, opt => opt.Ignore())
+             .ForMember(dest => dest.SupplierID, opt => opt.Ignore()); // Ignore if you want to set it manually
+
+            config.CreateMap<CreateSupplierAccountDTO, Supplier>()
+                .ForMember(dest => dest.AccountID, opt => opt.Ignore()) // This will be set after creating the Account
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
+
+
 
         });
         // Trong class MappingConfig

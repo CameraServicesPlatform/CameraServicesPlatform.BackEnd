@@ -7,6 +7,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService;
 
 public interface IAccountService
 {
+    public Task<AppActionResult> CreateAccountSupplier(CreateSupplierAccountDTO dto, bool isGoogle);
+
     Task<AppActionResult> Login(LoginRequestDTO loginRequest);
 
     public Task<AppActionResult> VerifyLoginGoogle(string email, string verifyCode);

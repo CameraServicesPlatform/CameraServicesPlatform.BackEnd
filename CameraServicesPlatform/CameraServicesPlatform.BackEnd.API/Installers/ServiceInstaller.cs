@@ -45,10 +45,12 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IWishlistService, WishlistService>();
         services.AddScoped<IPolicyService, PolicyService>();
 
+        services.AddScoped<IContractTemplateService, ContractTemplateService>();
 
 
 
-    }
+
+    
  
         services.AddScoped<ISmsService, SmsService>();
 

@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
@@ -126,7 +127,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var orderDetail in orderDetails)
                 {
-                    orderDetail.OrderID = createdOrder.OrderID;
+                    var product = await _productRepository.GetById(orderDetail.ProductID);
+                    if (product != null)
+                    {
+                        double rentalPrice = CalculateRentalPrice((double)product.PriceRent, request.DurationUnit, request.DurationValue);
+                        orderDetail.ProductPriceTotal = rentalPrice; 
+                        orderDetail.OrderID = createdOrder.OrderID;
+                    }
                 }
 
                 await _orderDetailRepository.InsertRange(orderDetails);
@@ -161,6 +168,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
 
+                var checkContract = await _contractRepository.GetByExpression(x => x.CreatedAt == request.CreatedAt && x.OrderID == order.OrderID);
+                if (checkContract == null)
+                {
+                    throw new Exception("Không có hợp đồng!");
+                }
                 result = _mapper.Map<OrderResponse>(createdOrder);
             }
             catch (Exception ex)
@@ -395,6 +407,28 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
 
             return result;
+        }
+        private double CalculateRentalPrice(double basePrice, RentalDurationUnit durationUnit, int durationValue)
+        {
+            double totalPrice = 0;
+
+            switch (durationUnit)
+            {
+                case RentalDurationUnit.Hour:
+                    totalPrice = basePrice * durationValue; 
+                    break;
+                case RentalDurationUnit.Day:
+                    totalPrice = basePrice * durationValue; 
+                    break;
+                case RentalDurationUnit.Week:
+                    totalPrice = basePrice * durationValue * 7; 
+                    break;
+                case RentalDurationUnit.Month:
+                    totalPrice = basePrice * durationValue * 30; 
+                    break;
+            }
+
+            return totalPrice; 
         }
     }
 }

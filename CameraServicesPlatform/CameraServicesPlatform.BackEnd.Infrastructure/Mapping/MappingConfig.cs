@@ -58,6 +58,9 @@ public class MappingConfig
             config.CreateMap<CreateWishlistRequestDTO, Wishlist>();
             //ReturnDetal
             config.CreateMap<ReturnDetailRequest, ReturnDetail>();
+            //Policy
+            config.CreateMap<PolicyRequestDTO, Policy>();
+
 
 
             // Map from CreateSupplierRequest to Account

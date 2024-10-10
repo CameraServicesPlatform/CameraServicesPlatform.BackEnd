@@ -35,10 +35,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var result = new AppActionResult();
             try
             {
-               
+
+                if (!Guid.TryParse(request.MemberID, out Guid CMemberID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+
                 var contractTemplate = new ContractTemplate
                 {
-                    MemberID = request.MemberID,
+                    MemberID = CMemberID,
                     ContractTerms = request.ContractTerms,
                     TemplateName = request.TemplateName,
                     TemplateDetails = request.TemplateDetails,
@@ -47,8 +53,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await _contractTemplateRepository.Insert(contractTemplate);
                 await _unitOfWork.SaveChangesAsync();
+
+                var response = _mapper.Map<ContractTemplateResponse>(contractTemplate);
+                response.MemberID = contractTemplate.MemberID.ToString();
+
                 result.IsSuccess = true;
-                result.Result = contractTemplate;
+                result.Result = response;
             }
             catch (Exception ex)
             {
@@ -126,8 +136,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
+                var response = _mapper.Map<ContractTemplateResponse>(contract);
+                response.MemberID = contract.MemberID.ToString();
+                response.ContractTemplateID = contract.ContractTemplateId.ToString();
+
                 result.IsSuccess = true;
-                result.Result = contract;
+                result.Result = response;
             }
             catch (Exception ex)
             {
@@ -162,8 +176,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await _contractTemplateRepository.Update(existingContractTemplate);
                 await _unitOfWork.SaveChangesAsync();
+                var response = _mapper.Map<ContractTemplateResponse>(existingContractTemplate);
+                response.MemberID = existingContractTemplate.MemberID.ToString();
+                response.ContractTemplateID = existingContractTemplate.ContractTemplateId.ToString();
+
                 result.IsSuccess = true;
-                result.Result = existingContractTemplate;
+                result.Result = response;
             }
             catch (Exception ex)
             {

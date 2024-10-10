@@ -27,14 +27,18 @@ public class MappingConfig
             ///Mapper Order
             config.CreateMap<CreateOrderBuyRequest, Order>();
             config.CreateMap<CreateOrderRentRequest, Order>();
+            config.CreateMap<Order, OrderResponse>();
 
             ///Mapper OrderDetail
 
             config.CreateMap<OrderDetailRequest, OrderDetail>();
+            config.CreateMap<OrderDetail, OrderDetailResponse>();
             ///Mapper Rating
             config.CreateMap<RatingRequest, Rating>();
             config.CreateMap<Rating, RatingResponse>();
- 
+            config.CreateMap<Contract, ContractResponse>();
+            config.CreateMap<ContractTemplate, ContractTemplateResponse>();
+
 
             config.CreateMap<CreateStaffDTO, Staff>()
                  .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())

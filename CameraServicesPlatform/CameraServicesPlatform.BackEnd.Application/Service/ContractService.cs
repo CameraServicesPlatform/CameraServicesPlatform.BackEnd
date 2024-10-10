@@ -59,8 +59,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await _contractRepository.Insert(contract);
                 await _unitOfWork.SaveChangesAsync();
+
+                var contractResponse = _mapper.Map<ContractResponse>(contract);
+                contractResponse.ContractID = contract.ContractID.ToString();
+
+
                 result.IsSuccess = true;
-                result.Result = contract;
+                result.Result = contractResponse;
             }
             catch (Exception ex)
             {
@@ -94,10 +99,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _contractRepository.Update(existingContract);
                 await _unitOfWork.SaveChangesAsync();
 
-                
+                var contractResponse = _mapper.Map<ContractResponse>(existingContract);
+                contractResponse.ContractID = existingContract.ContractID.ToString();
+
 
                 result.IsSuccess = true;
-                result.Result = existingContract; 
+                result.Result = contractResponse; 
             }
             catch (Exception ex)
             {

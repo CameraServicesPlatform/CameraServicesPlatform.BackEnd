@@ -11,13 +11,11 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
     {
         private readonly IProductImageService _productImageService;
 
-        public ProductImageController(
-        IProductImageService _productImageService
-        )
+        
+        public ProductImageController(IProductImageService productImageService)
         {
-            _productImageService = _productImageService;
+            _productImageService = productImageService ?? throw new ArgumentNullException(nameof(productImageService));
         }
-
         [HttpGet("get-all-product-image")]
         public async Task<AppActionResult> GetAllProductImage(int pageIndex = 1, int pageSize = 10)
         {

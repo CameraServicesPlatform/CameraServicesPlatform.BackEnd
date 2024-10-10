@@ -47,10 +47,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     null,
                     isAscending: true,
-                    includes: new Expression<Func<ProductImage, object>>[]
-                    {
-                a => a.Product
-                    }
+                    null
                 );
 
                 result.Result = pagedResult;

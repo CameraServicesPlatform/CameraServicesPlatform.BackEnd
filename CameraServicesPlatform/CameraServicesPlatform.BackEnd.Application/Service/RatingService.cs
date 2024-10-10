@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Migrations;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.Identity.Client;
 using System;
@@ -42,12 +43,22 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var result = new AppActionResult();
             try
             {
+                if (!Guid.TryParse(request.AccountID, out Guid RatingAccountID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                if (!Guid.TryParse(request.ProductID, out Guid RatingProductID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
                 if (request.RatingValue > 5)
                 {
                     result = BuildAppActionResultError(result, "giá trị đánh không được lớn hơn 5");
                     return result;
                 }
-                var hasOrder = await _orderRepository.GetByExpression(x => x.MemberID == request.AccountID);
+                var hasOrder = await _orderRepository.GetByExpression(x => x.MemberID == RatingAccountID);
 
                 if (hasOrder == null)
                 {
@@ -55,7 +66,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                var hasOrderDetail = await _orderDetailRepository.GetByExpression(x => x.ProductID == request.ProductID);
+                var hasOrderDetail = await _orderDetailRepository.GetByExpression(x => x.ProductID == RatingProductID);
 
                 if (hasOrderDetail == null)
                 {

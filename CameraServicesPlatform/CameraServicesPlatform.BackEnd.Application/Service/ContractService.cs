@@ -45,9 +45,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "Hãy chọn mẫu hợp đồng!");
                     return result;
                 }
+                if (!Guid.TryParse(request.OrderID, out Guid NOrderID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
                 var contract = new Contract
                 {
-                    OrderID = request.OrderID,
+                    OrderID = NOrderID,
                     ContractTerms = request.ContractTerms,
                     PenaltyPolicy = request.PenaltyPolicy,
                 };
@@ -88,6 +93,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await _contractRepository.Update(existingContract);
                 await _unitOfWork.SaveChangesAsync();
+
+                
+
                 result.IsSuccess = true;
                 result.Result = existingContract; 
             }
@@ -146,6 +154,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
+                var contractResponse = _mapper.Map<ContractResponse>(contract);
+                contractResponse.ContractID = contract.ContractID.ToString();
+
                 result.IsSuccess = true;
                 result.Result = contract; 
             }
@@ -167,8 +178,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize: pageSize
                 );
 
+                var contractResponses = contracts.Items.Select(contract =>
+                {
+                    var contractResponse = _mapper.Map<ContractResponse>(contract);
+                    contractResponse.ContractID = contract.ContractID.ToString();
+                    return contractResponse;
+                }).ToList();
+                var pagedResult = new PagedResult<ContractResponse>
+                {
+                    Items = contractResponses
+                };
+
                 result.IsSuccess = true;
-                result.Result = contracts;
+                result.Result = pagedResult;
             }
             catch (Exception ex)
             {

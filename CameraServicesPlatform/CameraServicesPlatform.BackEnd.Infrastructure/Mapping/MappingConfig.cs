@@ -41,6 +41,7 @@ public class MappingConfig
             config.CreateMap<Policy, PolicyResponse>();
             config.CreateMap<Report, ReportResponse>();
             config.CreateMap<ReturnDetail, ReturnDetailResponse>();
+            config.CreateMap<Wishlist, WishlistResponse>();
 
 
 

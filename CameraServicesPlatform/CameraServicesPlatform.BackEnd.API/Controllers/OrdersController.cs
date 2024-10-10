@@ -39,7 +39,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-count-of-product-rent")]
-        public async Task<AppActionResult> CountProductRentals(Guid productId, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> CountProductRentals(string productId, int pageIndex = 1, int pageSize = 10)
         {
             return await _orderService.CountProductRentals(productId, pageIndex, pageSize);
         }

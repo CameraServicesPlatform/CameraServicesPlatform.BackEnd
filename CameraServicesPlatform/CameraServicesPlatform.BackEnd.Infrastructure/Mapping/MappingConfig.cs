@@ -38,6 +38,9 @@ public class MappingConfig
             config.CreateMap<Rating, RatingResponse>();
             config.CreateMap<Contract, ContractResponse>();
             config.CreateMap<ContractTemplate, ContractTemplateResponse>();
+            config.CreateMap<Policy, PolicyResponse>();
+            config.CreateMap<Report, ReportResponse>();
+
 
 
             config.CreateMap<CreateStaffDTO, Staff>()

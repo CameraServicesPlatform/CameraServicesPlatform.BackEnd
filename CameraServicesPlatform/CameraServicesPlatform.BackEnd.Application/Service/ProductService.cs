@@ -23,6 +23,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IMapper _mapper;
         private IRepository<Product> _productRepository;
         private IRepository<ProductImage> _productImageRepository;
+        private IRepository<ProductResponse> _productResponseRepository;
 
         private IRepository<OrderDetail> _orderDetailRepository;
         private IRepository<Order> _orderRepository;
@@ -37,13 +38,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Order> orderRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
+            IRepository<ProductResponse> productResponseRepository,
             IServiceProvider serviceProvider,
             IDbContext context
         ) : base(serviceProvider)
         {
-            _productRepository = productRepository;
-            _productImageRepository = productImageRepository;
+            
             _orderDetailRepository = orderDetailRepository;
+            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
+            _productImageRepository = productImageRepository ?? throw new ArgumentNullException(nameof(productImageRepository));
+            _productResponseRepository = productResponseRepository ?? throw new ArgumentNullException(nameof(productResponseRepository));
+
             _orderRepository = orderRepository; 
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -76,12 +81,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result.Result = "Product serial number existed into supplier, serial number cann't duplicate";
                     return result;
                 }
+
                 Product product = new Product()
                 {
                     ProductID = Guid.NewGuid(),
                     SerialNumber = productResponse.SerialNumber,
-                    SupplierID = productResponse.SupplierID,
-                    CategoryID = productResponse.CategoryID,
+                    SupplierID = Guid.Parse(productResponse.SupplierID),
+                    CategoryID =  Guid.Parse(productResponse.CategoryID),
                     ProductName = productResponse.ProductName,
                     ProductDescription = productResponse.ProductDescription,
                     PriceBuy = productResponse.PriceBuy,
@@ -94,16 +100,27 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     UpdatedAt = DateTime.Now
                 };
                 var firebaseService = Resolve<IFirebaseService>();
+                if(productResponse.File != null)
+                {
+                    var pathName = SD.FirebasePathName.SUPPLIER_PREFIX + $"{product.ProductID}{Guid.NewGuid()}.jpg";
+                    var upload = await firebaseService!.UploadFileToFirebase(productResponse.File, pathName);
+                    var Img = upload!.Result!.ToString()!;
 
-                var pathName = SD.FirebasePathName.SUPPLIER_PREFIX + $"{product.ProductID}{Guid.NewGuid()}.jpg";
-                var upload = await firebaseService!.UploadFileToFirebase(productResponse.File, pathName);
-                var Img = upload!.Result!.ToString()!;
+                    await listProduct.Insert(product);
+                    await _unitOfWork.SaveChangesAsync();
 
-                await listProduct.Insert(product);
-                await _unitOfWork.SaveChangesAsync();
+                    result.Result = productResponse;
+                    result.IsSuccess = true;
+                }
+                else
+                {
+                    await listProduct.Insert(product);
+                    await _unitOfWork.SaveChangesAsync();
 
-                result.Result = productResponse;
-                result.IsSuccess = true;
+                    result.Result = productResponse;
+                    result.IsSuccess = true;
+                }
+                
             }
             catch (Exception ex)
             {
@@ -142,8 +159,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 productExist.SerialNumber = productResponse.SerialNumber;
-                productExist.SupplierID = productResponse.SupplierID;
-                productExist.CategoryID = productResponse.CategoryID;
+                productExist.SupplierID = Guid.Parse( productResponse.SupplierID);
+                productExist.CategoryID =Guid.Parse( productResponse.CategoryID);
                 productExist.ProductName = productResponse.ProductName;
                 productExist.ProductDescription = productResponse.ProductDescription;
                 if(productResponse.PriceBuy != null)
@@ -183,34 +200,61 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 Expression<Func<Product, bool>>? filter = null;
                 List<ProductResponse> listProduct = new List<ProductResponse>();
+
+                // Fetch paged result from repository
                 var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.Supplier!.SupplierName,
+                    orderBy: a => a.Supplier != null ? a.Supplier.SupplierName : string.Empty, // Handle null Supplier
                     isAscending: true,
-                    includes: new Expression<Func<Product, object>>[]
-                    {
-                //a => a.Supplier,
-                //a => a.Category
-                    }
+                    null
                 );
 
-                foreach ( var item in pagedResult.Items )
+                foreach (var item in pagedResult.Items)
                 {
+                    if (item == null)
+                    {
+                        continue; // Skip if item is null
+                    }
+
+                    // Get product image and handle null case
                     var productImage = await _productImageRepository.GetAllDataByExpression(
-                    a => a.ProductID.Equals(item.ProductID),
+                    a => a.ProductID == item.ProductID,
                     pageIndex,
                     pageSize,
-                    null,
+                    null, // Handle null Supplier
                     isAscending: true,
                     null
                     );
-                    ProductResponse productResponse = new ProductResponse();
-                    productResponse.product = item;
-                    productResponse.listImage = productImage.Items;
+                    string image = null;
+                    if(productImage.Items.Count >0)
+                    {
+                        image = productImage.Items[0].Image;
+                    }
+
+                    ProductResponse productResponse = new ProductResponse
+                    {
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        SupplierID = item.SupplierID != null ? item.SupplierID.ToString() : null, // Handle null SupplierID
+                        CategoryID = item.CategoryID != null ? item.CategoryID.ToString() : null, // Handle null CategoryID
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceRent = item.PriceRent,
+                        PriceBuy = item.PriceBuy,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        Image = image
+                    };
+
                     listProduct.Add(productResponse);
                 }
+
                 result.Result = listProduct;
                 result.IsSuccess = true;
             }
@@ -221,6 +265,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+
 
         public async Task<AppActionResult> GetProductById(string id, int pageIndex, int pageSize)
         {

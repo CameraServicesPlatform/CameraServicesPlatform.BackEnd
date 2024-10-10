@@ -12,12 +12,12 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
     public class ProductUpdateResponseDto
     {
-        public Guid ProductID { get; set; }
+        public string ProductID { get; set; }
         public string SerialNumber { get; set; }
 
-        public Guid? SupplierID { get; set; }
+        public string? SupplierID { get; set; }
 
-        public Guid? CategoryID { get; set; }
+        public string? CategoryID { get; set; }
 
         public string ProductName { get; set; }
 

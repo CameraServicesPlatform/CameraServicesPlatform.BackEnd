@@ -12,10 +12,10 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         private readonly IProductImageService _productImageService;
 
         public ProductImageController(
-        IProductImageService _productImageService
+        IProductImageService productImageService
         )
         {
-            _productImageService = _productImageService;
+            _productImageService = productImageService ?? throw new ArgumentNullException(nameof(productImageService));
         }
 
         [HttpGet("get-all-product-image")]

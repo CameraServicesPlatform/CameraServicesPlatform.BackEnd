@@ -108,8 +108,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize: pageSize
                 );
 
+                var responses = ctl.Items.Select(contractTL =>
+                {
+                    var response = _mapper.Map<ContractTemplateResponse>(ctl);
+                    response.ContractTemplateID = contractTL.ContractTemplateId.ToString();
+                    response.MemberID = contractTL.MemberID.ToString();
+                    return response;
+                }).ToList();
+                var pagedResult = new PagedResult<ContractTemplateResponse>
+                {
+                    Items = responses
+                };
+
                 result.IsSuccess = true;
-                result.Result = ctl;
+                result.Result = pagedResult;
             }
             catch (Exception ex)
             {

@@ -8,12 +8,17 @@ using Microsoft.AspNetCore.Mvc;
 public class ProductController : ControllerBase
 {
     private readonly IProductService _productService;
+    private readonly IProductImageService _productImageService;
+
 
     public ProductController(
+    IProductImageService productImageService,
     IProductService productService
     )
     {
-        _productService = productService;
+        _productService = productService ?? throw new ArgumentNullException(nameof(productService));
+        _productImageService = productImageService ?? throw new ArgumentNullException(nameof(productImageService));
+
     }
 
     [HttpGet("get-all-product")]
@@ -47,7 +52,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost("create-product")]
-    public async Task<AppActionResult> CreateProduct(ProductResponseDto productResponse)
+    public async Task<AppActionResult> CreateProduct([FromBody]ProductResponseDto productResponse)
     {
         return await _productService.CreateProduct(productResponse);
     }

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
-    [Route("[controller]")]
+    [Route("policy")]
     [ApiController]
     public class PolicyController : ControllerBase
     {

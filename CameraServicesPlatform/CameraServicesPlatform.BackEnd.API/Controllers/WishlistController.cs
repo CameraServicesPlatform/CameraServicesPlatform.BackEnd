@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
-    [Route("[controller]")]
+    [Route("wishlist")]
     [ApiController]
     public class WishlistController : ControllerBase
     {

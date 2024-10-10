@@ -10,6 +10,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Twilio.TwiML.Voice;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -95,8 +96,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize: pageSize
                 );
 
+                var responses = report.Items.Select(RB =>
+                {
+                    var response = _mapper.Map<ReportResponse>(report);
+                    response.ReportID = RB.ReportID.ToString();
+                    return response;
+                }).ToList();
+                var pagedResult = new PagedResult<ReportResponse>
+                {
+                    Items = responses
+                };
+
                 result.IsSuccess = true;
-                result.Result = report;
+                result.Result = pagedResult;
             }
             catch (Exception ex)
             {
@@ -123,8 +135,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
+                var response = _mapper.Map<ReportResponse>(report);
+                response.ReportID = report.ReportID.ToString();
+
                 result.IsSuccess = true;
-                result.Result = report;
+                result.Result = response;
             }
             catch (Exception ex)
             {
@@ -156,8 +171,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await _reportRepository.Update(existingReport);
                 await _unitOfWork.SaveChangesAsync();
+
+                var response = _mapper.Map<ReportResponse>(existingReport);
+                response.ReportID = existingReport.ReportID.ToString();
+
                 result.IsSuccess = true;
-                result.Result = existingReport;
+                result.Result = response;
             }
             catch (Exception ex)
             {

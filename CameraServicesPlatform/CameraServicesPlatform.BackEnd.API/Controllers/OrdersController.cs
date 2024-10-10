@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class OrdersController : ControllerBase
     {
@@ -36,6 +36,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         public async Task<AppActionResult> GetOrderByOfSupplier(string SupplierId, int pageIndex = 1, int pageSize = 10)
         {
             return await _orderService.GetOrderOfSupplier(SupplierId, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-count-of-product-rent")]
+        public async Task<AppActionResult> CountProductRentals(string productId, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.CountProductRentals(productId, pageIndex, pageSize);
         }
 
         [HttpGet("get-order-of-member")]

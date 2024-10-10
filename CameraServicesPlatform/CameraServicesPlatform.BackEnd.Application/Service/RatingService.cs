@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -67,10 +68,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 rating.CreatedAt = DateTime.UtcNow;
 
                 await _ratingRepository.Insert(rating);
-                await _unitOfWork.SaveChangesAsync(); 
+                await _unitOfWork.SaveChangesAsync();
+
+                var ratingResponse = _mapper.Map<RatingResponse>(rating);
+                ratingResponse.RatingID = rating.RatingID.ToString();
+                ratingResponse.ProductID = rating.ProductID.ToString();
+                ratingResponse.AccountID = rating.AccountID.ToString();
 
                 result.IsSuccess = true;
-                result.Result = _mapper.Map<RatingResponse>(rating);
+                result.Result = ratingResponse;
             }
             catch (Exception ex)
             {
@@ -97,8 +103,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
+                var ratingResponse = _mapper.Map<RatingResponse>(rating);
+                ratingResponse.RatingID = rating.RatingID.ToString();
+                ratingResponse.ProductID = rating.ProductID.ToString();
+                ratingResponse.AccountID = rating.AccountID.ToString();
+
                 result.IsSuccess = true;
-                result.Result = _mapper.Map<RatingResponse>(rating);
+                result.Result = ratingResponse;
             }
             catch (Exception ex)
             {
@@ -190,10 +201,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 rating.CreatedAt = DateTime.UtcNow; 
 
                 _ratingRepository.Update(rating);
-                await _unitOfWork.SaveChangesAsync(); 
+                await _unitOfWork.SaveChangesAsync();
+
+                var ratingResponse = _mapper.Map<RatingResponse>(rating);
+                ratingResponse.RatingID = rating.RatingID.ToString();
+                ratingResponse.ProductID = rating.ProductID.ToString();
+                ratingResponse.AccountID = rating.AccountID.ToString();
 
                 result.IsSuccess = true;
-                result.Result = _mapper.Map<RatingResponse>(rating); 
+                result.Result = ratingResponse;
             }
             catch (Exception ex)
             {
@@ -246,8 +262,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageNumber: pageIndex,
                     pageSize: pageSize
                 );
-
-                result.Result = pagedResult;
+                var convertedResult = pagedResult.Items.Select(rating => new
+                {
+                    RatingID = rating.RatingID.ToString(),
+                    ProductID = rating.ProductID.ToString(),
+                    AccountID=rating.AccountID.ToString(),
+                    rating.RatingValue,
+                    rating.ReviewComment,
+                    rating.CreatedAt              
+                }).ToList();
+                result.Result = convertedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)

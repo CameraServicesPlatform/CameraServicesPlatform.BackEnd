@@ -8,9 +8,9 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
     public class OrderDetailResponse
     {
-        public Guid OrderDetailsID { get; set; } 
-        public Guid OrderID { get; set; } 
-        public Guid ProductID { get; set; } 
+        public string OrderDetailsID { get; set; } 
+        public string OrderID { get; set; } 
+        public string ProductID { get; set; } 
         public string ProductName { get; set; } 
         public decimal ProductPrice { get; set; } 
         public string ProductQuality { get; set; } 

@@ -5,8 +5,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
     public class OrderResponse
     {
-        public Guid SupplierID { get; set; }
-        public Guid MemberID { get; set; }
+        public string SupplierID { get; set; }
+        public string MemberID { get; set; }
         public DateTime OrderDate { get; set; }
         public OrderStatus OrderStatus { get; set; }
         public decimal TotalAmount { get; set; }

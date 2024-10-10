@@ -173,7 +173,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     throw new Exception("Không có hợp đồng!");
                 }
-                result = _mapper.Map<OrderResponse>(createdOrder);
+                var orderResponse = _mapper.Map<OrderResponse>(createdOrder);
+                orderResponse.MemberID = createdOrder.MemberID.ToString();
+                orderResponse.SupplierID = createdOrder.SupplierID.ToString();
+
+                result = orderResponse;
             }
             catch (Exception ex)
             {
@@ -196,7 +200,26 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize: pageSize
                 );
 
-                result.Result = pagedResult;
+                var convertedResult = pagedResult.Items.Select(order => new
+                {
+                    OrderID = order.OrderID.ToString(),
+                    MemberID = order.MemberID.ToString(),
+                    SupplierID = order.SupplierID.ToString(),
+                    DeliveriesMethodID = order.DeliveriesMethodID.ToString(),
+                    OrderDetailID = order.OrderDetailID.ToString(),
+                    order.OrderDate,
+                    order.CreatedAt,
+                    order.OrderStatus,
+                    order.TotalAmount,
+                    order.DeliveryMethod,
+                    order.ShippingAddress,
+                    order.RentalStartDate,
+                    order.RentalEndDate,
+                    order.DurationUnit,
+                    order.DurationValue,
+                    order.ReturnDate,
+                }).ToList();
+                result.Result = convertedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -218,7 +241,26 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize
                 );
 
-                result.Result = pagedResult;
+                var convertedResult = pagedResult.Items.Select(order => new
+                {
+                    OrderID = order.OrderID.ToString(),
+                    MemberID = order.MemberID.ToString(),
+                    SupplierID = order.SupplierID.ToString(),
+                    DeliveriesMethodID = order.DeliveriesMethodID.ToString(),
+                    OrderDetailID = order.OrderDetailID.ToString(),
+                    order.OrderDate,
+                    order.CreatedAt,
+                    order.OrderStatus,
+                    order.TotalAmount,
+                    order.DeliveryMethod,
+                    order.ShippingAddress,
+                    order.RentalStartDate,
+                    order.RentalEndDate,
+                    order.DurationUnit,
+                    order.DurationValue,
+                    order.ReturnDate,
+                }).ToList();
+                result.Result = convertedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -229,13 +271,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> CountProductRentals(Guid productId, int pageIndex, int pageSize)
+        public async Task<AppActionResult> CountProductRentals(string productId, int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
 
             try
             {
-                
+                if (!Guid.TryParse(productId, out Guid ProductID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+
                 var orders = await _orderRepository.GetAllDataByExpression(
                     order => order.OrderType == OrderType.Rental,
                     pageIndex,
@@ -250,13 +297,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 int totalRentals = orders.Items
                     .SelectMany(order => order.OrderDetail) 
-                    .Where(detail => detail.ProductID == productId)
+                    .Where(detail => detail.ProductID == ProductID)
                     .Sum(detail => detail.RentalPeriod ?? 0); 
 
                 result.IsSuccess = true;
                 result.Result = new
                 {
-                    ProductID = productId,
+                    ProductID = productId.ToString(),
                     TotalRentals = totalRentals 
                 };
             }
@@ -289,6 +336,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.MemberID = order.MemberID.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
 
                 result.Result = orderResponse;
                 result.IsSuccess = true;
@@ -319,6 +368,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
                 }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.MemberID = order.MemberID.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
             }
             catch (Exception ex)
             {
@@ -346,6 +401,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     await Task.Delay(100);
                     await _unitOfWork.SaveChangesAsync();
                 }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.MemberID = order.MemberID.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
             }
             catch (Exception ex)
             {
@@ -371,7 +432,26 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize
                 );
 
-                result.Result = pagedResult;
+                var convertedResult = pagedResult.Items.Select(order => new
+                {
+                    OrderID = order.OrderID.ToString(),
+                    MemberID = order.MemberID.ToString(),
+                    SupplierID = order.SupplierID.ToString(),
+                    DeliveriesMethodID = order.DeliveriesMethodID.ToString(),
+                    OrderDetailID = order.OrderDetailID.ToString(),
+                    order.OrderDate,
+                    order.CreatedAt,
+                    order.OrderStatus,
+                    order.TotalAmount,
+                    order.DeliveryMethod,
+                    order.ShippingAddress,
+                    order.RentalStartDate,
+                    order.RentalEndDate,
+                    order.DurationUnit,
+                    order.DurationValue,
+                    order.ReturnDate,
+                }).ToList();
+                result.Result = convertedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -398,7 +478,26 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize
                 );
 
-                result.Result = pagedResult;
+                var convertedResult = pagedResult.Items.Select(order => new
+                {
+                    OrderID = order.OrderID.ToString(),
+                    MemberID = order.MemberID.ToString(),
+                    SupplierID = order.SupplierID.ToString(),
+                    DeliveriesMethodID = order.DeliveriesMethodID.ToString(),
+                    OrderDetailID = order.OrderDetailID.ToString(),
+                    order.OrderDate,
+                    order.CreatedAt,
+                    order.OrderStatus,
+                    order.TotalAmount,
+                    order.DeliveryMethod,
+                    order.ShippingAddress,
+                    order.RentalStartDate,
+                    order.RentalEndDate,
+                    order.DurationUnit,
+                    order.DurationValue,
+                    order.ReturnDate,
+                }).ToList();
+                result.Result = convertedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)

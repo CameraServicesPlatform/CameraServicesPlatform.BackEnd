@@ -191,8 +191,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     includes: new Expression<Func<Product, object>>[]
                     {
-                a => a.Supplier,
-                a => a.Category
+                //a => a.Supplier,
+                //a => a.Category
                     }
                 );
 

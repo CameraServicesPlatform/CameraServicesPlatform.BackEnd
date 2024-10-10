@@ -3,9 +3,10 @@
     public enum RentalDurationUnit
     {
         Hour ,
-        Day,
-        Week,
-        Month
+        Day ,
+        Week ,
+        Month 
+ 
     }
 
 }

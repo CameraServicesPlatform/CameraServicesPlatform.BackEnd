@@ -7,6 +7,7 @@ using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -45,8 +46,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 //policy.Value = request.Value;
                 await _policyRepository.Insert(policy);
                 await _unitOfWork.SaveChangesAsync();
+
+                var response = _mapper.Map<PolicyResponse>(policy);
+
                 result.IsSuccess = true;
                 result.Result = policy;
+               
             }
             catch (Exception ex)
             {
@@ -93,14 +98,25 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 Expression<Func<Policy, bool>>? filter = null;
 
-                var pagedResult = await _policyRepository.GetAllDataByExpression(
+                var Result = await _policyRepository.GetAllDataByExpression(
                     filter: null,
                     pageNumber: pageIndex,
                     pageSize: pageSize
                 );
 
-                result.Result = pagedResult;
+                var responses = Result.Items.Select(PLC =>
+                {
+                    var response = _mapper.Map<PolicyResponse>(Result);
+                    response.PolicyID = PLC.PolicyID.ToString();
+                    return response;
+                }).ToList();
+                var pagedResult = new PagedResult<PolicyResponse>
+                {
+                    Items = responses
+                };
+
                 result.IsSuccess = true;
+                result.Result = pagedResult;
             }
             catch (Exception ex)
             {
@@ -115,11 +131,22 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                var pagedResult = await _policyRepository.GetAllDataByExpression(
+                var Result = await _policyRepository.GetAllDataByExpression(
                     x => x.ApplicableObject == type,
                     pageIndex,
                     pageSize
                 );
+
+                var responses = Result.Items.Select(PLC =>
+                {
+                    var response = _mapper.Map<PolicyResponse>(Result);
+                    response.PolicyID = PLC.PolicyID.ToString();
+                    return response;
+                }).ToList();
+                var pagedResult = new PagedResult<PolicyResponse>
+                {
+                    Items = responses
+                };
 
                 result.Result = pagedResult;
                 result.IsSuccess = true;
@@ -143,15 +170,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                var returnDetail = await _policyRepository.GetById(GBPolicyID);
-                if (returnDetail == null)
+                var policyDetail = await _policyRepository.GetById(GBPolicyID);
+                if (policyDetail == null)
                 {
                     result = BuildAppActionResultError(result, "Không tìm thấy policy!");
                     return result;
                 }
 
+                var response = _mapper.Map<PolicyResponse>(policyDetail);
+                response.PolicyID = policyDetail.PolicyID.ToString();
+
                 result.IsSuccess = true;
-                result.Result = returnDetail;
+                result.Result = response;
             }
             catch (Exception ex)
             {
@@ -186,8 +216,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 existingPL.Value = request.Value;
                 await _policyRepository.Update(existingPL);
                 await _unitOfWork.SaveChangesAsync();
+
+
+                var response = _mapper.Map<PolicyResponse>(existingPL);
+                response.PolicyID = existingPL.PolicyID.ToString();
+
                 result.IsSuccess = true;
-                result.Result = existingPL;
+                result.Result = response;
             }
             catch (Exception ex)
             {

@@ -48,9 +48,9 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpDelete("delete-category")]
-        public async Task<AppActionResult> DeleteCategory(string productId)
+        public async Task<AppActionResult> DeleteCategory(string categoryId)
         {
-            return await _categoryService.DeleteCategory(productId);
+            return await _categoryService.DeleteCategory(categoryId);
         }
     }
 }

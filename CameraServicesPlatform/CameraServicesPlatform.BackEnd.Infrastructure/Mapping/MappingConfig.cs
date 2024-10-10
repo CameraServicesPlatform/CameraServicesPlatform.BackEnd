@@ -40,6 +40,7 @@ public class MappingConfig
             config.CreateMap<ContractTemplate, ContractTemplateResponse>();
             config.CreateMap<Policy, PolicyResponse>();
             config.CreateMap<Report, ReportResponse>();
+            config.CreateMap<ReturnDetail, ReturnDetailResponse>();
 
 
 

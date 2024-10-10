@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
-    [Route("[controller]")]
+    [Route("rating")]
     [ApiController]
     public class RatingController : ControllerBase
     {

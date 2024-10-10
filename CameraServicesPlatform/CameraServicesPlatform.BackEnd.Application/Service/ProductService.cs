@@ -139,10 +139,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 var productRepository = Resolve<IRepository<Product>>();
 
-                var productExist = await _productRepository.GetByExpression(
-                    a => a.ProductID.Equals(productResponse.ProductID ),
-                    null
-                );
+                Product productExist = await productRepository.GetById(productResponse.ProductID);
+
                 if (productExist == null)
                 {
                     result.IsSuccess = false;

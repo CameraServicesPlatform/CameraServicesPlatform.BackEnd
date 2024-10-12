@@ -209,6 +209,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     if (item == null)
                     {
+ 
                         continue; 
                     }
 
@@ -223,7 +224,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
 
                     ProductResponse productResponse = NewProsuctResponse(item, image);
-
+ 
 
                     listProduct.Add(productResponse);
                 }
@@ -239,6 +240,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+ 
         public ProductResponse NewProsuctResponse(Product productExist, List<string> image )
         {
             ProductResponse productResponse = new ProductResponse
@@ -262,6 +264,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             };
             return productResponse;
         }
+ 
         public async Task<AppActionResult> GetProductById(string id, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();

@@ -108,10 +108,7 @@ public class AccountController : ControllerBase
     {
         return await _accountService.GoogleCallBack(accessTokenFromGoogle);
     }
-
-
-
-
+     
     [HttpPost("assign-role")]
     public async Task<AppActionResult> AssignRole(string userId, string roleName)
     {

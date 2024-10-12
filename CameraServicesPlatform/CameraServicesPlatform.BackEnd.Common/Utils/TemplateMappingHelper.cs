@@ -7,7 +7,8 @@ public class TemplateMappingHelper
         VERIFICATION_CODE,
         FORGOTPASSWORD,
         CONTRACT_CODE,
-        STAFF_ACCOUNT_CREATION
+        STAFF_ACCOUNT_CREATION,
+        SUPLLIERS_ACCOUNT_CENSOR
     }
 
     public static string GetTemplateOTPEmail(ContentEmailType type, string body, string name)
@@ -163,7 +164,7 @@ public class TemplateMappingHelper
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Camera service platform Team</i></b>
+            <b><i>Camera Service Platform Team</i></b>
           </p>
         </div>
       </div>
@@ -325,7 +326,7 @@ public class TemplateMappingHelper
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Camera service platform Team</i></b>
+            <b><i>Camera Service Platform Team</i></b>
           </p>
         </div>
       </div>
@@ -487,7 +488,7 @@ public class TemplateMappingHelper
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Camera service platform Team</i></b>
+            <b><i>Camera Service Platform Team</i></b>
           </p>
         </div>
       </div>
@@ -502,6 +503,7 @@ public class TemplateMappingHelper
                 break;
 
                 return content;
+
             case ContentEmailType.STAFF_ACCOUNT_CREATION:
                 content = @"
 <html>
@@ -650,7 +652,7 @@ public class TemplateMappingHelper
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Camera service platform Team</i></b>
+            <b><i>Camera Service Platform Team</i></b>
           </p>
         </div>
       </div>
@@ -811,7 +813,7 @@ public class TemplateMappingHelper
         <div class=""signature"">
           <p>Best regards,</p>
           <p>
-            <b><i>Camera service platform Team</i></b>
+            <b><i>Camera Service Platform Team</i></b>
           </p>
         </div>
       </div>

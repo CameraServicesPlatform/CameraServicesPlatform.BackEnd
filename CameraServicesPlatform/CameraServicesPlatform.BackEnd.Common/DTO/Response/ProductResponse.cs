@@ -41,6 +41,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        public string ? Image { get; set; }
+        public List<string>? Image { get; set; } = new List<string>();
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.Execution;
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
@@ -7,9 +8,11 @@ using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using MailKit.Search;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -73,6 +76,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var orderDetail in orderDetails)
                 {
+                    var hasOrderDetail = await _orderDetailRepository.GetAllDataByExpression(x =>
+                            x.ProductID == orderDetail.ProductID &&
+                            x.Order.OrderType == OrderType.Purchase, 
+                            pageNumber: 1,
+                            pageSize: int.MaxValue
+                            );
+                   
+                    if (hasOrderDetail != null)
+                    {
+                        await _orderRepository.DeleteById(createdOrder.OrderID);
+                        await _unitOfWork.SaveChangesAsync();
+                        await Task.Delay(50);
+                        throw new Exception("Không tạo đơn hàng thành công vì sản phẩm đả được bán!");
+                    }
                     orderDetail.OrderID = createdOrder.OrderID;
                 }
 
@@ -82,7 +99,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var orderDetailRequest in request.OrderDetailRequests)
                 {
+                    
+
                     var product = await _productRepository.GetById(orderDetailRequest.ProductID);
+                    
                     if (product != null)
                     {
                         product.Status = ProductStatusEnum.Shipping;  

@@ -14,5 +14,6 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
 
         Task<AppActionResult> UpdateProduct(ProductUpdateResponseDto productResponse);
         Task<AppActionResult> GetProductByCategoryId(string filter, int pageIndex, int pageSize);
+        Task<AppActionResult> GetProductBySupplierId(string filter, int pageIndex, int pageSize);
     }
 }

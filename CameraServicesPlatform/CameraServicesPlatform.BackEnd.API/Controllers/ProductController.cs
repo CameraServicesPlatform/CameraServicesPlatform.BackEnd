@@ -31,12 +31,18 @@ public class ProductController : ControllerBase
     public async Task<AppActionResult> GetProductById(string id, int pageIndex = 1, int pageSize = 10)
     {
         return await _productService.GetProductById(id, pageIndex, pageSize);
-    }
+    } 
 
     [HttpGet("get-product-by-name")]
     public async Task<AppActionResult> GetProductByName(string filter, int pageIndex = 1, int pageSize = 10)
     {
         return await _productService.GetProductByName(filter, pageIndex, pageSize);
+    }
+
+    [HttpGet("get-product-by-supplierId")]
+    public async Task<AppActionResult> GetProductBySupplierId(string filter, int pageIndex = 1, int pageSize = 10)
+    {
+        return await _productService.GetProductBySupplierId(filter, pageIndex, pageSize);
     }
 
     [HttpGet("get-product-by-category-name")]
@@ -51,6 +57,7 @@ public class ProductController : ControllerBase
         return await _productService.GetProductByCategoryId(filter, pageIndex, pageSize);
     }
 
+    
     [HttpPost("create-product")]
     public async Task<AppActionResult> CreateProduct([FromBody]ProductResponseDto productResponse)
     {

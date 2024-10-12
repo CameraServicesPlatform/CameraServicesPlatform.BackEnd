@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Migrations;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.Identity.Client;
 using System;
@@ -19,6 +20,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IRepository<Rating> _ratingRepository;
         private readonly IRepository<Order> _orderRepository;
+        private readonly IRepository<Member> _memberRepository;
         private readonly IRepository<OrderDetail> _orderDetailRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -26,6 +28,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Rating> ratingRepository,
             IRepository<Order> orderRepository,
             IRepository<OrderDetail> orderDetailRepository,
+            IRepository<Member> memberRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
@@ -34,6 +37,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _ratingRepository = ratingRepository;
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
+            _memberRepository = memberRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -42,12 +46,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var result = new AppActionResult();
             try
             {
+               
+                if (!Guid.TryParse(request.ProductID, out Guid RatingProductID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
                 if (request.RatingValue > 5)
                 {
                     result = BuildAppActionResultError(result, "giá trị đánh không được lớn hơn 5");
                     return result;
                 }
-                var hasOrder = await _orderRepository.GetByExpression(x => x.MemberID == request.AccountID);
+                var member = await _memberRepository.GetByExpression(x => x.AccountID == request.AccountID);
+
+                var hasOrder = await _orderRepository.GetByExpression(x => x.MemberID == member.MemberID);
 
                 if (hasOrder == null)
                 {
@@ -55,7 +67,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                var hasOrderDetail = await _orderDetailRepository.GetByExpression(x => x.ProductID == request.ProductID);
+                var hasOrderDetail = await _orderDetailRepository.GetByExpression(x => x.ProductID == RatingProductID);
 
                 if (hasOrderDetail == null)
                 {

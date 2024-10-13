@@ -32,7 +32,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 
         public ProductStatusEnum Status { get; set; }
 
-        public double Rating { get; set; }
-
+ 
     }
 }

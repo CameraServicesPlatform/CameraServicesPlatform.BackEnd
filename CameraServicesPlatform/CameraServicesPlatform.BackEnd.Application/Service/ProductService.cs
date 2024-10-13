@@ -23,7 +23,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IMapper _mapper;
         private IRepository<Product> _productRepository;
         private IRepository<ProductImage> _productImageRepository;
-        private IRepository<ProductResponse> _productResponseRepository;
 
         private IRepository<OrderDetail> _orderDetailRepository;
         private IRepository<Order> _orderRepository;
@@ -38,18 +37,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Order> orderRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
-            IRepository<ProductResponse> productResponseRepository,
             IServiceProvider serviceProvider,
             IDbContext context
         ) : base(serviceProvider)
         {
-            
+            _productRepository = productRepository;
+            _productImageRepository = productImageRepository;
             _orderDetailRepository = orderDetailRepository;
-            _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
-            _productImageRepository = productImageRepository ?? throw new ArgumentNullException(nameof(productImageRepository));
-            _productResponseRepository = productResponseRepository ?? throw new ArgumentNullException(nameof(productResponseRepository));
-
-            _orderRepository = orderRepository; 
+            _orderRepository = orderRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -58,13 +53,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             AppActionResult result = new AppActionResult();
             try
-               {
+            {
                 var listProduct = Resolve<IRepository<Product>>();
                 var productNameExist = await _productRepository.GetByExpression(
-                    a => a.ProductName.Equals(productResponse.ProductName) && a.SupplierID.Equals(productResponse.SupplierID),
+                    a => a.ProductName != null && a.ProductName.Equals(productResponse.ProductName) && a.SupplierID != null && a.SupplierID.Equals(Guid.Parse(productResponse.SupplierID)),
                     null
                 );
-                if(productNameExist != null )
+                if (productNameExist != null)
                 {
                     result.IsSuccess = false;
                     result.Result = "Name product existed into supplier";
@@ -72,13 +67,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var productSerialExist = await _productRepository.GetByExpression(
-                    a => a.SerialNumber.Equals(productResponse.SerialNumber) && a.SupplierID.Equals(productResponse.SupplierID),
+                    a => a.SerialNumber != null && a.SerialNumber.Equals(productResponse.SerialNumber) && a.SupplierID != null && a.SupplierID.Equals(Guid.Parse(productResponse.SupplierID)),
                     null
                 );
-                if (productNameExist != null)
+                if (productSerialExist != null)
                 {
                     result.IsSuccess = false;
-                    result.Result = "Product serial number existed into supplier, serial number cann't duplicate";
+                    result.Result = "Product serial number existed into supplier, serial number can't duplicate";
                     return result;
                 }
 
@@ -87,7 +82,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductID = Guid.NewGuid(),
                     SerialNumber = productResponse.SerialNumber,
                     SupplierID = Guid.Parse(productResponse.SupplierID),
-                    CategoryID =  Guid.Parse(productResponse.CategoryID),
+                    CategoryID = Guid.Parse(productResponse.CategoryID),
                     ProductName = productResponse.ProductName,
                     ProductDescription = productResponse.ProductDescription,
                     PriceBuy = productResponse.PriceBuy,
@@ -99,35 +94,36 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     CreatedAt = DateTime.Now,
                     UpdatedAt = DateTime.Now
                 };
+
                 var firebaseService = Resolve<IFirebaseService>();
-                if(productResponse.File != null)
+
+                if (productResponse.File != null)
                 {
                     var pathName = SD.FirebasePathName.SUPPLIER_PREFIX + $"{product.ProductID}{Guid.NewGuid()}.jpg";
-                    var upload = await firebaseService!.UploadFileToFirebase(productResponse.File, pathName);
-                    var Img = upload!.Result!.ToString()!;
+                    var upload = await firebaseService.UploadFileToFirebase(productResponse.File, pathName);
+                    var imgUrl = upload.Result.ToString();
 
-                    await listProduct.Insert(product);
-                    await _unitOfWork.SaveChangesAsync();
+                    // Save the image URL to the database
+                    ProductImage productImage = new ProductImage
+                    {
+                        ProductImagesID = Guid.NewGuid(),
+                        ProductID = product.ProductID,
+                        Image = imgUrl
+                    };
 
-                    result.Result = productResponse;
-                    result.IsSuccess = true;
+                    await _productImageRepository.Insert(productImage);
                 }
-                else
-                {
-                    await listProduct.Insert(product);
-                    await _unitOfWork.SaveChangesAsync();
 
-                    result.Result = productResponse;
-                    result.IsSuccess = true;
-                }
-                
+                await listProduct.Insert(product);
+                await _unitOfWork.SaveChangesAsync();
+
+                result.Result = productResponse;
+                result.IsSuccess = true;
             }
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
-
-
 
             return result;
         }
@@ -159,12 +155,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 productExist.SerialNumber = productResponse.SerialNumber;
-                productExist.SupplierID = Guid.Parse( productResponse.SupplierID);
-                productExist.CategoryID =Guid.Parse( productResponse.CategoryID);
+                productExist.SupplierID = Guid.Parse(productResponse.SupplierID);
+                productExist.CategoryID = Guid.Parse(productResponse.CategoryID);
                 productExist.ProductName = productResponse.ProductName;
                 productExist.ProductDescription = productResponse.ProductDescription;
-                productExist.PriceBuy = productResponse.PriceBuy;
-                productExist.PriceRent = productResponse.PriceRent;
+                if (productResponse.PriceBuy != null)
+                {
+                    productExist.PriceBuy = productResponse.PriceBuy;
+                }
+                if (productResponse.PriceRent != null)
+                {
+                    productExist.PriceRent = productResponse.PriceRent;
+                }
                 productExist.Brand = productResponse.Brand;
                 productExist.Quality = productResponse.Quality;
                 productExist.Status = productResponse.Status;
@@ -194,38 +196,47 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 Expression<Func<Product, bool>>? filter = null;
                 List<ProductResponse> listProduct = new List<ProductResponse>();
-
-                // Fetch paged result from repository
                 var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.Supplier != null ? a.Supplier.SupplierName : string.Empty, // Handle null Supplier
+                    orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    null
+                    includes: new Expression<Func<Product, object>>[]
+                    {
+                a => a.Supplier,
+                a => a.Category
+                    }
                 );
 
                 foreach (var item in pagedResult.Items)
                 {
-                    if (item == null)
-                    {
- 
-                        continue; 
-                    }
-
-                    var productImage = await _productImageRepository.GetByExpression(
-                    a => a.ProductID == item.ProductID,
-                    null
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
                     );
-                    List<string> image = new List<string>();
-                    if(productImage!= null)
+                    ProductResponse productResponse = new ProductResponse
                     {
-                        image.Add(productImage.Image);
-                    }
-
-                    ProductResponse productResponse = NewProsuctResponse(item, image);
- 
-
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        SupplierID = item.SupplierID?.ToString(),
+                        CategoryID = item.CategoryID?.ToString(),
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceBuy = item.PriceBuy,
+                        PriceRent = item.PriceRent,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        listImage = productImage.Items
+                    };
                     listProduct.Add(productResponse);
                 }
 
@@ -240,31 +251,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
- 
-        public ProductResponse NewProsuctResponse(Product productExist, List<string> image )
-        {
-            ProductResponse productResponse = new ProductResponse
-            {
-                ProductID = productExist.ProductID.ToString(),
-                SerialNumber = productExist.SerialNumber,
-                SupplierID = productExist.SupplierID != null ? productExist.SupplierID.ToString() : null, // Handle null SupplierID
-                CategoryID = productExist.CategoryID != null ? productExist.CategoryID.ToString() : null, // Handle null CategoryID
-                ProductName = productExist.ProductName,
-                ProductDescription = productExist.ProductDescription,
-                PriceRent = productExist.PriceRent,
-                PriceBuy = productExist.PriceBuy,
-                Brand = productExist.Brand,
-                Quality = productExist.Quality,
-                Status = productExist.Status,
-                Rating = productExist.Rating,
-                CreatedAt = productExist.CreatedAt,
-                UpdatedAt = productExist.UpdatedAt,
-                Image = image
-
-            };
-            return productResponse;
-        }
- 
         public async Task<AppActionResult> GetProductById(string id, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
@@ -276,84 +262,42 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                var productExist = await _productRepository.GetById(productId);
-                if(productExist != null)
+                var product = await _productRepository.GetById(productId);
+                if (product == null)
                 {
-
-                    ProductImage productImageExist = await _productImageRepository.GetByExpression(
-                        a=> a.ProductID == productExist.ProductID,
-                        null
-                        );
-                    List<string> image = new List<string>();
-                    image.Add(productImageExist.Image.ToString());
-
-                    ProductResponse productResponse = NewProsuctResponse(productExist, image);
-
-                    result.Result = productResponse;
-                    result.IsSuccess = true;
-                }
-                else
-                {
-                    result.Result = "Product not exist";
-                    result.IsSuccess = false;
-                }
-                
-                
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
-            }
-
-            return result;
-        }
-
-
-        public async Task<AppActionResult> GetProductByName(string? productNameFilter , int pageIndex, int pageSize)
-        {
-            AppActionResult result = new AppActionResult();
-            try
-            {
-                Expression<Func<Product, bool>>? filter = a => true;
-                List<ProductResponse> listProduct = new List<ProductResponse>();
-
-                if (!string.IsNullOrEmpty(productNameFilter))
-                {
-                    filter = a => a.ProductName.Contains(productNameFilter);
+                    result = BuildAppActionResultError(result, "Product not found.");
+                    return result;
                 }
 
-                var listProductFilter = await _productRepository.GetAllDataByExpression(
-                    filter,
+                var productImage = await _productImageRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(product.ProductID),
                     pageIndex,
                     pageSize,
-                    orderBy: a => a.Supplier!.SupplierName,
+                    null,
                     isAscending: true,
                     null
                 );
 
-                foreach (var item in listProductFilter.Items)
+                ProductResponse productResponse = new ProductResponse
                 {
-                    if (item == null)
-                    {
-                        continue;
-                    }
+                    ProductID = product.ProductID.ToString(),
+                    SerialNumber = product.SerialNumber,
+                    SupplierID = product.SupplierID?.ToString(),
+                    CategoryID = product.CategoryID?.ToString(),
+                    ProductName = product.ProductName,
+                    ProductDescription = product.ProductDescription,
+                    PriceBuy = product.PriceBuy,
+                    PriceRent = product.PriceRent,
+                    Brand = product.Brand,
+                    Quality = product.Quality,
+                    Status = product.Status,
+                    Rating = product.Rating,
+                    CreatedAt = product.CreatedAt,
+                    UpdatedAt = product.UpdatedAt,
+                    listImage = productImage.Items
+                };
 
-                    var productImage = await _productImageRepository.GetByExpression(
-                    a => a.ProductID == item.ProductID,
-                    null
-                    );
-                    List<string> image = new List<string>();
-                    if (productImage != null)
-                    {
-                        image.Add(productImage.Image);
-                    }
-
-                    ProductResponse productResponse = NewProsuctResponse(item, image);
-
-
-                    listProduct.Add(productResponse);
-                }
-                result.Result = listProduct;
+                result.Result = productResponse;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -364,52 +308,33 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetProductBySupplierId(string? supplierId, int pageIndex, int pageSize)
+
+        public async Task<AppActionResult> GetProductByName(string? productNameFilter, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = a => true;
-                List<ProductResponse> listProduct = new List<ProductResponse>();
+                Expression<Func<Product, bool>>? filter = null;
 
-
-                if (!string.IsNullOrEmpty(supplierId))
+                if (!string.IsNullOrEmpty(productNameFilter))
                 {
-                    filter = a => a.SupplierID == Guid.Parse(supplierId);
+                    filter = a => a.ProductName.Contains(productNameFilter);
                 }
 
-                var listProductFilter = await _productRepository.GetAllDataByExpression(
+                var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    null
+                    includes: new Expression<Func<Product, object>>[]
+                    {
+                a => a.Supplier,
+                a => a.Category
+                    }
                 );
 
-                foreach (var item in listProductFilter.Items)
-                {
-                    if (item == null)
-                    {
-                        continue;
-                    }
-
-                    var productImage = await _productImageRepository.GetByExpression(
-                    a => a.ProductID == item.ProductID,
-                    null
-                    );
-                    List<string> image = new List<string>();
-                    if (productImage != null)
-                    {
-                        image.Add(productImage.Image);
-                    }
-
-                    ProductResponse productResponse = NewProsuctResponse(item, image);
-
-
-                    listProduct.Add(productResponse);
-                }
-                result.Result = listProduct;
+                result.Result = pagedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -426,8 +351,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 Expression<Func<Product, bool>>? filter = null;
-                List<ProductResponse> listProduct = new List<ProductResponse>();
-
 
                 if (!string.IsNullOrEmpty(categoryFilter))
                 {
@@ -440,33 +363,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    null
+                    includes: new Expression<Func<Product, object>>[]
+                    {
+                a => a.Supplier,
+                a => a.Category
+                    }
                 );
 
-                foreach (var item in pagedResult.Items)
-                {
-                    if (item == null)
-                    {
-                        continue;
-                    }
-
-                    var productImage = await _productImageRepository.GetByExpression(
-                    a => a.ProductID == item.ProductID,
-                    null
-                    );
-                    List<string> image = new List<string>();
-                    if (productImage != null)
-                    {
-                        image.Add(productImage.Image);
-                    }
-
-                    ProductResponse productResponse = NewProsuctResponse(item, image);
-
-                    listProduct.Add(productResponse);
-                }
-                result.Result = listProduct;
+                result.Result = pagedResult;
                 result.IsSuccess = true;
-
             }
             catch (Exception ex)
             {
@@ -482,8 +387,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 Expression<Func<Product, bool>>? filter = null;
-                List<ProductResponse> listProduct = new List<ProductResponse>();
-
                 Guid.TryParse(categoryFilter, out Guid categoryNameFilter);
 
                 if (!string.IsNullOrEmpty(categoryFilter))
@@ -497,32 +400,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    null
+                    includes: new Expression<Func<Product, object>>[]
+                    {
+                a => a.Supplier,
+                a => a.Category
+                    }
                 );
 
-                foreach (var item in pagedResult.Items)
-                {
-                    if (item == null)
-                    {
-                        continue;
-                    }
-
-                    var productImage = await _productImageRepository.GetByExpression(
-                    a => a.ProductID == item.ProductID,
-                    null
-                    );
-                    List<string> image = new List<string>();
-                    if (productImage != null)
-                    {
-                        image.Add(productImage.Image);
-                    }
-
-                    ProductResponse productResponse = NewProsuctResponse(item, image);
-
-
-                    listProduct.Add(productResponse);
-                }
-                result.Result = listProduct;
+                result.Result = pagedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -557,19 +442,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     includes: new Expression<Func<OrderDetail, object>>[] { a => a.Order }
                 );
 
-                if (orderDetails.Items.Any()) { 
-                
+                if (orderDetails.Items.Any())
+                {
+
                     result.IsSuccess = false;
                     result.Result = "Product is part of a pending or approved order and cannot be deleted.";
                 }
-                 else
+                else
                 {
                     var product = await _productRepository.GetById(id);
                     if (product != null)
                     {
                         product.Status = ProductStatusEnum.discontinuedProduct;
 
-                        productRepository.Update(product); 
+                        productRepository.Update(product);
                         await _unitOfWork.SaveChangesAsync();
 
                         result.IsSuccess = true;
@@ -589,6 +475,51 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+       
+            public async Task<AppActionResult> GetProductBySupplierId(string filter, int pageIndex, int pageSize)
+            {
+                AppActionResult result = new AppActionResult();
+                try
+                {
+                    Expression<Func<Product, bool>>? filterExpression = null;
+
+                    if (!string.IsNullOrEmpty(filter))
+                    {
+                        if (Guid.TryParse(filter, out Guid supplierId))
+                        {
+                            filterExpression = a => a.SupplierID == supplierId;
+                        }
+                        else
+                        {
+                            result = BuildAppActionResultError(result, "Invalid supplier ID format.");
+                            return result;
+                        }
+                    }
+
+                    var pagedResult = await _productRepository.GetAllDataByExpression(
+                        filterExpression,
+                        pageIndex,
+                        pageSize,
+                        orderBy: a => a.Supplier!.SupplierName,
+                        isAscending: true,
+                        includes: new Expression<Func<Product, object>>[]
+                        {
+                    a => a.Supplier,
+                    a => a.Category
+                        }
+                    );
+
+                    result.Result = pagedResult;
+                    result.IsSuccess = true;
+                }
+                catch (Exception ex)
+                {
+                    result = BuildAppActionResultError(result, ex.Message);
+                }
+
+                return result;
+            }
+        }
 
     }
-}
+

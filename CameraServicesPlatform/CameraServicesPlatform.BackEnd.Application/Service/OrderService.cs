@@ -60,9 +60,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.OrderDate = DateTime.Now;
                 order.OrderStatus = 0;
 
+                var hasOrderDetail = await _orderDetailRepository.GetByExpression(x =>
+                            x.ProductID == request.OrderDetailRequests.First().ProductID &&
+                            x.Order.OrderType == OrderType.Purchase
+                            );
+
+                if (hasOrderDetail != null)
+                {
+                    throw new Exception("Không tạo đơn hàng thành công vì sản phẩm đả được bán!");
+                }
+
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);
                 await _unitOfWork.SaveChangesAsync();
+
 
                 var createdOrder = await _orderRepository
                                         .GetByExpression(x => x.MemberID == request.MemberID && x.OrderDate == order.OrderDate);
@@ -76,20 +87,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var orderDetail in orderDetails)
                 {
-                    var hasOrderDetail = await _orderDetailRepository.GetAllDataByExpression(x =>
-                            x.ProductID == orderDetail.ProductID &&
-                            x.Order.OrderType == OrderType.Purchase, 
-                            pageNumber: 1,
-                            pageSize: int.MaxValue
-                            );
-                   
-                    if (hasOrderDetail != null)
-                    {
-                        await _orderRepository.DeleteById(createdOrder.OrderID);
-                        await _unitOfWork.SaveChangesAsync();
-                        await Task.Delay(50);
-                        throw new Exception("Không tạo đơn hàng thành công vì sản phẩm đả được bán!");
-                    }
+                    
                     orderDetail.OrderID = createdOrder.OrderID;
                 }
 
@@ -436,7 +434,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetOrderOfSupplier(string SupplierID, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetOrderOfSupplier(string? SupplierID, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -446,10 +444,42 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
+                if (OrderSupplierID != null)
+                {
+                    var pagedResult1 = await _orderRepository.GetAllDataByExpression(
+                        x => x.SupplierID == OrderSupplierID,
+                        pageIndex,
+                        pageSize
+                    );
+                    var convertedResult1 = pagedResult1.Items.Select(order => new
+                    {
+                        OrderID = order.OrderID.ToString(),
+                        MemberID = order.MemberID.ToString(),
+                        SupplierID = order.SupplierID.ToString(),
+                        DeliveriesMethodID = order.DeliveriesMethodID.ToString(),
+                        OrderDetailID = order.OrderDetailID.ToString(),
+                        order.OrderDate,
+                        order.CreatedAt,
+                        order.OrderStatus,
+                        order.TotalAmount,
+                        order.DeliveryMethod,
+                        order.ShippingAddress,
+                        order.RentalStartDate,
+                        order.RentalEndDate,
+                        order.DurationUnit,
+                        order.DurationValue,
+                        order.ReturnDate,
+                    }).ToList();
+                    result.Result = convertedResult1;
+                    result.IsSuccess = true;
+                }
+
+                Expression<Func<Order, bool>>? filter = null;
+
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
-                    x => x.SupplierID == OrderSupplierID,
-                    pageIndex,
-                    pageSize
+                    filter: null,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize
                 );
 
                 var convertedResult = pagedResult.Items.Select(order => new

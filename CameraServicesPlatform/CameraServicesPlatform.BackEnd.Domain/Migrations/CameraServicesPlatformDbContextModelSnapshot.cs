@@ -33,6 +33,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("BackOfCitizenIdentificationCard")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -46,6 +49,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<string>("FirstName")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FrontOfCitizenIdentificationCard")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Gender")

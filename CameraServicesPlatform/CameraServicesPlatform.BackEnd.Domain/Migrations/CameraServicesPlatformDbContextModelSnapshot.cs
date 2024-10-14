@@ -57,6 +57,12 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<string>("Img")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("FrontOfCitizenIdentificationCard")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BackOfCitizenIdentificationCard")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -150,12 +156,12 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("MemberId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("AccountID")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("BankId");
 
-                    b.HasIndex("MemberId");
+                    b.HasIndex("AccountID");
 
                     b.ToTable("BankInformation");
                 });
@@ -674,9 +680,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.ToTable("Vourchers");
                 });
 
-            modelBuilder.Entity("Contract", b =>
+            modelBuilder.Entity("ContractTemplate", b =>
                 {
-                    b.Property<Guid>("ContractID")
+                    b.Property<Guid>("ContractTemplateId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -687,9 +693,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("OrderID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("PenaltyPolicy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -699,10 +702,43 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasKey("ContractID");
 
-                    b.HasIndex("OrderID");
-
-                    b.ToTable("Contracts");
+                    b.ToTable("ContractTemplates");
                 });
+
+            modelBuilder.Entity("Contract", b =>
+            {
+                b.Property<Guid>("ContractID")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<string>("ContractTerms")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<DateTime>("CreatedAt")
+                    .HasColumnType("datetime2");
+
+                b.Property<Guid>("ContractTemplateId")
+                    .HasColumnType("uniqueidentifier");
+
+                b.Property<Guid>("OrderID")
+                   .HasColumnType("uniqueidentifier");
+
+                b.Property<string>("PenaltyPolicy")
+                    .IsRequired()
+                    .HasColumnType("nvarchar(max)");
+
+                b.Property<DateTime>("UpdatedAt")
+                    .HasColumnType("datetime2");
+
+                b.HasKey("ContractID");
+
+                b.HasIndex("OrderID");
+
+                b.HasIndex("ContractTemplateId");
+
+                b.ToTable("Contracts");
+            });
 
             modelBuilder.Entity("Member", b =>
                 {
@@ -1181,13 +1217,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.BankInformation", b =>
                 {
-                    b.HasOne("Member", "Member")
+                    b.HasOne("Account", "Account")
                         .WithMany()
-                        .HasForeignKey("MemberId")
+                        .HasForeignKey("AccountID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Member");
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models.ProductVoucher", b =>
@@ -1264,6 +1300,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Navigation("Product");
                 });
 
+           
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductReport", b =>
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "HandledBy")
@@ -1369,16 +1406,34 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Navigation("Supplier");
                 });
 
-            modelBuilder.Entity("Contract", b =>
+            modelBuilder.Entity("ContractTemplate", b =>
                 {
-                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Member", "Member")
                         .WithMany()
-                        .HasForeignKey("OrderID")
+                        .HasForeignKey("MemberID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Order");
+                    b.Navigation("Member");
+
                 });
+
+            modelBuilder.Entity("Contract", b =>
+            {
+                b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
+                    .WithMany()
+                    .HasForeignKey("OrderID")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+                b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.ContractTemplate", "ContractTemplate")
+                    .WithMany()
+                    .HasForeignKey("ContractTemplateId")
+                    .OnDelete(DeleteBehavior.Cascade)
+                    .IsRequired();
+
+                b.Navigation("ContractTemplate");
+                b.Navigation("Order");
+            });
 
             modelBuilder.Entity("Member", b =>
                 {

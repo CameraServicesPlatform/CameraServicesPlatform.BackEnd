@@ -11,8 +11,11 @@ public class Contract
     [ForeignKey(nameof(Order))]
     public Guid OrderID { get; set; }
 
+    [ForeignKey(nameof(ContractTemplate))]
+    public Guid ContractTemplateId { get; set; }
     // Navigation property for Order
     public Order Order { get; set; }
+    public ContractTemplate ContractTemplate { get; set; }
 
     public string ContractTerms { get; set; }
     public string PenaltyPolicy { get; set; }

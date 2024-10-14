@@ -239,14 +239,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public ProductResponse NewProsuctResponse(Product productExist, List<string> image )
+        public ProductResponse NewProsuctResponse(Product productExist, List<string> image)
         {
+            if (productExist == null)
+            {
+                throw new ArgumentNullException(nameof(productExist), "Product cannot be null");
+            }
+
             ProductResponse productResponse = new ProductResponse
             {
                 ProductID = productExist.ProductID.ToString(),
                 SerialNumber = productExist.SerialNumber,
-                SupplierID = productExist.SupplierID != null ? productExist.SupplierID.ToString() : null, // Handle null SupplierID
-                CategoryID = productExist.CategoryID != null ? productExist.CategoryID.ToString() : null, // Handle null CategoryID
+                AccountID = productExist.Supplier?.AccountID != null ? productExist.Supplier.AccountID.ToString() : null, // Handle null Supplier
+                CategoryID = productExist.CategoryID?.ToString(), // Handle null CategoryID
                 ProductName = productExist.ProductName,
                 ProductDescription = productExist.ProductDescription,
                 PriceRent = productExist.PriceRent,
@@ -258,10 +263,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 CreatedAt = productExist.CreatedAt,
                 UpdatedAt = productExist.UpdatedAt,
                 Image = image
-
             };
+
             return productResponse;
         }
+
         public async Task<AppActionResult> GetProductById(string id, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
@@ -368,6 +374,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 Expression<Func<Product, bool>>? filter = a => true;
                 List<ProductResponse> listProduct = new List<ProductResponse>();
+
 
 
                 if (!string.IsNullOrEmpty(supplierId))

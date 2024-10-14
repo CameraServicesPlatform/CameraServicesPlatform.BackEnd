@@ -155,7 +155,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 productExist.SerialNumber = productResponse.SerialNumber;
-                productExist.SupplierID = Guid.Parse(productResponse.SupplierID);
                 productExist.CategoryID = Guid.Parse(productResponse.CategoryID);
                 productExist.ProductName = productResponse.ProductName;
                 productExist.ProductDescription = productResponse.ProductDescription;

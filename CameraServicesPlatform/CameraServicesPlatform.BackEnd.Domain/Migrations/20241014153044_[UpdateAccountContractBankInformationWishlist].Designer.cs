@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    [Migration("20241014132942_[UpdateAccountContractBankInformationWishlist]")]
+    [Migration("20241014153044_[UpdateAccountContractBankInformationWishlist]")]
     partial class UpdateAccountContractBankInformationWishlist
     {
         /// <inheritdoc />

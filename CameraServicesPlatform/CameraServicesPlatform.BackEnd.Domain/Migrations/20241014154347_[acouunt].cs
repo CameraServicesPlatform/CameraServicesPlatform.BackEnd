@@ -5,7 +5,7 @@
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateAccountContractBankInformationWishlist : Migration
+    public partial class acouunt : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

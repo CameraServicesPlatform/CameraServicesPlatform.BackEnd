@@ -148,7 +148,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                     a => a.ProductName.Equals(productResponse.ProductName), 
                     null
-                );
+                ); 
                 if (productNameExist != null)
                 {
                     result.IsSuccess = false;

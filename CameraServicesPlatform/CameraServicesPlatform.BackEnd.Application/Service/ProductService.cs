@@ -147,7 +147,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var productNameExist = await _productRepository.GetByExpression(
 
 
-                    a => a.ProductName.Equals(productResponse.ProductName) 
+                    a => a.ProductName.Equals(productResponse.ProductName), 
                     null
                 );
                 if (productNameExist != null)

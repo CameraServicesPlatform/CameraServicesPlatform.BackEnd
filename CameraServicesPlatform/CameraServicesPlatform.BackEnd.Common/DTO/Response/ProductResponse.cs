@@ -17,7 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 
         public string SerialNumber { get; set; }
 
-        public string? AccountID { get; set; }
+        public string? SupplierID { get; set; }
 
         public string? CategoryID { get; set; }
 

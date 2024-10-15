@@ -6,7 +6,6 @@ public class Contract
 {
     [Key]
     public Guid ContractID { get; set; }
-    public Guid OrderID { get; set; }
 
     public Guid ContractTemplateId { get; set; }
     [ForeignKey(nameof(ContractTemplateId))]

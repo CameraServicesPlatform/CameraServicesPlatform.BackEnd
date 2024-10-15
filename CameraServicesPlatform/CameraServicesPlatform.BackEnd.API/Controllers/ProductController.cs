@@ -59,7 +59,7 @@ public class ProductController : ControllerBase
 
     
     [HttpPost("create-product")]
-    public async Task<AppActionResult> CreateProduct([FromBody]ProductResponseDto productResponse)
+    public async Task<AppActionResult> CreateProduct([FromForm]ProductResponseDto productResponse)
     {
         return await _productService.CreateProduct(productResponse);
     }

@@ -30,7 +30,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-supplier-by-name")]
-        public async Task<AppActionResult> GetSupplierByName(string filter, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetSupplierByName([FromQuery]string? filter, int pageIndex = 1, int pageSize = 10)
         {
             return await _supplierService.GetSupplierByName(filter, pageIndex, pageSize);
         }

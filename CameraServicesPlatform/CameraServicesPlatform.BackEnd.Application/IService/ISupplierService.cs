@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         
         Task<AppActionResult> GetAllSupplier(int pageIndex, int pageSize);
         Task<AppActionResult> GetSupplierById(string id, int pageIndex, int pageSize);
-        Task<AppActionResult> GetSupplierByName(string filter, int pageIndex, int pageSize);
+        Task<AppActionResult> GetSupplierByName([FromQuery] string? filter, int pageIndex, int pageSize);
         Task<AppActionResult> UpdateSupplier(SupplierUpdateResponseDto productResponse);
         Task<AppActionResult> CreateSupplier(SupplierResponseDto supplierResponse);
         Task<AppActionResult> DeleteSupplier(string supplierId);

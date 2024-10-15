@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("contractTemplate")]
     [ApiController]
     public class ContractTemplateController : ControllerBase
     {

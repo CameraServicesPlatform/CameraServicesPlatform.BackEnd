@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("orderDetail")]
     [ApiController]
     public class OrderDetailController : ControllerBase
     {

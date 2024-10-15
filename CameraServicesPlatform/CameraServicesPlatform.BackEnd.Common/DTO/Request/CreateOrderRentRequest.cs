@@ -19,6 +19,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public string? ShippingAddress { get; set; }
         public DateTime? RentalStartDate { get; set; }
         public DateTime? RentalEndDate { get; set; }
+        public RentalDurationUnit DurationUnit { get; set; }
         public int DurationValue { get; set; }
         public DateTime? ReturnDate { get; set; }
         public List<OrderDetailRequest> OrderDetailRequests { get; set; } 

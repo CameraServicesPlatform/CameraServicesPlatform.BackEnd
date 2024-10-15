@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
+namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
-    public class CreateContractTemplateRequestDTO
+    public class ContractTemplateResponse
     {
+        public string ContractTemplateID {  get; set; } 
         public string TemplateName { get; set; }
         public string ContractTerms { get; set; }
         public string TemplateDetails { get; set; }

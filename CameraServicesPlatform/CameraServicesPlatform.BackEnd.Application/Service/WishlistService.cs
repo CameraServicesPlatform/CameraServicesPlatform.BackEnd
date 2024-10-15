@@ -10,6 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Twilio.TwiML.Voice;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -99,14 +100,28 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 Expression<Func<Wishlist, bool>>? filter = null;
 
-                var pagedResult = await _wishListRepository.GetAllDataByExpression(
+                var Result = await _wishListRepository.GetAllDataByExpression(
                     filter: null,
                     pageNumber: pageIndex,
                     pageSize: pageSize
                 );
 
-                result.Result = pagedResult;
+                var responses = Result.Items.Select(WL =>
+                {
+                    var response = _mapper.Map<WishlistResponse>(Result);
+                    response.WishlistID = WL.WishlistID.ToString();
+                    response.ProductID = WL.ProductID.ToString();
+                    response.MemberID = WL.MemberID.ToString();
+
+                    return response;
+                }).ToList();
+                var pagedResult = new PagedResult<WishlistResponse>
+                {
+                    Items = responses
+                };
+
                 result.IsSuccess = true;
+                result.Result = pagedResult;
             }
             catch (Exception ex)
             {
@@ -133,8 +148,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
+                var response = _mapper.Map<WishlistResponse>(wl);
+                response.WishlistID = wl.WishlistID.ToString();
+                response.ProductID = wl.ProductID.ToString();
+                response.MemberID = wl.MemberID.ToString();
+
                 result.IsSuccess = true;
-                result.Result = wl;
+                result.Result = response;
             }
             catch (Exception ex)
             {
@@ -161,11 +181,25 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                var pagedResult = await _wishListRepository.GetAllDataByExpression(
+                var Result = await _wishListRepository.GetAllDataByExpression(
                     x => x.MemberID == WLMemberID,
                     pageNumber: pageIndex,
                     pageSize: pageSize
                 );
+
+                var responses = Result.Items.Select(WL =>
+                {
+                    var response = _mapper.Map<WishlistResponse>(Result);
+                    response.WishlistID = WL.WishlistID.ToString();
+                    response.ProductID = WL.ProductID.ToString();
+                    response.MemberID = WL.MemberID.ToString();
+
+                    return response;
+                }).ToList();
+                var pagedResult = new PagedResult<WishlistResponse>
+                {
+                    Items = responses
+                };
 
                 result.IsSuccess = true;
                 result.Result = pagedResult;
@@ -200,8 +234,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await _wishListRepository.Update(existingwl);
                 await _unitOfWork.SaveChangesAsync();
+
+                var response = _mapper.Map<WishlistResponse>(existingwl);
+                response.WishlistID = existingwl.WishlistID.ToString();
+                response.ProductID = existingwl.ProductID.ToString();
+                response.MemberID = existingwl.MemberID.ToString();
+
                 result.IsSuccess = true;
-                result.Result = existingwl;
+                result.Result = response;
             }
             catch (Exception ex)
             {

@@ -23,7 +23,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         // Foreign key to Member
         public Guid MemberID { get; set; }
-        [ForeignKey("MemberID")]
+        [ForeignKey("Member")]
 
         public Member Member { get; set; }
     }

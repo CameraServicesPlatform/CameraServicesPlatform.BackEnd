@@ -6,6 +6,7 @@ using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -52,18 +53,29 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                var orderDetailResponses = new List<OrderDetailResponse>();
-                foreach (var od in orderDetailsPagedResult.Items) 
+                //var orderDetailResponses = new List<OrderDetailResponse>();
+                //foreach (var od in orderDetailsPagedResult.Items)
+                //{
+                //    var response = _mapper.Map<OrderDetailResponse>(od);
+                //    response.OrderID = od.OrderID.ToString();
+                //    response.ProductID = od.ProductID.ToString();
+                //    response.OrderDetailsID = od.OrderDetailsID.ToString();
+                //}
+                var convertedResult = orderDetailsPagedResult.Items.Select(orderd => new
                 {
-                    var response = _mapper.Map<OrderDetailResponse>(od);
-                    response.OrderID = od.OrderID.ToString();
-                    response.ProductID = od.ProductID.ToString();
-                    response.OrderDetailsID = od.OrderDetailsID.ToString();
-                    orderDetailResponses.Add(response);
-                }
+                    OrderID = orderd.OrderID.ToString(),
+                    ProductID = orderd.ProductID.ToString(),
+                    OrderDetailsID = orderd.OrderDetailsID.ToString(),
+                    orderd.Discount,
+                    orderd.RentalPeriod,
+                    orderd.ProductPrice,
+                    orderd.ProductPriceTotal,
+                    orderd.ProductQuality,
+
+                }).ToList();
 
                 result.IsSuccess = true;
-                result.Result = orderDetailResponses;
+                result.Result = convertedResult;
             }
             catch (Exception ex)
             {

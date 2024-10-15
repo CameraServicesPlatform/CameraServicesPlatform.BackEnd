@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
+using Microsoft.AspNetCore.Http;
 
 namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 {
@@ -9,6 +10,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public string LastName { get; set; } = null!;
         public string Password { get; set; } = null!;
         public Gender Gender { get; set; }
+        public IFormFile? BackOfCitizenIdentificationCard { get; set; }
+        public IFormFile? FrontOfCitizenIdentificationCard { get; set; }
         public string PhoneNumber { get; set; } = null!;
     }
 }

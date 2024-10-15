@@ -26,6 +26,7 @@ public class AccountService : GenericBackendService, IAccountService
 {
     private readonly IRepository<Account> _accountRepository;
     private readonly IRepository<Supplier> _supplierRepository;
+    private readonly IRepository<BankInformation> _bankInformationRepository;
     private readonly IRepository<Staff> _staffRepository;
     private readonly IMapper _mapper;
     private readonly SignInManager<Account> _signInManager;
@@ -43,7 +44,8 @@ public class AccountService : GenericBackendService, IAccountService
     public AccountService(
         IRepository<Account> accountRepository,
         IRepository<Supplier> supplierRepository,
-        IRepository<Staff> staffRepository,
+         IRepository<BankInformation> bankInformationRepository,
+         IRepository<Staff> staffRepository,
          IUnitOfWork unitOfWork,
         Microsoft.AspNetCore.Identity.UserManager<Account> userManager,
         SignInManager<Account> signInManager,
@@ -61,6 +63,7 @@ public class AccountService : GenericBackendService, IAccountService
     {
         _accountRepository = accountRepository;
         _supplierRepository = supplierRepository;
+        _bankInformationRepository = bankInformationRepository;
         _staffRepository = staffRepository;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
@@ -78,6 +81,7 @@ public class AccountService : GenericBackendService, IAccountService
 
     public async Task<AppActionResult> CreateAccountSupplier(CreateSupplierAccountDTO dto, bool isGoogle)
     {
+        var firebaseService = Resolve<IFirebaseService>();
         var result = new AppActionResult();
 
         try
@@ -88,19 +92,46 @@ public class AccountService : GenericBackendService, IAccountService
                 return BuildAppActionResultError(result, "Email đã tồn tại!");
             }
 
+            if (dto.BackOfCitizenIdentificationCard == null || dto.FrontOfCitizenIdentificationCard == null)
+            {
+                return BuildAppActionResultError(result, "Bạn phải nhập ảnh hai mặt của căn cước công dân!");
+            }
             var emailService = Resolve<IEmailService>();
             var verifyCode = string.Empty;
 
             // Tạo mã xác minh
             if (!isGoogle)
                 verifyCode = Guid.NewGuid().ToString("N").Substring(0, 6);
-
+            
             // Mapping DTO sang Account
             var account = _mapper.Map<Account>(dto);
             account.VerifyCode = verifyCode;
             account.IsVerified = isGoogle ? true : false;
 
             IdentityResult createAccountResult;
+
+            // Upload ảnh căn cước công dân lên Firebase nếu có
+            string frontCardImageUrl = null;
+            string backCardImageUrl = null;
+
+            if (dto.FrontOfCitizenIdentificationCard != null)
+            {
+                var frontPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_front.jpg";
+                var frontUpload = await firebaseService.UploadFileToFirebase(dto.FrontOfCitizenIdentificationCard, frontPathName);
+                frontCardImageUrl = frontUpload?.Result?.ToString();
+            }
+
+            if (dto.BackOfCitizenIdentificationCard != null)
+            {
+                var backPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_back.jpg";
+                var backUpload = await firebaseService.UploadFileToFirebase(dto.BackOfCitizenIdentificationCard, backPathName);
+                backCardImageUrl = backUpload?.Result?.ToString();
+            }
+
+            // Cập nhật đường dẫn ảnh vào Account nếu cần
+            account.FrontOfCitizenIdentificationCard = frontCardImageUrl;
+            account.BackOfCitizenIdentificationCard = backCardImageUrl;
+
 
             if (!isGoogle)
             {
@@ -130,13 +161,21 @@ public class AccountService : GenericBackendService, IAccountService
                     supplier.UpdatedAt = DateTime.UtcNow;
 
                     await _supplierRepository.Insert(supplier);
+                    await Task.Delay(100);
                     await _unitOfWork.SaveChangeAsync();
 
+                    var bankInfor = _mapper.Map<BankInformation>(dto);
+                    bankInfor.AccountID = account.Id;
+
+                    await _bankInformationRepository.Insert(bankInfor);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangeAsync();
                     // Gán thông tin tài khoản và nhà cung cấp vào kết quả
                     result.Result = new
                     {
                         Account = account,
-                        Supplier = supplier
+                        Supplier = supplier,
+                        BankInformation = bankInfor
                     };
                 }
                 else
@@ -206,6 +245,7 @@ public class AccountService : GenericBackendService, IAccountService
  
     public async Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle)
     {
+        var firebaseService = Resolve<IFirebaseService>();
         AppActionResult result = new();
         try
         {
@@ -232,8 +272,33 @@ public class AccountService : GenericBackendService, IAccountService
                     PhoneNumber = signUpRequest.PhoneNumber,
                     Gender = signUpRequest.Gender,
                     VerifyCode = verifyCode,
-                    IsVerified = isGoogle
+                    IsVerified = isGoogle,
+                    
+                    
                 };
+
+                // Upload ảnh căn cước công dân lên Firebase nếu có
+                string? frontCardImageUrl = null;
+                string? backCardImageUrl = null;
+
+                if (signUpRequest.FrontOfCitizenIdentificationCard != null)
+                {
+                    var frontPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_front.jpg";
+                    var frontUpload = await firebaseService.UploadFileToFirebase(signUpRequest.FrontOfCitizenIdentificationCard, frontPathName);
+                    frontCardImageUrl = frontUpload?.Result?.ToString();
+                }
+
+                if (signUpRequest.BackOfCitizenIdentificationCard != null)
+                {
+                    var backPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_back.jpg";
+                    var backUpload = await firebaseService.UploadFileToFirebase(signUpRequest.BackOfCitizenIdentificationCard, backPathName);
+                    backCardImageUrl = backUpload?.Result?.ToString();
+                }
+
+                // Gán URL ảnh căn cước vào tài khoản
+                user.FrontOfCitizenIdentificationCard = frontCardImageUrl;
+                user.BackOfCitizenIdentificationCard = backCardImageUrl;
+
                 IdentityResult resultCreateUser = await _userManager.CreateAsync(user, signUpRequest.Password);
                 if (resultCreateUser.Succeeded)
                 {

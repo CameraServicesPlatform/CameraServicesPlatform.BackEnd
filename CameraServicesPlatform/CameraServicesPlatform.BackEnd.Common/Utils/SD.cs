@@ -141,6 +141,7 @@ public class SD
     public class FirebasePathName
     {
         public static string SUPPLIER_PREFIX = "supplier/";
+        public static string ACCOUNT_CITIZEN_IDENTIFICATION_CARD = "cards/";
         public static string NEWS_PREFIX = "news/";
         public static string BLOG_PREFIX = "blog/";
         public static string SAMPLE_HOUSE_PREFIX = "sample-house/";

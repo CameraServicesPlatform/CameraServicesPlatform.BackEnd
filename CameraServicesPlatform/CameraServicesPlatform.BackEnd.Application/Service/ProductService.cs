@@ -7,7 +7,6 @@ using CameraServicesPlatform.BackEnd.Data;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Printing;
@@ -223,7 +222,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     {
                         ProductID = item.ProductID.ToString(),
                         SerialNumber = item.SerialNumber,
-                        AccountID = item.Supplier?.AccountID,
+                        SupplierID = item.SupplierID?.ToString(),
                         CategoryID = item.CategoryID?.ToString(),
                         ProductName = item.ProductName,
                         ProductDescription = item.ProductDescription,
@@ -256,65 +255,48 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = null;
-                if (id != null)
+                if (!Guid.TryParse(id, out Guid productId))
                 {
-                    filter = a => a.ProductID == Guid.Parse(id);
-
+                    result = BuildAppActionResultError(result, "Invalid product ID format.");
+                    return result;
                 }
 
-                List<ProductResponse> listProduct = new List<ProductResponse>();
-
-                var pagedResult = await _productRepository.GetAllDataByExpression(
-                    filter,
-                    pageIndex,
-                    pageSize,
-                    orderBy: a => a.Supplier!.SupplierName,
-                    isAscending: true,
-                    includes: new Expression<Func<Product, object>>[]
-                    {
-                a => a.Supplier,
-                a => a.Category
-                    }
-                );
-                if (pagedResult.Items.Count == 0)
+                var product = await _productRepository.GetById(productId);
+                if (product == null)
                 {
                     result = BuildAppActionResultError(result, "Product not found.");
                     return result;
                 }
 
-                foreach (var item in pagedResult.Items)
-                {
-                    var productImage = await _productImageRepository.GetAllDataByExpression(
-                        a => a.ProductID.Equals(item.ProductID),
-                        pageIndex,
-                        pageSize,
-                        null,
-                        isAscending: true,
-                        null
-                    );
-                    ProductResponse productResponse = new ProductResponse
-                    {
-                        ProductID = item.ProductID.ToString(),
-                        SerialNumber = item.SerialNumber,
-                        AccountID = item.Supplier?.AccountID,
-                        CategoryID = item.CategoryID?.ToString(),
-                        ProductName = item.ProductName,
-                        ProductDescription = item.ProductDescription,
-                        PriceBuy = item.PriceBuy,
-                        PriceRent = item.PriceRent,
-                        Brand = item.Brand,
-                        Quality = item.Quality,
-                        Status = item.Status,
-                        Rating = item.Rating,
-                        CreatedAt = item.CreatedAt,
-                        UpdatedAt = item.UpdatedAt,
-                        listImage = productImage.Items
-                    };
-                    listProduct.Add(productResponse);
-                }
+                var productImage = await _productImageRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(product.ProductID),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
 
-                result.Result = listProduct;
+                ProductResponse productResponse = new ProductResponse
+                {
+                    ProductID = product.ProductID.ToString(),
+                    SerialNumber = product.SerialNumber,
+                    SupplierID = product.SupplierID?.ToString(),
+                    CategoryID = product.CategoryID?.ToString(),
+                    ProductName = product.ProductName,
+                    ProductDescription = product.ProductDescription,
+                    PriceBuy = product.PriceBuy,
+                    PriceRent = product.PriceRent,
+                    Brand = product.Brand,
+                    Quality = product.Quality,
+                    Status = product.Status,
+                    Rating = product.Rating,
+                    CreatedAt = product.CreatedAt,
+                    UpdatedAt = product.UpdatedAt,
+                    listImage = productImage.Items
+                };
+
+                result.Result = productResponse;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -326,7 +308,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         }
 
 
-        public async Task<AppActionResult> GetProductByName([FromQuery] string? productNameFilter, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductByName(string? productNameFilter, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -351,46 +333,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
                 );
 
-                if (pagedResult.Items.Count == 0)
-                {
-                    result = BuildAppActionResultError(result, "Product not found.");
-                    return result;
-                }
-
-                List<ProductResponse> listProduct = new List<ProductResponse>();
-
-                foreach (var item in pagedResult.Items)
-                {
-                    var productImage = await _productImageRepository.GetAllDataByExpression(
-                        a => a.ProductID.Equals(item.ProductID),
-                        pageIndex,
-                        pageSize,
-                        null,
-                        isAscending: true,
-                        null
-                    );
-                    ProductResponse productResponse = new ProductResponse
-                    {
-                        ProductID = item.ProductID.ToString(),
-                        SerialNumber = item.SerialNumber,
-                        AccountID = item.Supplier?.AccountID,
-                        CategoryID = item.CategoryID?.ToString(),
-                        ProductName = item.ProductName,
-                        ProductDescription = item.ProductDescription,
-                        PriceBuy = item.PriceBuy,
-                        PriceRent = item.PriceRent,
-                        Brand = item.Brand,
-                        Quality = item.Quality,
-                        Status = item.Status,
-                        Rating = item.Rating,
-                        CreatedAt = item.CreatedAt,
-                        UpdatedAt = item.UpdatedAt,
-                        listImage = productImage.Items
-                    };
-                    listProduct.Add(productResponse);
-                }
-
-                result.Result = listProduct;
+                result.Result = pagedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -398,12 +341,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 result = BuildAppActionResultError(result, ex.Message);
             }
 
-
-
             return result;
         }
 
-        public async Task<AppActionResult> GetProductByCategoryName([FromQuery] string? categoryFilter, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductByCategoryName(string? categoryFilter, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -428,40 +369,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
                 );
 
-                List<ProductResponse> listProduct = new List<ProductResponse>();
-
-                foreach (var item in pagedResult.Items)
-                {
-                    var productImage = await _productImageRepository.GetAllDataByExpression(
-                        a => a.ProductID.Equals(item.ProductID),
-                        pageIndex,
-                        pageSize,
-                        null,
-                        isAscending: true,
-                        null
-                    );
-                    ProductResponse productResponse = new ProductResponse
-                    {
-                        ProductID = item.ProductID.ToString(),
-                        SerialNumber = item.SerialNumber,
-                        AccountID = item.Supplier?.AccountID,
-                        CategoryID = item.CategoryID?.ToString(),
-                        ProductName = item.ProductName,
-                        ProductDescription = item.ProductDescription,
-                        PriceBuy = item.PriceBuy,
-                        PriceRent = item.PriceRent,
-                        Brand = item.Brand,
-                        Quality = item.Quality,
-                        Status = item.Status,
-                        Rating = item.Rating,
-                        CreatedAt = item.CreatedAt,
-                        UpdatedAt = item.UpdatedAt,
-                        listImage = productImage.Items
-                    };
-                    listProduct.Add(productResponse);
-                }
-
-                result.Result = listProduct;
+                result.Result = pagedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -472,7 +380,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetProductByCategoryId([FromQuery] string? categoryFilter, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductByCategoryId(string? categoryFilter, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -498,40 +406,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
                 );
 
-                List<ProductResponse> listProduct = new List<ProductResponse>();
-
-                foreach (var item in pagedResult.Items)
-                {
-                    var productImage = await _productImageRepository.GetAllDataByExpression(
-                        a => a.ProductID.Equals(item.ProductID),
-                        pageIndex,
-                        pageSize,
-                        null,
-                        isAscending: true,
-                        null
-                    );
-                    ProductResponse productResponse = new ProductResponse
-                    {
-                        ProductID = item.ProductID.ToString(),
-                        SerialNumber = item.SerialNumber,
-                        AccountID = item.Supplier?.AccountID,
-                        CategoryID = item.CategoryID?.ToString(),
-                        ProductName = item.ProductName,
-                        ProductDescription = item.ProductDescription,
-                        PriceBuy = item.PriceBuy,
-                        PriceRent = item.PriceRent,
-                        Brand = item.Brand,
-                        Quality = item.Quality,
-                        Status = item.Status,
-                        Rating = item.Rating,
-                        CreatedAt = item.CreatedAt,
-                        UpdatedAt = item.UpdatedAt,
-                        listImage = productImage.Items
-                    };
-                    listProduct.Add(productResponse);
-                }
-
-                result.Result = listProduct;
+                result.Result = pagedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -646,3 +521,4 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     }
 
 }
+

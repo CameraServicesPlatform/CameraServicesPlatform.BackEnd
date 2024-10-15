@@ -149,6 +149,7 @@ public class TemplateMappingHelper
         </p>
 
         <p class=""emailBody"">
+          Time: 1 day.
           Please enter the code above into the system to proceed to the next step
           <a href=""url""
             ><span style=""font-weight: bold; text-transform: uppercase""
@@ -311,6 +312,7 @@ public class TemplateMappingHelper
         </p>
 
         <p class=""emailBody"">
+          Time: 1 day.
           Please enter the code above into the system to proceed to the next step
           <a href=""url""
             ><span style=""font-weight: bold; text-transform: uppercase""
@@ -473,6 +475,7 @@ public class TemplateMappingHelper
         </p>
 
         <p class=""emailBody"">
+          Time: 1 day.
           Please enter the code above into the system to proceed to the next step
           <a href=""url""
             ><span style=""font-weight: bold; text-transform: uppercase""
@@ -637,6 +640,7 @@ public class TemplateMappingHelper
         </p>
 
         <p class=""emailBody"">
+          Time: 1 day.
           Please enter the code above into the system to proceed to the next step
           <a href=""url""
             ><span style=""font-weight: bold; text-transform: uppercase""

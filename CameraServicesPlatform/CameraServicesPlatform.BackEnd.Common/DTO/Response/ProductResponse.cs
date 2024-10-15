@@ -14,9 +14,10 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
     public class ProductResponse
     {
         public string ProductID { get; set; }
+
         public string SerialNumber { get; set; }
 
-        public string? SupplierID { get; set; }
+        public string? AccountID { get; set; }
 
         public string? CategoryID { get; set; }
 
@@ -25,9 +26,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string? ProductDescription { get; set; }
 
         public double? PriceRent { get; set; }
+
         public double? PriceBuy { get; set; }
-
-
 
         public BrandEnum? Brand { get; set; }
 
@@ -45,4 +45,5 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public List<ProductImage> listImage { get; set; } = null!;
 
     }
+    
 }

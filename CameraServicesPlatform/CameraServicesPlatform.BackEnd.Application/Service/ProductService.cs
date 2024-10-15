@@ -7,6 +7,7 @@ using CameraServicesPlatform.BackEnd.Data;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Printing;
@@ -222,7 +223,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     {
                         ProductID = item.ProductID.ToString(),
                         SerialNumber = item.SerialNumber,
-                        SupplierID = item.SupplierID?.ToString(),
+                        AccountID = item.Supplier?.AccountID,
                         CategoryID = item.CategoryID?.ToString(),
                         ProductName = item.ProductName,
                         ProductDescription = item.ProductDescription,
@@ -250,53 +251,70 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetProductById(string id, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductById([FromQuery] string? id, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                if (!Guid.TryParse(id, out Guid productId))
+                 Expression<Func<Product, bool>>? filter = null;
+                if (id != null)
                 {
-                    result = BuildAppActionResultError(result, "Invalid product ID format.");
-                    return result;
-                }
+                    filter = a => a.ProductID == Guid.Parse(id);
 
-                var product = await _productRepository.GetById(productId);
-                if (product == null)
+                }
+                
+                List<ProductResponse> listProduct = new List<ProductResponse>();
+
+                var pagedResult = await _productRepository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
+                    includes: new Expression<Func<Product, object>>[]
+                    {
+                a => a.Supplier,
+                a => a.Category
+                    }
+                );
+                if (pagedResult.Items.Count == 0)
                 {
                     result = BuildAppActionResultError(result, "Product not found.");
                     return result;
                 }
 
-                var productImage = await _productImageRepository.GetAllDataByExpression(
-                    a => a.ProductID.Equals(product.ProductID),
-                    pageIndex,
-                    pageSize,
-                    null,
-                    isAscending: true,
-                    null
-                );
-
-                ProductResponse productResponse = new ProductResponse
+                foreach (var item in pagedResult.Items)
                 {
-                    ProductID = product.ProductID.ToString(),
-                    SerialNumber = product.SerialNumber,
-                    SupplierID = product.SupplierID?.ToString(),
-                    CategoryID = product.CategoryID?.ToString(),
-                    ProductName = product.ProductName,
-                    ProductDescription = product.ProductDescription,
-                    PriceBuy = product.PriceBuy,
-                    PriceRent = product.PriceRent,
-                    Brand = product.Brand,
-                    Quality = product.Quality,
-                    Status = product.Status,
-                    Rating = product.Rating,
-                    CreatedAt = product.CreatedAt,
-                    UpdatedAt = product.UpdatedAt,
-                    listImage = productImage.Items
-                };
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    ProductResponse productResponse = new ProductResponse
+                    {
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        AccountID = item.Supplier?.AccountID,
+                        CategoryID = item.CategoryID?.ToString(),
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceBuy = item.PriceBuy,
+                        PriceRent = item.PriceRent,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        listImage = productImage.Items
+                    };
+                    listProduct.Add(productResponse);
+                }
 
-                result.Result = productResponse;
+                result.Result = listProduct;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -308,7 +326,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         }
 
 
-        public async Task<AppActionResult> GetProductByName(string? productNameFilter, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductByName([FromQuery] string? productNameFilter, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -333,7 +351,46 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
                 );
 
-                result.Result = pagedResult;
+                if (pagedResult.Items.Count == 0)
+                {
+                    result = BuildAppActionResultError(result, "Product not found.");
+                    return result;
+                }
+
+                List<ProductResponse> listProduct = new List<ProductResponse>();
+
+                foreach (var item in pagedResult.Items)
+                {
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    ProductResponse productResponse = new ProductResponse
+                    {
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        AccountID = item.Supplier?.AccountID,
+                        CategoryID = item.CategoryID?.ToString(),
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceBuy = item.PriceBuy,
+                        PriceRent = item.PriceRent,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        listImage = productImage.Items
+                    };
+                    listProduct.Add(productResponse);
+                }
+
+                result.Result = listProduct;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -341,10 +398,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 result = BuildAppActionResultError(result, ex.Message);
             }
 
+
+
             return result;
         }
 
-        public async Task<AppActionResult> GetProductByCategoryName(string? categoryFilter, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductByCategoryName([FromQuery] string? categoryFilter, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -369,7 +428,40 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
                 );
 
-                result.Result = pagedResult;
+                List<ProductResponse> listProduct = new List<ProductResponse>();
+
+                foreach (var item in pagedResult.Items)
+                {
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    ProductResponse productResponse = new ProductResponse
+                    {
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        AccountID = item.Supplier?.AccountID,
+                        CategoryID = item.CategoryID?.ToString(),
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceBuy = item.PriceBuy,
+                        PriceRent = item.PriceRent,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        listImage = productImage.Items
+                    };
+                    listProduct.Add(productResponse);
+                }
+
+                result.Result = listProduct;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -380,7 +472,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetProductByCategoryId(string? categoryFilter, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductByCategoryId([FromQuery] string? categoryFilter, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -406,7 +498,40 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
                 );
 
-                result.Result = pagedResult;
+                List<ProductResponse> listProduct = new List<ProductResponse>();
+
+                foreach (var item in pagedResult.Items)
+                {
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    ProductResponse productResponse = new ProductResponse
+                    {
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        AccountID = item.Supplier?.AccountID,
+                        CategoryID = item.CategoryID?.ToString(),
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceBuy = item.PriceBuy,
+                        PriceRent = item.PriceRent,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        listImage = productImage.Items
+                    };
+                    listProduct.Add(productResponse);
+                }
+
+                result.Result = listProduct;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -474,51 +599,50 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
-       
-            public async Task<AppActionResult> GetProductBySupplierId(string filter, int pageIndex, int pageSize)
+
+        public async Task<AppActionResult> GetProductBySupplierId(string filter, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
             {
-                AppActionResult result = new AppActionResult();
-                try
+                Expression<Func<Product, bool>>? filterExpression = null;
+
+                if (!string.IsNullOrEmpty(filter))
                 {
-                    Expression<Func<Product, bool>>? filterExpression = null;
-
-                    if (!string.IsNullOrEmpty(filter))
+                    if (Guid.TryParse(filter, out Guid supplierId))
                     {
-                        if (Guid.TryParse(filter, out Guid supplierId))
-                        {
-                            filterExpression = a => a.SupplierID == supplierId;
-                        }
-                        else
-                        {
-                            result = BuildAppActionResultError(result, "Invalid supplier ID format.");
-                            return result;
-                        }
+                        filterExpression = a => a.SupplierID == supplierId;
                     }
+                    else
+                    {
+                        result = BuildAppActionResultError(result, "Invalid supplier ID format.");
+                        return result;
+                    }
+                }
 
-                    var pagedResult = await _productRepository.GetAllDataByExpression(
-                        filterExpression,
-                        pageIndex,
-                        pageSize,
-                        orderBy: a => a.Supplier!.SupplierName,
-                        isAscending: true,
-                        includes: new Expression<Func<Product, object>>[]
-                        {
+                var pagedResult = await _productRepository.GetAllDataByExpression(
+                    filterExpression,
+                    pageIndex,
+                    pageSize,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
+                    includes: new Expression<Func<Product, object>>[]
+                    {
                     a => a.Supplier,
                     a => a.Category
-                        }
-                    );
+                    }
+                );
 
-                    result.Result = pagedResult;
-                    result.IsSuccess = true;
-                }
-                catch (Exception ex)
-                {
-                    result = BuildAppActionResultError(result, ex.Message);
-                }
-
-                return result;
+                result.Result = pagedResult;
+                result.IsSuccess = true;
             }
-        }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
 
+            return result;
+        }
     }
 
+}

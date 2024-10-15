@@ -28,7 +28,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("get-product-by-id")]
-    public async Task<AppActionResult> GetProductById(string id, int pageIndex = 1, int pageSize = 10)
+    public async Task<AppActionResult> GetProductById([FromQuery] string? id, int pageIndex = 1, int pageSize = 10)
     {
         return await _productService.GetProductById(id, pageIndex, pageSize);
     } 
@@ -59,7 +59,7 @@ public class ProductController : ControllerBase
 
     
     [HttpPost("create-product")]
-    public async Task<AppActionResult> CreateProduct([FromForm] ProductResponseDto productResponse)
+    public async Task<AppActionResult> CreateProduct([FromBody]ProductResponseDto productResponse)
     {
         return await _productService.CreateProduct(productResponse);
     }

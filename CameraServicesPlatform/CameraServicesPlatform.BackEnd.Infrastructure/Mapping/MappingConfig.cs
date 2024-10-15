@@ -83,6 +83,9 @@ public class MappingConfig
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
+            config.CreateMap<CreateSupplierAccountDTO, BankInformation>()
+               .ForMember(dest => dest.AccountID, opt => opt.Ignore()); // This will be set after creating the Account
+               
 
 
         });

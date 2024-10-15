@@ -13,10 +13,7 @@ public class Contract
     // Navigation property for ContractTemplate
     public ContractTemplate ContractTemplate { get; set; }
 
-    public Guid OrderID { get; set; }
-    // Foreign key to Order
-    [ForeignKey(nameof(OrderID))]
-    public Order Order { get; set; }
+    
 
     public string ContractTerms { get; set; }
     public string PenaltyPolicy { get; set; }

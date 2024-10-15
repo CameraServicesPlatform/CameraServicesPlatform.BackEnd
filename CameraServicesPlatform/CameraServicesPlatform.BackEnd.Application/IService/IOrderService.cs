@@ -12,8 +12,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetOrderOfSupplier(string SupplierID, int pageIndex, int pageSize);
 
         Task<AppActionResult> GetOrderByMemberID(string MemberID, int pageIndex, int pageSize);
-        Task<AppActionResult> CountProductRentals(Guid productId, int pageIndex, int pageSize);
-
+        Task<AppActionResult> CountProductRentals(string productId, int pageIndex, int pageSize);
+        Task<AppActionResult> GetByOrderId(string orderId, int pageIndex, int pageSize);
         Task<AppActionResult> GetAllOrder(int pageIndex, int pageSize);
         Task<AppActionResult> UpdateOrderStatus(string OrderID);
         Task<AppActionResult> CancelOrder(string OrderID);

@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Data;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,7 +86,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     includes: new Expression<Func<Supplier, object>>[]
                     {
-                         a => a.Account,
+                         //a => a.Account,
                          a => a.Vourcher
                     }
                 );
@@ -101,7 +102,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetSupplierByName(string supplierNamefilter, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetSupplierByName([FromQuery] string? supplierNamefilter, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -121,7 +122,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     includes: new Expression<Func<Supplier, object>>[]
                     {
-                a => a.Account,
+                //a => a.Account,
                 a => a.Vourcher
                     }
                 );

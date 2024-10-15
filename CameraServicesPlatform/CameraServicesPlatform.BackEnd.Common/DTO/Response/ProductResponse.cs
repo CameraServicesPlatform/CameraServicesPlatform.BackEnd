@@ -13,8 +13,37 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
     public class ProductResponse
     {
-        public Product product { get; set; } = null!;
+        public string ProductID { get; set; }
+
+        public string SerialNumber { get; set; }
+
+        public string? AccountID { get; set; }
+
+        public string? CategoryID { get; set; }
+
+        public string ProductName { get; set; }
+
+        public string? ProductDescription { get; set; }
+
+        public double? PriceRent { get; set; }
+
+        public double? PriceBuy { get; set; }
+
+        public BrandEnum? Brand { get; set; }
+
+        public string Quality { get; set; }
+
+        public ProductStatusEnum Status { get; set; }
+
+        public double Rating { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
 
         public List<ProductImage> listImage { get; set; } = null!;
+
     }
+    
 }

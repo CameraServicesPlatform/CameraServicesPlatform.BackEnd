@@ -14,7 +14,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public required string AccountHolder { get; set; }
 
-        // Foreign key to Account
+
         [ForeignKey(nameof(Account))]
         public string AccountID { get; set; }
 

@@ -8,8 +8,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 {
     public class CreateContractRequestDTO
     {
-        public Guid ContractTemplateId { get; set; }
-        public Guid OrderID { get; set; }
+        public string ContractTemplateId { get; set; }
+        public string OrderID { get; set; }
         public string ContractTerms { get; set; }
         public string PenaltyPolicy { get; set; }
     }

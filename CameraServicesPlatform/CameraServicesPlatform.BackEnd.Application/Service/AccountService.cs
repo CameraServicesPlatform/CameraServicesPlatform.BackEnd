@@ -711,9 +711,6 @@ public class AccountService : GenericBackendService, IAccountService
         return result;
     }
 
-
-
-
     public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO accountRequest)
     {
         AppActionResult result = new();

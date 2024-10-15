@@ -56,6 +56,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 foreach (var od in orderDetailsPagedResult.Items) 
                 {
                     var response = _mapper.Map<OrderDetailResponse>(od);
+                    response.OrderID = od.OrderID.ToString();
+                    response.ProductID = od.ProductID.ToString();
+                    response.OrderDetailsID = od.OrderDetailsID.ToString();
                     orderDetailResponses.Add(response);
                 }
 

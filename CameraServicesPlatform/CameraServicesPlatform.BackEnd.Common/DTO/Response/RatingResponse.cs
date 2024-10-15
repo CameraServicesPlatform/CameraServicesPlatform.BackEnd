@@ -8,8 +8,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
     public class RatingResponse
     {
-        public Guid RatingID { get; set; }
-        public Guid ProductID { get; set; }
+        public string RatingID { get; set; }
+        public string ProductID { get; set; }
         public string AccountID { get; set; }
         public int RatingValue { get; set; }
         public DateTime CreatedAt { get; set; }

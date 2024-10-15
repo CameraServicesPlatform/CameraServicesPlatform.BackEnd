@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("order")]
     [ApiController]
     public class OrdersController : ControllerBase
     {
@@ -39,7 +39,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-count-of-product-rent")]
-        public async Task<AppActionResult> CountProductRentals(Guid productId, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> CountProductRentals(string productId, int pageIndex = 1, int pageSize = 10)
         {
             return await _orderService.CountProductRentals(productId, pageIndex, pageSize);
         }
@@ -48,6 +48,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         public async Task<AppActionResult> GetOrderByMemberId(string MemberId, int pageIndex = 1, int pageSize = 10)
         {
             return await _orderService.GetOrderByMemberID(MemberId, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-order-by-id")]
+        public async Task<AppActionResult> GetOrderByOrderId(string OrderId, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetByOrderId(OrderId, pageIndex, pageSize);
         }
 
         [HttpPost("create-order-buy")]

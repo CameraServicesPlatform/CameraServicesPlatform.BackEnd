@@ -45,5 +45,5 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public List<ProductImage> listImage { get; set; } = null!;
 
     }
-    
+
 }

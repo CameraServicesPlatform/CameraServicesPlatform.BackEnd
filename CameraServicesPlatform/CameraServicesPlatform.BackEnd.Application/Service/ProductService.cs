@@ -145,7 +145,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var productNameExist = await _productRepository.GetByExpression(
-                    a => a.ProductName.Equals(productResponse.ProductName) ,
+
+
+                    a => a.ProductName.Equals(productResponse.ProductName) 
                     null
                 );
                 if (productNameExist != null)
@@ -251,18 +253,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetProductById([FromQuery] string? id, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductById(string id, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                 Expression<Func<Product, bool>>? filter = null;
+                Expression<Func<Product, bool>>? filter = null;
                 if (id != null)
                 {
                     filter = a => a.ProductID == Guid.Parse(id);
 
                 }
-                
+
                 List<ProductResponse> listProduct = new List<ProductResponse>();
 
                 var pagedResult = await _productRepository.GetAllDataByExpression(

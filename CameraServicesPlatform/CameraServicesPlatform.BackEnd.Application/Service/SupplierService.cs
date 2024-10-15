@@ -2,7 +2,9 @@
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Data;
+using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -153,11 +155,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
+                var firebaseService = Resolve<IFirebaseService>();
+                var pathName = SD.FirebasePathName.SUPPLIER_PREFIX + $"{supplierExist.AccountID}{Guid.NewGuid()}.jpg";
+                var upload = await firebaseService.UploadFileToFirebase(supplierResponse.SupplierLogo, pathName);
+                var imgUrl = upload.Result.ToString();
+
                 supplierExist.SupplierName = supplierResponse.SupplierName;
                 supplierExist.SupplierDescription = supplierResponse.SupplierDescription;
                 supplierExist.SupplierAddress = supplierResponse.SupplierAddress;
                 supplierExist.ContactNumber = supplierResponse.ContactNumber;
-                supplierExist.SupplierLogo = supplierResponse.SupplierLogo;
+                supplierExist.SupplierLogo = imgUrl;
                 supplierExist.BlockReason = supplierResponse.BlockReason;
                 supplierExist.BlockedAt = supplierResponse.BlockedAt;
                 if(supplierResponse.BlockedAt != null)
@@ -165,9 +172,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     supplierExist.UpdatedAt = DateTime.UtcNow;
                 }
                 
-                supplierExist.AccountBalance = supplierResponse.AccountBalance; 
-                supplierExist.VourcherID = supplierResponse.VourcherID;
-
+                
                 await supplierRepository.Update(supplierExist);
 
                 await _unitOfWork.SaveChangesAsync();
@@ -189,7 +194,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             try
             {
-                
+                var firebaseService = Resolve<IFirebaseService>();
+
+                var pathName = SD.FirebasePathName.SUPPLIER_PREFIX + $"{supplierResponse.AccountID}{Guid.NewGuid()}.jpg";
+                var upload = await firebaseService.UploadFileToFirebase(supplierResponse.SupplierLogo, pathName);
+                var imgUrl = upload.Result.ToString();
                 var listSupplier = Resolve<IRepository<Supplier>>();
 
                 Supplier supplier = new Supplier()
@@ -200,7 +209,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     SupplierDescription = supplierResponse.SupplierDescription,
                     SupplierAddress = supplierResponse.SupplierAddress,
                     ContactNumber = supplierResponse.ContactNumber,
-                    SupplierLogo = supplierResponse.SupplierLogo,
+                    SupplierLogo = imgUrl,
                     BlockReason = null,
                     BlockedAt = null,
                     CreatedAt = DateTime.UtcNow,

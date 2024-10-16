@@ -38,6 +38,10 @@ namespace CameraServicesPlatform.BackEnd.Data
         public DbSet<SupplierRequest> SupplierRequests { get; set; }
         public DbSet<DeliveriesMethod> DeliveriesMethod { get; set; }
         public DbSet<Vourcher> Vourchers { get; set; }
+        public DbSet<ContractTemplate> ContractTemplates { get; set; }
+        public DbSet<Wishlist> Wishlists { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

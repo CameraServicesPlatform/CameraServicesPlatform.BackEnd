@@ -27,12 +27,19 @@ public class MappingConfig
             ///Mapper Order
             config.CreateMap<CreateOrderBuyRequest, Order>();
             config.CreateMap<CreateOrderRentRequest, Order>();
-            config.CreateMap<Order, OrderResponse>();
+            config.CreateMap<Order, OrderResponse>()
+            .ForMember(dest => dest.OrderID, opt => opt.MapFrom(src => src.OrderID.ToString())) 
+            .ForMember(dest => dest.MemberID, opt => opt.MapFrom(src => src.MemberID.ToString()))
+            .ForMember(dest => dest.SupplierID, opt => opt.MapFrom(src => src.SupplierID.ToString())) 
+            .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetail));
 
             ///Mapper OrderDetail
 
             config.CreateMap<OrderDetailRequest, OrderDetail>();
-            config.CreateMap<OrderDetail, OrderDetailResponse>();
+            config.CreateMap<OrderDetail, OrderDetailResponse>()
+            .ForMember(dest => dest.OrderDetailsID, opt => opt.MapFrom(src => src.OrderDetailsID))
+            .ForMember(dest => dest.OrderID, opt => opt.MapFrom(src => src.OrderID.ToString()))
+            .ForMember(dest => dest.ProductID, opt => opt.MapFrom(src => src.ProductID.ToString()));
             ///Mapper Rating
             config.CreateMap<RatingRequest, Rating>();
             config.CreateMap<Rating, RatingResponse>();
@@ -83,6 +90,9 @@ public class MappingConfig
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
+            config.CreateMap<CreateSupplierAccountDTO, BankInformation>()
+               .ForMember(dest => dest.AccountID, opt => opt.Ignore()); // This will be set after creating the Account
+               
 
 
         });

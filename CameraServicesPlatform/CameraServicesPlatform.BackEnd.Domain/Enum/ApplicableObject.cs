@@ -3,7 +3,7 @@
     public enum ApplicableObject
     {
         System,
-        Member,
         Supllier,
+        Member,
     }
 }

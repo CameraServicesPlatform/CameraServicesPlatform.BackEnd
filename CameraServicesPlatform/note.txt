@@ -17,6 +17,7 @@ deloy vps
 3. ls - chọn CameraServicesPlatform.BackEnd
 4. cd CameraServicesPlatform.BackEnd -> ls
 5. cd CameraServicesPlatform -> ls
+
 sudo apt update
 sudo apt install docker-compose
 docker-compose --version
@@ -44,7 +45,7 @@ remote:      Visit the repository settings page, https://github.com/CameraServic
  ------------------
  update model - database
   cd CameraServicesPlatform.BackEnd.Domain
-  dotnet ef migrations add [rolename] --startup-project ../CameraServicesPlatform.BackEnd.API
+  dotnet ef migrations add [categorynameunique] --startup-project ../CameraServicesPlatform.BackEnd.API
  dotnet ef database update --startup-project ../CameraServicesPlatform.BackEnd.API
 
  nếu lỗi thì xóa database và tạo lại:  dotnet ef migrations remove

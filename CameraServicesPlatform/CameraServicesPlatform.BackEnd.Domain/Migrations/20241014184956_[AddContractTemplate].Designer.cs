@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    partial class CameraServicesPlatformDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241014184956_[AddContractTemplate]")]
+    partial class AddContractTemplate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -725,9 +728,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ContractTemplateId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("ContractTerms")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -746,8 +746,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("ContractID");
-
-                    b.HasIndex("ContractTemplateId");
 
                     b.HasIndex("OrderID");
 
@@ -1228,30 +1226,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.ToTable("Transactions");
                 });
 
-            modelBuilder.Entity("Wishlist", b =>
-                {
-                    b.Property<Guid>("WishlistID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("MemberID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("WishlistID");
-
-                    b.HasIndex("MemberID");
-
-                    b.HasIndex("ProductID");
-
-                    b.ToTable("Wishlists");
-                });
-
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.BankInformation", b =>
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
@@ -1455,19 +1429,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             modelBuilder.Entity("Contract", b =>
                 {
-                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.ContractTemplate", "ContractTemplate")
-                        .WithMany()
-                        .HasForeignKey("ContractTemplateId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("ContractTemplate");
 
                     b.Navigation("Order");
                 });
@@ -1617,25 +1583,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Navigation("Member");
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("Wishlist", b =>
-                {
-                    b.HasOne("Member", "Member")
-                        .WithMany()
-                        .HasForeignKey("MemberID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Member");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Account", b =>

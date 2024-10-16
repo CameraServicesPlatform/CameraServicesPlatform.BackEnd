@@ -215,28 +215,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     filter: null,
                     pageNumber: pageIndex,
-                    pageSize: pageSize
+                    pageSize: pageSize,
+                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
                 );
 
-                var convertedResult = pagedResult.Items.Select(order => new
-                {
-                    OrderID = order.OrderID.ToString(),
-                    MemberID = order.MemberID.ToString(),
-                    SupplierID = order.SupplierID.ToString(),
-                    DeliveriesMethodID = order.DeliveriesMethodID.ToString(),
-                    OrderDetailID = order.OrderDetailID.ToString(),
-                    order.OrderDate,
-                    order.CreatedAt,
-                    order.OrderStatus,
-                    order.TotalAmount,
-                    order.DeliveryMethod,
-                    order.ShippingAddress,
-                    order.RentalStartDate,
-                    order.RentalEndDate,
-                    order.DurationUnit,
-                    order.DurationValue,
-                    order.ReturnDate,
-                }).ToList();
+                var convertedResult = pagedResult.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+
                 result.Result = convertedResult;
                 result.IsSuccess = true;
             }
@@ -256,28 +240,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     x => x.OrderType == orderType,
                     pageIndex,
-                    pageSize
+                    pageSize,includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
                 );
 
-                var convertedResult = pagedResult.Items.Select(order => new
-                {
-                    OrderID = order.OrderID.ToString(),
-                    MemberID = order.MemberID.ToString(),
-                    SupplierID = order.SupplierID.ToString(),
-                    DeliveriesMethodID = order.DeliveriesMethodID.ToString(),
-                    OrderDetailID = order.OrderDetailID.ToString(),
-                    order.OrderDate,
-                    order.CreatedAt,
-                    order.OrderStatus,
-                    order.TotalAmount,
-                    order.DeliveryMethod,
-                    order.ShippingAddress,
-                    order.RentalStartDate,
-                    order.RentalEndDate,
-                    order.DurationUnit,
-                    order.DurationValue,
-                    order.ReturnDate,
-                }).ToList();
+                var convertedResult = pagedResult.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+
                 result.Result = convertedResult;
                 result.IsSuccess = true;
             }
@@ -295,16 +262,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             try
             {
-                if (!Guid.TryParse(productId, out Guid ProductID))
+                if (!Guid.TryParse(productId, out Guid productIdGuid))
                 {
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
 
                 var orders = await _orderRepository.GetAllDataByExpression(
-                    order => order.OrderType == OrderType.Rental,
+                    order => order.OrderType == OrderType.Rental &&
+                              order.OrderDetail.Any(od => od.ProductID == productIdGuid), 
                     pageIndex,
-                   pageSize
+                    pageSize,
+                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail } 
                 );
 
                 if (orders.Items == null || !orders.Items.Any())
@@ -314,15 +283,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 int totalRentals = orders.Items
-                    .SelectMany(order => order.OrderDetail) 
-                    .Where(detail => detail.ProductID == ProductID)
-                    .Sum(detail => detail.RentalPeriod ?? 0); 
+                    .Sum(order => order.OrderDetail.Where(od => od.ProductID == productIdGuid).Sum(od => od.RentalPeriod ?? 0));
 
                 result.IsSuccess = true;
                 result.Result = new
                 {
-                    ProductID = productId.ToString(),
-                    TotalRentals = totalRentals 
+                    ProductID = productId,
+                    TotalRentals = totalRentals
                 };
             }
             catch (Exception ex)
@@ -333,7 +300,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetByOrderId(string orderId)
+        public async Task<AppActionResult> GetByOrderId(string orderId, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -414,7 +381,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var order = await _orderRepository.GetById(OrderUpdateId);
                 if (order != null)
                 {
-                    order.OrderStatus = OrderStatus.Completed;
+                    order.OrderStatus = OrderStatus.Cancelled;
                     _orderRepository.Update(order);
                     await Task.Delay(100);
                     await _unitOfWork.SaveChangesAsync();
@@ -449,27 +416,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     var pagedResult1 = await _orderRepository.GetAllDataByExpression(
                         x => x.SupplierID == OrderSupplierID,
                         pageIndex,
-                        pageSize
+                        pageSize,
+                        includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
+
                     );
-                    var convertedResult1 = pagedResult1.Items.Select(order => new
-                    {
-                        OrderID = order.OrderID.ToString(),
-                        MemberID = order.MemberID.ToString(),
-                        SupplierID = order.SupplierID.ToString(),
-                        DeliveriesMethodID = order.DeliveriesMethodID.ToString(),
-                        OrderDetailID = order.OrderDetailID.ToString(),
-                        order.OrderDate,
-                        order.CreatedAt,
-                        order.OrderStatus,
-                        order.TotalAmount,
-                        order.DeliveryMethod,
-                        order.ShippingAddress,
-                        order.RentalStartDate,
-                        order.RentalEndDate,
-                        order.DurationUnit,
-                        order.DurationValue,
-                        order.ReturnDate,
-                    }).ToList();
+                    var convertedResult1 = pagedResult1.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+
                     result.Result = convertedResult1;
                     result.IsSuccess = true;
                 }
@@ -479,28 +431,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     filter: null,
                     pageNumber: pageIndex,
-                    pageSize: pageSize
+                    pageSize: pageSize,
+                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
+
                 );
 
-                var convertedResult = pagedResult.Items.Select(order => new
-                {
-                    OrderID = order.OrderID.ToString(),
-                    MemberID = order.MemberID.ToString(),
-                    SupplierID = order.SupplierID.ToString(),
-                    DeliveriesMethodID = order.DeliveriesMethodID.ToString(),
-                    OrderDetailID = order.OrderDetailID.ToString(),
-                    order.OrderDate,
-                    order.CreatedAt,
-                    order.OrderStatus,
-                    order.TotalAmount,
-                    order.DeliveryMethod,
-                    order.ShippingAddress,
-                    order.RentalStartDate,
-                    order.RentalEndDate,
-                    order.DurationUnit,
-                    order.DurationValue,
-                    order.ReturnDate,
-                }).ToList();
+                var convertedResult = pagedResult.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+
                 result.Result = convertedResult;
                 result.IsSuccess = true;
             }
@@ -525,28 +462,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     x => x.MemberID == OrderMemberID,
                     pageIndex,
-                    pageSize
+                    pageSize, 
+                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
+
                 );
 
-                var convertedResult = pagedResult.Items.Select(order => new
-                {
-                    OrderID = order.OrderID.ToString(),
-                    MemberID = order.MemberID.ToString(),
-                    SupplierID = order.SupplierID.ToString(),
-                    DeliveriesMethodID = order.DeliveriesMethodID.ToString(),
-                    OrderDetailID = order.OrderDetailID.ToString(),
-                    order.OrderDate,
-                    order.CreatedAt,
-                    order.OrderStatus,
-                    order.TotalAmount,
-                    order.DeliveryMethod,
-                    order.ShippingAddress,
-                    order.RentalStartDate,
-                    order.RentalEndDate,
-                    order.DurationUnit,
-                    order.DurationValue,
-                    order.ReturnDate,
-                }).ToList();
+                var convertedResult = pagedResult.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+
                 result.Result = convertedResult;
                 result.IsSuccess = true;
             }

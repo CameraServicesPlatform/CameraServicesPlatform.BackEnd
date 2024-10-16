@@ -28,13 +28,13 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("get-product-by-id")]
-    public async Task<AppActionResult> GetProductById(string id, int pageIndex = 1, int pageSize = 10)
+    public async Task<AppActionResult> GetProductById( string id, int pageIndex = 1, int pageSize = 10)
     {
         return await _productService.GetProductById(id, pageIndex, pageSize);
     } 
 
     [HttpGet("get-product-by-name")]
-    public async Task<AppActionResult> GetProductByName(string filter, int pageIndex = 1, int pageSize = 10)
+    public async Task<AppActionResult> GetProductByName([FromQuery] string? filter, int pageIndex = 1, int pageSize = 10)
     {
         return await _productService.GetProductByName(filter, pageIndex, pageSize);
     }
@@ -46,7 +46,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("get-product-by-category-name")]
-    public async Task<AppActionResult> GetProductByCategoryName(string filter, int pageIndex = 1, int pageSize = 10)
+    public async Task<AppActionResult> GetProductByCategoryName([FromQuery] string? filter, int pageIndex = 1, int pageSize = 10)
     {
         return await _productService.GetProductByCategoryName(filter, pageIndex, pageSize);
     }
@@ -59,7 +59,7 @@ public class ProductController : ControllerBase
 
     
     [HttpPost("create-product")]
-    public async Task<AppActionResult> CreateProduct([FromForm] ProductResponseDto productResponse)
+    public async Task<AppActionResult> CreateProduct([FromForm]ProductResponseDto productResponse)
     {
         return await _productService.CreateProduct(productResponse);
     }

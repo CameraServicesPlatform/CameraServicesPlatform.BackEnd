@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
@@ -25,7 +26,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string? ContactNumber { get; set; }
 
 
-        public string SupplierLogo { get; set; }
+        public IFormFile SupplierLogo { get; set; }
 
         public double AccountBalance { get; set; }
 

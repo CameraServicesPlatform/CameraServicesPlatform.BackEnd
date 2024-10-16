@@ -50,6 +50,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _orderService.GetOrderByMemberID(MemberId, pageIndex, pageSize);
         }
 
+        [HttpGet("get-order-by-id")]
+        public async Task<AppActionResult> GetOrderByOrderId(string OrderId, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetByOrderId(OrderId, pageIndex, pageSize);
+        }
+
         [HttpPost("create-order-buy")]
         public async Task<IActionResult> CreateOrder(CreateOrderBuyRequest request)
         {

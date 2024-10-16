@@ -300,7 +300,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetByOrderId(string orderId, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetByOrderId(string orderId)
         {
             AppActionResult result = new AppActionResult();
             try

@@ -110,6 +110,9 @@ public class GenericRepository<T> : IRepository<T> where T : class
         _dbSet.RemoveRange(entities);
         return entities.ToList();
     }
+    public async Task<T?> GetSingleByExpressionAsync(Expression<Func<T, bool>> expression)
+    {
+        return await _dbSet.FirstOrDefaultAsync(expression);
+    }
 
-    
 }

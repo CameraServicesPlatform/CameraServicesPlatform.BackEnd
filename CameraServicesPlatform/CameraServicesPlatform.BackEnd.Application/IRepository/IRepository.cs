@@ -21,5 +21,6 @@ public interface IRepository<T> where T : class
     Task<List<T>> DeleteRange(IEnumerable<T> entities);
     Task<T> Update(T entity);
     Task<T?> DeleteById(object id);
-    
+    Task<T?> GetSingleByExpressionAsync(Expression<Func<T, bool>> expression);
+
 }

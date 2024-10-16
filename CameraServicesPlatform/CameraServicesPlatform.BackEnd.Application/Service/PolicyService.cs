@@ -50,7 +50,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var response = _mapper.Map<PolicyResponse>(policy);
 
                 result.IsSuccess = true;
-                result.Result = policy;
+                result.Result = response;
                
             }
             catch (Exception ex)

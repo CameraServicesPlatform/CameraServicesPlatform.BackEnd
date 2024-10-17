@@ -47,7 +47,7 @@ public interface IAccountService
 
     public Task<PagedResult<Supplier>> GetSupllier(int pageNumber, int pageSize);
     public Task<PagedResult<Staff>> GetStaff(int pageNumber, int pageSize);
-
+    public Task<AppActionResult> CheckActiveByStaff(string AccountID, bool isGoogle);
 
 
     // Missing method signatures

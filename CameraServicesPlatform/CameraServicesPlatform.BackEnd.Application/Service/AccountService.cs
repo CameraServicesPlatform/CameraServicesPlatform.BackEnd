@@ -9,7 +9,9 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Data;
+using CameraServicesPlatform.BackEnd.Domain.Migrations;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using Firebase.Auth;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Identity;
@@ -259,7 +261,73 @@ public class AccountService : GenericBackendService, IAccountService
             return BuildAppActionResultError(result, $"Đã xảy ra lỗi: {ex.Message}");
         }
 
-        return result; // Trả về kết quả cuối cùng
+        return result; 
+    }
+    private async Task SendVerificationEmail(string email, string verifyCode, string firstName, bool isGoogle)
+    {
+        IEmailService? emailService = Resolve<IEmailService>();
+
+        if (!isGoogle)
+        {
+            emailService.SendEmail(email, SD.SubjectMail.VERIFY_ACCOUNT,
+                TemplateMappingHelper.GetTemplateOTPEmail(
+                    TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
+                    verifyCode,
+                    firstName));
+        }
+        else
+        {
+            emailService.SendEmail(email, SD.SubjectMail.VERIFY_ACCOUNT,
+                TemplateMappingHelper.GetTemplateOTPEmail(
+                    TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
+                    verifyCode,
+                    firstName) +
+                $"\n\nWelcome {firstName}, thank you for signing up with Google!");
+        }
+    }
+
+    public async Task<AppActionResult> CheckActiveByStaff(string AccountID, bool isGoogle)
+    {
+        AppActionResult result = new();
+
+        try
+        {
+            Account? account = await _accountRepository.GetById(AccountID);
+            if (account == null)
+            {
+                return BuildAppActionResultError(result, "Không tìm thấy tài khoản.");
+            }
+
+            string verifyCode = string.Empty;
+
+            if (!isGoogle)
+            {
+                verifyCode = Guid.NewGuid().ToString("N")[..6];
+                account.VerifyCode = verifyCode;
+                account.IsVerified = false;
+            }
+            else
+            {
+                account.IsVerified = true;
+            }
+
+            await SendVerificationEmail(account.Email, verifyCode, account.FirstName, isGoogle);
+
+            _accountRepository.Update(account);
+            await _unitOfWork.SaveChangeAsync();
+
+            result.Result = new
+            {
+                Account = account
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("An unexpected error occurred.", ex);
+            return BuildAppActionResultError(result, $"Đã xảy ra lỗi: {ex.Message}");
+        }
+
+        return result;
     }
 
     public async Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle)

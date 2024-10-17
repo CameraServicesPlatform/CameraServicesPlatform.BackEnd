@@ -18,7 +18,6 @@ public class ProductController : ControllerBase
     {
         _productService = productService ?? throw new ArgumentNullException(nameof(productService));
         _productImageService = productImageService ?? throw new ArgumentNullException(nameof(productImageService));
-
     }
 
     [HttpGet("get-all-product")]

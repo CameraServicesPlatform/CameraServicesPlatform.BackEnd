@@ -106,17 +106,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var responses = Result.Items.Select(PLC =>
                 {
-                    var response = _mapper.Map<PolicyResponse>(Result);
-                    response.PolicyID = PLC.PolicyID.ToString();
+                    var response = _mapper.Map<PolicyResponse>(PLC);
                     return response;
                 }).ToList();
-                var pagedResult = new PagedResult<PolicyResponse>
-                {
-                    Items = responses
-                };
-
+               
                 result.IsSuccess = true;
-                result.Result = pagedResult;
+                result.Result = responses;
             }
             catch (Exception ex)
             {
@@ -139,8 +134,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var responses = Result.Items.Select(PLC =>
                 {
-                    var response = _mapper.Map<PolicyResponse>(Result);
-                    response.PolicyID = PLC.PolicyID.ToString();
+                    var response = _mapper.Map<PolicyResponse>(PLC);
                     return response;
                 }).ToList();
                 var pagedResult = new PagedResult<PolicyResponse>
@@ -178,7 +172,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var response = _mapper.Map<PolicyResponse>(policyDetail);
-                response.PolicyID = policyDetail.PolicyID.ToString();
 
                 result.IsSuccess = true;
                 result.Result = response;
@@ -219,7 +212,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
 
                 var response = _mapper.Map<PolicyResponse>(existingPL);
-                response.PolicyID = existingPL.PolicyID.ToString();
 
                 result.IsSuccess = true;
                 result.Result = response;

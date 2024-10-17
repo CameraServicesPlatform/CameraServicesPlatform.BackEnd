@@ -663,10 +663,11 @@ public class AccountService : GenericBackendService, IAccountService
             }
 
             // Create the user in Identity
-            IdentityResult resultCreateUser = await _userManager.CreateAsync(staffAccount, SD.DefaultAccountInformation.PASSWORD);
+            //IdentityResult resultCreateUser = await _userManager.CreateAsync(staffAccount, SD.DefaultAccountInformation.PASSWORD);
+            IdentityResult resultCreateUser = await _userManager.CreateAsync(staffAccount, dto.Password);
             if (!resultCreateUser.Succeeded)
             {
-                result = BuildAppActionResultError(result, $"Account creation for staff {dto.Name} failed: {string.Join(", ", resultCreateUser.Errors.Select(e => e.Description))}");
+                result = BuildAppActionResultError(result, $"Account creation for staff {dto.FirstName} failed: {string.Join(", ", resultCreateUser.Errors.Select(e => e.Description))}");
                 return result;
             }
 

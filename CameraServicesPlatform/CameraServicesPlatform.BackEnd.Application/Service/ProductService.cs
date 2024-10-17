@@ -60,37 +60,44 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var listProduct = Resolve<IRepository<Product>>();
                 if (!Guid.TryParse(productResponse.SupplierID, out var supplierGuid))
                 {
-                    result.Result = "Invalid SupplierID format";
-                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, $"SupplierID không tồn tại!");
                     return result;
                 }
-                var supplierExist = await _supplierRepository.GetByExpression(a => a.SupplierID == supplierGuid);
-
+                var supplierExist = await _supplierRepository.GetAllDataByExpression(
+                    a => a.SupplierID == supplierGuid,
+                    1,
+                    10,
+                    orderBy: a => a.SupplierName,
+                    isAscending: true,
+                    null
+                );
                 if (supplierExist == null)
                 {
-                    result.Result = "SupplierID does not exist";
-                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, $"SupplierID không tồn tại!");
                     return result;
                 }
                 var productNameExist = await _productRepository.GetByExpression(
-                    a => a.ProductName != null && a.ProductName.Equals(productResponse.ProductName) && a.SupplierID != null && a.SupplierID.Equals(Guid.Parse(productResponse.SupplierID)),
+                    a => a.ProductName.Equals(productResponse.ProductName)  && a.SupplierID.Equals(Guid.Parse(productResponse.SupplierID)),
                     null
                 );
                 if (productNameExist != null)
                 {
-                    result.IsSuccess = false;
-                    result.Result = "Name product existed into supplier";
+                    result = BuildAppActionResultError(result, $"Tên sản phẩm đã tồn tại trong shop!");
                     return result;
                 }
 
-                var productSerialExist = await _productRepository.GetByExpression(
-                    a => a.SerialNumber != null && a.SerialNumber.Equals(productResponse.SerialNumber) && a.SupplierID != null && a.SupplierID.Equals(Guid.Parse(productResponse.SupplierID)),
+               
+                var productSerialExist = await _productRepository.GetAllDataByExpression(
+                    a => a.SerialNumber.Equals(productResponse.SerialNumber),
+                    1,
+                    10,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
                     null
                 );
-                if (productSerialExist != null)
+                if (productSerialExist.Items.Count > 0)
                 {
-                    result.IsSuccess = false;
-                    result.Result = "Product serial number existed into supplier, serial number can't duplicate";
+                    result = BuildAppActionResultError(result, $"Product serial number đã tồn tại , Product serial number không được trùng!");
                     return result;
                 }
 
@@ -120,7 +127,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     var upload = await firebaseService.UploadFileToFirebase(productResponse.File, pathName);
                     var imgUrl = upload.Result.ToString();
 
-                    // Save the image URL to the database
                     ProductImage productImage = new ProductImage
                     {
                         ProductImagesID = Guid.NewGuid(),
@@ -152,27 +158,28 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 var productRepository = Resolve<IRepository<Product>>();
 
-                Product productExist = await productRepository.GetById(productResponse.ProductID);
+                Product productExist = await productRepository.GetById(Guid.Parse(productResponse.ProductID));
 
                 if (productExist == null)
                 {
-                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, $"Sản phẩm không tồn tại!");
                     return result;
                 }
 
-                var productNameExist = await _productRepository.GetByExpression(
-
-
-
-                    a => a.ProductName.Equals(productResponse.ProductName) ,
- 
+                var productNameExist = await _productRepository.GetAllDataByExpression(
+                    a => a.ProductName.Equals(productResponse.ProductName) && (a.SupplierID ==productExist.SupplierID) &&(!a.ProductName.Equals(productExist.ProductName)),
+                    1,
+                    10,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
                     null
-                ); 
-                if (productNameExist != null)
+                );
+
+                if (productNameExist.Items.Count > 0 )
                 {
-                    result.IsSuccess = false;
-                    result.Result = "Name product existed into supplier";
+                    result = BuildAppActionResultError(result, $"Tên Sản phẩm đã tồn tại shop");
                     return result;
+
                 }
 
                 productExist.SerialNumber = productResponse.SerialNumber;

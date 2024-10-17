@@ -7,6 +7,7 @@ using CameraServicesPlatform.BackEnd.Data;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -24,10 +25,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IMapper _mapper;
         private IRepository<Product> _productRepository;
         private IRepository<ProductImage> _productImageRepository;
+        private IRepository<ProductVoucher> _productVoucherRepository;
+        private IRepository<ProductSpecification> _productSpecificationRepository;
         private IRepository<Supplier> _supplierRepository;
         private IRepository<OrderDetail> _orderDetailRepository;
         private IRepository<Order> _orderRepository;
-
         private IUnitOfWork _unitOfWork;
 
 
@@ -37,6 +39,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<OrderDetail> orderDetailRepository,
             IRepository<Supplier> supplierRepository,
             IRepository<Order> orderRepository,
+            IRepository<ProductVoucher> productVoucherRepository,
+            IRepository<ProductSpecification> productSpecificationRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider,
@@ -47,6 +51,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _productImageRepository = productImageRepository;
             _supplierRepository = supplierRepository;
             _orderDetailRepository = orderDetailRepository;
+            _productVoucherRepository = productVoucherRepository;
+            _productSpecificationRepository = productSpecificationRepository;
             _orderRepository = orderRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -304,8 +310,50 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
+                var productVoucher = await _productVoucherRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(product.ProductID),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
 
-                ProductResponse productResponse = new ProductResponse
+                foreach (var item in productVoucher.Items)
+                {
+
+                    ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                    {
+                        ProductVoucherID = item.ProductVoucherID.ToString(),
+                        VourcherID = item.VourcherID.ToString(),
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                    };
+                    listProductVoucher.Add(productVoucherResponse);
+                }
+                var productSpecification = await _productSpecificationRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(product.ProductID),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                List<ProductSpecificationResponse> listProductSpecification = new List<ProductSpecificationResponse>();
+
+                foreach (var item in productSpecification.Items)
+                {
+
+                    ProductSpecificationResponse productSpecificationResponse = new ProductSpecificationResponse
+                    {
+                        ProductSpecificationID = item.ProductSpecificationID.ToString(),
+                        Specification = item.Specification,
+                        Details = item.Details
+                    };
+                    listProductSpecification.Add(productSpecificationResponse);
+                }
+                ProductByIdResponse productResponse = new ProductByIdResponse
                 {
                     ProductID = product.ProductID.ToString(),
                     SerialNumber = product.SerialNumber,
@@ -321,7 +369,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     Rating = product.Rating,
                     CreatedAt = product.CreatedAt,
                     UpdatedAt = product.UpdatedAt,
-                    listImage = productImage.Items
+                    listImage = productImage.Items,
+                    listVoucher = listProductVoucher,
+                    listProductSpecification = listProductSpecification
+                    
                 };
 
                 result.Result = productResponse;

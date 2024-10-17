@@ -78,6 +78,27 @@ public class AccountService : GenericBackendService, IAccountService
         _roleManager = roleManager;
         _context = context;
     }
+ 
+    public async Task<AppActionResult> GetSupplierIDByAccountID(string accountId)
+    {
+        var supplier = await _context.Suppliers
+            .FirstOrDefaultAsync(s => s.AccountID == accountId);
+
+        if (supplier == null)
+        {
+            return new AppActionResult
+            {
+                IsSuccess = false,
+                Messages = new List<string> { "Supplier not found." }
+            };
+        }
+
+        return new AppActionResult
+        {
+            IsSuccess = true,
+            Result = supplier.SupplierID
+        };
+ 
     public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
     {
         AppActionResult result = new();
@@ -139,6 +160,7 @@ public class AccountService : GenericBackendService, IAccountService
 
         result.Result = new PagedResult<AccountResponse> { Items = listMap, TotalPages = list.TotalPages };
         return result;
+ 
     }
     public async Task<AppActionResult> CreateAccountSupplier(CreateSupplierAccountDTO dto, bool isGoogle)
     {

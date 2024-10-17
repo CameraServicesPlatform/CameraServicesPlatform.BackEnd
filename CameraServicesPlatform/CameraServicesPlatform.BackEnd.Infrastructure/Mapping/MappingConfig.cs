@@ -76,6 +76,11 @@ public class MappingConfig
             config.CreateMap<ReturnDetailRequest, ReturnDetail>();
             //Policy
             config.CreateMap<PolicyRequestDTO, Policy>();
+            // Staff
+            config.CreateMap<Staff, StaffResponseDto>()
+            .ForMember(dest => dest.StaffID, opt => opt.MapFrom(src => src.StaffID.ToString()))
+            .ForMember(dest => dest.AccountID, opt => opt.MapFrom(src => src.AccountID.ToString()))
+            .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src.Account)); ;
 
 
 

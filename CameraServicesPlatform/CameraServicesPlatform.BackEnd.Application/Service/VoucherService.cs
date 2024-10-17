@@ -164,11 +164,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     result.Result = "Voucher does not exist any supplier";
                     result.IsSuccess = false;
+                    return result;
+
                 }
                 if (voucherResponse.ExpirationDate <= voucherExist.ValidFrom)
                 {
                     result.Result = "ExpirationDate must be larger than ValidFrom";
                     result.IsSuccess = false;
+                    return result;
+
                 }
 
                 voucherExist.Description = voucherResponse.Description;
@@ -202,11 +206,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     result.Result = "ExpirationDate must be larger than ValidFrom";
                     result.IsSuccess = false;
+                    return result;
                 }
                 if (voucherResponse.DiscountAmount <= 0)
                 {
                     result.Result = "DiscountAmount must be larger than 0";
                     result.IsSuccess = false;
+                    return result;
+
                 }
                 Vourcher voucher = new Vourcher()
                 {

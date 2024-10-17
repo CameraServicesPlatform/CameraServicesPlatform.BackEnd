@@ -1,5 +1,4 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
-using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,8 +9,10 @@ using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
-    public class ProductReportResponseDto
+    public class ProductReportResponse
     {
+        public string ProductReportID { get; set; }
+
         public string SupplierID { get; set; }
 
         public string ProductID { get; set; }
@@ -23,9 +24,12 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public DateTime? EndDate { get; set; }
 
         public string? Reason { get; set; }
-        public string? AccountID { get; set; }
 
 
-        
+        public String? AccountID { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 }

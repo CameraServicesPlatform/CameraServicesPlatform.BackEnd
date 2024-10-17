@@ -78,94 +78,28 @@ public class AccountService : GenericBackendService, IAccountService
         _roleManager = roleManager;
         _context = context;
     }
- 
+
     public async Task<AppActionResult> GetSupplierIDByAccountID(string accountId)
     {
-        var supplier = await _context.Suppliers
+        Supplier? supplier = await _context.Suppliers
             .FirstOrDefaultAsync(s => s.AccountID == accountId);
 
-        if (supplier == null)
-        {
-            return new AppActionResult
+        return supplier == null
+            ? new AppActionResult
             {
                 IsSuccess = false,
-                Messages = new List<string> { "Supplier not found." }
+                Messages = ["Supplier not found."]
+            }
+            : new AppActionResult
+            {
+                IsSuccess = true,
+                Result = supplier.SupplierID
             };
-        }
-
-        return new AppActionResult
-        {
-            IsSuccess = true,
-            Result = supplier.SupplierID
-        };
- 
-    public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
-    {
-        AppActionResult result = new();
-        PagedResult<Account> list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
-
-        IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-        IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
-        PagedResult<IdentityRole> listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
-
-        // Add repositories for Supplier and Staff
-        IRepository<Supplier>? supplierRepository = Resolve<IRepository<Supplier>>();
-        IRepository<Staff>? staffRepository = Resolve<IRepository<Staff>>();
-
-        List<AccountResponse> listMap = _mapper.Map<List<AccountResponse>>(list.Items);
-        foreach (AccountResponse item in listMap)
-        {
-            // Retrieve User Roles
-            List<IdentityRole> userRole = new();
-            PagedResult<IdentityUserRole<string>> role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
-            foreach (IdentityUserRole<string> itemRole in role.Items!)
-            {
-                IdentityRole? roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
-                if (roleUser != null)
-                {
-                    userRole.Add(roleUser);
-                }
-            }
-
-            item.Role = userRole;
-
-            // Determine MainRole
-            if (userRole.Where(u => u.Name.Equals("ADMIN")).FirstOrDefault() != null)
-            {
-                item.MainRole = "ADMIN";
-            }
-            else if (userRole.Where(u => u.Name.Equals("SUPPLIER")).FirstOrDefault() != null)
-            {
-                item.MainRole = "SUPPLIER";
-            }
-            else if (userRole.Where(u => u.Name.Equals("STAFF")).FirstOrDefault() != null)
-            {
-                item.MainRole = "STAFF";
-            }
-            else
-            {
-                item.MainRole = userRole.Count > 0 ? userRole.FirstOrDefault(n => !n.Equals("MEMBER")).Name : "MEMBER";
-            }
-
-            // Retrieve Supplier data
-            var supplier = await supplierRepository!.GetSingleByExpressionAsync(s => s.AccountID == item.Id);
-            if (supplier != null)
-            {
-                item.SupplierID = supplier.SupplierID.ToString();
-                item.Supplier = supplier;
-            }
-
-             
-        }
-
-        result.Result = new PagedResult<AccountResponse> { Items = listMap, TotalPages = list.TotalPages };
-        return result;
- 
     }
     public async Task<AppActionResult> CreateAccountSupplier(CreateSupplierAccountDTO dto, bool isGoogle)
     {
-        var firebaseService = Resolve<IFirebaseService>();
-        var result = new AppActionResult();
+        IFirebaseService? firebaseService = Resolve<IFirebaseService>();
+        AppActionResult result = new();
 
         try
         {
@@ -179,35 +113,37 @@ public class AccountService : GenericBackendService, IAccountService
             {
                 return BuildAppActionResultError(result, "Bạn phải nhập ảnh hai mặt của căn cước công dân!");
             }
-            var emailService = Resolve<IEmailService>();
-            var verifyCode = string.Empty;
+            IEmailService? emailService = Resolve<IEmailService>();
+            string verifyCode = string.Empty;
 
             // Tạo mã xác minh
             if (!isGoogle)
-                verifyCode = Guid.NewGuid().ToString("N").Substring(0, 6);
-            
+            {
+                verifyCode = Guid.NewGuid().ToString("N")[..6];
+            }
+
             // Mapping DTO sang Account
-            var account = _mapper.Map<Account>(dto);
+            Account account = _mapper.Map<Account>(dto);
             account.VerifyCode = verifyCode;
-            account.IsVerified = isGoogle ? true : false;
+            account.IsVerified = isGoogle;
 
             IdentityResult createAccountResult;
 
             // Upload ảnh căn cước công dân lên Firebase nếu có
-            string frontCardImageUrl = null;
-            string backCardImageUrl = null;
+            string? frontCardImageUrl = null;
+            string? backCardImageUrl = null;
 
             if (dto.FrontOfCitizenIdentificationCard != null)
             {
-                var frontPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_front.jpg";
-                var frontUpload = await firebaseService.UploadFileToFirebase(dto.FrontOfCitizenIdentificationCard, frontPathName);
+                string frontPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_front.jpg";
+                AppActionResult frontUpload = await firebaseService.UploadFileToFirebase(dto.FrontOfCitizenIdentificationCard, frontPathName);
                 frontCardImageUrl = frontUpload?.Result?.ToString();
             }
 
             if (dto.BackOfCitizenIdentificationCard != null)
             {
-                var backPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_back.jpg";
-                var backUpload = await firebaseService.UploadFileToFirebase(dto.BackOfCitizenIdentificationCard, backPathName);
+                string backPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_back.jpg";
+                AppActionResult backUpload = await firebaseService.UploadFileToFirebase(dto.BackOfCitizenIdentificationCard, backPathName);
                 backCardImageUrl = backUpload?.Result?.ToString();
             }
 
@@ -230,27 +166,27 @@ public class AccountService : GenericBackendService, IAccountService
                             account.FirstName));
 
                     // Gán quyền SUPPLIER
-                    var roleResult = await _userManager.AddToRoleAsync(account, "SUPPLIER");
+                    IdentityResult roleResult = await _userManager.AddToRoleAsync(account, "SUPPLIER");
                     if (!roleResult.Succeeded)
                     {
-                        var roleErrors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                        string roleErrors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
                         return BuildAppActionResultError(result, $"Cấp quyền SUPPLIER không thành công: {roleErrors}");
                     }
 
                     // Thêm nhà cung cấp vào kho
-                    var supplier = _mapper.Map<Supplier>(dto);
+                    Supplier supplier = _mapper.Map<Supplier>(dto);
                     supplier.AccountID = account.Id;
                     supplier.CreatedAt = DateTime.UtcNow;
                     supplier.UpdatedAt = DateTime.UtcNow;
 
-                    await _supplierRepository.Insert(supplier);
+                    _ = await _supplierRepository.Insert(supplier);
                     await Task.Delay(100);
                     await _unitOfWork.SaveChangeAsync();
 
-                    var bankInfor = _mapper.Map<BankInformation>(dto);
+                    BankInformation bankInfor = _mapper.Map<BankInformation>(dto);
                     bankInfor.AccountID = account.Id;
 
-                    await _bankInformationRepository.Insert(bankInfor);
+                    _ = await _bankInformationRepository.Insert(bankInfor);
                     await Task.Delay(100);
                     await _unitOfWork.SaveChangeAsync();
                     // Gán thông tin tài khoản và nhà cung cấp vào kết quả
@@ -263,7 +199,7 @@ public class AccountService : GenericBackendService, IAccountService
                 }
                 else
                 {
-                    var errors = string.Join(", ", createAccountResult.Errors.Select(e => e.Description));
+                    string errors = string.Join(", ", createAccountResult.Errors.Select(e => e.Description));
                     return BuildAppActionResultError(result, $"Tạo tài khoản không thành công: {errors}");
                 }
             }
@@ -281,20 +217,20 @@ public class AccountService : GenericBackendService, IAccountService
                         $"\n\nWelcome {account.FirstName}, thank you for signing up with Google!");
 
                     // Gán quyền SUPPLIER
-                    var roleResult = await _userManager.AddToRoleAsync(account, "SUPPLIER");
+                    IdentityResult roleResult = await _userManager.AddToRoleAsync(account, "SUPPLIER");
                     if (!roleResult.Succeeded)
                     {
-                        var roleErrors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
+                        string roleErrors = string.Join(", ", roleResult.Errors.Select(e => e.Description));
                         return BuildAppActionResultError(result, $"Cấp quyền SUPPLIER không thành công: {roleErrors}");
                     }
 
                     // Thêm nhà cung cấp vào kho
-                    var supplier = _mapper.Map<Supplier>(dto);
+                    Supplier supplier = _mapper.Map<Supplier>(dto);
                     supplier.AccountID = account.Id;
                     supplier.CreatedAt = DateTime.UtcNow;
                     supplier.UpdatedAt = DateTime.UtcNow;
 
-                    await _supplierRepository.Insert(supplier);
+                    _ = await _supplierRepository.Insert(supplier);
                     await _unitOfWork.SaveChangeAsync();
 
                     // Gán thông tin tài khoản và nhà cung cấp vào kết quả
@@ -306,14 +242,14 @@ public class AccountService : GenericBackendService, IAccountService
                 }
                 else
                 {
-                    var errors = string.Join(", ", createAccountResult.Errors.Select(e => e.Description));
+                    string errors = string.Join(", ", createAccountResult.Errors.Select(e => e.Description));
                     return BuildAppActionResultError(result, $"Tạo tài khoản không thành công: {errors}");
                 }
             }
         }
         catch (DbUpdateException dbEx)
         {
-            var innerException = dbEx.InnerException?.Message ?? "No inner exception available.";
+            string innerException = dbEx.InnerException?.Message ?? "No inner exception available.";
             _logger.LogError("Error occurred while saving entity changes: {InnerException}: ${dbEx},", innerException);
             return BuildAppActionResultError(result, $"Đã xảy ra lỗi: {innerException}");
         }
@@ -325,10 +261,10 @@ public class AccountService : GenericBackendService, IAccountService
 
         return result; // Trả về kết quả cuối cùng
     }
- 
+
     public async Task<AppActionResult> CreateAccount(SignUpRequestDTO signUpRequest, bool isGoogle)
     {
-        var firebaseService = Resolve<IFirebaseService>();
+        IFirebaseService? firebaseService = Resolve<IFirebaseService>();
         AppActionResult result = new();
         try
         {
@@ -356,8 +292,8 @@ public class AccountService : GenericBackendService, IAccountService
                     Gender = signUpRequest.Gender,
                     VerifyCode = verifyCode,
                     IsVerified = isGoogle,
-                    
-                    
+
+
                 };
 
                 // Upload ảnh căn cước công dân lên Firebase nếu có
@@ -366,15 +302,15 @@ public class AccountService : GenericBackendService, IAccountService
 
                 if (signUpRequest.FrontOfCitizenIdentificationCard != null)
                 {
-                    var frontPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_front.jpg";
-                    var frontUpload = await firebaseService.UploadFileToFirebase(signUpRequest.FrontOfCitizenIdentificationCard, frontPathName);
+                    string frontPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_front.jpg";
+                    AppActionResult frontUpload = await firebaseService.UploadFileToFirebase(signUpRequest.FrontOfCitizenIdentificationCard, frontPathName);
                     frontCardImageUrl = frontUpload?.Result?.ToString();
                 }
 
                 if (signUpRequest.BackOfCitizenIdentificationCard != null)
                 {
-                    var backPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_back.jpg";
-                    var backUpload = await firebaseService.UploadFileToFirebase(signUpRequest.BackOfCitizenIdentificationCard, backPathName);
+                    string backPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{Guid.NewGuid()}_back.jpg";
+                    AppActionResult backUpload = await firebaseService.UploadFileToFirebase(signUpRequest.BackOfCitizenIdentificationCard, backPathName);
                     backCardImageUrl = backUpload?.Result?.ToString();
                 }
 
@@ -524,7 +460,7 @@ public class AccountService : GenericBackendService, IAccountService
 
         return result;
     }
-     
+
     public async Task<AppActionResult> AssignRole(string userId, string roleName)
     {
         AppActionResult result = new();
@@ -628,13 +564,11 @@ public class AccountService : GenericBackendService, IAccountService
         {
             _tokenDto.MainRole = "ADMIN";
         }
-        else if (roleNameList.Contains("STAFF"))
-        {
-            _tokenDto.MainRole = "STAFF";
-        }
         else
         {
-            _tokenDto.MainRole = roleNameList.Count > 0 ? roleNameList.FirstOrDefault(n => !n.Equals("MEMBER")) : "MEMBER";
+            _tokenDto.MainRole = roleNameList.Contains("STAFF")
+                ? "STAFF"
+                : roleNameList.Count > 0 ? roleNameList.FirstOrDefault(n => !n.Equals("MEMBER")) : "MEMBER";
         }
 
         result.Result = _tokenDto;
@@ -661,7 +595,7 @@ public class AccountService : GenericBackendService, IAccountService
         }
         return result;
     }
-     
+
     public async Task<bool> AssignStaffRole(List<Account> staffAccountList)
     {
         bool isSuccess = true;
@@ -890,7 +824,7 @@ public class AccountService : GenericBackendService, IAccountService
         return result;
     }
 
-    
+
 
     public async Task<AppActionResult> ChangePassword(ChangePasswordDTO changePasswordDto)
     {
@@ -1353,4 +1287,73 @@ public class AccountService : GenericBackendService, IAccountService
     }
 
 
+
+
+    private async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
+    {
+        AppActionResult result = new();
+        PagedResult<Account> list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
+
+        IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+        IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
+        PagedResult<IdentityRole> listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
+
+        // Add repositories for Supplier and Staff
+        IRepository<Supplier>? supplierRepository = Resolve<IRepository<Supplier>>();
+        IRepository<Staff>? staffRepository = Resolve<IRepository<Staff>>();
+
+        List<AccountResponse> listMap = _mapper.Map<List<AccountResponse>>(list.Items);
+        foreach (AccountResponse item in listMap)
+        {
+            // Retrieve User Roles
+            List<IdentityRole> userRole = [];
+            PagedResult<IdentityUserRole<string>> role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
+            foreach (IdentityUserRole<string> itemRole in role.Items!)
+            {
+                IdentityRole? roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
+                if (roleUser != null)
+                {
+                    userRole.Add(roleUser);
+                }
+            }
+
+            item.Role = userRole;
+
+            // Determine MainRole
+            if (userRole.Where(u => u.Name.Equals("ADMIN")).FirstOrDefault() != null)
+            {
+                item.MainRole = "ADMIN";
+            }
+            else if (userRole.Where(u => u.Name.Equals("SUPPLIER")).FirstOrDefault() != null)
+            {
+                item.MainRole = "SUPPLIER";
+            }
+            else
+            {
+                item.MainRole = userRole.Where(u => u.Name.Equals("STAFF")).FirstOrDefault() != null
+                    ? "STAFF"
+                    : userRole.Count > 0 ? userRole.FirstOrDefault(n => !n.Equals("MEMBER")).Name : "MEMBER";
+            }
+
+            // Retrieve Supplier data
+            var supplier = await supplierRepository!.GetSingleByExpressionAsync(s => s.AccountID == item.Id);
+            if (supplier != null)
+            {
+                item.SupplierID = supplier.SupplierID.ToString();
+                item.Supplier = supplier;
+            }
+
+
+        }
+
+        result.Result = new PagedResult<AccountResponse> { Items = listMap, TotalPages = list.TotalPages };
+        return result;
+
+    }
+
+    Task<AppActionResult> IAccountService.GetAllAccount(int pageIndex, int pageSize)
+    {
+        throw new NotImplementedException();
+    }
 }
+

@@ -32,6 +32,13 @@ public class AccountController : ControllerBase
     {
         return await _accountService.CreateAccountSupplier(dto, false);
     }
+
+    [HttpPost("create-staff")]
+    public async Task<AppActionResult> CreateStaff(CreateStaffDTO request)
+    {
+        return await _accountService.AddStaff(request);
+    }
+
     [HttpPost("get-account-by-userId/{id}")]
     public async Task<AppActionResult> GetAccountByUserId(string id)
     {

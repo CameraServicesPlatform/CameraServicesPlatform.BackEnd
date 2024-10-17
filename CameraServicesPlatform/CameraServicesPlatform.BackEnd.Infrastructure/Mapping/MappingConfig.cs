@@ -45,7 +45,9 @@ public class MappingConfig
             config.CreateMap<Rating, RatingResponse>();
             config.CreateMap<Contract, ContractResponse>();
             config.CreateMap<ContractTemplate, ContractTemplateResponse>();
-            config.CreateMap<Policy, PolicyResponse>();
+            config.CreateMap<Policy, PolicyResponse>()
+            .ForMember(dest => dest.PolicyID, opt => opt.MapFrom(src => src.PolicyID.ToString()));
+
             config.CreateMap<Report, ReportResponse>();
             config.CreateMap<ReturnDetail, ReturnDetailResponse>();
             config.CreateMap<Wishlist, WishlistResponse>();

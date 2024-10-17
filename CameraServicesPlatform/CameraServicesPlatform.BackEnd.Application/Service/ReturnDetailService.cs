@@ -115,7 +115,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var responses = Result.Items.Select(RD =>
                 {
-                    var response = _mapper.Map<ReturnDetailResponse>(Result);
+                    var response = _mapper.Map<ReturnDetailResponse>(RD);
                     response.ReturnID = RD.ReturnID.ToString();
                     response.OrderID = RD.OrderID.ToString();
                     return response;

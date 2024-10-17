@@ -44,10 +44,10 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _orderService.CountProductRentals(productId, pageIndex, pageSize);
         }
 
-        [HttpGet("get-order-of-member")]
-        public async Task<AppActionResult> GetOrderByMemberId(string MemberId, int pageIndex = 1, int pageSize = 10)
+        [HttpGet("get-order-of-account")]
+        public async Task<AppActionResult> GetOrderByMemberId(string AccountID, int pageIndex = 1, int pageSize = 10)
         {
-            return await _orderService.GetOrderByMemberID(MemberId, pageIndex, pageSize);
+            return await _orderService.GetOrderByAccountID(AccountID, pageIndex, pageSize);
         }
 
         [HttpPost("create-order-buy")]

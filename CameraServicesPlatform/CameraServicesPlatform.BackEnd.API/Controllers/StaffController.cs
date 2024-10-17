@@ -101,5 +101,17 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _staffService.GetAllStaff(pageIndex, pageSize);
         }
+
+        [HttpGet("get-all-account-inactive")]
+        public async Task<AppActionResult> GetAllAccountNotActive(int pageIndex, int pageSize)
+        {
+            return await _staffService.GetAllAccountNotActive(pageIndex, pageSize);
+        }
+
+        [HttpGet("get-all-account-active")]
+        public async Task<AppActionResult> GetAllAccountActive(int pageIndex, int pageSize)
+        {
+            return await _staffService.GetAllAccountActive(pageIndex, pageSize);
+        }
     }
 }

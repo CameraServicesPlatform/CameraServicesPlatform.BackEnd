@@ -16,5 +16,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetStaffByName(string? staffName, int pageIndex, int pageSize);
         Task<AppActionResult> UpdateStaff(string StaffID, StaffRequestDTO request);
         Task<AppActionResult> DeleteStaff(string staffID);
+        Task<AppActionResult> GetAllAccountActive(int pageIndex, int pageSize);
+        Task<AppActionResult> GetAllAccountNotActive(int pageIndex, int pageSize);
+
     }
 }

@@ -159,11 +159,11 @@ public class AccountService : GenericBackendService, IAccountService
                 if (createAccountResult.Succeeded)
                 {
                     // Gửi email xác minh
-                    emailService.SendEmail(account.Email, SD.SubjectMail.VERIFY_ACCOUNT,
-                        TemplateMappingHelper.GetTemplateOTPEmail(
-                            TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
-                            verifyCode,
-                            account.FirstName));
+                    //emailService.SendEmail(account.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+                    //    TemplateMappingHelper.GetTemplateOTPEmail(
+                    //        TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
+                    //        verifyCode,
+                    //        account.FirstName));
 
                     // Gán quyền SUPPLIER
                     IdentityResult roleResult = await _userManager.AddToRoleAsync(account, "SUPPLIER");
@@ -209,12 +209,12 @@ public class AccountService : GenericBackendService, IAccountService
                 createAccountResult = await _userManager.CreateAsync(account);
                 if (createAccountResult.Succeeded)
                 {
-                    emailService.SendEmail(account.Email, SD.SubjectMail.VERIFY_ACCOUNT,
-                        TemplateMappingHelper.GetTemplateOTPEmail(
-                            TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
-                            verifyCode,
-                            account.FirstName) +
-                        $"\n\nWelcome {account.FirstName}, thank you for signing up with Google!");
+                    //emailService.SendEmail(account.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+                    //    TemplateMappingHelper.GetTemplateOTPEmail(
+                    //        TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
+                    //        verifyCode,
+                    //        account.FirstName) +
+                    //    $"\n\nWelcome {account.FirstName}, thank you for signing up with Google!");
 
                     // Gán quyền SUPPLIER
                     IdentityResult roleResult = await _userManager.AddToRoleAsync(account, "SUPPLIER");
@@ -1289,7 +1289,7 @@ public class AccountService : GenericBackendService, IAccountService
 
 
 
-    private async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
+    public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
     {
         AppActionResult result = new();
         PagedResult<Account> list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
@@ -1351,9 +1351,5 @@ public class AccountService : GenericBackendService, IAccountService
 
     }
 
-    Task<AppActionResult> IAccountService.GetAllAccount(int pageIndex, int pageSize)
-    {
-        throw new NotImplementedException();
-    }
 }
 

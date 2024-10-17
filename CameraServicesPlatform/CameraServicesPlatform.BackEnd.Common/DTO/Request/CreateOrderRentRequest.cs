@@ -11,7 +11,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
     public class CreateOrderRentRequest
     {
         public Guid SupplierID { get; set; }
-        public Guid MemberID { get; set; }
+        public string AccountID { get; set; }
         public DateTime OrderDate { get; set; }
         public OrderStatus OrderStatus { get; set; }
         public decimal TotalAmount { get; set; }

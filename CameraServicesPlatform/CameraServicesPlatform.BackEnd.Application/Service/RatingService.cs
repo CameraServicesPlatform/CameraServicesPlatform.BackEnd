@@ -59,7 +59,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 var member = await _memberRepository.GetByExpression(x => x.AccountID == request.AccountID);
 
-                var hasOrder = await _orderRepository.GetByExpression(x => x.MemberID == member.MemberID);
+                var hasOrder = await _orderRepository.GetByExpression(x => x.Id == member.AccountID);
 
                 if (hasOrder == null)
                 {

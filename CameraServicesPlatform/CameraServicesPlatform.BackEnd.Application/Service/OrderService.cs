@@ -76,7 +76,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
 
                 var createdOrder = await _orderRepository
-                                        .GetByExpression(x => x.MemberID == request.MemberID && x.OrderDate == order.OrderDate);
+                                        .GetByExpression(x => x.Id == request.AccountID && x.OrderDate == order.OrderDate);
 
                 if (createdOrder == null)
                 {
@@ -134,7 +134,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _unitOfWork.SaveChangesAsync();
 
                 var createdOrder = await _orderRepository
-                                        .GetByExpression(x => x.MemberID == request.MemberID && x.OrderDate == order.OrderDate);
+                                        .GetByExpression(x => x.Id == request.AccountID && x.OrderDate == order.OrderDate);
 
                 if (createdOrder == null)
                 {
@@ -192,7 +192,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new Exception("Không có hợp đồng!");
                 }
                 var orderResponse = _mapper.Map<OrderResponse>(createdOrder);
-                orderResponse.MemberID = createdOrder.MemberID.ToString();
+                orderResponse.AccountID = createdOrder.Id.ToString();
                 orderResponse.SupplierID = createdOrder.SupplierID.ToString();
 
                 result = orderResponse;
@@ -321,7 +321,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var orderResponse = _mapper.Map<OrderResponse>(order);
-                orderResponse.MemberID = order.MemberID.ToString();
+                orderResponse.AccountID = order.Id.ToString();
                 orderResponse.SupplierID = order.SupplierID.ToString();
 
                 result.Result = orderResponse;
@@ -354,7 +354,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _unitOfWork.SaveChangesAsync();
                 }
                 var orderResponse = _mapper.Map<OrderResponse>(order);
-                orderResponse.MemberID = order.MemberID.ToString();
+                orderResponse.AccountID = order.Id.ToString();
                 orderResponse.SupplierID = order.SupplierID.ToString();
 
                 result.Result = orderResponse;
@@ -387,7 +387,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     await _unitOfWork.SaveChangesAsync();
                 }
                 var orderResponse = _mapper.Map<OrderResponse>(order);
-                orderResponse.MemberID = order.MemberID.ToString();
+                orderResponse.AccountID = order.Id.ToString();
                 orderResponse.SupplierID = order.SupplierID.ToString();
 
                 result.Result = orderResponse;
@@ -449,18 +449,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetOrderByMemberID(string MemberID, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetOrderByAccountID(string AccountID, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                if (!Guid.TryParse(MemberID, out Guid OrderMemberID))
-                {
-                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
-                    return result;
-                }
+               
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
-                    x => x.MemberID == OrderMemberID,
+                    x => x.Id == AccountID,
                     pageIndex,
                     pageSize, 
                     includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }

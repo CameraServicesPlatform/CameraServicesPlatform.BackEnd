@@ -14,6 +14,12 @@ public class Contract
     // Navigation property for Order
     public Order Order { get; set; }
 
+    [ForeignKey("ContractTemplateId")]
+    public ContractTemplate ContractTemplate { get; set; }
+
+
+    public Guid ContractTemplateId { get; set; }
+
     public string ContractTerms { get; set; }
     public string PenaltyPolicy { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

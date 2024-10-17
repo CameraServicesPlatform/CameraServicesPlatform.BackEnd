@@ -15,12 +15,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public required string AccountHolder { get; set; }
 
- 
         [ForeignKey("AccountID")]
         public Account Account { get; set; }
  
         
-        public Guid? AccountID { get; set; }
+        public string? AccountID { get; set; }
  
         
     }

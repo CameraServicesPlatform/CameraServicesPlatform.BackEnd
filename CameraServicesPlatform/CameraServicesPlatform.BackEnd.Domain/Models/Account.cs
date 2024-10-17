@@ -32,7 +32,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string? StaffID { get; set; }
          public Staff? Staff { get; set; }
         public string? Img { get; set; }
+         public string? FrontOfCitizenIdentificationCard { get; set; }
         public string? BackOfCitizenIdentificationCard { get; set; }
-        public string? FrontOfCitizenIdentificationCard { get; set; }
+ 
     }
 }

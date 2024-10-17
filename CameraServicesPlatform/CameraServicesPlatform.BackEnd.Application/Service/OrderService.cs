@@ -381,7 +381,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var order = await _orderRepository.GetById(OrderUpdateId);
                 if (order != null)
                 {
-                    order.OrderStatus = OrderStatus.Completed;
+                    order.OrderStatus = OrderStatus.Cancelled;
                     _orderRepository.Update(order);
                     await Task.Delay(100);
                     await _unitOfWork.SaveChangesAsync();

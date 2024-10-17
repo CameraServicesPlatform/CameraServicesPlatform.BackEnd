@@ -2,6 +2,7 @@
 public enum PolicyType
 {
     System,
-    Supplier
+    Supplier,
+    Member,
 }
 

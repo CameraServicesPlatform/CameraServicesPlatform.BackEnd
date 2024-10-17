@@ -24,7 +24,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IMapper _mapper;
         private IRepository<Product> _productRepository;
         private IRepository<ProductImage> _productImageRepository;
-
+        private IRepository<Supplier> _supplierRepository;
         private IRepository<OrderDetail> _orderDetailRepository;
         private IRepository<Order> _orderRepository;
 
@@ -35,6 +35,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Product> productRepository,
             IRepository<ProductImage> productImageRepository,
             IRepository<OrderDetail> orderDetailRepository,
+            IRepository<Supplier> supplierRepository,
             IRepository<Order> orderRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -44,6 +45,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             _productRepository = productRepository;
             _productImageRepository = productImageRepository;
+            _supplierRepository = supplierRepository;
             _orderDetailRepository = orderDetailRepository;
             _orderRepository = orderRepository;
             _unitOfWork = unitOfWork;
@@ -56,6 +58,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 var listProduct = Resolve<IRepository<Product>>();
+                if (!Guid.TryParse(productResponse.SupplierID, out var supplierGuid))
+                {
+                    result.Result = "Invalid SupplierID format";
+                    result.IsSuccess = false;
+                    return result;
+                }
+                var supplierExist = await _supplierRepository.GetByExpression(a => a.SupplierID == supplierGuid);
+
+                if (supplierExist == null)
+                {
+                    result.Result = "SupplierID does not exist";
+                    result.IsSuccess = false;
+                    return result;
+                }
                 var productNameExist = await _productRepository.GetByExpression(
                     a => a.ProductName != null && a.ProductName.Equals(productResponse.ProductName) && a.SupplierID != null && a.SupplierID.Equals(Guid.Parse(productResponse.SupplierID)),
                     null

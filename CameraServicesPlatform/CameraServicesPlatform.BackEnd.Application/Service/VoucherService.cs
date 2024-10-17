@@ -173,6 +173,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result.IsSuccess = false;
                     return result;
 
+
+
                 }
 
                 voucherExist.Description = voucherResponse.Description;

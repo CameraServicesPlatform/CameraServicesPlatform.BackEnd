@@ -46,10 +46,23 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             try
             {
-                var newProductReport = Resolve<IRepository<ProductReport>>();
-                var supplierExist = _supplierRepository.GetByExpression(a => a.SupplierID == Guid.Parse(productReportResponse.SupplierID));
-                var productExist = _productRepository.GetByExpression(a => a.ProductID == Guid.Parse(productReportResponse.ProductID));
-                if(supplierExist == null)
+                if (!Guid.TryParse(productReportResponse.SupplierID, out var supplierGuid))
+                {
+                    result.Result = "Invalid SupplierID format";
+                    result.IsSuccess = false;
+                    return result;
+                }
+                if (!Guid.TryParse(productReportResponse.ProductID, out var productGuid))
+                {
+                    result.Result = "Invalid ProductID format";
+                    result.IsSuccess = false;
+                    return result;
+                }
+
+                var supplierExist = await _supplierRepository.GetByExpression(a => a.SupplierID == supplierGuid);
+                var productExist = await _productRepository.GetByExpression(a => a.ProductID == productGuid);
+
+                if (supplierExist == null)
                 {
                     result.Result = "SupplierID does not exist";
                     result.IsSuccess = false;
@@ -57,22 +70,30 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 if (productExist == null)
                 {
-                    result.Result = "ProductId does not exist";
+                    result.Result = "ProductID does not exist";
                     result.IsSuccess = false;
                     return result;
-
                 }
+
+                if (productReportResponse.StartDate > productReportResponse.EndDate)
+                {
+                    result.Result = "StartDate must be earlier than EndDate";
+                    result.IsSuccess = false;
+                    return result;
+                }
+
                 ProductReport productReport = new ProductReport()
                 {
                     ProductReportID = Guid.NewGuid(),
-                    SupplierID = Guid.Parse(productReportResponse.SupplierID),
-                    ProductID = Guid.Parse(productReportResponse.ProductID),
+                    SupplierID = supplierGuid,
+                    ProductID = productGuid,
                     StatusType = productReportResponse.StatusType,
                     EndDate = productReportResponse.EndDate,
                     Reason = productReportResponse.Reason,
                     AccountID = productReportResponse.AccountID
                 };
 
+                var newProductReport = Resolve<IRepository<ProductReport>>();
                 await newProductReport.Insert(productReport);
                 await _unitOfWork.SaveChangesAsync();
 
@@ -83,8 +104,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
+
             return result;
         }
+
 
         public async Task<AppActionResult> DeleteProductReport(string productReportId)
         {

@@ -100,6 +100,14 @@ public class AccountController : ControllerBase
 
         return result == null ? StatusCode(500, "An error occurred while processing your request.") : (IActionResult)Ok(result);
     }
+
+
+    [HttpGet("get-supplier-id-by-account-id/{accountId}")]
+    public async Task<AppActionResult> GetSupplierIDByAccountID(string accountId)
+    {
+        return await _accountService.GetSupplierIDByAccountID(accountId);
+    }
+
     [HttpPut("update-account")]
     public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO request)
     {

@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
+using System.CodeDom;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -15,11 +16,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     public class VoucherService : GenericBackendService, IVoucherService
     {
         private readonly IRepository<Vourcher> _repository;
+        private readonly IRepository<Supplier> _supplierRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
         public VoucherService(
             IRepository<Vourcher> repository,
+            IRepository<Supplier> supplierRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
@@ -27,6 +30,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _supplierRepository = supplierRepository;
             _mapper = mapper;
         }
 
@@ -38,7 +42,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 Expression<Func<Vourcher, bool>>? filter = null;
-
+                List<VoucherResponse> listVoucher = new List<VoucherResponse>();
                 var pagedResult = await _repository.GetAllDataByExpression(
                     filter,
                     pageIndex,
@@ -48,8 +52,26 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     null
                 );
 
-                // Set success result
-                result.Result = pagedResult;
+                foreach (var item in pagedResult.Items)
+                {
+
+                    VoucherResponse voucherResponse = new VoucherResponse
+                    {
+                        VourcherID =item.VourcherID.ToString(),
+                        SupplierID =item.SupplierID.ToString(),
+                        VourcherCode = item.VourcherCode.ToString(),
+                        Description = item.Description,
+                        DiscountAmount = item.DiscountAmount,
+                        ValidFrom = item.ValidFrom,
+                        ExpirationDate = item.ExpirationDate,
+                        IsActive = item.IsActive,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt
+                    };
+                    listVoucher.Add(voucherResponse);
+                }
+
+                result.Result = listVoucher;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -130,30 +152,31 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 var voucherRepository = Resolve<IRepository<Vourcher>>();
-
                 Vourcher voucherExist = await voucherRepository.GetById(voucherResponse.VourcherID);
 
-                if (voucherExist == null)
+                if (voucherResponse.VourcherID == null)
                 {
+                    result.Result = "voucherId required";
                     result.IsSuccess = false;
                     return result;
                 }
-
-                voucherExist.SupplierID = voucherResponse.SupplierID;
-                voucherExist.VourcherCode = voucherResponse.VourcherCode;
+                if (voucherExist == null)
+                {
+                    result.Result = "Voucher does not exist any supplier";
+                    result.IsSuccess = false;
+                }
+                if(voucherResponse.ExpirationDate <= voucherExist.ValidFrom)
+                {
+                    result.Result = "ExpirationDate must be larger than ValidFrom";
+                    result.IsSuccess = false;
+                }
+                
                 voucherExist.Description = voucherResponse.Description;
-                voucherExist.DiscountAmount = voucherResponse.DiscountAmount;
-                /*voucherExist.DiscountType = voucherResponse.DiscountType;
-                voucherExist.MaxUsageLimit = voucherResponse.MaxUsageLimit;
-                voucherExist.UsagePerCustomer = voucherResponse.UsagePerCustomer;
-                voucherExist.MinOrderAmount = voucherResponse.MinOrderAmount;*/
-                voucherExist.ValidFrom = voucherResponse.ValidFrom;
                 voucherExist.ExpirationDate = voucherResponse.ExpirationDate;
                 voucherExist.IsActive = voucherResponse.IsActive;
                 voucherExist.UpdatedAt = DateTime.UtcNow;
 
                 await voucherRepository.Update(voucherExist);
-
                 await _unitOfWork.SaveChangesAsync();
 
                 result.Result = voucherExist;
@@ -175,17 +198,23 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 var listVoucher = Resolve<IRepository<Vourcher>>();
+                if (voucherResponse.ExpirationDate <= voucherResponse.ValidFrom)
+                {
+                    result.Result = "ExpirationDate must be larger than ValidFrom";
+                    result.IsSuccess = false;
+                }
+                if (voucherResponse.DiscountAmount <= 0)
+                {
+                    result.Result = "DiscountAmount must be larger than 0";
+                    result.IsSuccess = false;
+                }
                 Vourcher voucher = new Vourcher()
                 {
                     VourcherID = Guid.NewGuid(),
-                    SupplierID = voucherResponse.SupplierID,
+                    SupplierID = Guid.Parse(voucherResponse.SupplierID),
                     VourcherCode = voucherResponse.VourcherCode,
                     Description = voucherResponse.Description,
                     DiscountAmount = voucherResponse.DiscountAmount,
-                    /*DiscountType = voucherResponse.DiscountType,
-                    MaxUsageLimit = voucherResponse.MaxUsageLimit,
-                    UsagePerCustomer = voucherResponse.UsagePerCustomer,
-                    MinOrderAmount = voucherResponse.MinOrderAmount,*/
                     ValidFrom = voucherResponse.ValidFrom,
                     ExpirationDate = voucherResponse.ExpirationDate
                 };
@@ -201,9 +230,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 result = BuildAppActionResultError(result, ex.Message);
             }
             return result;
-
         }
-
 
 
         public async Task<AppActionResult> DeleteVoucher(string voucherId)

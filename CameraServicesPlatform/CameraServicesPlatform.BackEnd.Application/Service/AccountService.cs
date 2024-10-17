@@ -78,7 +78,90 @@ public class AccountService : GenericBackendService, IAccountService
         _roleManager = roleManager;
         _context = context;
     }
+ 
+    public async Task<AppActionResult> GetSupplierIDByAccountID(string accountId)
+    {
+        var supplier = await _context.Suppliers
+            .FirstOrDefaultAsync(s => s.AccountID == accountId);
 
+        if (supplier == null)
+        {
+            return new AppActionResult
+            {
+                IsSuccess = false,
+                Messages = new List<string> { "Supplier not found." }
+            };
+        }
+
+        return new AppActionResult
+        {
+            IsSuccess = true,
+            Result = supplier.SupplierID
+        };
+ 
+    public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
+    {
+        AppActionResult result = new();
+        PagedResult<Account> list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
+
+        IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+        IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
+        PagedResult<IdentityRole> listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
+
+        // Add repositories for Supplier and Staff
+        IRepository<Supplier>? supplierRepository = Resolve<IRepository<Supplier>>();
+        IRepository<Staff>? staffRepository = Resolve<IRepository<Staff>>();
+
+        List<AccountResponse> listMap = _mapper.Map<List<AccountResponse>>(list.Items);
+        foreach (AccountResponse item in listMap)
+        {
+            // Retrieve User Roles
+            List<IdentityRole> userRole = new();
+            PagedResult<IdentityUserRole<string>> role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
+            foreach (IdentityUserRole<string> itemRole in role.Items!)
+            {
+                IdentityRole? roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
+                if (roleUser != null)
+                {
+                    userRole.Add(roleUser);
+                }
+            }
+
+            item.Role = userRole;
+
+            // Determine MainRole
+            if (userRole.Where(u => u.Name.Equals("ADMIN")).FirstOrDefault() != null)
+            {
+                item.MainRole = "ADMIN";
+            }
+            else if (userRole.Where(u => u.Name.Equals("SUPPLIER")).FirstOrDefault() != null)
+            {
+                item.MainRole = "SUPPLIER";
+            }
+            else if (userRole.Where(u => u.Name.Equals("STAFF")).FirstOrDefault() != null)
+            {
+                item.MainRole = "STAFF";
+            }
+            else
+            {
+                item.MainRole = userRole.Count > 0 ? userRole.FirstOrDefault(n => !n.Equals("MEMBER")).Name : "MEMBER";
+            }
+
+            // Retrieve Supplier data
+            var supplier = await supplierRepository!.GetSingleByExpressionAsync(s => s.AccountID == item.Id);
+            if (supplier != null)
+            {
+                item.SupplierID = supplier.SupplierID.ToString();
+                item.Supplier = supplier;
+            }
+
+             
+        }
+
+        result.Result = new PagedResult<AccountResponse> { Items = listMap, TotalPages = list.TotalPages };
+        return result;
+ 
+    }
     public async Task<AppActionResult> CreateAccountSupplier(CreateSupplierAccountDTO dto, bool isGoogle)
     {
         var firebaseService = Resolve<IFirebaseService>();
@@ -807,53 +890,7 @@ public class AccountService : GenericBackendService, IAccountService
         return result;
     }
 
-    public async Task<AppActionResult> GetAllAccount(int pageIndex, int pageSize)
-    {
-        AppActionResult result = new();
-        PagedResult<Account> list = await _accountRepository.GetAllDataByExpression(null, pageIndex, pageSize, null, false, null);
-
-        IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
-        IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
-        PagedResult<IdentityRole> listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
-        List<AccountResponse> listMap = _mapper.Map<List<AccountResponse>>(list.Items);
-        foreach (AccountResponse item in listMap)
-        {
-            List<IdentityRole> userRole = new();
-            PagedResult<IdentityUserRole<string>> role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
-            foreach (IdentityUserRole<string> itemRole in role.Items!)
-            {
-                IdentityRole? roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
-                if (roleUser != null)
-                {
-                    userRole.Add(roleUser);
-                }
-            }
-
-            item.Role = userRole;
-
-            if (userRole.Where(u => u.Name.Equals("ADMIN")).FirstOrDefault() != null)
-            {
-                item.MainRole = "ADMIN";
-            }
-            else if (userRole.Where(u => u.Name.Equals("SUPPLIER")).FirstOrDefault() != null)
-            {
-                item.MainRole = "SUPPLIER";
-            }
-            else if (userRole.Where(u => u.Name.Equals("STAFF")).FirstOrDefault() != null)
-            {
-                item.MainRole = "STAFF";
-            }
-            else
-            {
-                item.MainRole = userRole.Count > 0 ? userRole.FirstOrDefault(n => !n.Equals("MEMBER")).Name : "MEMBER";
-            }
-        }
-
-        result.Result =
-            new PagedResult<AccountResponse>
-            { Items = listMap, TotalPages = list.TotalPages };
-        return result;
-    }
+    
 
     public async Task<AppActionResult> ChangePassword(ChangePasswordDTO changePasswordDto)
     {

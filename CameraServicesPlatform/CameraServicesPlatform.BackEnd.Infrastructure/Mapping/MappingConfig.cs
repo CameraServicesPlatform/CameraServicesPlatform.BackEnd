@@ -45,7 +45,9 @@ public class MappingConfig
             config.CreateMap<Rating, RatingResponse>();
             config.CreateMap<Contract, ContractResponse>();
             config.CreateMap<ContractTemplate, ContractTemplateResponse>();
-            config.CreateMap<Policy, PolicyResponse>();
+            config.CreateMap<Policy, PolicyResponse>()
+            .ForMember(dest => dest.PolicyID, opt => opt.MapFrom(src => src.PolicyID.ToString()));
+
             config.CreateMap<Report, ReportResponse>();
             config.CreateMap<ReturnDetail, ReturnDetailResponse>();
             config.CreateMap<Wishlist, WishlistResponse>();
@@ -56,6 +58,7 @@ public class MappingConfig
                  .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
                  .ForMember(dest => dest.JobTitle, opt => opt.MapFrom(src => src.JobTitle))
+                .ForMember(dest => dest.Name, act => act.MapFrom(src => src.FirstName))
                 .ForMember(dest => dest.Department, opt => opt.MapFrom(src => src.Department))
                 .ForMember(dest => dest.StaffStatus, opt => opt.MapFrom(src => src.StaffStatus))
                 .ForMember(dest => dest.HireDate, opt => opt.MapFrom(src => src.HireDate))
@@ -63,12 +66,13 @@ public class MappingConfig
                 .ForMember(dest => dest.Img, opt => opt.MapFrom(src => src.Img));
             ; 
             config.CreateMap<CreateStaffDTO, Account>()
-     .ForMember(dest => dest.Email, act => act.MapFrom(src => src.Email)) 
-    .ForMember(dest => dest.FirstName, act => act.MapFrom(src => src.Name))  
-     .ForMember(dest => dest.PhoneNumber, act => act.MapFrom(src => src.PhoneNumber))  
-    .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => false)) 
-    .ForMember(dest => dest.IsVerified, opt => opt.MapFrom(src => false))  
-    .ForMember(dest => dest.StaffID, opt => opt.Ignore()); // Assuming this is managed elsewhere
+            .ForMember(dest => dest.Email, act => act.MapFrom(src => src.Email)) 
+            .ForMember(dest => dest.FirstName, act => act.MapFrom(src => src.FirstName))
+            .ForMember(dest => dest.LastName, act => act.MapFrom(src => src.LastName))
+            .ForMember(dest => dest.PhoneNumber, act => act.MapFrom(src => src.PhoneNumber))  
+            .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => false)) 
+            .ForMember(dest => dest.IsVerified, opt => opt.MapFrom(src => false))  
+            .ForMember(dest => dest.StaffID, opt => opt.Ignore()); // Assuming this is managed elsewhere
  
                //WishList
             config.CreateMap<CreateWishlistRequestDTO, Wishlist>();

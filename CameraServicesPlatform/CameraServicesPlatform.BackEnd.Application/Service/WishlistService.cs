@@ -189,7 +189,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var responses = Result.Items.Select(WL =>
                 {
-                    var response = _mapper.Map<WishlistResponse>(Result);
+                    var response = _mapper.Map<WishlistResponse>(WL);
                     response.WishlistID = WL.WishlistID.ToString();
                     response.ProductID = WL.ProductID.ToString();
                     response.MemberID = WL.MemberID.ToString();

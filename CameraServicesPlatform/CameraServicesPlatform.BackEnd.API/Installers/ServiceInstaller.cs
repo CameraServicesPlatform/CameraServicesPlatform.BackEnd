@@ -30,12 +30,9 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<ISupplierService, SupplierService>();
         services.AddScoped<IVoucherService, VoucherService>();
-
         services.AddScoped<IProductImageService, ProductImageService>();
         services.AddScoped<IProductVoucherService, ProductVoucherService>();
         services.AddScoped<IProductSpecificationService, ProductSpecificationService>();
-
-
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IRatingService, RatingService>();
         services.AddScoped<IOrderDetailService, OrderDetailService>();
@@ -44,21 +41,14 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IReturnDetailService, ReturnDetailService>();
         services.AddScoped<IWishlistService, WishlistService>();
         services.AddScoped<IPolicyService, PolicyService>();
-
         services.AddScoped<IContractTemplateService, ContractTemplateService>();
-
-
-
-
-    
- 
         services.AddScoped<ISmsService, SmsService>();
-
- 
         services.AddScoped<IProductReportService, ProductReportService>();
         services.AddScoped<IFirebaseService, FirebaseService>();
+        services.AddScoped<IStaffService, StaffService>();
 
-        
+
+
     }
 
 }

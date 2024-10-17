@@ -90,7 +90,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var responses = Result.Items.Select(ST =>
                 {
-                    var response = _mapper.Map<StaffResponseDto>(Result);
+                    var response = _mapper.Map<StaffResponseDto>(ST);
                     return response;
                 }).ToList();
                 var pagedResult = new PagedResult<StaffResponseDto>
@@ -170,7 +170,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                );
                 var responses = Result.Items.Select(ST =>
                 {
-                    var response = _mapper.Map<StaffResponseDto>(Result);
+                    var response = _mapper.Map<StaffResponseDto>(ST);
                     return response;
                 }).ToList();
                 var pagedResult = new PagedResult<StaffResponseDto>

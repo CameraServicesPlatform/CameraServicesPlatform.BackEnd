@@ -110,7 +110,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var responses = ctl.Items.Select(contractTL =>
                 {
-                    var response = _mapper.Map<ContractTemplateResponse>(ctl);
+                    var response = _mapper.Map<ContractTemplateResponse>(contractTL);
                     response.ContractTemplateID = contractTL.ContractTemplateId.ToString();
                     response.MemberID = contractTL.MemberID.ToString();
                     return response;

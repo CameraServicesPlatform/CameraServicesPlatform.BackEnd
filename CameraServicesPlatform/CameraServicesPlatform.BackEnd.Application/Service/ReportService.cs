@@ -98,7 +98,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var responses = report.Items.Select(RB =>
                 {
-                    var response = _mapper.Map<ReportResponse>(report);
+                    var response = _mapper.Map<ReportResponse>(RB);
                     response.ReportID = RB.ReportID.ToString();
                     return response;
                 }).ToList();

@@ -44,7 +44,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var orderDetailsPagedResult = await _orderDetailRepository.GetAllDataByExpression(
                     x => x.OrderID == OrderId,
                     pageNumber: pageIndex,
-                    pageSize: pageSize
+                    pageSize: pageSize,
+                    includes: new Expression<Func<OrderDetail, object>>[] { o => o.Product }
                 );
 
                 if (orderDetailsPagedResult == null || !orderDetailsPagedResult.Items.Any())
@@ -71,6 +72,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     orderd.ProductPrice,
                     orderd.ProductPriceTotal,
                     orderd.ProductQuality,
+                    orderd.Product,
 
                 }).ToList();
 

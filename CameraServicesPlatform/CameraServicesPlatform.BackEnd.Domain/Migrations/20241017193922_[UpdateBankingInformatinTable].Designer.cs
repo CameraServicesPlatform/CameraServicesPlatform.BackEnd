@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    [Migration("20241017190625_[UpdateBankInformationTable1]")]
-    partial class UpdateBankInformationTable1
+    [Migration("20241017193922_[UpdateBankingInformatinTable]")]
+    partial class UpdateBankingInformatinTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -152,6 +152,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AccountID")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AccountNumber")
@@ -727,6 +728,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ContractTemplateId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("ContractTerms")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -745,6 +749,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("ContractID");
+
+                    b.HasIndex("ContractTemplateId");
 
                     b.HasIndex("OrderID");
 
@@ -1253,7 +1259,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountID");
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Account");
                 });
@@ -1450,11 +1458,19 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             modelBuilder.Entity("Contract", b =>
                 {
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.ContractTemplate", "ContractTemplate")
+                        .WithMany()
+                        .HasForeignKey("ContractTemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ContractTemplate");
 
                     b.Navigation("Order");
                 });

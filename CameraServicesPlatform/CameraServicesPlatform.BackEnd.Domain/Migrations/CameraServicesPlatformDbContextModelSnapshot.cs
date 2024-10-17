@@ -149,6 +149,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AccountID")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("AccountNumber")
@@ -1255,7 +1256,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountID");
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Account");
                 });

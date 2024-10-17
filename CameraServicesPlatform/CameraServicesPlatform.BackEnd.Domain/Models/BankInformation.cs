@@ -19,7 +19,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Account Account { get; set; }
  
         
-        public string? AccountID { get; set; }
+        public string AccountID { get; set; }
  
         
     }

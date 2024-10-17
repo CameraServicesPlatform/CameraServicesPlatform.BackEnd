@@ -144,7 +144,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 productVoucherExist.ProductID = productVoucherResponse.ProductID;
                 productVoucherExist.VourcherID = productVoucherResponse.VourcherID;
                 productVoucherExist.UpdatedAt = DateTime.UtcNow;
-               
+
                 await productVoucherRepository.Update(productVoucherExist);
 
                 await _unitOfWork.SaveChangesAsync();

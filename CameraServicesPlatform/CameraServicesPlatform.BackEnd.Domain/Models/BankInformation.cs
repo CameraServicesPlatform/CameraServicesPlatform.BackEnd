@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.Identity.Client;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
@@ -14,9 +15,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public required string AccountHolder { get; set; }
 
+ 
         [ForeignKey("AccountID")]
         public Account Account { get; set; }
-
-        public string AccountID { get; set; }
+ 
+        
+        public Account Account { get; set; }
+ 
+        
     }
 }

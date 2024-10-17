@@ -34,7 +34,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
-        
+
         public async Task<AppActionResult> GetAllVoucher(int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
@@ -57,8 +57,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                     VoucherResponse voucherResponse = new VoucherResponse
                     {
-                        VourcherID =item.VourcherID.ToString(),
-                        SupplierID =item.SupplierID.ToString(),
+                        VourcherID = item.VourcherID.ToString(),
+                        SupplierID = item.SupplierID.ToString(),
                         VourcherCode = item.VourcherCode.ToString(),
                         Description = item.Description,
                         DiscountAmount = item.DiscountAmount,
@@ -165,12 +165,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result.Result = "Voucher does not exist any supplier";
                     result.IsSuccess = false;
                 }
-                if(voucherResponse.ExpirationDate <= voucherExist.ValidFrom)
+                if (voucherResponse.ExpirationDate <= voucherExist.ValidFrom)
                 {
                     result.Result = "ExpirationDate must be larger than ValidFrom";
                     result.IsSuccess = false;
                 }
-                
+
                 voucherExist.Description = voucherResponse.Description;
                 voucherExist.ExpirationDate = voucherResponse.ExpirationDate;
                 voucherExist.IsActive = voucherResponse.IsActive;
@@ -253,6 +253,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-       
+
     }
 }

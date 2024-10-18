@@ -88,6 +88,10 @@ public class MappingConfig
             .ForMember(dest => dest.AccountID, opt => opt.MapFrom(src => src.AccountID.ToString()))
             .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src.Account));
 
+            config.CreateMap<Member, MemberResponse>()
+           .ForMember(dest => dest.MemberID, opt => opt.MapFrom(src => src.MemberID.ToString()))
+           .ForMember(dest => dest.AccountID, opt => opt.MapFrom(src => src.AccountID.ToString()))
+           .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src.Account));
 
 
             // Map from CreateSupplierRequest to Account

@@ -481,49 +481,55 @@ public class AccountService : GenericBackendService, IAccountService
     }
     public async Task<AppActionResult> GetAccountByUserId(string id)
     {
-
-        AppActionResult result = new();
+        var result = new AppActionResult();
         try
         {
-
-            Account account = await _accountRepository.GetById(id);
+            // Fetch the account
+            var account = await _accountRepository.GetById(id);
             if (account == null)
             {
-                result = BuildAppActionResultError(result, $"Tài khoản với id {id} không tồn tại !");
-                return result;
+                return BuildAppActionResultError(result, $"Tài khoản với id {id} không tồn tại !");
             }
 
-            if (account.SupplierID != null)
+            // Fetch related Supplier or Staff if they exist
+            if (!string.IsNullOrEmpty(account.SupplierID))
             {
-                // Fetch supplier data using supplier repository
-                Guid supplierGuid = Guid.Parse(account.SupplierID);
-                Supplier? supplierDb = await _supplierRepository.GetByExpression(p => p.SupplierID == supplierGuid);
-                if (supplierDb == null)
+                if (Guid.TryParse(account.SupplierID, out var supplierGuid))
                 {
-                    result = BuildAppActionResultError(result, $"Nhà cung cấp với {account.SupplierID} không tồn tại");
-                    return result;
+                    var supplierDb = await _supplierRepository.GetByExpression(p => p.SupplierID == supplierGuid);
+                    if (supplierDb == null)
+                    {
+                        return BuildAppActionResultError(result, $"Nhà cung cấp với ID {account.SupplierID} không tồn tại");
+                    }
+                    account.Supplier = supplierDb;
                 }
-                account.Supplier = supplierDb;
+                else
+                {
+                    return BuildAppActionResultError(result, $"ID nhà cung cấp không hợp lệ: {account.SupplierID}");
+                }
             }
-            else if (account.StaffID != null)
+            else if (!string.IsNullOrEmpty(account.StaffID))
             {
-                // Fetch staff data using staff repository
-                Guid staffGuid = Guid.Parse(account.StaffID);
-                Staff? staffDb = await _staffRepository.GetByExpression(p => p.StaffID == staffGuid);
-                if (staffDb == null)
+                if (Guid.TryParse(account.StaffID, out var staffGuid))
                 {
-                    result = BuildAppActionResultError(result, $"Nhân Viên với {account.StaffID} không tồn tại");
-                    return result;
+                    var staffDb = await _staffRepository.GetByExpression(p => p.StaffID == staffGuid);
+                    if (staffDb == null)
+                    {
+                        return BuildAppActionResultError(result, $"Nhân viên với ID {account.StaffID} không tồn tại");
+                    }
+                    account.Staff = staffDb;
                 }
-
-                account.Staff = staffDb;
+                else
+                {
+                    return BuildAppActionResultError(result, $"ID nhân viên không hợp lệ: {account.StaffID}");
+                }
             }
 
             result.Result = account;
         }
         catch (Exception ex)
         {
-            result = BuildAppActionResultError(result, ex.Message);
+            return BuildAppActionResultError(result, $"Lỗi xảy ra: {ex.Message}");
         }
 
         return result;

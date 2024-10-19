@@ -53,7 +53,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
-        public async Task<OrderResponse> CreateOrderBuy(CreateOrderBuyRequest request, HttpContext context)
+        public async Task<OrderResponse> CreateOrderBuy(CreateOrderBuyRequest request)
         {
             var result = new OrderResponse();
 
@@ -154,6 +154,120 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         _productRepository.Update(productEntity);
                     }
                 }
+                await Task.Delay(100);
+                await _unitOfWork.SaveChangesAsync();
+
+                result = _mapper.Map<OrderResponse>(createdOrder);
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không tạo đơn hàng thành công. Lỗi: " + ex.Message);
+            }
+
+            return result;
+        }
+        public async Task<OrderResponse> CreateOrderWithPayment(CreateOrderBuyRequest request, HttpContext context)
+        {
+            var result = new OrderResponse();
+
+            try
+            {
+                var utility = Resolve<Utility>();
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
+
+                var existingOrderDetails = await _orderDetailRepository.GetByExpression(x =>
+                    productIDs.Contains(x.ProductID) && x.Order.OrderType == OrderType.Purchase
+                );
+
+                if (existingOrderDetails != null)
+                {
+                    throw new Exception("Không tạo đơn hàng thành công vì một hoặc nhiều sản phẩm đã được bán!");
+                }
+
+                var order = _mapper.Map<Order>(request);
+                order.OrderDate = DateTime.UtcNow;
+                order.CreatedAt = DateTime.UtcNow;
+                order.UpdatedAt = DateTime.UtcNow;
+                order.Id = request.AccountID;
+                order.SupplierID = Guid.Parse(request.SupplierID);
+                order.OrderStatus = OrderStatus.Pending;
+
+                double totalOrderPrice = 0;
+                var orderDetails = new List<OrderDetail>();
+
+                foreach (var product in request.Products)
+                {
+                    var orderDetail = new OrderDetail
+                    {
+                        OrderID = order.OrderID,
+                        ProductID = Guid.Parse(product.ProductID),
+                        ProductPrice = product.PriceBuy ?? 0,
+                        Discount = request.OrderDetailRequests
+                            .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0,
+                        ProductQuality = product.Quality,
+                    };
+
+                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
+                    orderDetail.ProductPriceTotal = priceAfterDiscount;
+
+                    totalOrderPrice += priceAfterDiscount;
+
+                    orderDetails.Add(orderDetail);
+                }
+
+                order.TotalAmount = totalOrderPrice;
+
+                await _orderRepository.Insert(order);
+                await Task.Delay(200);
+                await _unitOfWork.SaveChangesAsync();
+
+                var createdOrder = await _orderRepository.GetByExpression(x =>
+                    x.Id == request.AccountID && x.OrderDate == order.OrderDate && x.OrderStatus == OrderStatus.Pending,
+                    x => x.OrderDetail
+                );
+
+                if (createdOrder == null)
+                {
+                    throw new Exception("Không tìm thấy đơn hàng bạn vừa đặt. Hãy tạo lại đơn hàng của bạn.");
+                }
+                var orderDetaills = new List<OrderDetail>();
+
+                foreach (var product in request.Products)
+                {
+                    var orderDetail = new OrderDetail
+                    {
+                        OrderID = createdOrder.OrderID,
+                        ProductID = Guid.Parse(product.ProductID),
+                        ProductPrice = product.PriceBuy ?? 0,
+                        Discount = request.OrderDetailRequests
+                            .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0,
+                        ProductQuality = product.Quality,
+                    };
+
+                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
+                    orderDetail.ProductPriceTotal = priceAfterDiscount;
+
+                    totalOrderPrice += priceAfterDiscount;
+
+                    orderDetaills.Add(orderDetail);
+                }
+
+                await _orderDetailRepository.InsertRange(orderDetaills);
+                await Task.Delay(200);
+                await _unitOfWork.SaveChangesAsync();
+
+                foreach (var product in request.Products)
+                {
+                    var productEntity = await _productRepository.GetById(Guid.Parse(product.ProductID));
+
+                    if (productEntity != null)
+                    {
+                        productEntity.Status = ProductStatusEnum.Shipping;
+                        _productRepository.Update(productEntity);
+                    }
+                }
                 await _unitOfWork.SaveChangesAsync();
 
 
@@ -167,7 +281,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 };
 
                 await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
-               
+
 
             }
             catch (Exception ex)

@@ -51,11 +51,25 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpPost("create-order-buy")]
-        public async Task<IActionResult> CreateOrder(CreateOrderBuyRequest request, HttpContext context)
+        public async Task<IActionResult> CreateOrder(CreateOrderBuyRequest request)
         {
             try
             {
-                var response = await _orderService.CreateOrderBuy(request, context);
+                var response = await _orderService.CreateOrderBuy(request);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("create-order-buy-with-payment")]
+        public async Task<IActionResult> CreateOrderWithPayment(CreateOrderBuyRequest request)
+        {
+            try
+            {
+                var response = await _orderService.CreateOrderWithPayment(request, HttpContext);
                 return Ok(response);
             }
             catch (Exception ex)

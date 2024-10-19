@@ -399,22 +399,62 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     filter = a => a.ProductName.Contains(productNameFilter);
                 }
 
-                List<ProductResponse> listProduct = new List<ProductResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    includes: new Expression<Func<Product, object>>[]
-                    {
-                a => a.Supplier,
-                a => a.Category
-                    }
+                    null
                 );
 
+                List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 foreach (var item in pagedResult.Items)
                 {
+                    var productVoucher = await _productVoucherRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(item.ProductID),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                    );
+                    List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
+
+                    foreach (var a in productVoucher.Items)
+                    {
+
+                        ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                        {
+                            ProductVoucherID = a.ProductVoucherID.ToString(),
+                            VourcherID = a.VourcherID.ToString(),
+                            CreatedAt = a.CreatedAt,
+                            UpdatedAt = a.UpdatedAt,
+                        };
+                        listProductVoucher.Add(productVoucherResponse);
+                    }
+
+                    var productSpecification = await _productSpecificationRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    List<ProductSpecificationResponse> listProductSpecification = new List<ProductSpecificationResponse>();
+
+                    foreach (var a in productSpecification.Items)
+                    {
+
+                        ProductSpecificationResponse productSpecificationResponse = new ProductSpecificationResponse
+                        {
+                            ProductSpecificationID = a.ProductSpecificationID.ToString(),
+                            Specification = a.Specification,
+                            Details = a.Details
+                        };
+                        listProductSpecification.Add(productSpecificationResponse);
+                    }
                     var productImage = await _productImageRepository.GetAllDataByExpression(
                         a => a.ProductID.Equals(item.ProductID),
                         pageIndex,
@@ -423,7 +463,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         isAscending: true,
                         null
                     );
-                    ProductResponse productResponse = new ProductResponse
+                    ProductByIdResponse productResponse = new ProductByIdResponse
                     {
                         ProductID = item.ProductID.ToString(),
                         SerialNumber = item.SerialNumber,
@@ -439,7 +479,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         Rating = item.Rating,
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt,
-                        listImage = productImage.Items
+                        listImage = productImage.Items,
+                        listVoucher = listProductVoucher,
+                        listProductSpecification = listProductSpecification
+
                     };
                     listProduct.Add(productResponse);
                 }
@@ -467,22 +510,62 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     filter = a => a.Category.CategoryName == categoryFilter;
                 }
 
-                List<ProductResponse> listProduct = new List<ProductResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    includes: new Expression<Func<Product, object>>[]
-                    {
-                a => a.Supplier,
-                a => a.Category
-                    }
+                    null
                 );
 
+                List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 foreach (var item in pagedResult.Items)
                 {
+                    var productVoucher = await _productVoucherRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(item.ProductID),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                    );
+                    List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
+
+                    foreach (var a in productVoucher.Items)
+                    {
+
+                        ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                        {
+                            ProductVoucherID = a.ProductVoucherID.ToString(),
+                            VourcherID = a.VourcherID.ToString(),
+                            CreatedAt = a.CreatedAt,
+                            UpdatedAt = a.UpdatedAt,
+                        };
+                        listProductVoucher.Add(productVoucherResponse);
+                    }
+
+                    var productSpecification = await _productSpecificationRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    List<ProductSpecificationResponse> listProductSpecification = new List<ProductSpecificationResponse>();
+
+                    foreach (var a in productSpecification.Items)
+                    {
+
+                        ProductSpecificationResponse productSpecificationResponse = new ProductSpecificationResponse
+                        {
+                            ProductSpecificationID = a.ProductSpecificationID.ToString(),
+                            Specification = a.Specification,
+                            Details = a.Details
+                        };
+                        listProductSpecification.Add(productSpecificationResponse);
+                    }
                     var productImage = await _productImageRepository.GetAllDataByExpression(
                         a => a.ProductID.Equals(item.ProductID),
                         pageIndex,
@@ -491,7 +574,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         isAscending: true,
                         null
                     );
-                    ProductResponse productResponse = new ProductResponse
+                    ProductByIdResponse productResponse = new ProductByIdResponse
                     {
                         ProductID = item.ProductID.ToString(),
                         SerialNumber = item.SerialNumber,
@@ -507,11 +590,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         Rating = item.Rating,
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt,
-                        listImage = productImage.Items
+                        listImage = productImage.Items,
+                        listVoucher = listProductVoucher,
+                        listProductSpecification = listProductSpecification
+
                     };
                     listProduct.Add(productResponse);
                 }
-                result.Result = pagedResult;
+                result.Result = listProduct;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -541,14 +627,87 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    includes: new Expression<Func<Product, object>>[]
-                    {
-                a => a.Supplier,
-                a => a.Category
-                    }
+                    null
                 );
+                List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
+                foreach (var item in pagedResult.Items)
+                {
+                    var productVoucher = await _productVoucherRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(item.ProductID),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                    );
+                    List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
 
-                result.Result = pagedResult;
+                    foreach (var a in productVoucher.Items)
+                    {
+
+                        ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                        {
+                            ProductVoucherID = a.ProductVoucherID.ToString(),
+                            VourcherID = a.VourcherID.ToString(),
+                            CreatedAt = a.CreatedAt,
+                            UpdatedAt = a.UpdatedAt,
+                        };
+                        listProductVoucher.Add(productVoucherResponse);
+                    }
+
+                    var productSpecification = await _productSpecificationRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    List<ProductSpecificationResponse> listProductSpecification = new List<ProductSpecificationResponse>();
+
+                    foreach (var a in productSpecification.Items)
+                    {
+
+                        ProductSpecificationResponse productSpecificationResponse = new ProductSpecificationResponse
+                        {
+                            ProductSpecificationID = a.ProductSpecificationID.ToString(),
+                            Specification = a.Specification,
+                            Details = a.Details
+                        };
+                        listProductSpecification.Add(productSpecificationResponse);
+                    }
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    ProductByIdResponse productResponse = new ProductByIdResponse
+                    {
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        SupplierID = item.SupplierID?.ToString(),
+                        CategoryID = item.CategoryID?.ToString(),
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceBuy = item.PriceBuy,
+                        PriceRent = item.PriceRent,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        listImage = productImage.Items,
+                        listVoucher = listProductVoucher,
+                        listProductSpecification = listProductSpecification
+
+                    };
+                    listProduct.Add(productResponse);
+                }
+                result.Result = listProduct;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -643,14 +802,87 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    includes: new Expression<Func<Product, object>>[]
-                    {
-                    a => a.Supplier,
-                    a => a.Category
-                    }
+                    null
                 );
+                List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
+                foreach (var item in pagedResult.Items)
+                {
+                    var productVoucher = await _productVoucherRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(item.ProductID),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                    );
+                    List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
 
-                result.Result = pagedResult;
+                    foreach (var a in productVoucher.Items)
+                    {
+
+                        ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                        {
+                            ProductVoucherID = a.ProductVoucherID.ToString(),
+                            VourcherID = a.VourcherID.ToString(),
+                            CreatedAt = a.CreatedAt,
+                            UpdatedAt = a.UpdatedAt,
+                        };
+                        listProductVoucher.Add(productVoucherResponse);
+                    }
+
+                    var productSpecification = await _productSpecificationRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    List<ProductSpecificationResponse> listProductSpecification = new List<ProductSpecificationResponse>();
+
+                    foreach (var a in productSpecification.Items)
+                    {
+
+                        ProductSpecificationResponse productSpecificationResponse = new ProductSpecificationResponse
+                        {
+                            ProductSpecificationID = a.ProductSpecificationID.ToString(),
+                            Specification = a.Specification,
+                            Details = a.Details
+                        };
+                        listProductSpecification.Add(productSpecificationResponse);
+                    }
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    ProductByIdResponse productResponse = new ProductByIdResponse
+                    {
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        SupplierID = item.SupplierID?.ToString(),
+                        CategoryID = item.CategoryID?.ToString(),
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceBuy = item.PriceBuy,
+                        PriceRent = item.PriceRent,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        listImage = productImage.Items,
+                        listVoucher = listProductVoucher,
+                        listProductSpecification = listProductSpecification
+
+                    };
+                    listProduct.Add(productResponse);
+                }
+                result.Result = listProduct;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -661,7 +893,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetProductByRent(int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetProductByRent( int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -755,7 +987,217 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     };
                     listProduct.Add(productResponse);
                 }
-                result.Result = pagedResult;
+                result.Result = listProduct;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetProductBySold(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Sold;
+
+                List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
+                var pagedResult = await _productRepository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
+                    null
+                );
+
+                foreach (var item in pagedResult.Items)
+                {
+                    var productVoucher = await _productVoucherRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(item.ProductID),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                    );
+                    List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
+
+                    foreach (var a in productVoucher.Items)
+                    {
+
+                        ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                        {
+                            ProductVoucherID = a.ProductVoucherID.ToString(),
+                            VourcherID = a.VourcherID.ToString(),
+                            CreatedAt = a.CreatedAt,
+                            UpdatedAt = a.UpdatedAt,
+                        };
+                        listProductVoucher.Add(productVoucherResponse);
+                    }
+
+                    var productSpecification = await _productSpecificationRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    List<ProductSpecificationResponse> listProductSpecification = new List<ProductSpecificationResponse>();
+
+                    foreach (var a in productSpecification.Items)
+                    {
+
+                        ProductSpecificationResponse productSpecificationResponse = new ProductSpecificationResponse
+                        {
+                            ProductSpecificationID = a.ProductSpecificationID.ToString(),
+                            Specification = a.Specification,
+                            Details = a.Details
+                        };
+                        listProductSpecification.Add(productSpecificationResponse);
+                    }
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    ProductByIdResponse productResponse = new ProductByIdResponse
+                    {
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        SupplierID = item.SupplierID?.ToString(),
+                        CategoryID = item.CategoryID?.ToString(),
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceBuy = item.PriceBuy,
+                        PriceRent = item.PriceRent,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        listImage = productImage.Items,
+                        listVoucher = listProductVoucher,
+                        listProductSpecification = listProductSpecification
+
+                    };
+                    listProduct.Add(productResponse);
+                }
+                result.Result = listProduct;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetProductByRentSold(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Both;
+
+                List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
+                var pagedResult = await _productRepository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
+                    null
+                );
+
+                foreach (var item in pagedResult.Items)
+                {
+                    var productVoucher = await _productVoucherRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(item.ProductID),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                    );
+                    List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
+
+                    foreach (var a in productVoucher.Items)
+                    {
+
+                        ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                        {
+                            ProductVoucherID = a.ProductVoucherID.ToString(),
+                            VourcherID = a.VourcherID.ToString(),
+                            CreatedAt = a.CreatedAt,
+                            UpdatedAt = a.UpdatedAt,
+                        };
+                        listProductVoucher.Add(productVoucherResponse);
+                    }
+
+                    var productSpecification = await _productSpecificationRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    List<ProductSpecificationResponse> listProductSpecification = new List<ProductSpecificationResponse>();
+
+                    foreach (var a in productSpecification.Items)
+                    {
+
+                        ProductSpecificationResponse productSpecificationResponse = new ProductSpecificationResponse
+                        {
+                            ProductSpecificationID = a.ProductSpecificationID.ToString(),
+                            Specification = a.Specification,
+                            Details = a.Details
+                        };
+                        listProductSpecification.Add(productSpecificationResponse);
+                    }
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    ProductByIdResponse productResponse = new ProductByIdResponse
+                    {
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        SupplierID = item.SupplierID?.ToString(),
+                        CategoryID = item.CategoryID?.ToString(),
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceBuy = item.PriceBuy,
+                        PriceRent = item.PriceRent,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        listImage = productImage.Items,
+                        listVoucher = listProductVoucher,
+                        listProductSpecification = listProductSpecification
+
+                    };
+                    listProduct.Add(productResponse);
+                }
+                result.Result = listProduct;
                 result.IsSuccess = true;
             }
             catch (Exception ex)

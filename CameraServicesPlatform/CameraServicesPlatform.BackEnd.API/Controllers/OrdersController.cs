@@ -51,11 +51,11 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpPost("create-order-buy")]
-        public async Task<IActionResult> CreateOrder(CreateOrderBuyRequest request)
+        public async Task<IActionResult> CreateOrder(CreateOrderBuyRequest request, HttpContext context)
         {
             try
             {
-                var response = await _orderService.CreateOrderBuy(request);
+                var response = await _orderService.CreateOrderBuy(request, context);
                 return Ok(response);
             }
             catch (Exception ex)

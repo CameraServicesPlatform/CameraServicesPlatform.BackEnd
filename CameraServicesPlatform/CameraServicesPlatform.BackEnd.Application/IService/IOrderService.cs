@@ -1,13 +1,14 @@
 ﻿using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
  using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
- 
+using Microsoft.AspNetCore.Http;
+
 
 namespace CameraServicesPlatform.BackEnd.Application.IService
 {
     public interface IOrderService
     {
-        Task<OrderResponse> CreateOrderBuy(CreateOrderBuyRequest request);
+        Task<OrderResponse> CreateOrderBuy(CreateOrderBuyRequest request, HttpContext context);
         Task<AppActionResult> GetOrderByOrderType(OrderType orderType, int pageIndex, int pageSize);
         Task<AppActionResult> GetOrderOfSupplier(string SupplierID, int pageIndex, int pageSize);
 

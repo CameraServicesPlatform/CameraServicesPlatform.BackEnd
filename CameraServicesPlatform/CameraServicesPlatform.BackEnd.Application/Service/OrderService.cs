@@ -4,11 +4,13 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using MailKit.Search;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -51,12 +53,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
-        public async Task<OrderResponse> CreateOrderBuy(CreateOrderBuyRequest request)
+        public async Task<OrderResponse> CreateOrderBuy(CreateOrderBuyRequest request, HttpContext context)
         {
             var result = new OrderResponse();
 
             try
             {
+                var utility = Resolve<Utility>();
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
 
                 var existingOrderDetails = await _orderDetailRepository.GetByExpression(x =>
@@ -150,10 +154,21 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         _productRepository.Update(productEntity);
                     }
                 }
-
                 await _unitOfWork.SaveChangesAsync();
 
-                result = _mapper.Map<OrderResponse>(createdOrder);
+
+                var payment = new PaymentInformationRequest
+                {
+                    AccountID = createdOrder.Id,
+                    Amount = (double)order.TotalAmount,
+                    MemberName = $"{order.Account!.FirstName} {order.Account.LastName}",
+                    OrderID = order.Id.ToString(),
+                    SupplierID = request.SupplierID,
+                };
+
+                await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
+               
+
             }
             catch (Exception ex)
             {

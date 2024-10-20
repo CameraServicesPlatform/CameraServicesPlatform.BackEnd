@@ -10,11 +10,12 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 {
     public class CreateOrderRentRequest
     {
-        public Guid SupplierID { get; set; }
+        public string SupplierID { get; set; }
         public string AccountID { get; set; }
         public DateTime OrderDate { get; set; }
         public OrderStatus OrderStatus { get; set; }
         public decimal TotalAmount { get; set; }
+        public List<OrderProductRequest> Products { get; set; }
         public OrderType OrderType { get; set; }
         public string? ShippingAddress { get; set; }
         public DateTime? RentalStartDate { get; set; }

@@ -193,6 +193,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.Id = request.AccountID;
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
+                order.OrderType = OrderType.Purchase;
 
                 double totalOrderPrice = 0;
                 var orderDetails = new List<OrderDetail>();
@@ -294,62 +295,124 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<OrderResponse> CreateOrderRent(CreateOrderRentRequest request)
         {
             var result = new OrderResponse();
+
             try
             {
-                var order = _mapper.Map<Order>(request);
-                order.OrderDate = DateTime.Now;
-                order.OrderStatus = 0;
-
-                await _orderRepository.Insert(order);
-                await Task.Delay(200);
-                await _unitOfWork.SaveChangesAsync();
-
-                var createdOrder = await _orderRepository
-                                        .GetByExpression(x => x.Id == request.AccountID && x.OrderDate == order.OrderDate);
-
-                if (createdOrder == null)
-                {
-                    throw new Exception("Không tìm thấy đơn hàng bạn vừa đặt. Hãy tạo lại đơn hàng của bạn");
-                }
-
-                var orderDetails = _mapper.Map<List<OrderDetail>>(request.OrderDetailRequests);
-
-                foreach (var orderDetail in orderDetails)
-                {
-                    var product = await _productRepository.GetById(orderDetail.ProductID);
-                    if (product != null)
-                    {
-                        double rentalPrice = CalculateRentalPrice((double)product.PriceRent, request.DurationUnit, request.DurationValue);
-                        orderDetail.ProductPriceTotal = rentalPrice; 
-                        orderDetail.OrderID = createdOrder.OrderID;
-                    }
-                }
-
-                await _orderDetailRepository.InsertRange(orderDetails);
-                await Task.Delay(200);
-                await _unitOfWork.SaveChangesAsync();
-
-                foreach (var orderDetailRequest in request.OrderDetailRequests)
-                {
-                    var product = await _productRepository.GetById(orderDetailRequest.ProductID);
-                    if (product != null)
-                    {
-                        product.Status = ProductStatusEnum.Shipping;
-                        await _productRepository.Update(product);
-                    }
-                }
-                await Task.Delay(100);
-                await _unitOfWork.SaveChangesAsync();
+                var utility = Resolve<Utility>();
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
 
                 var checkTemplate = await _contractTemplateRepository.GetById(request.ContractRequest.ContractTemplateId);
                 if (checkTemplate == null)
                 {
                     throw new Exception("Hãy chọn mẫu hợp đồng!");
                 }
+
+                var existingOrderDetails = await _orderDetailRepository.GetByExpression(x =>
+                    productIDs.Contains(x.ProductID) && x.Order.OrderType == OrderType.Purchase
+                );
+
+                if (existingOrderDetails != null)
+                {
+                    throw new Exception("Không tạo đơn hàng thành công vì một hoặc nhiều sản phẩm đã được bán!");
+                }
+
+                var order = _mapper.Map<Order>(request);
+                order.OrderDate = DateTime.UtcNow;
+                order.CreatedAt = DateTime.UtcNow;
+                order.UpdatedAt = DateTime.UtcNow;
+                order.Id = request.AccountID;
+                order.SupplierID = Guid.Parse(request.SupplierID);
+                order.OrderStatus = OrderStatus.Pending;
+                order.OrderType = OrderType.Rental;
+
+                double totalOrderPrice = 0;
+                var orderDetails = new List<OrderDetail>();
+
+                foreach (var product in request.Products)
+                {
+                    var orderDetail = new OrderDetail
+                    {
+                        OrderID = order.OrderID,
+                        ProductID = Guid.Parse(product.ProductID),
+                        ProductPrice = CalculateRentalPrice((double)product.PriceRent, request.DurationUnit, request.DurationValue),
+                        Discount = request.OrderDetailRequests
+                            .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0,
+                        ProductQuality = product.Quality,
+                    };
+
+                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
+                    orderDetail.ProductPriceTotal = priceAfterDiscount;
+
+                    totalOrderPrice += priceAfterDiscount;
+
+                    orderDetails.Add(orderDetail);
+                }
+
+                order.TotalAmount = totalOrderPrice;
+
+                await _orderRepository.Insert(order);
+                await Task.Delay(200);
+                await _unitOfWork.SaveChangesAsync();
+
+                var createdOrder = await _orderRepository.GetByExpression(x =>
+                    x.Id == request.AccountID && x.OrderDate == order.OrderDate && x.OrderStatus == OrderStatus.Pending,
+                    x => x.OrderDetail
+                );
+
+                if (createdOrder == null)
+                {
+                    throw new Exception("Không tìm thấy đơn hàng bạn vừa đặt. Hãy tạo lại đơn hàng của bạn.");
+                }
+                var orderDetaills = new List<OrderDetail>();
+
+                foreach (var product in request.Products)
+                {
+                    var orderDetail = new OrderDetail
+                    {
+                        OrderID = createdOrder.OrderID,
+                        ProductID = Guid.Parse(product.ProductID),
+                        ProductPrice = CalculateRentalPrice((double)product.PriceRent, request.DurationUnit, request.DurationValue),
+                        Discount = request.OrderDetailRequests
+                            .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0,
+                        ProductQuality = product.Quality,
+                    };
+
+                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
+                    orderDetail.ProductPriceTotal = priceAfterDiscount;
+
+                    totalOrderPrice += priceAfterDiscount;
+
+                    orderDetaills.Add(orderDetail);
+                }
+
+                await _orderDetailRepository.InsertRange(orderDetaills);
+                await Task.Delay(200);
+                await _unitOfWork.SaveChangesAsync();
+
+                foreach (var product in request.Products)
+                {
+                    var productEntity = await _productRepository.GetById(Guid.Parse(product.ProductID));
+
+                    if (productEntity != null)
+                    {
+                        productEntity.Status = ProductStatusEnum.Shipping;
+                        _productRepository.Update(productEntity);
+                    }
+                }
+                await _unitOfWork.SaveChangesAsync();
+
+
+                var productDescriptions = orderDetails.Select(od =>
+                    $"ProductID: {od.ProductID}, Price: {od.ProductPrice}, Quantity: {od.ProductQuality}, Discount: {od.Discount}, Total: {od.ProductPriceTotal}")
+                    .ToList();
+
+                var contractTerms = string.Join("; ", productDescriptions);
+
                 var contract = new Contract
                 {
                     OrderID = createdOrder.OrderID,
-                    ContractTerms = request.ContractRequest.ContractTerms,
+                    ContractTerms = contractTerms,
                     PenaltyPolicy = request.ContractRequest.PenaltyPolicy,
                 };
 

@@ -1081,6 +1081,9 @@ public class AccountService : GenericBackendService, IAccountService
             {
                 IEmailService? emailService = Resolve<IEmailService>();
                 string code = await GenerateVerifyCode(user!.Email, false);
+                user.VerifyCode = code;
+                await _userManager.UpdateAsync(user);
+                await _unitOfWork.SaveChangesAsync();
                 emailService!.SendEmail(email, SD.SubjectMail.VERIFY_ACCOUNT,
                     TemplateMappingHelper.GetTemplateOTPEmail(TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
                         code, user.FirstName!));

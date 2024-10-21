@@ -77,7 +77,19 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
+        [HttpPost("create-order-rent")]
+        public async Task<IActionResult> CreateOrderRent(CreateOrderRentRequest request)
+        {
+            try
+            {
+                var response = await _orderService.CreateOrderRent(request);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpPut("update-order-status-completed/{orderId}")]
         public async Task<AppActionResult> UpdateOrderStatusCompleted(string orderId)
         {

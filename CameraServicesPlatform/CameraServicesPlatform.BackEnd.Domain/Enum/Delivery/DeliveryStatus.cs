@@ -2,10 +2,8 @@
 {
     public enum DeliveryStatus
     {
-        Pending,
-        Shipped,
-        Delivered,
+        GoShopPichUpProduct,
+        ShopShip,
         Returned
     }
-
 }

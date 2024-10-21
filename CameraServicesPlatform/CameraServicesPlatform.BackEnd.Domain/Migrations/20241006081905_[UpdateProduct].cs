@@ -81,7 +81,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 columns: table => new
                 {
                     DeliveriesMethodID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MethodName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MethodName = table.Column<int>(type: "int", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)

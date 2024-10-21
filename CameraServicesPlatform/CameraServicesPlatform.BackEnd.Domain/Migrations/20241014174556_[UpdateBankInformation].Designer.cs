@@ -228,7 +228,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MethodName")
+                    b.Property<int>("MethodName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

@@ -48,6 +48,8 @@ remote:      Visit the repository settings page, https://github.com/CameraServic
   dotnet ef migrations add [categorynameunique] --startup-project ../CameraServicesPlatform.BackEnd.API
  dotnet ef database update --startup-project ../CameraServicesPlatform.BackEnd.API
 
+ dotnet ef migrations add [updateDeliverMethod] --startup-project ../CameraServicesPlatform.BackEnd.API
+
  nếu lỗi thì xóa database và tạo lại:  dotnet ef migrations remove
  ------
  db deloy 

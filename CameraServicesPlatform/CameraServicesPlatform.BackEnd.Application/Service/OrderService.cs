@@ -9,6 +9,7 @@ using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using Firebase.Auth;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -30,11 +31,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<OrderDetail> _orderDetailRepository;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Contract> _contractRepository;
+        private readonly IRepository<Account> _accountRepository;
         private readonly IRepository<ContractTemplate> _contractTemplateRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         public OrderService(
             IRepository<Order> orderRepository,
+            IRepository<Account> accountRepository,
             IRepository<OrderDetail> orderDetailRepository,
             IRepository<Product> productRepository,
             IRepository<Contract> contractRepository,
@@ -44,6 +47,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
+            _accountRepository = accountRepository;
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
             _productRepository = productRepository;
@@ -62,6 +66,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
+
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
 
                 var existingOrderDetails = await _orderDetailRepository.GetByExpression(x =>
                     productIDs.Contains(x.ProductID) && x.Order.OrderType == OrderType.Purchase
@@ -157,6 +163,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
 
+                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetails, totalOrderPrice);
                 result = _mapper.Map<OrderResponse>(createdOrder);
 
             }
@@ -176,6 +183,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
 
                 var existingOrderDetails = await _orderDetailRepository.GetByExpression(x =>
                     productIDs.Contains(x.ProductID) && x.Order.OrderType == OrderType.Purchase
@@ -283,6 +291,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
 
+                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetails, totalOrderPrice);
+
+                result = _mapper.Map<OrderResponse>(createdOrder);
 
             }
             catch (Exception ex)
@@ -291,6 +302,25 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
 
             return result;
+        }
+
+        private async Task SendOrderConfirmationEmail(string email, string firstName, List<OrderDetail> orderDetails, double totalOrderPrice)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            var orderDetailsString = string.Join("\n", orderDetails.Select(od =>
+                $"Product ID: {od.ProductID}, Quantity: {od.ProductQuality}, Unit Price: {od.ProductPrice:C}, Discount: {od.Discount:C}, Total Price: {od.ProductPriceTotal:C}"
+            ));
+
+            var totalOrderString = $"\n\nTotal Order Price: {totalOrderPrice:C}";
+
+            var orderSummary = $"\n\nOrder Details:\n{orderDetailsString}{totalOrderString}";
+
+                emailService.SendEmail(
+                    email,
+                    SD.SubjectMail.ORDER_CONFIRMATION,
+                    $"Dear {firstName},\n\nCảm ơn bạn vì đã tin dùng!\nĐơn hàng của bạn đã được đặt thành công."
+                    + orderSummary);
         }
         public async Task<OrderResponse> CreateOrderRent(CreateOrderRentRequest request)
         {
@@ -301,6 +331,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
+
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
 
                 var checkTemplate = await _contractTemplateRepository.GetById(request.ContractRequest.ContractTemplateId);
                 if (checkTemplate == null)
@@ -425,6 +457,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     throw new Exception("Không có hợp đồng!");
                 }
+
+                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetails, totalOrderPrice);
+
                 var orderResponse = _mapper.Map<OrderResponse>(createdOrder);
                 orderResponse.AccountID = createdOrder.Id.ToString();
                 orderResponse.SupplierID = createdOrder.SupplierID.ToString();

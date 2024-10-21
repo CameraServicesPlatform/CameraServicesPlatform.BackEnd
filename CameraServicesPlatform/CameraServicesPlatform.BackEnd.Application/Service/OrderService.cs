@@ -612,7 +612,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
+
                 var order = await _orderRepository.GetById(OrderUpdateId);
+
+                TimeSpan timeSinceOrderCreated = DateTime.UtcNow - order.CreatedAt;
+                if (timeSinceOrderCreated.TotalHours > 24)
+                {
+                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau 24 giờ kể từ khi tạo!");
+                    return result;
+                }
+
                 if (order != null)
                 {
                     order.OrderStatus = OrderStatus.Cancelled;
@@ -631,7 +640,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
-
             return result;
         }
 

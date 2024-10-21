@@ -48,7 +48,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 Expression<Func<DeliveriesMethod, bool>>? filter = null;
-                List<DeliveriesMethodResponse> listVoucher = new List<DeliveriesMethodResponse>();
+                List<DeliveriesMethodResponse> listDeliveriesMethod = new List<DeliveriesMethodResponse>();
                 var pagedResult = await _deliveriesMethodRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
@@ -61,7 +61,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 foreach (var item in pagedResult.Items)
                 {
 
-                    DeliveriesMethodResponse voucherResponse = new DeliveriesMethodResponse
+                    DeliveriesMethodResponse deliveriesMethodResponse = new DeliveriesMethodResponse
                     {
                         DeliveriesMethodID = item.DeliveriesMethodID.ToString(),
                         MethodName = item.MethodName,
@@ -69,10 +69,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt
                     };
-                    listVoucher.Add(voucherResponse);
+                    listDeliveriesMethod.Add(deliveriesMethodResponse);
                 }
 
-                result.Result = listVoucher;
+                result.Result = listDeliveriesMethod;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -87,7 +87,40 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
         public async Task<AppActionResult> GetDeliveriesMethodById(string deliveriesMethodId)
         {
-            throw new NotImplementedException();
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(deliveriesMethodId, out Guid Id))
+                {
+                    result = BuildAppActionResultError(result, "Invalid deliver method ID format.");
+                    return result;
+                }
+
+                var pagedResult = await _deliveriesMethodRepository.GetAllDataByExpression(
+                    a => a.DeliveriesMethodID == Id,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                DeliveriesMethodResponse DeliveriesMethodResponse = new DeliveriesMethodResponse
+                {
+                    DeliveriesMethodID = pagedResult.Items[0].DeliveriesMethodID.ToString(),
+                    MethodName = pagedResult.Items[0].MethodName,
+                    Description = pagedResult.Items[0].Description,
+                    CreatedAt = pagedResult.Items[0].CreatedAt,
+                    UpdatedAt = pagedResult.Items[0].UpdatedAt
+                };
+                result.Result = DeliveriesMethodResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
         }
 
         public async Task<AppActionResult> UpdateDeliveriesMethod(string contractId, DeliveriesMethodRequest request)

@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 using Utility = CameraServicesPlatform.BackEnd.Common.Utils.Utility;
 
 
@@ -988,6 +989,7 @@ public class AccountService : GenericBackendService, IAccountService
                 if (addPassword.Succeeded)
                 {
                     user!.VerifyCode = null;
+                    await _userManager.UpdateAsync(user);
                 }
                 else
                 {
@@ -1021,6 +1023,7 @@ public class AccountService : GenericBackendService, IAccountService
             }
             else
             {
+                user.EmailConfirmed = true;
                 user.IsVerified = true; // Set verified status
                 user.VerifyCode = null; // Clear verification code
                 _ = await _userManager.UpdateAsync(user); // Save changes to the database
@@ -1052,6 +1055,9 @@ public class AccountService : GenericBackendService, IAccountService
             {
                 IEmailService? emailService = Resolve<IEmailService>();
                 string code = await GenerateVerifyCode(user!.Email, true);
+                user.VerifyCode = code;
+                await _userManager.UpdateAsync(user);
+                await _unitOfWork.SaveChangesAsync();
                 emailService?.SendEmail(email, SD.SubjectMail.PASSCODE_FORGOT_PASSWORD,
                     TemplateMappingHelper.GetTemplateOTPEmail(TemplateMappingHelper.ContentEmailType.FORGOTPASSWORD,
                         code, user.FirstName!));

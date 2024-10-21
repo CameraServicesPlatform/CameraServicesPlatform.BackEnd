@@ -36,7 +36,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var result = new AppActionResult();
             try
             {
-                var hasM = await _wishListRepository.GetByExpression(x => x.MemberID == request.MemberID);
+                var hasM = await _wishListRepository.GetByExpression(x => x.AccountID == request.AccountID);
 
                 if (hasM == null)
                 {
@@ -45,8 +45,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var wl = _mapper.Map<Wishlist>(request);
-                wl.ProductID = request.ProductID;
-                wl.MemberID = request.MemberID;
+                wl.ProductID = Guid.Parse(request.ProductID);
+                wl.AccountID = request.AccountID;
               
 
                 await _wishListRepository.Insert(wl);
@@ -111,7 +111,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     var response = _mapper.Map<WishlistResponse>(Result);
                     response.WishlistID = WL.WishlistID.ToString();
                     response.ProductID = WL.ProductID.ToString();
-                    response.MemberID = WL.MemberID.ToString();
+                    response.AccountID = WL.AccountID;
 
                     return response;
                 }).ToList();
@@ -151,7 +151,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var response = _mapper.Map<WishlistResponse>(wl);
                 response.WishlistID = wl.WishlistID.ToString();
                 response.ProductID = wl.ProductID.ToString();
-                response.MemberID = wl.MemberID.ToString();
+                response.AccountID = wl.AccountID;
 
                 result.IsSuccess = true;
                 result.Result = response;
@@ -164,25 +164,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetWishlistByMemberID(string MemberID, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetWishlistByMemberID(string AccountID, int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
             try
             {
-                if (!Guid.TryParse(MemberID, out Guid WLMemberID))
-                {
-                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
-                    return result;
-                }
-                if (WLMemberID == Guid.Empty)
-                {
-                    result.IsSuccess = false;
-                    result = BuildAppActionResultError(result, "Không tìm thấy danh sách!");
-                    return result;
-                }
 
                 var Result = await _wishListRepository.GetAllDataByExpression(
-                    x => x.MemberID == WLMemberID,
+                    x => x.AccountID == AccountID,
                     pageNumber: pageIndex,
                     pageSize: pageSize
                 );
@@ -192,7 +181,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     var response = _mapper.Map<WishlistResponse>(WL);
                     response.WishlistID = WL.WishlistID.ToString();
                     response.ProductID = WL.ProductID.ToString();
-                    response.MemberID = WL.MemberID.ToString();
+                    response.AccountID = WL.AccountID;
 
                     return response;
                 }).ToList();
@@ -238,7 +227,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var response = _mapper.Map<WishlistResponse>(existingwl);
                 response.WishlistID = existingwl.WishlistID.ToString();
                 response.ProductID = existingwl.ProductID.ToString();
-                response.MemberID = existingwl.MemberID.ToString();
+                response.AccountID = existingwl.AccountID;
 
                 result.IsSuccess = true;
                 result.Result = response;

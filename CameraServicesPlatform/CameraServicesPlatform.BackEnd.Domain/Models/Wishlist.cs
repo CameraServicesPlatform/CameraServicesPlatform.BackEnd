@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CameraServicesPlatform.BackEnd.Domain.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 public class Wishlist
@@ -7,10 +8,10 @@ public class Wishlist
     public Guid WishlistID { get; set; }
 
 
-    public Guid MemberID { get; set; }
+    public string AccountID { get; set; }
 
-    [ForeignKey(nameof(MemberID))]
-    public Member Member { get; set; }
+    [ForeignKey(nameof(AccountID))]
+    public Account Account { get; set; }
 
 
     public Guid ProductID { get; set; }

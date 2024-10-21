@@ -12,7 +12,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
     {
         Task<AppActionResult> CreateWishlist(CreateWishlistRequestDTO request);
         Task<AppActionResult> UpdateWishlist(string WishlistID, WishlistRequestDTO request);
-        Task<AppActionResult> GetWishlistByMemberID(string MemberID, int pageIndex, int pageSize);
+        Task<AppActionResult> GetWishlistByMemberID(string AccountID, int pageIndex, int pageSize);
         Task<AppActionResult> GetAllWishlist(int pageIndex, int pageSize);
         Task<AppActionResult> GetWishlistById(string WishlistID);
         Task<AppActionResult> DeleteWishlist(string WishlistID);

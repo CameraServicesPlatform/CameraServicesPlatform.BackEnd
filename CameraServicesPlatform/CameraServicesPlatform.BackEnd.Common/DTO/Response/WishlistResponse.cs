@@ -10,7 +10,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
     public class WishlistResponse
     {
         public string WishlistID { get; set; }
-        public string MemberID { get; set; }
+        public string AccountID { get; set; }
         public string ProductID { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

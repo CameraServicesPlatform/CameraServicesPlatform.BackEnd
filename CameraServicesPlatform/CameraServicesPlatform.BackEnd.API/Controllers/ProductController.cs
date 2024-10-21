@@ -38,13 +38,13 @@ public class ProductController : ControllerBase
         return await _productService.GetProductByRent(pageIndex, pageSize);
     }
 
-    [HttpGet("get-product-by-sold")]
+    [HttpGet("get-product-by-buy")]
     public async Task<AppActionResult> GetProductBySold(int pageIndex = 1, int pageSize = 10)
     {
         return await _productService.GetProductBySold(pageIndex, pageSize);
     }
 
-    [HttpGet("get-product-by-rent-sold")]
+    [HttpGet("get-product-by-rent-buy")]
     public async Task<AppActionResult> GetProductByRentSold(int pageIndex = 1, int pageSize = 10)
     {
         return await _productService.GetProductByRentSold(pageIndex, pageSize);

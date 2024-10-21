@@ -129,7 +129,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 if (productResponse.File != null)
                 {
-                    var pathName = SD.FirebasePathName.SUPPLIER_PREFIX + $"{product.ProductID}{Guid.NewGuid()}.jpg";
+                    var pathName = SD.FirebasePathName.PRODUCTS_PREFIX + $"{product.ProductID}{Guid.NewGuid()}.jpg";
                     var upload = await firebaseService.UploadFileToFirebase(productResponse.File, pathName);
                     var imgUrl = upload.Result.ToString();
 

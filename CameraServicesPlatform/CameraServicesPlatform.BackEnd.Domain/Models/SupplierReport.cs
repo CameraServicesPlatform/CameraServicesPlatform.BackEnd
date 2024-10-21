@@ -24,9 +24,14 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public string? Reason { get; set; }
 
-        [ForeignKey(nameof(HandledBy))]
-        public Guid HandledBy { get; set; }
+        public Guid MemberID { get; set; }
 
-        public Account HandledByAccount { get; set; }
+        [ForeignKey(nameof(MemberID))]
+        public Member Member { get; set; }
+
+        public Guid StaffID { get; set; }
+
+        [ForeignKey(nameof(StaffID))]
+        public Staff Staff { get; set; }
     }
 }

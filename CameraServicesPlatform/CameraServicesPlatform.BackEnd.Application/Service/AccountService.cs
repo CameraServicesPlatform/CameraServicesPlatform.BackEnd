@@ -1341,12 +1341,13 @@ public class AccountService : GenericBackendService, IAccountService
         return result;
     }
 
-    public async Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize)
+    public async Task<AppActionResult> GetAccountsByRoleId(string Id, int pageNumber, int pageSize)
     {
         AppActionResult result = new();
 
         try
         {
+
             IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
             IdentityRole roleDb = await roleRepository!.GetById(Id);
             if (roleDb != null)

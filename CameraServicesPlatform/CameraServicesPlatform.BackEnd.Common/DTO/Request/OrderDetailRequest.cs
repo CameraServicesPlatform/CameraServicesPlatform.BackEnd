@@ -4,8 +4,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 {
     public class OrderDetailRequest
     {
-        public Guid OrderID { get; set; }
-        public Guid ProductID { get; set; }
+         public Guid ProductID { get; set; }
         public double ProductPrice { get; set; }
 
         [MaxLength(255)]

@@ -93,7 +93,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     var orderDetail = new OrderDetail
                     {
-                        OrderID = order.OrderID, 
                         ProductID = Guid.Parse(product.ProductID),
                         ProductPrice = product.PriceBuy ?? 0,
                         Discount = request.OrderDetailRequests

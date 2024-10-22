@@ -871,6 +871,7 @@ public class AccountService : GenericBackendService, IAccountService
 
     public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO accountRequest)
     {
+        var firebaseService = Resolve<IFirebaseService>();
         AppActionResult result = new();
         try
         {
@@ -886,6 +887,42 @@ public class AccountService : GenericBackendService, IAccountService
                 account!.FirstName = accountRequest.FirstName;
                 account.LastName = accountRequest.LastName;
                 account.PhoneNumber = accountRequest.PhoneNumber;
+                string imageUrlFrontOfCitizenIdentificationCard = null;
+                string imageUrlBackOfCitizenIdentificationCard = null;
+                if (accountRequest.FrontOfCitizenIdentificationCard != null || accountRequest.BackOfCitizenIdentificationCard != null)
+                {
+
+                    if (accountRequest.FrontOfCitizenIdentificationCard != null && accountRequest.FrontOfCitizenIdentificationCard.ToString() != account.FrontOfCitizenIdentificationCard)
+                    {
+                        if (!string.IsNullOrEmpty(account.FrontOfCitizenIdentificationCard))
+                        {
+                            await firebaseService.DeleteFileFromFirebase(account.FrontOfCitizenIdentificationCard);
+                        }
+
+                        var imgPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{account.Id}.jpg";
+                        var imgUpload = await firebaseService.UploadFileToFirebase(accountRequest.FrontOfCitizenIdentificationCard, imgPathName);
+                        imageUrlFrontOfCitizenIdentificationCard = imgUpload?.Result?.ToString();
+                    }
+
+
+                    if (accountRequest.BackOfCitizenIdentificationCard != null && accountRequest.BackOfCitizenIdentificationCard.ToString() != account.BackOfCitizenIdentificationCard)
+                    {
+                        if (!string.IsNullOrEmpty(account.BackOfCitizenIdentificationCard))
+                        {
+                            await firebaseService.DeleteFileFromFirebase(account.BackOfCitizenIdentificationCard);
+                        }
+
+                        var imgPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{account.Id}.jpg";
+                        var imgUpload = await firebaseService.UploadFileToFirebase(accountRequest.BackOfCitizenIdentificationCard, imgPathName);
+                        imageUrlBackOfCitizenIdentificationCard = imgUpload?.Result?.ToString();
+                    }
+
+                    account.BackOfCitizenIdentificationCard = imageUrlBackOfCitizenIdentificationCard;
+                    account.FrontOfCitizenIdentificationCard = imageUrlFrontOfCitizenIdentificationCard;
+                }
+                account.Gender = accountRequest.Gender;
+                account.Hobby = accountRequest.Hobby;
+                account.Job = accountRequest.Job;
                 result.Result = await _accountRepository.Update(account);
             }
 

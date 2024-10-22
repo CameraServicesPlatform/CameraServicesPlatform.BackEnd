@@ -35,5 +35,6 @@ public class Supplier
     [ForeignKey(nameof(VourcherID))]
     public Vourcher? Vourcher { get; set; }
 
+    public Boolean status { get; set; }
 
 }

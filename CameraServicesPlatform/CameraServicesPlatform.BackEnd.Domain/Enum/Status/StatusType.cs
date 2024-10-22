@@ -2,6 +2,7 @@
 public enum StatusType
 {
     Suspended,
-    Blocked
+    Blocked,
+    reject
 }
 

@@ -97,8 +97,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductPrice = product.PriceBuy ?? 0,
                         Discount = request.OrderDetailRequests
                             .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0, 
-                        ProductQuality = product.Quality, 
-                    };
+                     };
 
                     double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;

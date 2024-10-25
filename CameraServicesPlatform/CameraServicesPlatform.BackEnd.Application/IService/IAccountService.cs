@@ -41,13 +41,13 @@ public interface IAccountService
 
     public Task<AppActionResult> GetAccountsByRoleName(string roleName, int pageNumber, int pageSize);
 
-    public Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize);
+    public Task<AppActionResult> GetAccountsByRoleId(string Id, int pageNumber, int pageSize);
 
     public Task<AppActionResult> AssignRole(string userId, string roleName);
 
     public Task<PagedResult<Supplier>> GetSupllier(int pageNumber, int pageSize);
     public Task<PagedResult<Staff>> GetStaff(int pageNumber, int pageSize);
-
+    public Task<AppActionResult> CheckActiveByStaff(string AccountID, bool isGoogle);
 
 
     // Missing method signatures

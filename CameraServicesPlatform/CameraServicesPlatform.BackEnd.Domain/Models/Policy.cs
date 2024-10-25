@@ -15,6 +15,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public ApplicableObject ApplicableObject { get; set; }
         public DateTime EffectiveDate { get; set; }
         public DateTime Value { get; set; }
+        public Boolean IsDisable { get; set; }
 
 
     }

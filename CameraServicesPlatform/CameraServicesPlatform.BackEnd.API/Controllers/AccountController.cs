@@ -32,6 +32,11 @@ public class AccountController : ControllerBase
     {
         return await _accountService.CreateAccountSupplier(dto, false);
     }
+    [HttpPost("check-active-by-staff-send-email")]
+    public async Task<AppActionResult> CheckActiveByStaff(string AccountID, bool isGoogle)
+    {
+        return await _accountService.CheckActiveByStaff(AccountID, isGoogle);
+    }
 
     [HttpPost("create-staff")]
     public async Task<AppActionResult> CreateStaff(CreateStaffDTO request)
@@ -84,7 +89,7 @@ public class AccountController : ControllerBase
 
 
     [HttpGet("get-accounts-by-role-id/{roleId}/{pageIndex:int}/{pageSize:int}")]
-    public async Task<AppActionResult> GetAccountsByRoleId(Guid roleId, int pageIndex = 1, int pageSize = 10)
+    public async Task<AppActionResult> GetAccountsByRoleId(string roleId, int pageIndex = 1, int pageSize = 10)
     {
         return await _accountService.GetAccountsByRoleId(roleId, pageIndex, pageSize);
     }

@@ -89,6 +89,7 @@ public class SD
         public static string WELCOME = "[CAMERASERVICEPLATFORM] CHÀO MỪNG BẠN ĐẾN VỚI CAMERASERVICEPLATFORM";
         public static string REMIND_PAYMENT = "[CAMERASERVICEPLATFORM] NHẮC NHỞ THANH TOÁN";
         public static string PASSCODE_FORGOT_PASSWORD = "[CAMERASERVICEPLATFORM] MÃ XÁC THỰC QUÊN MẬT KHẨU";
+        public static string ORDER_CONFIRMATION = "[CAMERASERVICEPLATFORM] BẠN VỪA ĐẶT ĐƠN HÀNG";
 
         public static string SIGN_CONTRACT_VERIFICATION_CODE =
             "[CAMERASERVICEPLATFORM] You are in the process of completing contract procedures".ToUpper();
@@ -141,8 +142,9 @@ public class SD
     public class FirebasePathName
     {
         public static string SUPPLIER_PREFIX = "supplier/";
-        public static string ACCOUNT_CITIZEN_IDENTIFICATION_CARD = "cards/";
-        public static string NEWS_PREFIX = "news/";
+        public static string ACCOUNT_CARD = "cards/";
+        public static string ACCOUNT_CITIZEN_IDENTIFICATION_CARD = "account-citizen-identification-cards/";
+        public static string PRODUCTS_PREFIX = "product-image/";
         public static string BLOG_PREFIX = "blog/";
         public static string SAMPLE_HOUSE_PREFIX = "sample-house/";
         public static string STAFF_PREFIX = "staff/";

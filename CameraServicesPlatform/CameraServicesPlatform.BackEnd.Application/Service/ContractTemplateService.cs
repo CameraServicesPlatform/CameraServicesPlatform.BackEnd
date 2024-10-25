@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -36,15 +37,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
 
-                if (!Guid.TryParse(request.MemberID, out Guid CMemberID))
-                {
-                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
-                    return result;
-                }
+               
 
                 var contractTemplate = new ContractTemplate
                 {
-                    MemberID = CMemberID,
+                    AccountID = request.AccountID,
                     ContractTerms = request.ContractTerms,
                     TemplateName = request.TemplateName,
                     TemplateDetails = request.TemplateDetails,
@@ -55,7 +52,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _unitOfWork.SaveChangesAsync();
 
                 var response = _mapper.Map<ContractTemplateResponse>(contractTemplate);
-                response.MemberID = contractTemplate.MemberID.ToString();
 
                 result.IsSuccess = true;
                 result.Result = response;
@@ -112,7 +108,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     var response = _mapper.Map<ContractTemplateResponse>(contractTL);
                     response.ContractTemplateID = contractTL.ContractTemplateId.ToString();
-                    response.MemberID = contractTL.MemberID.ToString();
                     return response;
                 }).ToList();
                 var pagedResult = new PagedResult<ContractTemplateResponse>
@@ -149,7 +144,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var response = _mapper.Map<ContractTemplateResponse>(contract);
-                response.MemberID = contract.MemberID.ToString();
                 response.ContractTemplateID = contract.ContractTemplateId.ToString();
 
                 result.IsSuccess = true;
@@ -189,7 +183,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _contractTemplateRepository.Update(existingContractTemplate);
                 await _unitOfWork.SaveChangesAsync();
                 var response = _mapper.Map<ContractTemplateResponse>(existingContractTemplate);
-                response.MemberID = existingContractTemplate.MemberID.ToString();
                 response.ContractTemplateID = existingContractTemplate.ContractTemplateId.ToString();
 
                 result.IsSuccess = true;

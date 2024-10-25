@@ -29,7 +29,7 @@ public class MappingConfig
             config.CreateMap<CreateOrderRentRequest, Order>();
             config.CreateMap<Order, OrderResponse>()
             .ForMember(dest => dest.OrderID, opt => opt.MapFrom(src => src.OrderID.ToString())) 
-            .ForMember(dest => dest.MemberID, opt => opt.MapFrom(src => src.MemberID.ToString()))
+            .ForMember(dest => dest.AccountID, opt => opt.MapFrom(src => src.Id.ToString()))
             .ForMember(dest => dest.SupplierID, opt => opt.MapFrom(src => src.SupplierID.ToString())) 
             .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetail));
 
@@ -54,6 +54,7 @@ public class MappingConfig
 
 
 
+
             config.CreateMap<CreateStaffDTO, Staff>()
                  .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
@@ -73,8 +74,9 @@ public class MappingConfig
             .ForMember(dest => dest.IsDeleted, opt => opt.MapFrom(src => false)) 
             .ForMember(dest => dest.IsVerified, opt => opt.MapFrom(src => false))  
             .ForMember(dest => dest.StaffID, opt => opt.Ignore()); // Assuming this is managed elsewhere
- 
-               //WishList
+            
+
+            //WishList
             config.CreateMap<CreateWishlistRequestDTO, Wishlist>();
             //ReturnDetal
             config.CreateMap<ReturnDetailRequest, ReturnDetail>();
@@ -84,8 +86,9 @@ public class MappingConfig
             config.CreateMap<Staff, StaffResponseDto>()
             .ForMember(dest => dest.StaffID, opt => opt.MapFrom(src => src.StaffID.ToString()))
             .ForMember(dest => dest.AccountID, opt => opt.MapFrom(src => src.AccountID.ToString()))
-            .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src.Account)); ;
+            .ForMember(dest => dest.Account, opt => opt.MapFrom(src => src.Account));
 
+          
 
 
             // Map from CreateSupplierRequest to Account
@@ -99,8 +102,7 @@ public class MappingConfig
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
-            config.CreateMap<CreateSupplierAccountDTO, BankInformation>()
-               .ForMember(dest => dest.AccountID, opt => opt.Ignore()); // This will be set after creating the Account
+            
                
 
 

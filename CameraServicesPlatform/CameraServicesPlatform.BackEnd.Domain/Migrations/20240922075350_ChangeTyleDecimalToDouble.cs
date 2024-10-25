@@ -180,7 +180,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             migrationBuilder.AlterColumn<bool>(
                 name: "IsVerifiedEmail",
-                table: "Members",
+                table: "Account",
                 type: "bit",
                 nullable: true,
                 oldClrType: typeof(bool),
@@ -188,7 +188,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             migrationBuilder.AlterColumn<bool>(
                 name: "IsVerfiedPhoneNumber",
-                table: "Members",
+                table: "Account",
                 type: "bit",
                 nullable: true,
                 oldClrType: typeof(bool),
@@ -465,7 +465,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             migrationBuilder.AlterColumn<bool>(
                 name: "IsVerifiedEmail",
-                table: "Members",
+                table: "Account",
                 type: "bit",
                 nullable: false,
                 defaultValue: false,
@@ -475,7 +475,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             migrationBuilder.AlterColumn<bool>(
                 name: "IsVerfiedPhoneNumber",
-                table: "Members",
+                table: "Account",
                 type: "bit",
                 nullable: false,
                 defaultValue: false,

@@ -13,7 +13,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Guid SupplierID { get; set; }
 
 
-        public Guid MemberID { get; set; }
+        public string Id { get; set; }
 
         public DateTime OrderDate { get; set; }
         public OrderStatus OrderStatus { get; set; }
@@ -34,7 +34,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public Supplier? Supplier { get; set; }
-        public Member? Member { get; set; }
+        public Account? Account { get; set; }
 
         public Guid? OrderDetailID { get; set; }
         public Guid? DeliveriesMethodID { get; set; }

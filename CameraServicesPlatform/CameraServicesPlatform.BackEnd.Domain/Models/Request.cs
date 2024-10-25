@@ -27,6 +27,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Account Account { get; set; }
 
         [ForeignKey(nameof(ReviewedBy))]
-        public Account Reviewer { get; set; }
+        public Boolean IsDisable { get; set; }
     }
 }

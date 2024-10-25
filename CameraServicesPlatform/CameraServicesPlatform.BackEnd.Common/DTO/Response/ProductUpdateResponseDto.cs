@@ -15,7 +15,6 @@ public class ProductUpdateResponseDto
     {
         public string ProductID { get; set; }
         public string SerialNumber { get; set; }
-        public string? SupplierID { get; set; }
         public string? CategoryID { get; set; }
         public string ProductName { get; set; }
         public string? ProductDescription { get; set; }

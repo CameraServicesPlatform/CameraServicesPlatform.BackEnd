@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Delivery;
+using System.ComponentModel.DataAnnotations;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
@@ -9,10 +10,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
 
 
-        public string MethodName { get; set; }
+        public DeliveryStatus MethodName { get; set; }
 
 
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

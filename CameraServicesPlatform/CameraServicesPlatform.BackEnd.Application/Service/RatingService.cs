@@ -20,7 +20,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IRepository<Rating> _ratingRepository;
         private readonly IRepository<Order> _orderRepository;
-        private readonly IRepository<Member> _memberRepository;
+        private readonly IRepository<Account> _accountRepository;
         private readonly IRepository<OrderDetail> _orderDetailRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -28,7 +28,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Rating> ratingRepository,
             IRepository<Order> orderRepository,
             IRepository<OrderDetail> orderDetailRepository,
-            IRepository<Member> memberRepository,
+            IRepository<Account> accountRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
@@ -37,7 +37,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _ratingRepository = ratingRepository;
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
-            _memberRepository = memberRepository;
+            _accountRepository = accountRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -57,9 +57,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "giá trị đánh không được lớn hơn 5");
                     return result;
                 }
-                var member = await _memberRepository.GetByExpression(x => x.AccountID == request.AccountID);
+                var account = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
 
-                var hasOrder = await _orderRepository.GetByExpression(x => x.MemberID == member.MemberID);
+                var hasOrder = await _orderRepository.GetByExpression(x => x.Id == account.Id);
 
                 if (hasOrder == null)
                 {

@@ -32,8 +32,7 @@ public class Supplier
 
     public Guid? VourcherID { get; set; }
 
-    [ForeignKey(nameof(VourcherID))]
-    public Vourcher? Vourcher { get; set; }
 
+    public Boolean IsDisable { get; set; }
 
 }

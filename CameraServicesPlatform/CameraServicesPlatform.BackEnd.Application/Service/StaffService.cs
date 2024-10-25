@@ -11,6 +11,7 @@ using Google.Apis.Util;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Printing;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -23,17 +24,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IMapper _mapper;
         private IRepository<Staff> _repository;
+        private IRepository<Account> _accountRepository;
         private IUnitOfWork _unitOfWork;
 
 
         public StaffService(
             IRepository<Staff> repository,
+            IRepository<Account> accountRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider,
             IDbContext context
         ) : base(serviceProvider)
         {
+            _accountRepository = accountRepository;
             _repository = repository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -96,6 +100,82 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var pagedResult = new PagedResult<StaffResponseDto>
                 {
                     Items = responses
+                };
+
+                result.Result = pagedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAllAccountActive(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Account, bool>>? filter = s => s.IsVerified == true;
+
+                var Result = await _accountRepository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    orderBy: s => s.Email
+                   
+                );
+
+                var responses = Result.Items.Select(account =>
+                {
+                    var response = _mapper.Map<AccountResponse>(account);
+                    return response;
+                }).ToList();
+
+                var pagedResult = new PagedResult<AccountResponse>
+                {
+                    Items = responses,
+                   
+                };
+
+                result.Result = pagedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAllAccountNotActive(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Account, bool>>? filter = s => s.IsVerified == false;
+
+                var Result = await _accountRepository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    orderBy: s => s.Email
+                    
+                );
+
+                var responses = Result.Items.Select(account =>
+                {
+                    var response = _mapper.Map<AccountResponse>(account);
+                    return response;
+                }).ToList();
+
+                var pagedResult = new PagedResult<AccountResponse>
+                {
+                    Items = responses,
+
                 };
 
                 result.Result = pagedResult;

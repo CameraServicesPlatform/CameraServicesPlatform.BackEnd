@@ -13,5 +13,10 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public IFormFile? BackOfCitizenIdentificationCard { get; set; }
         public IFormFile? FrontOfCitizenIdentificationCard { get; set; }
         public string PhoneNumber { get; set; } = null!;
+        public   string BankName { get; set; }
+
+        public   string AccountNumber { get; set; }
+
+        public   string AccountHolder { get; set; }
     }
 }

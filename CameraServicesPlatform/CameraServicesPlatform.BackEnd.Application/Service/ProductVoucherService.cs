@@ -38,21 +38,30 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 Expression<Func<ProductVoucher, bool>>? filter = null;
-
                 var pagedResult = await _repository.GetAllDataByExpression(
                     filter,
                     pageIndex,
                     pageSize,
                     null,
                     isAscending: true,
-                    includes: new Expression<Func<ProductVoucher, object>>[]
-                    {
-                         a => a.Product,
-                         a => a.Vourcher
-                    }
+                    null
                 );
+                List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
 
-                result.Result = pagedResult;
+                foreach (var item in pagedResult.Items)
+                {
+
+                    ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                    {
+                        ProductVoucherID = item.ProductVoucherID.ToString(),
+                        VourcherID = item.VourcherID.ToString(),
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                    };
+                    listProductVoucher.Add(productVoucherResponse);
+                }
+
+                result.Result = listProductVoucher;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -114,8 +123,21 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
+                List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
 
-                result.Result = pagedResult;
+                foreach (var item in pagedResult.Items)
+                {
+
+                    ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                    {
+                        ProductVoucherID = item.ProductVoucherID.ToString(),
+                         VourcherID = item.VourcherID.ToString(),
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                    };
+                    listProductVoucher.Add(productVoucherResponse);
+                }
+                result.Result = listProductVoucher;
                 result.IsSuccess = true;
             }
             catch (Exception ex)

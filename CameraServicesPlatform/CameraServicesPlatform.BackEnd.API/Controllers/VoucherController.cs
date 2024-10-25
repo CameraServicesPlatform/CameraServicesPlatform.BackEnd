@@ -48,10 +48,6 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _voucherService.UpdateVoucher(voucherResponse);
         }
 
-        [HttpDelete("delete-voucher")]
-        public async Task<AppActionResult> DeleteVoucher(string voucherId)
-        {
-            return await _voucherService.DeleteVoucher(voucherId);
-        }
+        
     }
 }

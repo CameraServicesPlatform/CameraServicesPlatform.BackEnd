@@ -10,17 +10,16 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string LastName { get; set; } = null!;
         public Gender Gender { get; set; }
         public object Role { get; set; }
-
-         public string? SupplierID { get; set; }
+        public string? FrontOfCitizenIdentificationCard { get; set; }
+        public string? BackOfCitizenIdentificationCard { get; set; }
+        public string? SupplierID { get; set; }
         public Supplier? Supplier { get; set; }
- 
         public bool IsDeleted { get; set; }
         public bool IsVerified { get; set; }
         public string UserName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string? ProfileImage { get; set; }
         public string MainRole { get; set; }
-
         public string Address { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }

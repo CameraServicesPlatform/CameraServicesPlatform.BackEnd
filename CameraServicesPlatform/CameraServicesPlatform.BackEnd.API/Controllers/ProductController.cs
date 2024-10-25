@@ -18,7 +18,6 @@ public class ProductController : ControllerBase
     {
         _productService = productService ?? throw new ArgumentNullException(nameof(productService));
         _productImageService = productImageService ?? throw new ArgumentNullException(nameof(productImageService));
-
     }
 
     [HttpGet("get-all-product")]
@@ -31,7 +30,25 @@ public class ProductController : ControllerBase
     public async Task<AppActionResult> GetProductById( string id, int pageIndex = 1, int pageSize = 10)
     {
         return await _productService.GetProductById(id, pageIndex, pageSize);
-    } 
+    }
+
+    [HttpGet("get-product-by-rent")]
+    public async Task<AppActionResult> GetProductByRent(int pageIndex = 1, int pageSize = 10)
+    {
+        return await _productService.GetProductByRent(pageIndex, pageSize);
+    }
+
+    [HttpGet("get-product-by-sold")]
+    public async Task<AppActionResult> GetProductBySold(int pageIndex = 1, int pageSize = 10)
+    {
+        return await _productService.GetProductBySold(pageIndex, pageSize);
+    }
+
+    [HttpGet("get-product-available-both")]
+    public async Task<AppActionResult> GetProductAvaibleRentAndSell(int pageIndex = 1, int pageSize = 10)
+    {
+        return await _productService.GetProductAvaibleRentAndSell(pageIndex, pageSize);
+    }
 
     [HttpGet("get-product-by-name")]
     public async Task<AppActionResult> GetProductByName([FromQuery] string? filter, int pageIndex = 1, int pageSize = 10)

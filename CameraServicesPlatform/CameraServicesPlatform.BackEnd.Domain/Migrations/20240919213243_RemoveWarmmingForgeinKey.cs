@@ -11,16 +11,16 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Members_OrderHistory_OrderHistoryID",
-                table: "Members");
+                name: "FK_Account_OrderHistory_OrderHistoryID",
+                table: "Account");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Members_Orders_OrderID",
-                table: "Members");
+                name: "FK_Account_Orders_OrderID",
+                table: "Account");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Members_Wishlist_WishlistID",
-                table: "Members");
+                name: "FK_Account_Wishlist_WishlistID",
+                table: "Account");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Orders_Contracts_ContractID",
@@ -67,7 +67,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 table: "Transactions");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Transactions_Members_MemberId",
+                name: "FK_Transactions_Account_AccountID",
                 table: "Transactions");
 
             migrationBuilder.DropForeignKey(
@@ -138,7 +138,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 table: "Orders");
 
             migrationBuilder.DropIndex(
-                name: "IX_OrderHistory_MemberID",
+                name: "IX_OrderHistory_AccountID",
                 table: "OrderHistory");
 
             migrationBuilder.DropIndex(
@@ -146,16 +146,16 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 table: "OrderDetails");
 
             migrationBuilder.DropIndex(
-                name: "IX_Members_OrderHistoryID",
-                table: "Members");
+                name: "IX_Account_OrderHistoryID",
+                table: "Account");
 
             migrationBuilder.DropIndex(
-                name: "IX_Members_OrderID",
-                table: "Members");
+                name: "IX_Account_OrderID",
+                table: "Account");
 
             migrationBuilder.DropIndex(
-                name: "IX_Members_WishlistID",
-                table: "Members");
+                name: "IX_Account_WishlistID",
+                table: "Account");
 
             migrationBuilder.DropColumn(
                 name: "HistoryTransactionID",
@@ -195,15 +195,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             migrationBuilder.DropColumn(
                 name: "OrderHistoryID",
-                table: "Members");
+                table: "Account");
 
             migrationBuilder.DropColumn(
                 name: "OrderID",
-                table: "Members");
+                table: "Account");
 
             migrationBuilder.DropColumn(
                 name: "WishlistID",
-                table: "Members");
+                table: "Account");
 
             migrationBuilder.AddColumn<Guid>(
                 name: "BankInformationBankId",
@@ -254,9 +254,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderHistory_MemberID",
+                name: "IX_OrderHistory_AccountID",
                 table: "OrderHistory",
-                column: "MemberID",
+                column: "AccountID",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -274,11 +274,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Transactions_Members_MemberId",
+                name: "FK_Transactions_Account_AccountID",
                 table: "Transactions",
-                column: "MemberId",
-                principalTable: "Members",
-                principalColumn: "MemberID",
+                column: "AccountID",
+                principalTable: "Account",
+                principalColumn: "AccountID",
                 onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
@@ -298,7 +298,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 table: "Transactions");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_Transactions_Members_MemberId",
+                name: "FK_Transactions_Account_AccountID",
                 table: "Transactions");
 
             migrationBuilder.DropForeignKey(
@@ -314,7 +314,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 table: "Transactions");
 
             migrationBuilder.DropIndex(
-                name: "IX_OrderHistory_MemberID",
+                name: "IX_OrderHistory_AccountID",
                 table: "OrderHistory");
 
             migrationBuilder.DropIndex(
@@ -394,19 +394,19 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             migrationBuilder.AddColumn<Guid>(
                 name: "OrderHistoryID",
-                table: "Members",
+                table: "Account",
                 type: "uniqueidentifier",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
                 name: "OrderID",
-                table: "Members",
+                table: "Account",
                 type: "uniqueidentifier",
                 nullable: true);
 
             migrationBuilder.AddColumn<Guid>(
                 name: "WishlistID",
-                table: "Members",
+                table: "Account",
                 type: "uniqueidentifier",
                 nullable: true);
 
@@ -526,7 +526,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 columns: table => new
                 {
                     WishlistID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MemberID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -534,10 +534,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     table.PrimaryKey("PK_Wishlist", x => x.WishlistID);
                     table.ForeignKey(
-                        name: "FK_Wishlist_Members_MemberID",
-                        column: x => x.MemberID,
-                        principalTable: "Members",
-                        principalColumn: "MemberID",
+                        name: "FK_Wishlist_Account_AccountID",
+                        column: x => x.AccountID,
+                        principalTable: "Account",
+                        principalColumn: "AccountID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Wishlist_Products_ProductID",
@@ -622,9 +622,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 column: "TransactionID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderHistory_MemberID",
+                name: "IX_OrderHistory_AccountID",
                 table: "OrderHistory",
-                column: "MemberID");
+                column: "AccountID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_OrderID",
@@ -632,18 +632,18 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 column: "OrderID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Members_OrderHistoryID",
-                table: "Members",
+                name: "IX_Account_OrderHistoryID",
+                table: "Account",
                 column: "OrderHistoryID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Members_OrderID",
-                table: "Members",
+                name: "IX_Account_OrderID",
+                table: "Account",
                 column: "OrderID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Members_WishlistID",
-                table: "Members",
+                name: "IX_Account_WishlistID",
+                table: "Account",
                 column: "WishlistID");
 
             migrationBuilder.CreateIndex(
@@ -682,9 +682,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 column: "SupplierID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Wishlist_MemberID",
+                name: "IX_Wishlist_AccountID",
                 table: "Wishlist",
-                column: "MemberID");
+                column: "AccountID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Wishlist_ProductID",
@@ -692,22 +692,22 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 column: "ProductID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Members_OrderHistory_OrderHistoryID",
-                table: "Members",
+                name: "FK_Account_OrderHistory_OrderHistoryID",
+                table: "Account",
                 column: "OrderHistoryID",
                 principalTable: "OrderHistory",
                 principalColumn: "OrderHistoryID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Members_Orders_OrderID",
-                table: "Members",
+                name: "FK_Account_Orders_OrderID",
+                table: "Account",
                 column: "OrderID",
                 principalTable: "Orders",
                 principalColumn: "OrderID");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Members_Wishlist_WishlistID",
-                table: "Members",
+                name: "FK_Account_Wishlist_WishlistID",
+                table: "Account",
                 column: "WishlistID",
                 principalTable: "Wishlist",
                 principalColumn: "WishlistID");
@@ -790,11 +790,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 principalColumn: "BankId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_Transactions_Members_MemberId",
+                name: "FK_Transactions_Account_AccountID",
                 table: "Transactions",
-                column: "MemberId",
-                principalTable: "Members",
-                principalColumn: "MemberID");
+                column: "AccountID",
+                principalTable: "Account",
+                principalColumn: "AccountID");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Transactions_Orders_OrderID",

@@ -31,8 +31,8 @@ public class Transaction
 
 
 
-    public Guid AccountID { get; set; }
+    public string AccountID { get; set; }
     [ForeignKey("AccountID")]
 
-    public required Account Account { get; set; }
+    public required Account? Account { get; set; }
 }

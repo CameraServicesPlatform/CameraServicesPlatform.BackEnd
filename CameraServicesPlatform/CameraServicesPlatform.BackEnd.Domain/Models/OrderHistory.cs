@@ -9,9 +9,9 @@
 //    public Guid OrderHistoryID { get; set; }
 
 
-//    public Guid MemberID { get; set; }
+//    public Guid AccountID { get; set; }
 
-//    [ForeignKey(nameof(MemberID))]
+//    [ForeignKey(nameof(AccountID))]
 //    public Member Member { get; set; }
 
 

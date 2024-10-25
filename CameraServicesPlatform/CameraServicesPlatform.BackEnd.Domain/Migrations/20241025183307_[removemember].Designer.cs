@@ -12,8 +12,8 @@
 //namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 //{
 //    [DbContext(typeof(CameraServicesPlatformDbContext))]
-//    [Migration("20241022191730_[updateVoucher]")]
-//    partial class updateVoucher
+//    [Migration("20241025183307_[removemember]")]
+//    partial class removemember
 //    {
 //        /// <inheritdoc />
 //        protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,10 +33,22 @@
 //                    b.Property<int>("AccessFailedCount")
 //                        .HasColumnType("int");
 
+//                    b.Property<string>("AccountHolder")
+//                        .IsRequired()
+//                        .HasColumnType("nvarchar(max)");
+
+//                    b.Property<string>("AccountNumber")
+//                        .IsRequired()
+//                        .HasColumnType("nvarchar(max)");
+
 //                    b.Property<string>("Address")
 //                        .HasColumnType("nvarchar(max)");
 
 //                    b.Property<string>("BackOfCitizenIdentificationCard")
+//                        .HasColumnType("nvarchar(max)");
+
+//                    b.Property<string>("BankName")
+//                        .IsRequired()
 //                        .HasColumnType("nvarchar(max)");
 
 //                    b.Property<string>("ConcurrencyStamp")
@@ -141,35 +153,6 @@
 //                    b.ToTable("AspNetUsers", (string)null);
 //                });
 
-//            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.BankInformation", b =>
-//                {
-//                    b.Property<Guid>("BankId")
-//                        .ValueGeneratedOnAdd()
-//                        .HasColumnType("uniqueidentifier");
-
-//                    b.Property<string>("AccountHolder")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.Property<string>("AccountID")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(450)");
-
-//                    b.Property<string>("AccountNumber")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.Property<string>("BankName")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.HasKey("BankId");
-
-//                    b.HasIndex("AccountID");
-
-//                    b.ToTable("BankInformation");
-//                });
-
 //            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models.ProductVoucher", b =>
 //                {
 //                    b.Property<Guid>("ProductVoucherID")
@@ -179,6 +162,9 @@
 //                    b.Property<DateTime>("CreatedAt")
 //                        .HasColumnType("datetime2");
 
+//                    b.Property<bool>("IsDisable")
+//                        .HasColumnType("bit");
+
 //                    b.Property<Guid>("ProductID")
 //                        .HasColumnType("uniqueidentifier");
 
@@ -187,9 +173,6 @@
 
 //                    b.Property<Guid>("VourcherID")
 //                        .HasColumnType("uniqueidentifier");
-
-//                    b.Property<bool>("status")
-//                        .HasColumnType("bit");
 
 //                    b.HasKey("ProductVoucherID");
 
@@ -405,6 +388,9 @@
 //                    b.Property<DateTime>("EffectiveDate")
 //                        .HasColumnType("datetime2");
 
+//                    b.Property<bool>("IsDisable")
+//                        .HasColumnType("bit");
+
 //                    b.Property<string>("PolicyContent")
 //                        .IsRequired()
 //                        .HasColumnType("nvarchar(max)");
@@ -523,6 +509,9 @@
 //                    b.Property<DateTime>("CreatedAt")
 //                        .HasColumnType("datetime2");
 
+//                    b.Property<bool>("IsDisable")
+//                        .HasColumnType("bit");
+
 //                    b.Property<Guid>("ProductID")
 //                        .HasColumnType("uniqueidentifier");
 
@@ -584,6 +573,9 @@
 //                    b.Property<DateTime>("CreatedAt")
 //                        .HasColumnType("datetime2");
 
+//                    b.Property<bool>("IsDisable")
+//                        .HasColumnType("bit");
+
 //                    b.Property<Guid>("OrderID")
 //                        .HasColumnType("uniqueidentifier");
 
@@ -595,9 +587,6 @@
 
 //                    b.Property<DateTime>("UpdatedAt")
 //                        .HasColumnType("datetime2");
-
-//                    b.Property<bool>("status")
-//                        .HasColumnType("bit");
 
 //                    b.HasKey("ReturnID");
 
@@ -633,6 +622,9 @@
 //                    b.Property<bool>("IsAdmin")
 //                        .HasColumnType("bit");
 
+//                    b.Property<bool>("IsDisable")
+//                        .HasColumnType("bit");
+
 //                    b.Property<string>("JobTitle")
 //                        .IsRequired()
 //                        .HasColumnType("nvarchar(max)");
@@ -648,9 +640,6 @@
 //                    b.Property<DateTime>("UpdatedAt")
 //                        .HasColumnType("datetime2");
 
-//                    b.Property<bool>("status")
-//                        .HasColumnType("bit");
-
 //                    b.HasKey("StaffID");
 
 //                    b.HasIndex("AccountID")
@@ -665,11 +654,11 @@
 //                        .ValueGeneratedOnAdd()
 //                        .HasColumnType("uniqueidentifier");
 
+//                    b.Property<string>("AccountID")
+//                        .HasColumnType("nvarchar(450)");
+
 //                    b.Property<DateTime?>("EndDate")
 //                        .HasColumnType("datetime2");
-
-//                    b.Property<Guid>("AccountID")
-//                        .HasColumnType("uniqueidentifier");
 
 //                    b.Property<string>("Reason")
 //                        .HasColumnType("nvarchar(max)");
@@ -771,82 +760,6 @@
 //                    b.HasIndex("OrderID");
 
 //                    b.ToTable("Contracts");
-//                });
-
-//            modelBuilder.Entity("Member", b =>
-//                {
-//                    b.Property<Guid>("AccountID")
-//                        .ValueGeneratedOnAdd()
-//                        .HasColumnType("uniqueidentifier");
-
-//                    b.Property<string>("AccountID")
-//                        .HasColumnType("nvarchar(450)");
-
-//                    b.Property<string>("Address")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.Property<DateTime>("Dob")
-//                        .HasColumnType("datetime2");
-
-//                    b.Property<string>("Email")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.Property<string>("FirstName")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.Property<int>("Gender")
-//                        .HasColumnType("int");
-
-//                    b.Property<int?>("Hobby")
-//                        .HasColumnType("int");
-
-//                    b.Property<string>("Img")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.Property<bool>("IsActive")
-//                        .HasColumnType("bit");
-
-//                    b.Property<bool>("IsAdult")
-//                        .HasColumnType("bit");
-
-//                    b.Property<bool?>("IsVerfiedPhoneNumber")
-//                        .HasColumnType("bit");
-
-//                    b.Property<bool?>("IsVerifiedEmail")
-//                        .HasColumnType("bit");
-
-//                    b.Property<int?>("Job")
-//                        .HasColumnType("int");
-
-//                    b.Property<DateTime>("JoinedAt")
-//                        .HasColumnType("datetime2");
-
-//                    b.Property<string>("LastName")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.Property<double>("Money")
-//                        .HasColumnType("float");
-
-//                    b.Property<string>("PhoneNumber")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.Property<string>("VerficationCodeEmail")
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.Property<string>("VerficationCodePhoneNumber")
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.HasKey("AccountID");
-
-//                    b.HasIndex("AccountID");
-
-//                    b.ToTable("Account");
 //                });
 
 //            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -1012,41 +925,6 @@
 //                    b.ToTable("AspNetUserTokens", (string)null);
 //                });
 
-//            modelBuilder.Entity("OrderHistory", b =>
-//                {
-//                    b.Property<Guid>("OrderHistoryID")
-//                        .ValueGeneratedOnAdd()
-//                        .HasColumnType("uniqueidentifier");
-
-//                    b.Property<DateTime>("CreatedAt")
-//                        .HasColumnType("datetime2");
-
-//                    b.Property<Guid>("AccountID")
-//                        .HasColumnType("uniqueidentifier");
-
-//                    b.Property<string>("OrderDetails")
-//                        .IsRequired()
-//                        .HasColumnType("nvarchar(max)");
-
-//                    b.Property<Guid>("OrderID")
-//                        .HasColumnType("uniqueidentifier");
-
-//                    b.Property<int>("OrderStatus")
-//                        .HasColumnType("int");
-
-//                    b.Property<double>("TotalAmount")
-//                        .HasColumnType("float");
-
-//                    b.HasKey("OrderHistoryID");
-
-//                    b.HasIndex("AccountID")
-//                        .IsUnique();
-
-//                    b.HasIndex("OrderID");
-
-//                    b.ToTable("OrderHistory");
-//                });
-
 //            modelBuilder.Entity("Product", b =>
 //                {
 //                    b.Property<Guid>("ProductID")
@@ -1131,6 +1009,9 @@
 //                    b.Property<string>("Img")
 //                        .HasColumnType("nvarchar(max)");
 
+//                    b.Property<bool>("IsDisable")
+//                        .HasColumnType("bit");
+
 //                    b.Property<string>("SupplierAddress")
 //                        .HasColumnType("nvarchar(max)");
 
@@ -1150,16 +1031,11 @@
 //                    b.Property<Guid?>("VourcherID")
 //                        .HasColumnType("uniqueidentifier");
 
-//                    b.Property<bool>("status")
-//                        .HasColumnType("bit");
-
 //                    b.HasKey("SupplierID");
 
 //                    b.HasIndex("AccountID")
 //                        .IsUnique()
 //                        .HasFilter("[AccountID] IS NOT NULL");
-
-//                    b.HasIndex("VourcherID");
 
 //                    b.ToTable("Suppliers");
 //                });
@@ -1202,17 +1078,12 @@
 //                        .ValueGeneratedOnAdd()
 //                        .HasColumnType("uniqueidentifier");
 
+//                    b.Property<string>("AccountID")
+//                        .IsRequired()
+//                        .HasColumnType("nvarchar(450)");
+
 //                    b.Property<double>("Amount")
 //                        .HasColumnType("float");
-
-//                    b.Property<Guid>("BankId")
-//                        .HasColumnType("uniqueidentifier");
-
-//                    b.Property<Guid>("BankInformationBankId")
-//                        .HasColumnType("uniqueidentifier");
-
-//                    b.Property<Guid>("AccountID")
-//                        .HasColumnType("uniqueidentifier");
 
 //                    b.Property<Guid>("OrderID")
 //                        .HasColumnType("uniqueidentifier");
@@ -1240,8 +1111,6 @@
 
 //                    b.HasKey("TransactionID");
 
-//                    b.HasIndex("BankInformationBankId");
-
 //                    b.HasIndex("AccountID");
 
 //                    b.HasIndex("OrderID")
@@ -1263,6 +1132,9 @@
 //                    b.Property<DateTime>("CreatedAt")
 //                        .HasColumnType("datetime2");
 
+//                    b.Property<bool>("IsDisable")
+//                        .HasColumnType("bit");
+
 //                    b.Property<Guid>("ProductID")
 //                        .HasColumnType("uniqueidentifier");
 
@@ -1273,17 +1145,6 @@
 //                    b.HasIndex("ProductID");
 
 //                    b.ToTable("Wishlists");
-//                });
-
-//            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.BankInformation", b =>
-//                {
-//                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
-//                        .WithMany()
-//                        .HasForeignKey("AccountID")
-//                        .OnDelete(DeleteBehavior.Cascade)
-//                        .IsRequired();
-
-//                    b.Navigation("Account");
 //                });
 
 //            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models.ProductVoucher", b =>
@@ -1457,11 +1318,9 @@
 
 //            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.SupplierReport", b =>
 //                {
-//                    b.HasOne("Member", "Member")
+//                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
 //                        .WithMany()
-//                        .HasForeignKey("AccountID")
-//                        .OnDelete(DeleteBehavior.Cascade)
-//                        .IsRequired();
+//                        .HasForeignKey("AccountID");
 
 //                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Staff", "Staff")
 //                        .WithMany()
@@ -1475,7 +1334,7 @@
 //                        .OnDelete(DeleteBehavior.Cascade)
 //                        .IsRequired();
 
-//                    b.Navigation("Member");
+//                    b.Navigation("Account");
 
 //                    b.Navigation("Staff");
 
@@ -1499,15 +1358,6 @@
 //                    b.Navigation("ContractTemplate");
 
 //                    b.Navigation("Order");
-//                });
-
-//            modelBuilder.Entity("Member", b =>
-//                {
-//                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
-//                        .WithMany()
-//                        .HasForeignKey("AccountID");
-
-//                    b.Navigation("Account");
 //                });
 
 //            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1561,25 +1411,6 @@
 //                        .IsRequired();
 //                });
 
-//            modelBuilder.Entity("OrderHistory", b =>
-//                {
-//                    b.HasOne("Member", "Member")
-//                        .WithOne("OrderHistory")
-//                        .HasForeignKey("OrderHistory", "AccountID")
-//                        .OnDelete(DeleteBehavior.Cascade)
-//                        .IsRequired();
-
-//                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
-//                        .WithMany()
-//                        .HasForeignKey("OrderID")
-//                        .OnDelete(DeleteBehavior.Cascade)
-//                        .IsRequired();
-
-//                    b.Navigation("Member");
-
-//                    b.Navigation("Order");
-//                });
-
 //            modelBuilder.Entity("Product", b =>
 //                {
 //                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Category", "Category")
@@ -1601,13 +1432,7 @@
 //                        .WithOne("Supplier")
 //                        .HasForeignKey("Supplier", "AccountID");
 
-//                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Vourcher", "Vourcher")
-//                        .WithMany()
-//                        .HasForeignKey("VourcherID");
-
 //                    b.Navigation("Account");
-
-//                    b.Navigation("Vourcher");
 //                });
 
 //            modelBuilder.Entity("SupplierRequest", b =>
@@ -1623,13 +1448,7 @@
 
 //            modelBuilder.Entity("Transaction", b =>
 //                {
-//                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.BankInformation", "BankInformation")
-//                        .WithMany()
-//                        .HasForeignKey("BankInformationBankId")
-//                        .OnDelete(DeleteBehavior.Cascade)
-//                        .IsRequired();
-
-//                    b.HasOne("Member", "Member")
+//                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
 //                        .WithMany()
 //                        .HasForeignKey("AccountID")
 //                        .OnDelete(DeleteBehavior.Cascade)
@@ -1641,9 +1460,7 @@
 //                        .OnDelete(DeleteBehavior.Cascade)
 //                        .IsRequired();
 
-//                    b.Navigation("BankInformation");
-
-//                    b.Navigation("Member");
+//                    b.Navigation("Account");
 
 //                    b.Navigation("Order");
 //                });
@@ -1679,11 +1496,6 @@
 //                    b.Navigation("OrderDetail");
 
 //                    b.Navigation("Transaction");
-//                });
-
-//            modelBuilder.Entity("Member", b =>
-//                {
-//                    b.Navigation("OrderHistory");
 //                });
 //#pragma warning restore 612, 618
 //        }

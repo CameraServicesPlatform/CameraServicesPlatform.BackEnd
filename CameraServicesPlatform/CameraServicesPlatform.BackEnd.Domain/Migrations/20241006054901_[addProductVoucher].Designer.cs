@@ -144,12 +144,12 @@
 //                        .IsRequired()
 //                        .HasColumnType("nvarchar(max)");
 
-//                    b.Property<Guid>("MemberId")
+//                    b.Property<Guid>("AccountID")
 //                        .HasColumnType("uniqueidentifier");
 
 //                    b.HasKey("BankId");
 
-//                    b.HasIndex("MemberId");
+//                    b.HasIndex("AccountID");
 
 //                    b.ToTable("BankInformation");
 //                });
@@ -218,7 +218,7 @@
 //                    b.Property<int>("DurationValue")
 //                        .HasColumnType("int");
 
-//                    b.Property<Guid>("MemberID")
+//                    b.Property<Guid>("AccountID")
 //                        .HasColumnType("uniqueidentifier");
 
 //                    b.Property<DateTime>("OrderDate")
@@ -258,7 +258,7 @@
 
 //                    b.HasIndex("DeliveriesMethodID");
 
-//                    b.HasIndex("MemberID");
+//                    b.HasIndex("AccountID");
 
 //                    b.HasIndex("SupplierID");
 
@@ -664,7 +664,7 @@
 
 //            modelBuilder.Entity("Member", b =>
 //                {
-//                    b.Property<Guid>("MemberID")
+//                    b.Property<Guid>("AccountID")
 //                        .ValueGeneratedOnAdd()
 //                        .HasColumnType("uniqueidentifier");
 
@@ -727,11 +727,11 @@
 //                    b.Property<string>("VerficationCodePhoneNumber")
 //                        .HasColumnType("nvarchar(max)");
 
-//                    b.HasKey("MemberID");
+//                    b.HasKey("AccountID");
 
 //                    b.HasIndex("AccountID");
 
-//                    b.ToTable("Members");
+//                    b.ToTable("Account");
 //                });
 
 //            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -902,7 +902,7 @@
 //                    b.Property<DateTime>("CreatedAt")
 //                        .HasColumnType("datetime2");
 
-//                    b.Property<Guid>("MemberID")
+//                    b.Property<Guid>("AccountID")
 //                        .HasColumnType("uniqueidentifier");
 
 //                    b.Property<string>("OrderDetails")
@@ -920,7 +920,7 @@
 
 //                    b.HasKey("OrderHistoryID");
 
-//                    b.HasIndex("MemberID")
+//                    b.HasIndex("AccountID")
 //                        .IsUnique();
 
 //                    b.HasIndex("OrderID");
@@ -1085,7 +1085,7 @@
 //                    b.Property<Guid>("BankInformationBankId")
 //                        .HasColumnType("uniqueidentifier");
 
-//                    b.Property<Guid>("MemberId")
+//                    b.Property<Guid>("AccountID")
 //                        .HasColumnType("uniqueidentifier");
 
 //                    b.Property<Guid>("OrderID")
@@ -1116,7 +1116,7 @@
 
 //                    b.HasIndex("BankInformationBankId");
 
-//                    b.HasIndex("MemberId");
+//                    b.HasIndex("AccountID");
 
 //                    b.HasIndex("OrderID")
 //                        .IsUnique();
@@ -1128,7 +1128,7 @@
 //                {
 //                    b.HasOne("Member", "Member")
 //                        .WithMany()
-//                        .HasForeignKey("MemberId")
+//                        .HasForeignKey("AccountID")
 //                        .OnDelete(DeleteBehavior.Cascade)
 //                        .IsRequired();
 
@@ -1143,7 +1143,7 @@
 
 //                    b.HasOne("Member", "Member")
 //                        .WithMany()
-//                        .HasForeignKey("MemberID")
+//                        .HasForeignKey("AccountID")
 //                        .OnDelete(DeleteBehavior.Cascade)
 //                        .IsRequired();
 
@@ -1370,7 +1370,7 @@
 //                {
 //                    b.HasOne("Member", "Member")
 //                        .WithOne("OrderHistory")
-//                        .HasForeignKey("OrderHistory", "MemberID")
+//                        .HasForeignKey("OrderHistory", "AccountID")
 //                        .OnDelete(DeleteBehavior.Cascade)
 //                        .IsRequired();
 
@@ -1436,7 +1436,7 @@
 
 //                    b.HasOne("Member", "Member")
 //                        .WithMany()
-//                        .HasForeignKey("MemberId")
+//                        .HasForeignKey("AccountID")
 //                        .OnDelete(DeleteBehavior.Cascade)
 //                        .IsRequired();
 

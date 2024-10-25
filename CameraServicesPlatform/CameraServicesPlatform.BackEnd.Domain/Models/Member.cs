@@ -7,7 +7,7 @@
 //public class Member
 //{
 //    [Key]
-//    public Guid MemberID { get; set; }
+//    public Guid AccountID { get; set; }
 //    public string FirstName { get; set; } = null!;
 //    public string LastName { get; set; } = null!;
 //    public string Address { get; set; } = null!;

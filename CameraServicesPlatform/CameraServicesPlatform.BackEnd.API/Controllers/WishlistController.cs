@@ -95,11 +95,11 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-wish-list-by-member-id")]
-        public async Task<IActionResult> GetWishlistByMemberID(string AccountID, int pageIndex = 1, int pageSize = 10)
+        public async Task<IActionResult> GetWishlistByAccountID(string AccountID, int pageIndex = 1, int pageSize = 10)
         {
             try
             {
-                var response = await _wishlistService.GetWishlistByMemberID(AccountID, pageIndex, pageSize);
+                var response = await _wishlistService.GetWishlistByAccountID(AccountID, pageIndex, pageSize);
                 if (!response.IsSuccess)
                 {
                     return NotFound(response);

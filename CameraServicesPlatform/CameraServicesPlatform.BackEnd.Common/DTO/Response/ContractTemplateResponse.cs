@@ -13,6 +13,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string ContractTerms { get; set; }
         public string TemplateDetails { get; set; }
         public string PenaltyPolicy { get; set; }
-        public string MemberID { get; set; }
+        public string AccountID { get; set; }
     }
 }

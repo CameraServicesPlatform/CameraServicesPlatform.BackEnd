@@ -1,10 +1,10 @@
 ﻿namespace CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 public enum ProductStatusEnum
 {
-    Both,
+    AvailableSell,
+    AvailableRent,
     Rented,
     Sold,
-     Shipping,
     discontinuedProduct
 
 }

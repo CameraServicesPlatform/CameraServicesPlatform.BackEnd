@@ -23,11 +23,16 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime? RefreshTokenExpiryTime { get; set; }
 
         public string? SupplierID { get; set; }
-        [JsonIgnore] public Supplier? Supplier { get; set; } // Reference to Supplier, consider limiting its data exposure
+        [JsonIgnore] public Supplier? Supplier { get; set; }  
         public string? StaffID { get; set; }
-        [JsonIgnore] public Staff? Staff { get; set; } // Reference to Staff, consider limiting its data exposure
+        [JsonIgnore] public Staff? Staff { get; set; }  
         public string? Img { get; set; }
         public string? FrontOfCitizenIdentificationCard { get; set; }
         public string? BackOfCitizenIdentificationCard { get; set; }
+        public required string BankName { get; set; }
+
+        public required string AccountNumber { get; set; }
+
+        public required string AccountHolder { get; set; }
     }
 }

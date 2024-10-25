@@ -31,7 +31,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public bool IsAdmin { get; set; }
         public string Img { get; set; } = null!;
 
-        public Boolean status { get; set; }
+        public Boolean IsDisable { get; set; }
 
     }
 }

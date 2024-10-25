@@ -27,6 +27,5 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        //public Boolean status { get; set; }
     }
 }

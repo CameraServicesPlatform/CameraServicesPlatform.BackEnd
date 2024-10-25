@@ -14,7 +14,7 @@ public class Transaction
     public Guid OrderID { get; set; }
 
     [ForeignKey(nameof(OrderID))]
-    public Order Order { get; set; }
+    public required Order Order { get; set; }
 
     public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
     public double Amount { get; set; }
@@ -29,13 +29,10 @@ public class Transaction
     public VNPAYTransactionStatus? VNPAYTransactionStatus { get; set; }
     public DateTime? VNPAYTransactionTime { get; set; }
 
-    // Foreign key to Bank
-    [ForeignKey("Bank")]
-    public Guid BankId { get; set; }
-    public virtual BankInformation BankInformation { get; set; }
 
-    // Foreign key to Member
-    [ForeignKey("Member")]
-    public Guid MemberId { get; set; }
-    public virtual Member Member { get; set; }
+
+    public Guid AccountID { get; set; }
+    [ForeignKey("AccountID")]
+
+    public required Account Account { get; set; }
 }

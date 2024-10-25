@@ -18,7 +18,6 @@ namespace CameraServicesPlatform.BackEnd.Data
 
         //public DbSet<Role> Roles { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
-        public DbSet<Member> Members { get; set; }
         public DbSet<Staff> Staffs { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Product> Products { get; set; }

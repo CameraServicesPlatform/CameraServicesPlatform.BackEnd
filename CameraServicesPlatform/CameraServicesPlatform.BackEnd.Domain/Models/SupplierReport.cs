@@ -24,10 +24,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public string? Reason { get; set; }
 
-        public Guid MemberID { get; set; }
+        public Guid AccountID { get; set; }
 
-        [ForeignKey(nameof(MemberID))]
-        public Member Member { get; set; }
+        [ForeignKey(nameof(AccountID))]
+        public Account Account { get; set; }
 
         public Guid StaffID { get; set; }
 

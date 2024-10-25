@@ -53,8 +53,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     {
  
                         //a => a.Account,
-                        a => a.Vourcher 
- 
+  
                     }
                 );
 
@@ -89,8 +88,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     includes: new Expression<Func<Supplier, object>>[]
                     {
                          //a => a.Account,
-                         a => a.Vourcher
-                    }
+                     }
                 );
 
                 result.Result = pagedResult;
@@ -125,8 +123,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     includes: new Expression<Func<Supplier, object>>[]
                     {
                 //a => a.Account,
-                a => a.Vourcher
-                    }
+                     }
                 );
 
                 result.Result = pagedResult;

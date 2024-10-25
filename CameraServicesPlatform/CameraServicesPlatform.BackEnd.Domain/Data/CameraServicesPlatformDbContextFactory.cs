@@ -16,7 +16,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Data
                 .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<CameraServicesPlatformDbContext>();
-            var connectionString = configuration.GetConnectionString("DBVPS");
+            var connectionString = configuration.GetConnectionString("DB");
             optionsBuilder.UseSqlServer(connectionString);
 
             return new CameraServicesPlatformDbContext(optionsBuilder.Options);

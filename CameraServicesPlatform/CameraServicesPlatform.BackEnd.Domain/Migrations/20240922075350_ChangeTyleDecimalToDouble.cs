@@ -1,4 +1,4 @@
-﻿/*using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -18,7 +18,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 oldClrType: typeof(Guid),
                 oldType: "uniqueidentifier");
 
-           
+
 
             migrationBuilder.AlterColumn<string>(
                 name: "VNPAYTransactionID",
@@ -300,7 +300,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 oldType: "uniqueidentifier",
                 oldNullable: true);
 
-            
+
 
 
             migrationBuilder.AlterColumn<string>(
@@ -581,4 +581,3 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         }
     }
 }
-*/

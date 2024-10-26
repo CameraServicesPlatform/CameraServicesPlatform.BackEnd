@@ -1,5 +1,4 @@
-﻿using CameraServicesPlatform.BackEnd.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
@@ -16,7 +15,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Data
                 .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<CameraServicesPlatformDbContext>();
-            var connectionString = configuration.GetConnectionString("DB");
+            var connectionString = configuration.GetConnectionString("DBVPS");
             optionsBuilder.UseSqlServer(connectionString);
 
             return new CameraServicesPlatformDbContext(optionsBuilder.Options);

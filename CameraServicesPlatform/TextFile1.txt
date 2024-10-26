@@ -8,7 +8,7 @@
 
 //#nullable disable
 
-//namespace CameraServicesPlatform.BackEnd.Domain.Migrations
+//namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
 //{
 //    [DbContext(typeof(CameraServicesPlatformDbContext))]
 //    partial class CameraServicesPlatformDbContextModelSnapshot : ModelSnapshot

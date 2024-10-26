@@ -1,7 +1,7 @@
 using CameraServicesPlatform.BackEnd.API.Installers;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.Service;
-using CameraServicesPlatform.BackEnd.Data;
+using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Infrastructure.ServerHub;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
@@ -30,7 +30,7 @@ builder.Services.InstallerServicesInAssembly(builder.Configuration); // Assuming
  
 // Configure DbContext with SQL Server (update your connection string as needed)
 builder.Services.AddDbContext<CameraServicesPlatformDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DB")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DBVPS")));
 
 
 

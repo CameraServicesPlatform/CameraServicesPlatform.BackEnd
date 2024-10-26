@@ -9,7 +9,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid SupplierRequestID { get; set; }
 
-        public Guid AccountID { get; set; }
+        public string? AccountID { get; set; }
 
         public Guid RoleRequestID { get; set; }
 
@@ -24,7 +24,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string ReviewNotes { get; set; }
 
         [ForeignKey(nameof(AccountID))]
-        public Account Account { get; set; }
+        public Account? Account { get; set; }
 
         [ForeignKey(nameof(ReviewedBy))]
         public Boolean IsDisable { get; set; }

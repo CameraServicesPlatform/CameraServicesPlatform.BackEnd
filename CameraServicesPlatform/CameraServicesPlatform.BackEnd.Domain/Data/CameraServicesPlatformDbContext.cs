@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace CameraServicesPlatform.BackEnd.Data
+namespace CameraServicesPlatform.BackEnd.Domain.Data
 {
     public class CameraServicesPlatformDbContext : IdentityDbContext<Account>, IDbContext
     {
@@ -12,17 +12,15 @@ namespace CameraServicesPlatform.BackEnd.Data
             : base(options)
         {
         }
+        public DbSet<ProductImage> ProductImages { get; set; }
 
         public DbSet<Account> Accounts { get; set; }
-        //public DbSet<AccountRole> AccountRoles { get; set; }
 
-        //public DbSet<Role> Roles { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<Staff> Staffs { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductSpecification> ProductSpecifications { get; set; }
-        public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<ProductVoucher> ProductVouchers { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
@@ -39,7 +37,11 @@ namespace CameraServicesPlatform.BackEnd.Data
         public DbSet<Vourcher> Vourchers { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
+        public DbSet<RentalPrice> RentalPrices { get; set; }
+        public DbSet<HistoryTransaction> HistoryTransactions { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
+        public DbSet<Request> Requests { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder builder)

@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Category;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
@@ -77,11 +78,18 @@ public class ProductController : ControllerBase
     }
 
     
-    [HttpPost("create-product")]
-    public async Task<AppActionResult> CreateProduct([FromForm] ProductResponseDto listProduct)
+    [HttpPost("create-product-buy")]
+    public async Task<AppActionResult> CreateProductBuy([FromForm] ProductResponseDto listProduct)
     {
-          return await _productService.CreateProduct(listProduct);
+          return await _productService.CreateProductBuy(listProduct);
       
+    }
+
+    [HttpPost("create-product-rent")]
+    public async Task<AppActionResult> CreateProductRent([FromForm] ProductRequestRentDto listProduct)
+    {
+        return await _productService.CreateProductRent(listProduct);
+
     }
 
     [HttpPut("update-product")]

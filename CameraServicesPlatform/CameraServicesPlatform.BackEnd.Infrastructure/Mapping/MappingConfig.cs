@@ -39,7 +39,10 @@ public class MappingConfig
             config.CreateMap<OrderDetail, OrderDetailResponse>()
             .ForMember(dest => dest.OrderDetailsID, opt => opt.MapFrom(src => src.OrderDetailsID))
             .ForMember(dest => dest.OrderID, opt => opt.MapFrom(src => src.OrderID.ToString()))
-            .ForMember(dest => dest.ProductID, opt => opt.MapFrom(src => src.ProductID.ToString()));
+            .ForMember(dest => dest.ProductID, opt => opt.MapFrom(src => src.ProductID.ToString()))
+            .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName));
+
+
             ///Mapper Rating
             config.CreateMap<RatingRequest, Rating>();
             config.CreateMap<Rating, RatingResponse>();

@@ -1,7 +1,7 @@
 using CameraServicesPlatform.BackEnd.API.Installers;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.Service;
-using CameraServicesPlatform.BackEnd.Data;
+using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Infrastructure.ServerHub;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;

@@ -12,12 +12,11 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string OrderID { get; set; } 
         public string ProductID { get; set; } 
         public string ProductName { get; set; } 
-        public decimal ProductPrice { get; set; } 
+        public double ProductPrice { get; set; } 
         public string ProductQuality { get; set; } 
-        public decimal Discount { get; set; }
-        public decimal ProductPriceTotal { get; set; } 
+        public double Discount { get; set; }
+        public double ProductPriceTotal { get; set; } 
         public int? RentalPeriod { get; set; } 
-
         public DateTime CreatedAt { get; set; } 
         public DateTime UpdatedAt { get; set; } 
     }

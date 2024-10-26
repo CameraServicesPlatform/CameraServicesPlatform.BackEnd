@@ -8,6 +8,7 @@ using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.InstallerServicesInAssembly(builder.Configuration); // Assuming this installs your services
  
 // Configure DbContext with SQL Server (update your connection string as needed)

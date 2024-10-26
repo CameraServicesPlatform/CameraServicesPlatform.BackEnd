@@ -1,4 +1,5 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Category;
+﻿using CameraServicesPlatform.BackEnd.Common.DTO.Request;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Category;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using Microsoft.AspNetCore.Http;
 
@@ -25,7 +26,13 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public ProductStatusEnum Status { get; set; }
 
         public IFormFile? File { get; set; }
+        
+        public List<string> listProductSpecification { get; set; }  = new List<string>();
+    }
+    public class ProductSpecificationCreateDto
+    {
+        public string Specification { get; set; }
 
-
+        public string? Details { get; set; }
     }
 }

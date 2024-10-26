@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateProduct : Migration
+    public partial class updatePolicies : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -45,6 +45,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     VerifyCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RefreshToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     RefreshTokenExpiryTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    SupplierID = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StaffID = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Img = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FrontOfCitizenIdentificationCard = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BackOfCitizenIdentificationCard = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -69,7 +74,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     CategoryID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CategoryName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CategoryDescription = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    CategoryDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    StatusCategory = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -89,22 +95,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DeliveriesMethod", x => x.DeliveriesMethodID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Policies",
-                columns: table => new
-                {
-                    PolicyID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PolicyType = table.Column<int>(type: "int", nullable: false),
-                    PolicyContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ApplicableObject = table.Column<int>(type: "int", nullable: false),
-                    EffectiveDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Value = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Policies", x => x.PolicyID);
                 });
 
             migrationBuilder.CreateTable(
@@ -234,6 +224,51 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "BankInformation",
+                columns: table => new
+                {
+                    BankId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BankName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccountNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccountHolder = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AccountID = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BankInformation", x => x.BankId);
+                    table.ForeignKey(
+                        name: "FK_BankInformation_AspNetUsers_AccountID",
+                        column: x => x.AccountID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ContractTemplates",
+                columns: table => new
+                {
+                    ContractTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TemplateName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ContractTerms = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TemplateDetails = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PenaltyPolicy = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AccountID = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ContractTemplates", x => x.ContractTemplateId);
+                    table.ForeignKey(
+                        name: "FK_ContractTemplates_AspNetUsers_AccountID",
+                        column: x => x.AccountID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Members",
                 columns: table => new
                 {
@@ -251,6 +286,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     Money = table.Column<double>(type: "float", nullable: false),
                     AccountID = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     JoinedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Img = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsVerfiedPhoneNumber = table.Column<bool>(type: "bit", nullable: true),
                     IsVerifiedEmail = table.Column<bool>(type: "bit", nullable: true),
@@ -293,6 +329,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 columns: table => new
                 {
                     StaffID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AccountID = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     JobTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Department = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -300,7 +337,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     HireDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsAdmin = table.Column<bool>(type: "bit", nullable: false)
+                    IsAdmin = table.Column<bool>(type: "bit", nullable: false),
+                    Img = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    status = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -320,16 +359,18 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AccountID = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     SupplierName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SupplierDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SupplierAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ContactNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
-                    SupplierLogo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SupplierDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SupplierAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ContactNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SupplierLogo = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BlockReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     BlockedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AccountBalance = table.Column<double>(type: "float", nullable: false),
-                    VourcherID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    Img = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    VourcherID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    status = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -347,24 +388,25 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BankInformation",
+                name: "Policies",
                 columns: table => new
                 {
-                    BankId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BankName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccountNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AccountHolder = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MemberId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    PolicyID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PolicyType = table.Column<int>(type: "int", nullable: false),
+                    PolicyContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApplicableObject = table.Column<int>(type: "int", nullable: false),
+                    EffectiveDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Value = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    StaffID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BankInformation", x => x.BankId);
+                    table.PrimaryKey("PK_Policies", x => x.PolicyID);
                     table.ForeignKey(
-                        name: "FK_BankInformation_Members_MemberId",
-                        column: x => x.MemberId,
-                        principalTable: "Members",
-                        principalColumn: "MemberID",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_Policies_Staffs_StaffID",
+                        column: x => x.StaffID,
+                        principalTable: "Staffs",
+                        principalColumn: "StaffID");
                 });
 
             migrationBuilder.CreateTable(
@@ -373,7 +415,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     OrderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MemberID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     OrderStatus = table.Column<int>(type: "int", nullable: false),
                     TotalAmount = table.Column<double>(type: "float", nullable: true),
@@ -387,6 +429,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     DeliveryMethod = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AccountId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     OrderDetailID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     DeliveriesMethodID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
@@ -394,16 +437,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     table.PrimaryKey("PK_Orders", x => x.OrderID);
                     table.ForeignKey(
+                        name: "FK_Orders_AspNetUsers_AccountId",
+                        column: x => x.AccountId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Orders_DeliveriesMethod_DeliveriesMethodID",
                         column: x => x.DeliveriesMethodID,
                         principalTable: "DeliveriesMethod",
                         principalColumn: "DeliveriesMethodID");
-                    table.ForeignKey(
-                        name: "FK_Orders_Members_MemberID",
-                        column: x => x.MemberID,
-                        principalTable: "Members",
-                        principalColumn: "MemberID",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Orders_Suppliers_SupplierID",
                         column: x => x.SupplierID,
@@ -456,17 +498,23 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Reason = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    HandledBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    HandledByAccountId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    MemberID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    StaffID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SupplierReports", x => x.SupplierReportID);
                     table.ForeignKey(
-                        name: "FK_SupplierReports_AspNetUsers_HandledByAccountId",
-                        column: x => x.HandledByAccountId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
+                        name: "FK_SupplierReports_Members_MemberID",
+                        column: x => x.MemberID,
+                        principalTable: "Members",
+                        principalColumn: "MemberID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_SupplierReports_Staffs_StaffID",
+                        column: x => x.StaffID,
+                        principalTable: "Staffs",
+                        principalColumn: "StaffID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_SupplierReports_Suppliers_SupplierID",
@@ -505,6 +553,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     ContractID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ContractTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ContractTerms = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PenaltyPolicy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -513,6 +562,12 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Contracts", x => x.ContractID);
+                    table.ForeignKey(
+                        name: "FK_Contracts_ContractTemplates_ContractTemplateId",
+                        column: x => x.ContractTemplateId,
+                        principalTable: "ContractTemplates",
+                        principalColumn: "ContractTemplateId",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Contracts_Orders_OrderID",
                         column: x => x.OrderID,
@@ -541,13 +596,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         column: x => x.MemberID,
                         principalTable: "Members",
                         principalColumn: "MemberID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_OrderHistory_Orders_OrderID",
                         column: x => x.OrderID,
                         principalTable: "Orders",
                         principalColumn: "OrderID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -560,7 +615,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     Condition = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PenaltyApplied = table.Column<double>(type: "float", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    status = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -605,13 +661,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         column: x => x.MemberId,
                         principalTable: "Members",
                         principalColumn: "MemberID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Transactions_Orders_OrderID",
                         column: x => x.OrderID,
                         principalTable: "Orders",
                         principalColumn: "OrderID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -635,13 +691,13 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         column: x => x.OrderID,
                         principalTable: "Orders",
                         principalColumn: "OrderID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(   
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_OrderDetails_Products_ProductID",
                         column: x => x.ProductID,
                         principalTable: "Products",
                         principalColumn: "ProductID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -729,7 +785,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     VourcherID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    status = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -776,15 +833,41 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Wishlists",
+                columns: table => new
+                {
+                    WishlistID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountID = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Wishlists", x => x.WishlistID);
+                    table.ForeignKey(
+                        name: "FK_Wishlists_AspNetUsers_AccountID",
+                        column: x => x.AccountID,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Wishlists_Products_ProductID",
+                        column: x => x.ProductID,
+                        principalTable: "Products",
+                        principalColumn: "ProductID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "086b7a13-79af-4610-851d-204d9d84b865", null, "STAFF", "Staff" },
-                    { "1cf2de31-b0d8-4447-8f2f-c41df905a3a5", null, "ADMIN", "ADMIN" },
-                    { "74bd6d3a-1119-449b-9743-3956d74e7575", null, "Supplier", "Supplier" },
-                    { "e64b36a7-ed67-47d2-b92e-d2f6caa3eda9", null, "MEMBER", "Member" }
+                    { "086b7a13-79af-4610-851d-204d9d84b865", "086b7a13-79af-4610-851d-204d9d84b865", "STAFF", "staff" },
+                    { "1cf2de31-b0d8-4447-8f2f-c41df905a3a5", "1cf2de31-b0d8-4447-8f2f-c41df905a3a5", "ADMIN", "admin" },
+                    { "74bd6d3a-1119-449b-9743-3956d74e7575", "74bd6d3a-1119-449b-9743-3956d74e7575", "SUPPLIER", "supplier" },
+                    { "e64b36a7-ed67-47d2-b92e-d2f6caa3eda9", "e64b36a7-ed67-47d2-b92e-d2f6caa3eda9", "MEMBER", "member" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -827,14 +910,24 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BankInformation_MemberId",
+                name: "IX_BankInformation_AccountID",
                 table: "BankInformation",
-                column: "MemberId");
+                column: "AccountID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Contracts_ContractTemplateId",
+                table: "Contracts",
+                column: "ContractTemplateId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Contracts_OrderID",
                 table: "Contracts",
                 column: "OrderID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ContractTemplates_AccountID",
+                table: "ContractTemplates",
+                column: "AccountID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Members_AccountID",
@@ -844,8 +937,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_OrderID",
                 table: "OrderDetails",
-                column: "OrderID",
-                unique: true);
+                column: "OrderID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_ProductID",
@@ -864,19 +956,24 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 column: "OrderID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_AccountId",
+                table: "Orders",
+                column: "AccountId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_DeliveriesMethodID",
                 table: "Orders",
                 column: "DeliveriesMethodID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_MemberID",
-                table: "Orders",
-                column: "MemberID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Orders_SupplierID",
                 table: "Orders",
                 column: "SupplierID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Policies_StaffID",
+                table: "Policies",
+                column: "StaffID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductImages_ProductID",
@@ -946,12 +1043,18 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Staffs_AccountID",
                 table: "Staffs",
-                column: "AccountID");
+                column: "AccountID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_SupplierReports_HandledByAccountId",
+                name: "IX_SupplierReports_MemberID",
                 table: "SupplierReports",
-                column: "HandledByAccountId");
+                column: "MemberID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SupplierReports_StaffID",
+                table: "SupplierReports",
+                column: "StaffID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SupplierReports_SupplierID",
@@ -966,7 +1069,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Suppliers_AccountID",
                 table: "Suppliers",
-                column: "AccountID");
+                column: "AccountID",
+                unique: true,
+                filter: "[AccountID] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Suppliers_VourcherID",
@@ -988,6 +1093,16 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 table: "Transactions",
                 column: "OrderID",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Wishlists_AccountID",
+                table: "Wishlists",
+                column: "AccountID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Wishlists_ProductID",
+                table: "Wishlists",
+                column: "ProductID");
         }
 
         /// <inheritdoc />
@@ -1042,9 +1157,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 name: "ReturnDetails");
 
             migrationBuilder.DropTable(
-                name: "Staffs");
-
-            migrationBuilder.DropTable(
                 name: "SupplierReports");
 
             migrationBuilder.DropTable(
@@ -1054,25 +1166,34 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 name: "Transactions");
 
             migrationBuilder.DropTable(
+                name: "Wishlists");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "ContractTemplates");
+
+            migrationBuilder.DropTable(
+                name: "Staffs");
 
             migrationBuilder.DropTable(
                 name: "BankInformation");
 
             migrationBuilder.DropTable(
+                name: "Members");
+
+            migrationBuilder.DropTable(
                 name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "DeliveriesMethod");
 
             migrationBuilder.DropTable(
-                name: "Members");
+                name: "Categories");
 
             migrationBuilder.DropTable(
                 name: "Suppliers");

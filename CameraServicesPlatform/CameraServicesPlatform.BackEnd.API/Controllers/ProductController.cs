@@ -1,5 +1,7 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Category;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -76,9 +78,10 @@ public class ProductController : ControllerBase
 
     
     [HttpPost("create-product")]
-    public async Task<AppActionResult> CreateProduct([FromForm]ProductResponseDto productResponse)
+    public async Task<AppActionResult> CreateProduct([FromForm] ProductResponseDto listProduct)
     {
-        return await _productService.CreateProduct(productResponse);
+          return await _productService.CreateProduct(listProduct);
+      
     }
 
     [HttpPut("update-product")]

@@ -16,7 +16,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 columns: table => new
                 {
                     WishlistID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MemberID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -24,10 +24,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     table.PrimaryKey("PK_Wishlists", x => x.WishlistID);
                     table.ForeignKey(
-                        name: "FK_Wishlists_Members_MemberID",
-                        column: x => x.MemberID,
-                        principalTable: "Members",
-                        principalColumn: "MemberID",
+                        name: "FK_Wishlists_Account_AccountID",
+                        column: x => x.AccountID,
+                        principalTable: "Account",
+                        principalColumn: "AccountID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Wishlists_Products_ProductID",
@@ -38,9 +38,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Wishlists_MemberID",
+                name: "IX_Wishlists_AccountID",
                 table: "Wishlists",
-                column: "MemberID");
+                column: "AccountID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Wishlists_ProductID",

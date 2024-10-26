@@ -1,75 +1,59 @@
-﻿/*using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
+//namespace CameraServicesPlatform.BackEnd.Domain.Migrations
+//{
+//    public partial class UpdateContractTableTable1 : Migration
+//    {
+//        protected override void Up(MigrationBuilder migrationBuilder)
+//        {
+//            // Check for the column existence
+//            var columnCheckSql = @"
+//                IF NOT EXISTS (
+//                    SELECT 1 
+//                    FROM INFORMATION_SCHEMA.COLUMNS 
+//                    WHERE TABLE_NAME = 'ContractTemplates' 
+//                    AND COLUMN_NAME = 'AccountID'
+//                ) 
+//                BEGIN
+//                    ALTER TABLE [ContractTemplates] 
+//                    ADD [AccountID] NVARCHAR(450) NOT NULL DEFAULT N'';
+//                END";
+//            migrationBuilder.Sql(columnCheckSql);
 
-namespace CameraServicesPlatform.BackEnd.Domain.Migrations
-{
-    /// <inheritdoc />
-    public partial class UpdateContractTableTable1 : Migration
-    {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ContractTemplates_Members_MemberID",
-                table: "ContractTemplates");
+//            // Check for the index existence
+//            var indexCheckSql = @"
+//                IF NOT EXISTS (
+//                    SELECT 1 
+//                    FROM sys.indexes 
+//                    WHERE name = 'IX_ContractTemplates_AccountID' 
+//                    AND object_id = OBJECT_ID('ContractTemplates')
+//                ) 
+//                BEGIN
+//                    CREATE INDEX [IX_ContractTemplates_AccountID] 
+//                    ON [ContractTemplates] ([AccountID]);
+//                END";
+//            migrationBuilder.Sql(indexCheckSql);
 
-            migrationBuilder.DropIndex(
-                name: "IX_ContractTemplates_MemberID",
-                table: "ContractTemplates");
+//            // Foreign key constraint for AccountID to AspNetUsers table
+//            migrationBuilder.AddForeignKey(
+//                name: "FK_ContractTemplates_AspNetUsers_AccountID",
+//                table: "ContractTemplates",
+//                column: "AccountID",
+//                principalTable: "AspNetUsers",
+//                principalColumn: "Id",
+//                onDelete: ReferentialAction.Cascade);
+//        }
 
-            migrationBuilder.DropColumn(
-                name: "MemberID",
-                table: "ContractTemplates");
+//        protected override void Down(MigrationBuilder migrationBuilder)
+//        {
+//            migrationBuilder.DropForeignKey(
+//                name: "FK_ContractTemplates_AspNetUsers_AccountID",
+//                table: "ContractTemplates");
 
-            migrationBuilder.AddColumn<string>(
-                name: "AccountID",
-                table: "ContractTemplates",
-                type: "nvarchar(450)",
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ContractTemplates_AccountID",
-                table: "ContractTemplates",
-                column: "AccountID");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ContractTemplates_AspNetUsers_AccountID",
-                table: "ContractTemplates",
-                column: "AccountID",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-        }
-
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ContractTemplates_AspNetUsers_AccountID",
-                table: "ContractTemplates");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ContractTemplates_AccountID",
-                table: "ContractTemplates");
-
-            migrationBuilder.DropColumn(
-                name: "AccountID",
-                table: "ContractTemplates");
-
-            migrationBuilder.AddColumn<Guid>(
-                name: "MemberID",
-                table: "ContractTemplates",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ContractTemplates_MemberID",
-                table: "ContractTemplates",
-                column: "MemberID");
+//            migrationBuilder.DropIndex(
+//                name: "IX_ContractTemplates_AccountID",
+//                table: "ContractTemplates");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_ContractTemplates_Members_MemberID",
@@ -81,4 +65,3 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         }
     }
 }
-*/

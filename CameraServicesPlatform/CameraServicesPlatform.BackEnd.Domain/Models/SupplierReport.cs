@@ -9,7 +9,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         [Key]
         public Guid SupplierReportID { get; set; }
 
-
         public Guid SupplierID { get; set; }
 
         [ForeignKey(nameof(SupplierID))]
@@ -17,17 +16,16 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public StatusType StatusType { get; set; }
 
-
         public DateTime StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
 
         public string? Reason { get; set; }
 
-        public Guid MemberID { get; set; }
+        public string? AccountID { get; set; }
 
-        [ForeignKey(nameof(MemberID))]
-        public Member Member { get; set; }
+        [ForeignKey(nameof(AccountID))]
+        public Account? Account { get; set; } 
 
         public Guid StaffID { get; set; }
 
@@ -35,3 +33,4 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Staff Staff { get; set; }
     }
 }
+

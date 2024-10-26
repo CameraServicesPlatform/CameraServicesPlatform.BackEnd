@@ -45,7 +45,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-order-of-account")]
-        public async Task<AppActionResult> GetOrderByMemberId(string AccountID, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetOrderByAccountID(string AccountID, int pageIndex = 1, int pageSize = 10)
         {
             return await _orderService.GetOrderByAccountID(AccountID, pageIndex, pageSize);
         }

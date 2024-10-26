@@ -14,7 +14,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetProductByCategoryName([FromQuery] string? filter, int pageIndex, int pageSize);
         Task<AppActionResult> GetProductByRent(int pageIndex, int pageSize);
         Task<AppActionResult> GetProductBySold(int pageIndex, int pageSize); 
-        Task<AppActionResult> GetProductByRentSold(int pageIndex, int pageSize);
+        Task<AppActionResult> GetProductAvaibleRentAndSell
+            (int pageIndex, int pageSize);
         Task<AppActionResult> UpdateProduct(ProductUpdateResponseDto productResponse);
         Task<AppActionResult> GetProductByCategoryId(string filter, int pageIndex, int pageSize);
         Task<AppActionResult> GetProductBySupplierId(string filter, int pageIndex, int pageSize);

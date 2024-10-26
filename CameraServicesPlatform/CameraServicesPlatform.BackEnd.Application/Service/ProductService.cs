@@ -1145,13 +1145,15 @@ public async Task<AppActionResult> CreateProduct(ProductResponseDto productRespo
 
             return result;
         }
-
         public async Task<AppActionResult> GetProductByRentSold(int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Both;
+                // Update the filter to include both AvailableSell and AvailableRent statuses
+                Expression<Func<Product, bool>>? filter = a =>
+                    a.Status == ProductStatusEnum.AvailableSell ||
+                    a.Status == ProductStatusEnum.AvailableRent;
 
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1165,19 +1167,19 @@ public async Task<AppActionResult> CreateProduct(ProductResponseDto productRespo
 
                 foreach (var item in pagedResult.Items)
                 {
+                    // Fetch product vouchers
                     var productVoucher = await _productVoucherRepository.GetAllDataByExpression(
-                    a => a.ProductID.Equals(item.ProductID),
-                    pageIndex,
-                    pageSize,
-                    null,
-                    isAscending: true,
-                    null
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
                     );
                     List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
 
                     foreach (var a in productVoucher.Items)
                     {
-
                         ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
                         {
                             ProductVoucherID = a.ProductVoucherID.ToString(),
@@ -1188,6 +1190,7 @@ public async Task<AppActionResult> CreateProduct(ProductResponseDto productRespo
                         listProductVoucher.Add(productVoucherResponse);
                     }
 
+                    // Fetch product specifications
                     var productSpecification = await _productSpecificationRepository.GetAllDataByExpression(
                         a => a.ProductID.Equals(item.ProductID),
                         pageIndex,
@@ -1200,7 +1203,6 @@ public async Task<AppActionResult> CreateProduct(ProductResponseDto productRespo
 
                     foreach (var a in productSpecification.Items)
                     {
-
                         ProductSpecificationResponse productSpecificationResponse = new ProductSpecificationResponse
                         {
                             ProductSpecificationID = a.ProductSpecificationID.ToString(),
@@ -1209,6 +1211,8 @@ public async Task<AppActionResult> CreateProduct(ProductResponseDto productRespo
                         };
                         listProductSpecification.Add(productSpecificationResponse);
                     }
+
+                    // Fetch product images
                     var productImage = await _productImageRepository.GetAllDataByExpression(
                         a => a.ProductID.Equals(item.ProductID),
                         pageIndex,
@@ -1236,10 +1240,10 @@ public async Task<AppActionResult> CreateProduct(ProductResponseDto productRespo
                         listImage = productImage.Items,
                         listVoucher = listProductVoucher,
                         listProductSpecification = listProductSpecification
-
                     };
                     listProduct.Add(productResponse);
                 }
+
                 result.Result = listProduct;
                 result.IsSuccess = true;
             }
@@ -1250,6 +1254,117 @@ public async Task<AppActionResult> CreateProduct(ProductResponseDto productRespo
 
             return result;
         }
+
+        public async Task<AppActionResult> GetProductAvaibleRentAndSell(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                // Update the filter to include both AvailableSell and AvailableRent statuses
+                Expression<Func<Product, bool>>? filter = a =>
+                    a.Status == ProductStatusEnum.AvailableSell ||
+                    a.Status == ProductStatusEnum.AvailableRent;
+
+                List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
+                var pagedResult = await _productRepository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
+                    null
+                );
+
+                foreach (var item in pagedResult.Items)
+                {
+                    // Fetch product vouchers
+                    var productVoucher = await _productVoucherRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
+
+                    foreach (var a in productVoucher.Items)
+                    {
+                        ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                        {
+                            ProductVoucherID = a.ProductVoucherID.ToString(),
+                            VourcherID = a.VourcherID.ToString(),
+                            CreatedAt = a.CreatedAt,
+                            UpdatedAt = a.UpdatedAt,
+                        };
+                        listProductVoucher.Add(productVoucherResponse);
+                    }
+
+                    // Fetch product specifications
+                    var productSpecification = await _productSpecificationRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    List<ProductSpecificationResponse> listProductSpecification = new List<ProductSpecificationResponse>();
+
+                    foreach (var a in productSpecification.Items)
+                    {
+                        ProductSpecificationResponse productSpecificationResponse = new ProductSpecificationResponse
+                        {
+                            ProductSpecificationID = a.ProductSpecificationID.ToString(),
+                            Specification = a.Specification,
+                            Details = a.Details
+                        };
+                        listProductSpecification.Add(productSpecificationResponse);
+                    }
+
+                    // Fetch product images
+                    var productImage = await _productImageRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    ProductByIdResponse productResponse = new ProductByIdResponse
+                    {
+                        ProductID = item.ProductID.ToString(),
+                        SerialNumber = item.SerialNumber,
+                        SupplierID = item.SupplierID?.ToString(),
+                        CategoryID = item.CategoryID?.ToString(),
+                        ProductName = item.ProductName,
+                        ProductDescription = item.ProductDescription,
+                        PriceBuy = item.PriceBuy,
+                        PriceRent = item.PriceRent,
+                        Brand = item.Brand,
+                        Quality = item.Quality,
+                        Status = item.Status,
+                        Rating = item.Rating,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                        listImage = productImage.Items,
+                        listVoucher = listProductVoucher,
+                        listProductSpecification = listProductSpecification
+                    };
+                    listProduct.Add(productResponse);
+                }
+
+                result.Result = listProduct;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
     }
 
 }

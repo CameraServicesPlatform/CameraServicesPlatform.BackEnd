@@ -164,7 +164,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetWishlistByMemberID(string AccountID, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetWishlistByAccountID(string AccountID, int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
             try

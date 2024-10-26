@@ -28,8 +28,7 @@ public class AccountService : GenericBackendService, IAccountService
 {
     private readonly IRepository<Account> _accountRepository;
     private readonly IRepository<Supplier> _supplierRepository;
-    private readonly IRepository<BankInformation> _bankInformationRepository;
-    private readonly IRepository<Staff> _staffRepository;
+     private readonly IRepository<Staff> _staffRepository;
     private readonly IMapper _mapper;
     private readonly SignInManager<Account> _signInManager;
     private readonly TokenDTO _tokenDto;
@@ -46,8 +45,7 @@ public class AccountService : GenericBackendService, IAccountService
     public AccountService(
         IRepository<Account> accountRepository,
         IRepository<Supplier> supplierRepository,
-         IRepository<BankInformation> bankInformationRepository,
-         IRepository<Staff> staffRepository,
+          IRepository<Staff> staffRepository,
          IUnitOfWork unitOfWork,
         Microsoft.AspNetCore.Identity.UserManager<Account> userManager,
         SignInManager<Account> signInManager,
@@ -65,8 +63,7 @@ public class AccountService : GenericBackendService, IAccountService
     {
         _accountRepository = accountRepository;
         _supplierRepository = supplierRepository;
-        _bankInformationRepository = bankInformationRepository;
-        _staffRepository = staffRepository;
+         _staffRepository = staffRepository;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _signInManager = signInManager;
@@ -185,19 +182,15 @@ public class AccountService : GenericBackendService, IAccountService
                     await Task.Delay(100);
                     await _unitOfWork.SaveChangeAsync();
 
-                    BankInformation bankInfor = _mapper.Map<BankInformation>(dto);
-                    bankInfor.AccountID = account.Id;
-
-                    _ = await _bankInformationRepository.Insert(bankInfor);
-                    await Task.Delay(100);
+ 
+                     await Task.Delay(100);
                     await _unitOfWork.SaveChangeAsync();
                     // Gán thông tin tài khoản và nhà cung cấp vào kết quả
                     result.Result = new
                     {
                         Account = account,
                         Supplier = supplier,
-                        BankInformation = bankInfor
-                    };
+                     };
                 }
                 else
                 {
@@ -360,8 +353,9 @@ public class AccountService : GenericBackendService, IAccountService
                     Gender = signUpRequest.Gender,
                     VerifyCode = verifyCode,
                     IsVerified = isGoogle,
-
-
+                    BankName = signUpRequest.BankName,
+                    AccountNumber = signUpRequest.AccountNumber,
+                    AccountHolder = signUpRequest.AccountHolder,
                 };
 
                 // Upload ảnh căn cước công dân lên Firebase nếu có

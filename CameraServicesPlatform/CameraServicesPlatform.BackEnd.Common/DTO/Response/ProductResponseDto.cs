@@ -29,10 +29,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         
         public List<string> listProductSpecification { get; set; }  = new List<string>();
     }
-    public class ProductSpecificationCreateDto
-    {
-        public string Specification { get; set; }
 
-        public string? Details { get; set; }
-    }
+    
 }

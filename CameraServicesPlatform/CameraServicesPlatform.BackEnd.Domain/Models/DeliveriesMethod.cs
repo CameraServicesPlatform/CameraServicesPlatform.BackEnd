@@ -13,7 +13,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DeliveryStatus MethodName { get; set; }
 
 
-        public string Description { get; set; }
+        public required string Description { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

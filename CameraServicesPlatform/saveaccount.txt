@@ -343,7 +343,7 @@ public class AccountService : GenericBackendService, IAccountService
         {
             var member = new Member
             {
-                MemberID = Guid.NewGuid(),
+                AccountID = Guid.NewGuid(),
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,

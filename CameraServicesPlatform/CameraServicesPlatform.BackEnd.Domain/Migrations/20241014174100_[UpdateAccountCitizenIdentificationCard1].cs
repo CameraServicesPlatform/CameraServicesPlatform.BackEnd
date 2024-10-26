@@ -1,61 +1,61 @@
-﻿/*using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-#nullable disable
+//#nullable disable
 
-namespace CameraServicesPlatform.BackEnd.Domain.Migrations
-{
-    /// <inheritdoc />
-    public partial class UpdateAccountCitizenIdentificationCard1 : Migration
-    {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropIndex(
-                name: "IX_OrderDetails_OrderID",
-                table: "OrderDetails");
+//namespace CameraServicesPlatform.BackEnd.Domain.Migrations
+//{
+//    /// <inheritdoc />
+//    public partial class UpdateAccountCitizenIdentificationCard1 : Migration
+//    {
+//        /// <inheritdoc />
+//        protected override void Up(MigrationBuilder migrationBuilder)
+//        {
+//            migrationBuilder.DropIndex(
+//                name: "IX_OrderDetails_OrderID",
+//                table: "OrderDetails");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "ContactNumber",
-                table: "Suppliers",
-                type: "nvarchar(max)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(20)",
-                oldMaxLength: 20,
-                oldNullable: true);
+//            migrationBuilder.AlterColumn<string>(
+//                name: "ContactNumber",
+//                table: "Suppliers",
+//                type: "nvarchar(max)",
+//                nullable: true,
+//                oldClrType: typeof(string),
+//                oldType: "nvarchar(20)",
+//                oldMaxLength: 20,
+//                oldNullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "BackOfCitizenIdentificationCard",
-                table: "AspNetUsers",
-                type: "nvarchar(max)",
-                nullable: true);
+//            migrationBuilder.AddColumn<string>(
+//                name: "BackOfCitizenIdentificationCard",
+//                table: "AspNetUsers",
+//                type: "nvarchar(max)",
+//                nullable: true);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_OrderDetails_OrderID",
-                table: "OrderDetails",
-                column: "OrderID");
-        }
+//            migrationBuilder.CreateIndex(
+//                name: "IX_OrderDetails_OrderID",
+//                table: "OrderDetails",
+//                column: "OrderID");
+//        }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropIndex(
-                name: "IX_OrderDetails_OrderID",
-                table: "OrderDetails");
+//        /// <inheritdoc />
+//        protected override void Down(MigrationBuilder migrationBuilder)
+//        {
+//            migrationBuilder.DropIndex(
+//                name: "IX_OrderDetails_OrderID",
+//                table: "OrderDetails");
 
-            migrationBuilder.DropColumn(
-                name: "BackOfCitizenIdentificationCard",
-                table: "AspNetUsers");
+//            migrationBuilder.DropColumn(
+//                name: "BackOfCitizenIdentificationCard",
+//                table: "AspNetUsers");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "ContactNumber",
-                table: "Suppliers",
-                type: "nvarchar(20)",
-                maxLength: 20,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
-                oldNullable: true);
+//            migrationBuilder.AlterColumn<string>(
+//                name: "ContactNumber",
+//                table: "Suppliers",
+//                type: "nvarchar(20)",
+//                maxLength: 20,
+//                nullable: true,
+//                oldClrType: typeof(string),
+//                oldType: "nvarchar(max)",
+//                oldNullable: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_OrderID",
@@ -65,4 +65,3 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         }
     }
 }
-*/

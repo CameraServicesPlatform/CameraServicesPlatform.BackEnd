@@ -1,5 +1,7 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Category;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -44,10 +46,10 @@ public class ProductController : ControllerBase
         return await _productService.GetProductBySold(pageIndex, pageSize);
     }
 
-    [HttpGet("get-product-available-both")]
-    public async Task<AppActionResult> GetProductAvaibleRentAndSell(int pageIndex = 1, int pageSize = 10)
+    [HttpGet("get-product-by-rent-sold")]
+    public async Task<AppActionResult> GetProductByRentSold(int pageIndex = 1, int pageSize = 10)
     {
-        return await _productService.GetProductAvaibleRentAndSell(pageIndex, pageSize);
+        return await _productService.GetProductByRentSold(pageIndex, pageSize);
     }
 
     [HttpGet("get-product-by-name")]
@@ -76,9 +78,10 @@ public class ProductController : ControllerBase
 
     
     [HttpPost("create-product")]
-    public async Task<AppActionResult> CreateProduct([FromForm]ProductResponseDto productResponse)
+    public async Task<AppActionResult> CreateProduct([FromForm] ProductResponseDto listProduct)
     {
-        return await _productService.CreateProduct(productResponse);
+          return await _productService.CreateProduct(listProduct);
+      
     }
 
     [HttpPut("update-product")]

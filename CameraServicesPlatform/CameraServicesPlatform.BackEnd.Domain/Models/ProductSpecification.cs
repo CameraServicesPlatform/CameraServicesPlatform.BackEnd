@@ -20,3 +20,4 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
     }
 }
+

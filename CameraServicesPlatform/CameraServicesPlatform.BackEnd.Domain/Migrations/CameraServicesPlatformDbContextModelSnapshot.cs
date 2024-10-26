@@ -395,10 +395,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
                     b.Property<int>("PolicyType")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("StaffID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("Value")
                         .HasColumnType("datetime2");
 
                     b.HasKey("PolicyID");
+
+                    b.HasIndex("StaffID");
 
                     b.ToTable("Policies");
                 });
@@ -1371,6 +1376,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Policy", b =>
+                {
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Staff", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffID");
+
+                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductImage", b =>

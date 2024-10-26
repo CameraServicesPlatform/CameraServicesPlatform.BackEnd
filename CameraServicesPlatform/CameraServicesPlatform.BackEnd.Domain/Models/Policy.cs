@@ -1,5 +1,6 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
@@ -17,6 +18,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime Value { get; set; }
         public Boolean IsDisable { get; set; }
 
+        public Guid? StaffID { get; set; }
 
+        [ForeignKey(nameof(StaffID))]
+        public Staff? Staff { get; set; }
     }
 }

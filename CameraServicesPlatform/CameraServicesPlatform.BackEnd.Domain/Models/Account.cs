@@ -29,9 +29,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string? Img { get; set; }
         public string? FrontOfCitizenIdentificationCard { get; set; }
         public string? BackOfCitizenIdentificationCard { get; set; }
-     public string BankName { get; set; }
-   public  string AccountNumber { get; set; }
+     public string? BankName { get; set; }
+   public  string? AccountNumber { get; set; }
 
-    public string AccountHolder { get; set; }
+    public string? AccountHolder { get; set; }
     }
 }

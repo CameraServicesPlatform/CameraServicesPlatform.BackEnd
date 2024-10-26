@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    partial class CameraServicesPlatformDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241026162532_updatecategory")]
+    partial class updatecategory
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -395,10 +398,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
                     b.Property<int>("PolicyType")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("StaffID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("Value")
                         .HasColumnType("datetime2");
 
                     b.HasKey("PolicyID");
+
+                    b.HasIndex("StaffID");
 
                     b.ToTable("Policies");
                 });
@@ -1371,6 +1379,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
                     b.Navigation("Order");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Policy", b =>
+                {
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Staff", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffID");
+
+                    b.Navigation("Staff");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ProductImage", b =>

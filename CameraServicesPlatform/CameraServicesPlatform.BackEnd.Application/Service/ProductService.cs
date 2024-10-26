@@ -278,11 +278,7 @@ public async Task<AppActionResult> CreateProduct(ProductResponseDto productRespo
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    includes: new Expression<Func<Product, object>>[]
-                    {
-                a => a.Supplier,
-                a => a.Category
-                    }
+                    null
                 );
 
                 foreach (var item in pagedResult.Items)

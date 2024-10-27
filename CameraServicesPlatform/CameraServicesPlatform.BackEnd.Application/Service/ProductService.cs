@@ -501,10 +501,10 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         };
                         listProduct.Add(productResponse);
  
-                    }
+                    }  
  
-                }
-
+ 
+ 
                 result.Result = listProduct;
                 result.IsSuccess = true;
             }

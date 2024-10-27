@@ -92,45 +92,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.Id = request.AccountID;
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
-
+                order.OrderType = OrderType.Purchase;
+                order.DeliveryMethod = request.DeliveryMethod;
                 double totalOrderPrice = 0;
                 var orderDetails = new List<OrderDetail>();
 
-                foreach (var product in request.Products)
-                {
-                    var orderDetailRequest = request.OrderDetailRequests
-                    .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
-
-                    var productVouchers = await _productVoucherRepository.GetByExpression(
-                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VourcherID));
-
-                    double discount = 0;
-
-                    if (productVouchers != null)
-                    {
-                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
-
-                        if (voucher != null )
-                        {
-                            discount = voucher.DiscountAmount;
-                        }
-                    }
-                    var orderDetail = new OrderDetail
-                    {
-                        ProductID = Guid.Parse(product.ProductID),
-                        ProductPrice = product.PriceBuy ?? 0,
-                        Discount = discount,
-                        ProductQuality = product.Quality,
-                    };
-
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
-                    orderDetail.ProductPriceTotal = priceAfterDiscount;
-
-                    totalOrderPrice += priceAfterDiscount;
-
-                    orderDetails.Add(orderDetail);
-                }
-
+ 
                 order.TotalAmount = totalOrderPrice;
 
                 await _orderRepository.Insert(order);
@@ -176,7 +143,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -273,7 +240,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -327,7 +294,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -462,7 +429,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -516,7 +483,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;

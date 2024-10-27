@@ -9,6 +9,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public string SupplierID { get; set; }
         public string AccountID { get; set; }
         public string VourcherID { get; set; }
+
         public string ProductID { get; set; }
         public DateTime OrderDate { get; set; }
         public OrderStatus OrderStatus { get; set; }

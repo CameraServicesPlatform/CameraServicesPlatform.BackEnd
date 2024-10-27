@@ -3,7 +3,6 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
-using CameraServicesPlatform.BackEnd.Domain.Migrations;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.Identity.Client;
 using System;

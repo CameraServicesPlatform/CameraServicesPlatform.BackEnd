@@ -5,7 +5,6 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Data;
-using CameraServicesPlatform.BackEnd.Domain.Migrations;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Google.Apis.Util;
 using Microsoft.AspNetCore.Mvc;

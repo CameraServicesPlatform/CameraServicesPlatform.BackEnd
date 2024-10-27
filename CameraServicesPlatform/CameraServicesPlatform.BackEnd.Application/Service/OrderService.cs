@@ -123,7 +123,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -176,7 +176,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -273,7 +273,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -327,7 +327,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -462,7 +462,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -516,7 +516,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;

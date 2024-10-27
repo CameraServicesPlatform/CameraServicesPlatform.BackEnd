@@ -39,7 +39,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Data
         public DbSet<Vourcher> Vourchers { get; set; }
         public DbSet<ContractTemplate> ContractTemplates { get; set; }
         public DbSet<Wishlist> Wishlists { get; set; }
-         public DbSet<HistoryTransaction> HistoryTransactions { get; set; }
+        public DbSet<HistoryTransaction> HistoryTransactions { get; set; }
         public DbSet<Payment> Payments { get; set; }
 
         public DbSet<Request> Requests { get; set; }

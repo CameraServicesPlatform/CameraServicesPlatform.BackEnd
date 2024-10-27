@@ -15,7 +15,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 
         public double Price { get; set; }
 
-
         public string? Brand { get; set; }
 
         public string Quality { get; set; }

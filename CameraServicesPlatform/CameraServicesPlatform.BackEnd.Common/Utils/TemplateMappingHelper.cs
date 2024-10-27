@@ -632,16 +632,18 @@ public class TemplateMappingHelper
         <p class=""greeting""></p>
 
         <p class=""emailBody"">
-         Tài khoản hướng dẫn viên của bạn đã được tọ thành công <b><i>Camera service platform </i></b>.
+         Tài khoản staff của bạn đã được tạo thành công trên nền tảng <b><i>Camera service platform </i></b>.
         </p>
         <p class=""emailBody"">
           Đây là thông tin tài khoản của bạn, hãy thay đỗi mật khẩu
           <b><i> " + body + @"</i></b>
         </p>
-
         <p class=""emailBody"">
-          Time: 1 day.
-          Please enter the code above into the system to proceed to the next step
+        Time: 1 day.
+        </p>
+        <p class=""emailBody"">
+          
+          Vui lòng nhập mã trên vào hệ thống để tiến hành bước tiếp theo
           <a href=""url""
             ><span style=""font-weight: bold; text-transform: uppercase""
               >here</span
@@ -649,9 +651,9 @@ public class TemplateMappingHelper
           >
         </p>
         <p class=""support"">
-          Thank you for your interest in the services of <b><i>Camera service platform</i></b
-          >, for any inquiries, please contact
-          <u><i>dan1314705@gmail.com</i></u> for support
+          Cảm ơn bạn đã quan tâm đến các dịch vụ của <b><i>Camera service platform</i></b
+          >, mọi thắc mắc vui lòng liên hệ
+          <u><i>dan1314705@gmail.com</i></u> để được hỗ trợ
         </p>
         <div class=""signature"">
           <p>Best regards,</p>

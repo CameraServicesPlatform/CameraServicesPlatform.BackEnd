@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CameraServicesPlatform.BackEnd.Domain.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 
 namespace CameraServicesPlatform.BackEnd.Domain.Models
 {
@@ -13,5 +15,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string CategoryName { get; set; }
 
         public string? CategoryDescription { get; set; }
+
+        public Boolean StatusCategory { get; set; }
     }
 }
+
+

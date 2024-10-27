@@ -21,10 +21,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        // Foreign key to Member
-        public Guid MemberID { get; set; }
-        [ForeignKey("MemberID")]
+        // Foreign key to Account
+        public string AccountID { get; set; }
+        [ForeignKey("AccountID")]
 
-        public Member Member { get; set; }
+        public Account Account { get; set; }
     }
 }

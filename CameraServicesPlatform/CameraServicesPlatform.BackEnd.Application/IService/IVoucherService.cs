@@ -11,7 +11,6 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
     {
      
         Task<AppActionResult> CreateVoucher(VoucherResponseDto voucherResponse);
-        Task<AppActionResult> DeleteVoucher(string voucherId);
         Task<AppActionResult> GetAllVoucher(int pageIndex, int pageSize);
         Task<AppActionResult> GetVoucherById(string id, int pageIndex, int pageSize);
         Task<AppActionResult> GetVoucherBySupplierId(string supplierId, int pageIndex, int pageSize);

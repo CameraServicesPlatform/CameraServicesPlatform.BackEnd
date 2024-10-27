@@ -37,5 +37,7 @@ public class Payment
 
 
     public string Image { get; set; }
+    public Boolean IsDisable { get; set; }
+
 }
 

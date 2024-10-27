@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
+using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
 using Utility = CameraServicesPlatform.BackEnd.Common.Utils.Utility;
 
 
@@ -28,8 +29,7 @@ public class AccountService : GenericBackendService, IAccountService
 {
     private readonly IRepository<Account> _accountRepository;
     private readonly IRepository<Supplier> _supplierRepository;
-    private readonly IRepository<BankInformation> _bankInformationRepository;
-    private readonly IRepository<Staff> _staffRepository;
+     private readonly IRepository<Staff> _staffRepository;
     private readonly IMapper _mapper;
     private readonly SignInManager<Account> _signInManager;
     private readonly TokenDTO _tokenDto;
@@ -46,8 +46,7 @@ public class AccountService : GenericBackendService, IAccountService
     public AccountService(
         IRepository<Account> accountRepository,
         IRepository<Supplier> supplierRepository,
-         IRepository<BankInformation> bankInformationRepository,
-         IRepository<Staff> staffRepository,
+          IRepository<Staff> staffRepository,
          IUnitOfWork unitOfWork,
         Microsoft.AspNetCore.Identity.UserManager<Account> userManager,
         SignInManager<Account> signInManager,
@@ -65,8 +64,7 @@ public class AccountService : GenericBackendService, IAccountService
     {
         _accountRepository = accountRepository;
         _supplierRepository = supplierRepository;
-        _bankInformationRepository = bankInformationRepository;
-        _staffRepository = staffRepository;
+         _staffRepository = staffRepository;
         _unitOfWork = unitOfWork;
         _userManager = userManager;
         _signInManager = signInManager;
@@ -185,19 +183,15 @@ public class AccountService : GenericBackendService, IAccountService
                     await Task.Delay(100);
                     await _unitOfWork.SaveChangeAsync();
 
-                    BankInformation bankInfor = _mapper.Map<BankInformation>(dto);
-                    bankInfor.AccountID = account.Id;
-
-                    _ = await _bankInformationRepository.Insert(bankInfor);
-                    await Task.Delay(100);
+ 
+                     await Task.Delay(100);
                     await _unitOfWork.SaveChangeAsync();
                     // Gán thông tin tài khoản và nhà cung cấp vào kết quả
                     result.Result = new
                     {
                         Account = account,
                         Supplier = supplier,
-                        BankInformation = bankInfor
-                    };
+                     };
                 }
                 else
                 {
@@ -360,8 +354,9 @@ public class AccountService : GenericBackendService, IAccountService
                     Gender = signUpRequest.Gender,
                     VerifyCode = verifyCode,
                     IsVerified = isGoogle,
-
-
+                    BankName = signUpRequest.BankName,
+                    AccountNumber = signUpRequest.AccountNumber,
+                    AccountHolder = signUpRequest.AccountHolder,
                 };
 
                 // Upload ảnh căn cước công dân lên Firebase nếu có
@@ -870,6 +865,7 @@ public class AccountService : GenericBackendService, IAccountService
 
     public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO accountRequest)
     {
+        var firebaseService = Resolve<IFirebaseService>();
         AppActionResult result = new();
         try
         {
@@ -885,6 +881,42 @@ public class AccountService : GenericBackendService, IAccountService
                 account!.FirstName = accountRequest.FirstName;
                 account.LastName = accountRequest.LastName;
                 account.PhoneNumber = accountRequest.PhoneNumber;
+                string imageUrlFrontOfCitizenIdentificationCard = null;
+                string imageUrlBackOfCitizenIdentificationCard = null;
+                if (accountRequest.FrontOfCitizenIdentificationCard != null || accountRequest.BackOfCitizenIdentificationCard != null)
+                {
+
+                    if (accountRequest.FrontOfCitizenIdentificationCard != null && accountRequest.FrontOfCitizenIdentificationCard.ToString() != account.FrontOfCitizenIdentificationCard)
+                    {
+                        if (!string.IsNullOrEmpty(account.FrontOfCitizenIdentificationCard))
+                        {
+                            await firebaseService.DeleteFileFromFirebase(account.FrontOfCitizenIdentificationCard);
+                        }
+
+                        var imgPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{account.Id}.jpg";
+                        var imgUpload = await firebaseService.UploadFileToFirebase(accountRequest.FrontOfCitizenIdentificationCard, imgPathName);
+                        imageUrlFrontOfCitizenIdentificationCard = imgUpload?.Result?.ToString();
+                    }
+
+
+                    if (accountRequest.BackOfCitizenIdentificationCard != null && accountRequest.BackOfCitizenIdentificationCard.ToString() != account.BackOfCitizenIdentificationCard)
+                    {
+                        if (!string.IsNullOrEmpty(account.BackOfCitizenIdentificationCard))
+                        {
+                            await firebaseService.DeleteFileFromFirebase(account.BackOfCitizenIdentificationCard);
+                        }
+
+                        var imgPathName = SD.FirebasePathName.ACCOUNT_CITIZEN_IDENTIFICATION_CARD + $"{account.Id}.jpg";
+                        var imgUpload = await firebaseService.UploadFileToFirebase(accountRequest.BackOfCitizenIdentificationCard, imgPathName);
+                        imageUrlBackOfCitizenIdentificationCard = imgUpload?.Result?.ToString();
+                    }
+
+                    account.BackOfCitizenIdentificationCard = imageUrlBackOfCitizenIdentificationCard;
+                    account.FrontOfCitizenIdentificationCard = imageUrlFrontOfCitizenIdentificationCard;
+                }
+                account.Gender = accountRequest.Gender;
+                account.Hobby = accountRequest.Hobby;
+                account.Job = accountRequest.Job;
                 result.Result = await _accountRepository.Update(account);
             }
 
@@ -988,6 +1020,7 @@ public class AccountService : GenericBackendService, IAccountService
                 if (addPassword.Succeeded)
                 {
                     user!.VerifyCode = null;
+                    await _userManager.UpdateAsync(user);
                 }
                 else
                 {
@@ -1021,6 +1054,7 @@ public class AccountService : GenericBackendService, IAccountService
             }
             else
             {
+                user.EmailConfirmed = true;
                 user.IsVerified = true; // Set verified status
                 user.VerifyCode = null; // Clear verification code
                 _ = await _userManager.UpdateAsync(user); // Save changes to the database
@@ -1052,6 +1086,9 @@ public class AccountService : GenericBackendService, IAccountService
             {
                 IEmailService? emailService = Resolve<IEmailService>();
                 string code = await GenerateVerifyCode(user!.Email, true);
+                user.VerifyCode = code;
+                await _userManager.UpdateAsync(user);
+                await _unitOfWork.SaveChangesAsync();
                 emailService?.SendEmail(email, SD.SubjectMail.PASSCODE_FORGOT_PASSWORD,
                     TemplateMappingHelper.GetTemplateOTPEmail(TemplateMappingHelper.ContentEmailType.FORGOTPASSWORD,
                         code, user.FirstName!));
@@ -1081,6 +1118,9 @@ public class AccountService : GenericBackendService, IAccountService
             {
                 IEmailService? emailService = Resolve<IEmailService>();
                 string code = await GenerateVerifyCode(user!.Email, false);
+                user.VerifyCode = code;
+                await _userManager.UpdateAsync(user);
+                await _unitOfWork.SaveChangesAsync();
                 emailService!.SendEmail(email, SD.SubjectMail.VERIFY_ACCOUNT,
                     TemplateMappingHelper.GetTemplateOTPEmail(TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE,
                         code, user.FirstName!));
@@ -1295,12 +1335,13 @@ public class AccountService : GenericBackendService, IAccountService
         return result;
     }
 
-    public async Task<AppActionResult> GetAccountsByRoleId(Guid Id, int pageNumber, int pageSize)
+    public async Task<AppActionResult> GetAccountsByRoleId(string Id, int pageNumber, int pageSize)
     {
         AppActionResult result = new();
 
         try
         {
+
             IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
             IdentityRole roleDb = await roleRepository!.GetById(Id);
             if (roleDb != null)

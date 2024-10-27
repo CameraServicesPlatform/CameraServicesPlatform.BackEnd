@@ -22,5 +22,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public string ReviewComment { get; set; }
+        public Boolean IsDisable { get; set; }
+
+
     }
 }

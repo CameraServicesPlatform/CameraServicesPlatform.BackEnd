@@ -15,7 +15,7 @@ var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(p => p.AddPolicy(MyAllowSpecificOrigins, builder =>
 {
-    builder.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5275", "https://cameraserviceplatform.firebaseapp.com/__/auth/handler?apiKey=AIzaSyA2cV2sxqM4INpHxDLdNnDVTAnIupgJTTU&appName=%5BDEFAULT%5D&authType=signInViaPopup&redirectUrl=http%3A%2F%2Flocalhost%3A5173%2Flogin&v=10.13.2&eventId=8031253629&providerId=google.com&scopes=profile")
+    builder.WithOrigins("http://localhost:5173", "http://localhost:5174", "https://6719859a45f36f0008fa0413--camera-service-platform-web.netlify.app", "http://localhost:5175", "http://localhost:5275", "https://cameraserviceplatform.firebaseapp.com/__/auth/handler?apiKey=AIzaSyA2cV2sxqM4INpHxDLdNnDVTAnIupgJTTU&appName=%5BDEFAULT%5D&authType=signInViaPopup&redirectUrl=http%3A%2F%2Flocalhost%3A5173%2Flogin&v=10.13.2&eventId=8031253629&providerId=google.com&scopes=profile")
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials();

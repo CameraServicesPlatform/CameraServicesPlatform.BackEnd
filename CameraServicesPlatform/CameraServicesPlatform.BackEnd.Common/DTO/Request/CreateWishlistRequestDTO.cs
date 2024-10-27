@@ -8,7 +8,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 {
     public class CreateWishlistRequestDTO
     {
-        public Guid MemberID { get; set; }
-        public Guid ProductID { get; set; }
+        public string AccountID { get; set; }
+        public string ProductID { get; set; }
     }
 }

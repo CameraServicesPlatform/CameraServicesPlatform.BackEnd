@@ -9,6 +9,8 @@ using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models;
+using Firebase.Auth;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -27,14 +29,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     public class OrderService : GenericBackendService, IOrderService
     {
         private readonly IRepository<Order> _orderRepository;
+        private readonly IRepository<ProductVoucher> _productVoucherRepository;
+        private readonly IRepository<Vourcher> _voucherRepository;
         private readonly IRepository<OrderDetail> _orderDetailRepository;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Contract> _contractRepository;
+        private readonly IRepository<Account> _accountRepository;
         private readonly IRepository<ContractTemplate> _contractTemplateRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         public OrderService(
             IRepository<Order> orderRepository,
+            IRepository<ProductVoucher> productVoucherRepository,
+            IRepository<Account> accountRepository,
+            IRepository<Vourcher> voucherRepository,
             IRepository<OrderDetail> orderDetailRepository,
             IRepository<Product> productRepository,
             IRepository<Contract> contractRepository,
@@ -44,6 +52,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
+            _productVoucherRepository = productVoucherRepository;
+            _voucherRepository = voucherRepository;
+            _accountRepository = accountRepository;
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
             _productRepository = productRepository;
@@ -62,6 +73,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
+
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
 
                 var existingOrderDetails = await _orderDetailRepository.GetByExpression(x =>
                     productIDs.Contains(x.ProductID) && x.Order.OrderType == OrderType.Purchase
@@ -85,17 +98,32 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var product in request.Products)
                 {
+                    var orderDetailRequest = request.OrderDetailRequests
+                    .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
+
+                    var productVouchers = await _productVoucherRepository.GetByExpression(
+                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VourcherID));
+
+                    double discount = 0;
+
+                    if (productVouchers != null)
+                    {
+                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
+
+                        if (voucher != null )
+                        {
+                            discount = voucher.DiscountAmount;
+                        }
+                    }
                     var orderDetail = new OrderDetail
                     {
-                        OrderID = order.OrderID, 
                         ProductID = Guid.Parse(product.ProductID),
                         ProductPrice = product.PriceBuy ?? 0,
-                        Discount = request.OrderDetailRequests
-                            .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0, 
-                        ProductQuality = product.Quality, 
+                        Discount = discount,
+                        ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
+                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -122,17 +150,33 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var product in request.Products)
                 {
+                    var orderDetailRequest = request.OrderDetailRequests
+                    .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
+
+                    var productVouchers = await _productVoucherRepository.GetByExpression(
+                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VourcherID));
+
+                    double discount = 0;
+
+                    if (productVouchers != null)
+                    {
+                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
+
+                        if (voucher != null)
+                        {
+                            discount = voucher.DiscountAmount;
+                        }
+                    }
                     var orderDetail = new OrderDetail
                     {
                         OrderID = createdOrder.OrderID,
                         ProductID = Guid.Parse(product.ProductID),
                         ProductPrice = product.PriceBuy ?? 0,
-                        Discount = request.OrderDetailRequests
-                            .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0,
+                        Discount = discount,
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
+                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -150,13 +194,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                     if (productEntity != null)
                     {
-                        productEntity.Status = ProductStatusEnum.Shipping;
+                        productEntity.Status = ProductStatusEnum.Sold;
                         _productRepository.Update(productEntity);
                     }
                 }
                 await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
 
+                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetails, totalOrderPrice);
                 result = _mapper.Map<OrderResponse>(createdOrder);
 
             }
@@ -176,6 +221,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
 
                 var existingOrderDetails = await _orderDetailRepository.GetByExpression(x =>
                     productIDs.Contains(x.ProductID) && x.Order.OrderType == OrderType.Purchase
@@ -200,17 +246,34 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var product in request.Products)
                 {
+                    var orderDetailRequest = request.OrderDetailRequests
+                        .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
+
+                    var productVouchers = await _productVoucherRepository.GetByExpression(
+                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VourcherID));
+
+                    double discount = 0;
+
+                    if (productVouchers != null)
+                    {
+                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
+
+                        if (voucher != null)
+                        {
+                            discount = voucher.DiscountAmount;
+                        }
+                    }
+
                     var orderDetail = new OrderDetail
                     {
                         OrderID = order.OrderID,
                         ProductID = Guid.Parse(product.ProductID),
                         ProductPrice = product.PriceBuy ?? 0,
-                        Discount = request.OrderDetailRequests
-                            .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0,
+                        Discount = discount,
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
+                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -237,17 +300,34 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var product in request.Products)
                 {
+                    var orderDetailRequest = request.OrderDetailRequests
+                        .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
+
+                    var productVouchers = await _productVoucherRepository.GetByExpression(
+                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VourcherID));
+
+                    double discount = 0;
+
+                    if (productVouchers != null)
+                    {
+                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
+
+                        if (voucher != null)
+                        {
+                            discount = voucher.DiscountAmount;
+                        }
+                    }
+
                     var orderDetail = new OrderDetail
                     {
                         OrderID = createdOrder.OrderID,
                         ProductID = Guid.Parse(product.ProductID),
                         ProductPrice = product.PriceBuy ?? 0,
-                        Discount = request.OrderDetailRequests
-                            .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0,
+                        Discount = discount,
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
+                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -265,7 +345,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                     if (productEntity != null)
                     {
-                        productEntity.Status = ProductStatusEnum.Shipping;
+                        productEntity.Status = ProductStatusEnum.Sold;
                         _productRepository.Update(productEntity);
                     }
                 }
@@ -283,6 +363,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
 
+                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetails, totalOrderPrice);
+
+                result = _mapper.Map<OrderResponse>(createdOrder);
 
             }
             catch (Exception ex)
@@ -291,6 +374,25 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
 
             return result;
+        }
+
+        private async Task SendOrderConfirmationEmail(string email, string firstName, List<OrderDetail> orderDetails, double totalOrderPrice)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            var orderDetailsString = string.Join("\n", orderDetails.Select(od =>
+                $"Product ID: {od.ProductID}, Quantity: {od.ProductQuality}, Unit Price: {od.ProductPrice:C}, Discount: {od.Discount:C}, Total Price: {od.ProductPriceTotal:C}"
+            ));
+
+            var totalOrderString = $"\n\nTotal Order Price: {totalOrderPrice:C}";
+
+            var orderSummary = $"\n\nOrder Details:\n{orderDetailsString}{totalOrderString}";
+
+                emailService.SendEmail(
+                    email,
+                    SD.SubjectMail.ORDER_CONFIRMATION,
+                    $"Dear {firstName},\n\nCảm ơn bạn vì đã tin dùng!\nĐơn hàng của bạn đã được đặt thành công."
+                    + orderSummary);
         }
         public async Task<OrderResponse> CreateOrderRent(CreateOrderRentRequest request)
         {
@@ -301,6 +403,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
+
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
 
                 var checkTemplate = await _contractTemplateRepository.GetById(request.ContractRequest.ContractTemplateId);
                 if (checkTemplate == null)
@@ -331,17 +435,34 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var product in request.Products)
                 {
+                    var orderDetailRequest = request.OrderDetailRequests
+                        .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
+
+                    var productVouchers = await _productVoucherRepository.GetByExpression(
+                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VoucherID));
+
+                    double discount = 0;
+
+                    if (productVouchers != null)
+                    {
+                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
+
+                        if (voucher != null)
+                        {
+                            discount = voucher.DiscountAmount;
+                        }
+                    }
+
                     var orderDetail = new OrderDetail
                     {
                         OrderID = order.OrderID,
                         ProductID = Guid.Parse(product.ProductID),
                         ProductPrice = CalculateRentalPrice((double)product.PriceRent, request.DurationUnit, request.DurationValue),
-                        Discount = request.OrderDetailRequests
-                            .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0,
+                        Discount = discount,
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
+                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -368,17 +489,34 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var product in request.Products)
                 {
+                    var orderDetailRequest = request.OrderDetailRequests
+                       .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
+
+                    var productVouchers = await _productVoucherRepository.GetByExpression(
+                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VoucherID));
+
+                    double discount = 0;
+
+                    if (productVouchers != null)
+                    {
+                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
+
+                        if (voucher != null)
+                        {
+                            discount = voucher.DiscountAmount;
+                        }
+                    }
+
                     var orderDetail = new OrderDetail
                     {
                         OrderID = createdOrder.OrderID,
                         ProductID = Guid.Parse(product.ProductID),
                         ProductPrice = CalculateRentalPrice((double)product.PriceRent, request.DurationUnit, request.DurationValue),
-                        Discount = request.OrderDetailRequests
-                            .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID))?.Discount ?? 0,
+                        Discount = discount,
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
+                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -396,7 +534,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                     if (productEntity != null)
                     {
-                        productEntity.Status = ProductStatusEnum.Shipping;
+                        productEntity.Status = ProductStatusEnum.Rented;
                         _productRepository.Update(productEntity);
                     }
                 }
@@ -425,6 +563,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     throw new Exception("Không có hợp đồng!");
                 }
+
+                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetails, totalOrderPrice);
+
                 var orderResponse = _mapper.Map<OrderResponse>(createdOrder);
                 orderResponse.AccountID = createdOrder.Id.ToString();
                 orderResponse.SupplierID = createdOrder.SupplierID.ToString();
@@ -612,7 +753,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
+
                 var order = await _orderRepository.GetById(OrderUpdateId);
+
+                TimeSpan timeSinceOrderCreated = DateTime.UtcNow - order.CreatedAt;
+                if (timeSinceOrderCreated.TotalHours > 24)
+                {
+                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau 24 giờ kể từ khi tạo!");
+                    return result;
+                }
+
                 if (order != null)
                 {
                     order.OrderStatus = OrderStatus.Cancelled;
@@ -631,7 +781,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
-
             return result;
         }
 

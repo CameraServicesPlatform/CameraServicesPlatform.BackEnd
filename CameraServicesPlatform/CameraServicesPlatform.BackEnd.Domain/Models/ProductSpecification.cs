@@ -17,5 +17,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string Specification { get; set; }
 
         public string? Details { get; set; }
+
     }
 }

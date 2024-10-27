@@ -92,7 +92,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.Id = request.AccountID;
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
-
+                order.OrderType = OrderType.Purchase;
+                order.DeliveryMethod = request.DeliveryMethod;
                 double totalOrderPrice = 0;
                 var orderDetails = new List<OrderDetail>();
 

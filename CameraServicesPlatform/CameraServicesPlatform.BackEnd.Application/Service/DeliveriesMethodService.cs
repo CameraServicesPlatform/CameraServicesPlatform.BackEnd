@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Delivery;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -29,16 +30,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _deliveriesMethodRepository = deliveriesMethodRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-        }
-
-        public async Task<AppActionResult> CreateDeliveriesMethod(DeliveriesMethodRequest request)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<AppActionResult> DeleteDeliveriesMethod(string deliveriesMethodId)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<AppActionResult> GetAllDeliveriesMethod(int pageIndex, int pageSize)
@@ -123,11 +114,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> UpdateDeliveriesMethod(string contractId, DeliveriesMethodRequest request)
-        {
-            throw new NotImplementedException();
-
-        }
+        
     }
 }
 

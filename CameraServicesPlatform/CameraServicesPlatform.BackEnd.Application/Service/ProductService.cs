@@ -500,9 +500,11 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             listImage = productImage.Items
                         };
                         listProduct.Add(productResponse);
+ 
                     }  
-                }
-
+ 
+ 
+ 
                 result.Result = listProduct;
                 result.IsSuccess = true;
             }

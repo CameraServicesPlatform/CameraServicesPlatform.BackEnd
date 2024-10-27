@@ -22,15 +22,14 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public string? Reason { get; set; }
 
-        public string? AccountID { get; set; }
+        public string? AccountID { get; set; }  
 
         [ForeignKey(nameof(AccountID))]
-        public Account? Account { get; set; } 
+        public Account? Account { get; set; }
 
-        public Guid StaffID { get; set; }
+        public Guid StaffID { get; set; }  
 
         [ForeignKey(nameof(StaffID))]
         public Staff Staff { get; set; }
     }
 }
-

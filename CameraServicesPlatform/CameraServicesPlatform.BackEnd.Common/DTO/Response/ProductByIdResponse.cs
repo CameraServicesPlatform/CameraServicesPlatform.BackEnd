@@ -27,6 +27,14 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public double? PriceRent { get; set; }
 
         public double? PriceBuy { get; set; }
+        public double? PricePerHour { get; set; }
+
+
+        public double? PricePerDay { get; set; }
+
+        public double? PricePerWeek { get; set; }
+
+        public double? PricePerMonth { get; set; }
 
         public BrandEnum? Brand { get; set; }
 

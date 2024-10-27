@@ -445,25 +445,63 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
-                    ProductResponse productResponse = new ProductResponse
+                    var rentalPrice = await _rentalPriceRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    if (rentalPrice.Items.Count() > 0)
                     {
-                        ProductID = item.ProductID.ToString(),
-                        SerialNumber = item.SerialNumber,
-                        SupplierID = item.SupplierID?.ToString(),
-                        CategoryID = item.CategoryID?.ToString(),
-                        ProductName = item.ProductName,
-                        ProductDescription = item.ProductDescription,
-                        PriceBuy = item.PriceBuy,
-                        PriceRent = item.PriceRent,
-                        Brand = item.Brand,
-                        Quality = item.Quality,
-                        Status = item.Status,
-                        Rating = item.Rating,
-                        CreatedAt = item.CreatedAt,
-                        UpdatedAt = item.UpdatedAt,
-                        listImage = productImage.Items
-                    };
-                    listProduct.Add(productResponse);
+                        ProductResponse productResponse = new ProductResponse
+                        {
+                            ProductID = item.ProductID.ToString(),
+                            SerialNumber = item.SerialNumber,
+                            SupplierID = item.SupplierID?.ToString(),
+                            CategoryID = item.CategoryID?.ToString(),
+                            ProductName = item.ProductName,
+                            ProductDescription = item.ProductDescription,
+                            PriceBuy = item.PriceBuy,
+                            PriceRent = item.PriceRent,
+                            PricePerHour = rentalPrice.Items[0].PricePerHour,
+                            PricePerDay = rentalPrice.Items[0].PricePerDay,
+                            PricePerWeek = rentalPrice.Items[0].PricePerWeek,
+                            PricePerMonth = rentalPrice.Items[0].PricePerMonth,
+                            Brand = item.Brand,
+                            Quality = item.Quality,
+                            Status = item.Status,
+                            Rating = item.Rating,
+                            CreatedAt = item.CreatedAt,
+                            UpdatedAt = item.UpdatedAt,
+                            listImage = productImage.Items
+                        };
+                        listProduct.Add(productResponse);
+                    }
+                    else
+                    {
+                        ProductResponse productResponse = new ProductResponse
+                        {
+                            ProductID = item.ProductID.ToString(),
+                            SerialNumber = item.SerialNumber,
+                            SupplierID = item.SupplierID?.ToString(),
+                            CategoryID = item.CategoryID?.ToString(),
+                            ProductName = item.ProductName,
+                            ProductDescription = item.ProductDescription,
+                            PriceBuy = item.PriceBuy,
+                            PriceRent = item.PriceRent,
+                            Brand = item.Brand,
+                            Quality = item.Quality,
+                            Status = item.Status,
+                            Rating = item.Rating,
+                            CreatedAt = item.CreatedAt,
+                            UpdatedAt = item.UpdatedAt,
+                            listImage = productImage.Items
+                        };
+                        listProduct.Add(productResponse);
+                    }
+                    
                 }
 
                 result.Result = listProduct;

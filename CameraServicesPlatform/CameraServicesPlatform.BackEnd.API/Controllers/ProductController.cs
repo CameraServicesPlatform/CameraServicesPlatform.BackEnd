@@ -47,14 +47,12 @@ public class ProductController : ControllerBase
         return await _productService.GetProductBySold(pageIndex, pageSize);
     }
 
-<<<<<<< HEAD
-    [HttpGet("get-product-by-rent-sold")]
+      
+ 
+    [HttpGet("get-product-available-both")]
     public async Task<AppActionResult> GetProductAvaibleRentAndSell(int pageIndex = 1, int pageSize = 10)
-=======
-    [HttpGet("get-product-by-rent-buy")]
-    public async Task<AppActionResult> GetProductByRentSold(int pageIndex = 1, int pageSize = 10)
->>>>>>> 3310ea3a8ab5e7027da2ca2420d6a5a251d28a9f
-    {
+ 
+     {
         return await _productService.GetProductAvaibleRentAndSell(pageIndex, pageSize);
     }
 

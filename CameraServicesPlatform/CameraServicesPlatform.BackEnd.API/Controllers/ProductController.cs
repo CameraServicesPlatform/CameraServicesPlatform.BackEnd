@@ -47,7 +47,6 @@ public class ProductController : ControllerBase
         return await _productService.GetProductBySold(pageIndex, pageSize);
     }
 
-      
  
     [HttpGet("get-product-available-both")]
     public async Task<AppActionResult> GetProductAvaibleRentAndSell(int pageIndex = 1, int pageSize = 10)

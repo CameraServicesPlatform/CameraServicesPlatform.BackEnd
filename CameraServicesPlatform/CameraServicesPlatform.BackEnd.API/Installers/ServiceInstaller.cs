@@ -2,7 +2,7 @@
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.Service;
-using CameraServicesPlatform.BackEnd.Data;
+using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Infrastructure.Repositories;
 using CameraServicesPlatform.BackEnd.Infrastructure.UnitOfWork;
 

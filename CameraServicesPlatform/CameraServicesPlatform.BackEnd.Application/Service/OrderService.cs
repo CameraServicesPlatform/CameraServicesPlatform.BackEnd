@@ -92,45 +92,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.Id = request.AccountID;
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
-
+                order.OrderType = OrderType.Purchase;
+                order.DeliveryMethod = request.DeliveryMethod;
                 double totalOrderPrice = 0;
                 var orderDetails = new List<OrderDetail>();
 
-                foreach (var product in request.Products)
-                {
-                    var orderDetailRequest = request.OrderDetailRequests
-                    .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
-
-                    var productVouchers = await _productVoucherRepository.GetByExpression(
-                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VourcherID));
-
-                    double discount = 0;
-
-                    if (productVouchers != null)
-                    {
-                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
-
-                        if (voucher != null )
-                        {
-                            discount = voucher.DiscountAmount;
-                        }
-                    }
-                    var orderDetail = new OrderDetail
-                    {
-                        ProductID = Guid.Parse(product.ProductID),
-                        ProductPrice = product.PriceBuy ?? 0,
-                        Discount = discount,
-                        ProductQuality = product.Quality,
-                    };
-
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
-                    orderDetail.ProductPriceTotal = priceAfterDiscount;
-
-                    totalOrderPrice += priceAfterDiscount;
-
-                    orderDetails.Add(orderDetail);
-                }
-
+ 
                 order.TotalAmount = totalOrderPrice;
 
                 await _orderRepository.Insert(order);
@@ -176,7 +143,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -273,7 +240,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -327,7 +294,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -462,7 +429,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice - orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -516,7 +483,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductQuality = product.Quality,
                     };
 
-                    double priceAfterDiscount = orderDetail.ProductPrice - (orderDetail.ProductPrice * orderDetail.Discount);
+                    double priceAfterDiscount = orderDetail.ProductPrice -orderDetail.Discount;
                     orderDetail.ProductPriceTotal = priceAfterDiscount;
 
                     totalOrderPrice += priceAfterDiscount;
@@ -588,13 +555,22 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 Expression<Func<Order, bool>>? filter = null;
 
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
-                    filter: null,
+                    filter: filter,
                     pageNumber: pageIndex,
                     pageSize: pageSize,
-                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
+                    includes: new Expression<Func<Order, object>>[]
+                    {
+                o => o.OrderDetail,       
+                    }
                 );
 
-                var convertedResult = pagedResult.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+                var convertedResult = pagedResult.Items.Select(order =>
+                {
+                    var orderResponse = _mapper.Map<OrderResponse>(order); 
+
+                    orderResponse.OrderDetails = _mapper.Map<List<OrderDetailResponse>>(order.OrderDetail.ToList());
+                    return orderResponse;
+                }).ToList();
 
                 result.Result = convertedResult;
                 result.IsSuccess = true;
@@ -607,6 +583,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        
         public async Task<AppActionResult> GetOrderByOrderType(OrderType orderType, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
@@ -687,7 +664,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 var order = await _orderRepository.GetByExpression(
                     filter: o => o.OrderID == OrderId,   
-                    includeProperties: o => o.OrderDetail
+                    includeProperties: o => o.OrderDetail.Select(od => od.Product)
                 );
                 if (order == null)
                 {
@@ -710,7 +687,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> UpdateOrderStatus(string OrderID)
+        public async Task<AppActionResult> UpdateOrderStatusCompletedBySupplier(string OrderID)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -727,6 +704,71 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 _orderRepository.Update(order);
                 await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+        public async Task<AppActionResult> UpdateOrderStatusShippedBySupplier(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.Shipped;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateOrderStatusApprovedBySupplier(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.Approved;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
                 }
                 var orderResponse = _mapper.Map<OrderResponse>(order);
                 orderResponse.AccountID = order.Id.ToString();

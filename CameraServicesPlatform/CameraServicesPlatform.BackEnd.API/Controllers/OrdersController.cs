@@ -91,9 +91,21 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
         [HttpPut("update-order-status-completed/{orderId}")]
-        public async Task<AppActionResult> UpdateOrderStatusCompleted(string orderId)
+        public async Task<AppActionResult> UpdateOrderStatusCompletedBySupplier(string orderId)
         {
-            return await _orderService.UpdateOrderStatus(orderId);
+            return await _orderService.UpdateOrderStatusCompletedBySupplier(orderId);
+        }
+
+        [HttpPut("update-order-status-Shipped/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderStatusShippedBySupplier(string orderId)
+        {
+            return await _orderService.UpdateOrderStatusShippedBySupplier(orderId);
+        }
+
+        [HttpPut("update-order-status-Approved/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderStatusApprovedBySupplier(string orderId)
+        {
+            return await _orderService.UpdateOrderStatusApprovedBySupplier(orderId);
         }
 
         [HttpPut("cancel-order/{orderId}")]

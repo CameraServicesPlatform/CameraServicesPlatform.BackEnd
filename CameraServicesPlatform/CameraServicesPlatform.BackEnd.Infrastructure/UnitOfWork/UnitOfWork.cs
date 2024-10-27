@@ -1,7 +1,7 @@
 ﻿
 
 using CameraServicesPlatform.BackEnd.Application;
-using CameraServicesPlatform.BackEnd.Data;
+using CameraServicesPlatform.BackEnd.Domain.Data;
 
 namespace CameraServicesPlatform.BackEnd.Infrastructure.UnitOfWork;
 

@@ -16,7 +16,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public string? CategoryDescription { get; set; }
 
-        public Boolean StatusCategory { get; set; }
+        public bool StatusCategory { get; set; }
     }
 }
 

@@ -89,3 +89,7 @@ remote:      Visit the repository settings page, https://github.com/CameraServic
 
 org-sup/organization-supplier
 spo-stf/sponsor-staff
+
+------
+phần supplierReport : khi member gửi báo cáo supplier, staff sẽ gửi mail cho sullier nếu supplier thấy k hợp
+lí có thể phản hồi lại quy mail

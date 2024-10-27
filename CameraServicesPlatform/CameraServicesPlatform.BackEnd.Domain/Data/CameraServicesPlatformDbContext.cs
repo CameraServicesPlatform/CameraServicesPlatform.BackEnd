@@ -29,6 +29,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Data
         public DbSet<Transaction> Transactions { get; set; }
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<Report> Reports { get; set; }
+        public DbSet<RentalPrice> RentalPrices { get; set; }
+
         public DbSet<Policy> Policies { get; set; }
         public DbSet<ProductReport> ProductReports { get; set; }
         public DbSet<SupplierReport> SupplierReports { get; set; }

@@ -11,10 +11,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
     public interface IDeliveriesMethodService
     {
         
-        Task<AppActionResult> CreateDeliveriesMethod(DeliveriesMethodRequest request);
-        Task<AppActionResult> UpdateDeliveriesMethod(string contractId, DeliveriesMethodRequest request);
-        Task<AppActionResult> DeleteDeliveriesMethod(string deliveriesMethodId);
-        Task<AppActionResult> GetDeliveriesMethodById(string deliveriesMethodId);
+         Task<AppActionResult> GetDeliveriesMethodById(string deliveriesMethodId);
         Task<AppActionResult> GetAllDeliveriesMethod(int pageIndex, int pageSize);
     }
 }

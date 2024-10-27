@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Data;
@@ -25,6 +26,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IMapper _mapper;
         private IRepository<Product> _productRepository;
         private IRepository<ProductImage> _productImageRepository;
+        private IRepository<RentalPrice> _rentalPriceRepository;
         private IRepository<ProductVoucher> _productVoucherRepository;
         private IRepository<ProductSpecification> _productSpecificationRepository;
         private IRepository<Supplier> _supplierRepository;
@@ -38,6 +40,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<ProductImage> productImageRepository,
             IRepository<OrderDetail> orderDetailRepository,
             IRepository<Supplier> supplierRepository,
+            IRepository<RentalPrice> rentalPriceRepository,
             IRepository<Order> orderRepository,
             IRepository<ProductVoucher> productVoucherRepository,
             IRepository<ProductSpecification> productSpecificationRepository,
@@ -50,6 +53,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _productRepository = productRepository;
             _productImageRepository = productImageRepository;
             _supplierRepository = supplierRepository;
+            _rentalPriceRepository = rentalPriceRepository;
             _orderDetailRepository = orderDetailRepository;
             _productVoucherRepository = productVoucherRepository;
             _productSpecificationRepository = productSpecificationRepository;
@@ -58,7 +62,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
-public async Task<AppActionResult> CreateProduct(ProductResponseDto productResponse)
+public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productResponse)
 {
     AppActionResult result = new AppActionResult();
     try
@@ -199,6 +203,156 @@ public async Task<AppActionResult> CreateProduct(ProductResponseDto productRespo
     return result;
 }
 
+        public async Task<AppActionResult> CreateProductRent(ProductRequestRentDto productResponse)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var listProduct = Resolve<IRepository<Product>>();
+
+                // Validate SupplierID
+                if (!Guid.TryParse(productResponse.SupplierID, out var supplierGuid))
+                {
+                    result = BuildAppActionResultError(result, $"SupplierID không hợp lệ!");
+                    return result;
+                }
+
+                // Check if Supplier exists
+                var supplierExist = await _supplierRepository.GetAllDataByExpression(
+                    a => a.SupplierID == supplierGuid,
+                    1,
+                    10,
+                    orderBy: a => a.SupplierName,
+                    isAscending: true,
+                    null
+                );
+                if (supplierExist == null || supplierExist.Items.Count == 0)
+                {
+                    result = BuildAppActionResultError(result, $"SupplierID không tồn tại!");
+                    return result;
+                }
+
+                // Check if product name already exists for the supplier
+                var productNameExist = await _productRepository.GetByExpression(
+                    a => a.ProductName.Equals(productResponse.ProductName) && a.SupplierID.Equals(supplierGuid),
+                    null
+                );
+                if (productNameExist != null)
+                {
+                    result = BuildAppActionResultError(result, $"Tên sản phẩm đã tồn tại trong shop!");
+                    return result;
+                }
+
+                // Check if Serial Number already exists
+                var productSerialExist = await _productRepository.GetAllDataByExpression(
+                    a => a.SerialNumber.Equals(productResponse.SerialNumber),
+                    1,
+                    10,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
+                    null
+                );
+                if (productSerialExist.Items.Count > 0)
+                {
+                    result = BuildAppActionResultError(result, $"Product serial number đã tồn tại, Product serial number không được trùng!");
+                    return result;
+                }
+
+                // Parse CategoryID and validate it
+                if (!Guid.TryParse(productResponse.CategoryID, out var categoryGuid))
+                {
+                    result = BuildAppActionResultError(result, $"CategoryID không hợp lệ!");
+                    return result;
+                }
+
+                // Create new Product
+                Product product = new Product()
+                {
+                    ProductID = Guid.NewGuid(),
+                    SerialNumber = productResponse.SerialNumber,
+                    SupplierID = supplierGuid,
+                    CategoryID = categoryGuid,
+                    ProductName = productResponse.ProductName,
+                    ProductDescription = productResponse.ProductDescription,
+                    Brand = productResponse.Brand,
+                    Status = ProductStatusEnum.AvailableRent,
+                    Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
+                    Rating = 0,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                RentalPrice newRentalPrice = new RentalPrice
+                {
+                    RentalPriceID = Guid.NewGuid(),
+                    ProductID = product.ProductID,
+                    PricePerHour = productResponse.PricePerHour,
+                    PricePerDay = productResponse.PricePerDay,
+                    PricePerWeek = productResponse.PricePerWeek,
+                    PricePerMonth = productResponse.PricePerMonth,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                await _rentalPriceRepository.Insert(newRentalPrice);
+                // Firebase Image Upload
+                var firebaseService = Resolve<IFirebaseService>();
+                if (productResponse.File != null)
+                {
+                    var pathName = SD.FirebasePathName.PRODUCTS_PREFIX + $"{product.ProductID}_{Guid.NewGuid()}.jpg";
+                    var uploadResult = await firebaseService.UploadFileToFirebase(productResponse.File, pathName);
+
+                    if (!string.IsNullOrEmpty(uploadResult?.Result.ToString()))
+                    {
+                        var imgUrl = uploadResult.Result.ToString();
+
+                        // Save Product Image
+                        ProductImage productImage = new ProductImage
+                        {
+                            ProductImagesID = Guid.NewGuid(),
+                            ProductID = product.ProductID,
+                            Image = imgUrl
+                        };
+                        await _productImageRepository.Insert(productImage);
+                    }
+                    else
+                    {
+                        result = BuildAppActionResultError(result, "Lỗi khi upload hình ảnh.");
+                        return result;
+                    }
+                }
+
+                await listProduct.Insert(product);
+
+                if (productResponse.listProductSpecification != null && productResponse.listProductSpecification.Count > 0)
+                {
+                    foreach (var spec in productResponse.listProductSpecification)
+                    {
+                        int index = spec.IndexOf(':');
+                        string specification = spec.Substring(0, index);
+                        string detail = spec.Substring(index + 1);
+                        ProductSpecification productSpecification = new ProductSpecification
+                        {
+                            ProductSpecificationID = Guid.NewGuid(),
+                            ProductID = product.ProductID,
+                            Specification = specification,
+                            Details = detail
+                        };
+                        await _productSpecificationRepository.Insert(productSpecification);
+                    }
+                }
+
+                await _unitOfWork.SaveChangesAsync();
+
+                result.Result = productResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
 
         public async Task<AppActionResult> UpdateProduct(ProductUpdateResponseDto productResponse)
         {
@@ -278,11 +432,7 @@ public async Task<AppActionResult> CreateProduct(ProductResponseDto productRespo
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    includes: new Expression<Func<Product, object>>[]
-                    {
-                a => a.Supplier,
-                a => a.Category
-                    }
+                    null
                 );
 
                 foreach (var item in pagedResult.Items)

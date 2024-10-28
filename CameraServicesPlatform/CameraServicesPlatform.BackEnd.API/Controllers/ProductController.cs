@@ -99,6 +99,12 @@ public class ProductController : ControllerBase
         return await _productService.UpdateProduct(productResponse);
     }
 
+    [HttpPut("update-product-rent")]
+    public async Task<AppActionResult> UpdateProductRent(ProductUpdateRentDto productResponse)
+    {
+        return await _productService.UpdateProductRent(productResponse);
+    }
+
     [HttpDelete("delete-product")]
     public async Task<AppActionResult> DeleteProduct(string productId)
     {

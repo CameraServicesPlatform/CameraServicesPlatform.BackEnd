@@ -330,7 +330,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
 
-                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetails, totalOrderPrice);
+                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetaills, totalOrderPrice);
 
                 result = _mapper.Map<OrderResponse>(createdOrder);
 
@@ -348,18 +348,36 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IEmailService? emailService = Resolve<IEmailService>();
 
             var orderDetailsString = string.Join("\n", orderDetails.Select(od =>
-                $"Product ID: {od.ProductID}, Quantity: {od.ProductQuality}, Unit Price: {od.ProductPrice:C}, Discount: {od.Discount:C}, Total Price: {od.ProductPriceTotal:C}"
+                $"- Mã sản phẩm: {od.ProductID}\n" +
+                $"  Tình trạng: {od.ProductQuality}\n" +
+                $"  Đơn giá: {od.ProductPrice:C}\n" +
+                $"  Giảm giá: {od.Discount:C}\n" +
+                $"  Thành tiền: {od.ProductPriceTotal:C}\n"
             ));
 
-            var totalOrderString = $"\n\nTotal Order Price: {totalOrderPrice:C}";
+            var orderSummary =
+                "=====================================\n" +
+                "         CHI TIẾT ĐƠN HÀNG\n" +
+                "=====================================\n" +
+                $"{orderDetailsString}" +
+                "\n-------------------------------------\n" +
+                $"Tổng giá trị đơn hàng: {totalOrderPrice:C}\n" +
+                "=====================================\n";
 
-            var orderSummary = $"\n\nOrder Details:\n{orderDetailsString}{totalOrderString}";
+            var emailMessage =
+                $"Kính chào {firstName},\n\n" +
+                "Cảm ơn quý khách đã tin tưởng và đặt hàng!\n\n" +
+                "Đơn hàng của quý khách đã được đặt thành công.\n\n" +
+                orderSummary +
+                "\nNếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ, xin vui lòng liên hệ với chúng tôi.\n\n" +
+                "Trân trọng,\n" +
+                "Đội ngũ hỗ trợ của Công ty";
 
-                emailService.SendEmail(
-                    email,
-                    SD.SubjectMail.ORDER_CONFIRMATION,
-                    $"Dear {firstName},\n\nCảm ơn bạn vì đã tin dùng!\nĐơn hàng của bạn đã được đặt thành công."
-                    + orderSummary);
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION,
+               emailMessage
+           );
         }
         public async Task<OrderResponse> CreateOrderRent(CreateOrderRentRequest request)
         {

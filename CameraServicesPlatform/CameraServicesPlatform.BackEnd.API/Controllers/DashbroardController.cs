@@ -101,5 +101,33 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("get-calculate-total-revenue-by-supplier/{supplierId}")]
+        public async Task<ActionResult<double>> CalculateTotalRevenueBySupplierAsync(string supplierId)
+        {
+            try
+            {
+                var result = await _dashbroardService.CalculateTotalRevenueBySupplierAsync(supplierId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("get-calculate-monthly-revenue-by-supplier/{supplierId}")]
+        public async Task<ActionResult<List<MonthlyRevenueDto>>> CalculateMonthlyRevenueBySupplierAsync(string supplierId, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var result = await _dashbroardService.CalculateMonthlyRevenueBySupplierAsync(supplierId, startDate, endDate);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

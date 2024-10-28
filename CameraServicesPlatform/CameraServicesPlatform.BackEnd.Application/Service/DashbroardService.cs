@@ -228,5 +228,44 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             return categorySales.Values.OrderByDescending(c => c.TotalSold).ToList();
         }
+
+        public async Task<double> CalculateTotalRevenueBySupplierAsync(string supplierId)
+        {
+            var orders = await _orderRepository.GetAllDataByExpression(
+                filter: o => o.SupplierID == Guid.Parse(supplierId) && o.OrderStatus == OrderStatus.Completed,
+                pageNumber: 0,
+                pageSize: 0
+            );
+
+            var totalRevenue = orders.Items.Sum(o => o.TotalAmount);
+
+            return (double)totalRevenue;
+        }
+
+        public async Task<List<MonthlyRevenueDto>> CalculateMonthlyRevenueBySupplierAsync(string supplierId, DateTime startDate, DateTime endDate)
+        {
+            var orders = await _orderRepository.GetAllDataByExpression(
+                filter: o => o.SupplierID == Guid.Parse(supplierId)
+                             && o.OrderDate >= startDate
+                             && o.OrderDate <= endDate
+                             && o.OrderStatus == OrderStatus.Completed,
+                pageNumber: 0,
+                pageSize: 0 
+            );
+
+            var monthlyRevenue = orders.Items
+                .GroupBy(o => new { o.OrderDate.Year, o.OrderDate.Month })
+                .Select(g => new MonthlyRevenueDto
+                {
+                    Year = g.Key.Year,
+                    Month = g.Key.Month,
+                    TotalRevenue = (double)g.Sum(o => o.TotalAmount)
+                })
+                .OrderBy(r => r.Year).ThenBy(r => r.Month)  
+                .ToList();
+
+            return monthlyRevenue;
+        }
+
     }
 }

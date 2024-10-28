@@ -500,14 +500,16 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             listImage = productImage.Items
                         };
                         listProduct.Add(productResponse);
- 
-                    }  
- 
- 
- 
-                result.Result = listProduct;
-                result.IsSuccess = true;
+
+                    }
+
+
+                    result.Result = listProduct;
+                    result.IsSuccess = true;
+                }
             }
+
+
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
@@ -891,28 +893,70 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
-                    ProductByIdResponse productResponse = new ProductByIdResponse
+                    var rentalPrice = await _rentalPriceRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    if (rentalPrice.Items.Count() > 0)
                     {
-                        ProductID = item.ProductID.ToString(),
-                        SerialNumber = item.SerialNumber,
-                        SupplierID = item.SupplierID?.ToString(),
-                        CategoryID = item.CategoryID?.ToString(),
-                        ProductName = item.ProductName,
-                        ProductDescription = item.ProductDescription,
-                        PriceBuy = item.PriceBuy,
-                        PriceRent = item.PriceRent,
-                        Brand = item.Brand,
-                        Quality = item.Quality,
-                        Status = item.Status,
-                        Rating = item.Rating,
-                        CreatedAt = item.CreatedAt,
-                        UpdatedAt = item.UpdatedAt,
-                        listImage = productImage.Items,
-                        listVoucher = listProductVoucher,
-                        listProductSpecification = listProductSpecification
+                        ProductByIdResponse productResponse = new ProductByIdResponse
+                        {
+                            ProductID = item.ProductID.ToString(),
+                            SerialNumber = item.SerialNumber,
+                            SupplierID = item.SupplierID?.ToString(),
+                            CategoryID = item.CategoryID?.ToString(),
+                            ProductName = item.ProductName,
+                            ProductDescription = item.ProductDescription,
+                            PriceBuy = item.PriceBuy,
+                            PriceRent = item.PriceRent,
+                            PricePerHour = rentalPrice.Items[0].PricePerHour,
+                            PricePerDay = rentalPrice.Items[0].PricePerDay,
+                            PricePerWeek = rentalPrice.Items[0].PricePerWeek,
+                            PricePerMonth = rentalPrice.Items[0].PricePerMonth,
+                            Brand = item.Brand,
+                            Quality = item.Quality,
+                            Status = item.Status,
+                            Rating = item.Rating,
+                            CreatedAt = item.CreatedAt,
+                            UpdatedAt = item.UpdatedAt,
+                            listImage = productImage.Items,
+                            listVoucher = listProductVoucher,
+                            listProductSpecification = listProductSpecification
 
-                    };
-                    listProduct.Add(productResponse);
+                        };
+                        listProduct.Add(productResponse);
+
+                    }
+                    else
+                    {
+                        ProductByIdResponse productResponse = new ProductByIdResponse
+                        {
+                            ProductID = item.ProductID.ToString(),
+                            SerialNumber = item.SerialNumber,
+                            SupplierID = item.SupplierID?.ToString(),
+                            CategoryID = item.CategoryID?.ToString(),
+                            ProductName = item.ProductName,
+                            ProductDescription = item.ProductDescription,
+                            PriceBuy = item.PriceBuy,
+                            PriceRent = item.PriceRent,
+                            Brand = item.Brand,
+                            Quality = item.Quality,
+                            Status = item.Status,
+                            Rating = item.Rating,
+                            CreatedAt = item.CreatedAt,
+                            UpdatedAt = item.UpdatedAt,
+                            listImage = productImage.Items,
+                            listVoucher = listProductVoucher,
+                            listProductSpecification = listProductSpecification
+
+                        };
+
+                        listProduct.Add(productResponse);
+                    }
                 }
                 result.Result = listProduct;
                 result.IsSuccess = true;
@@ -1001,28 +1045,70 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
-                    ProductByIdResponse productResponse = new ProductByIdResponse
+                    var rentalPrice = await _rentalPriceRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    if (rentalPrice.Items.Count() > 0)
                     {
-                        ProductID = item.ProductID.ToString(),
-                        SerialNumber = item.SerialNumber,
-                        SupplierID = item.SupplierID?.ToString(),
-                        CategoryID = item.CategoryID?.ToString(),
-                        ProductName = item.ProductName,
-                        ProductDescription = item.ProductDescription,
-                        PriceBuy = item.PriceBuy,
-                        PriceRent = item.PriceRent,
-                        Brand = item.Brand,
-                        Quality = item.Quality,
-                        Status = item.Status,
-                        Rating = item.Rating,
-                        CreatedAt = item.CreatedAt,
-                        UpdatedAt = item.UpdatedAt,
-                        listImage = productImage.Items,
-                        listVoucher = listProductVoucher,
-                        listProductSpecification = listProductSpecification
+                        ProductByIdResponse productResponse = new ProductByIdResponse
+                        {
+                            ProductID = item.ProductID.ToString(),
+                            SerialNumber = item.SerialNumber,
+                            SupplierID = item.SupplierID?.ToString(),
+                            CategoryID = item.CategoryID?.ToString(),
+                            ProductName = item.ProductName,
+                            ProductDescription = item.ProductDescription,
+                            PriceBuy = item.PriceBuy,
+                            PriceRent = item.PriceRent,
+                            PricePerHour = rentalPrice.Items[0].PricePerHour,
+                            PricePerDay = rentalPrice.Items[0].PricePerDay,
+                            PricePerWeek = rentalPrice.Items[0].PricePerWeek,
+                            PricePerMonth = rentalPrice.Items[0].PricePerMonth,
+                            Brand = item.Brand,
+                            Quality = item.Quality,
+                            Status = item.Status,
+                            Rating = item.Rating,
+                            CreatedAt = item.CreatedAt,
+                            UpdatedAt = item.UpdatedAt,
+                            listImage = productImage.Items,
+                            listVoucher = listProductVoucher,
+                            listProductSpecification = listProductSpecification
 
-                    };
-                    listProduct.Add(productResponse);
+                        };
+                        listProduct.Add(productResponse);
+
+                    }
+                    else
+                    {
+                        ProductByIdResponse productResponse = new ProductByIdResponse
+                        {
+                            ProductID = item.ProductID.ToString(),
+                            SerialNumber = item.SerialNumber,
+                            SupplierID = item.SupplierID?.ToString(),
+                            CategoryID = item.CategoryID?.ToString(),
+                            ProductName = item.ProductName,
+                            ProductDescription = item.ProductDescription,
+                            PriceBuy = item.PriceBuy,
+                            PriceRent = item.PriceRent,
+                            Brand = item.Brand,
+                            Quality = item.Quality,
+                            Status = item.Status,
+                            Rating = item.Rating,
+                            CreatedAt = item.CreatedAt,
+                            UpdatedAt = item.UpdatedAt,
+                            listImage = productImage.Items,
+                            listVoucher = listProductVoucher,
+                            listProductSpecification = listProductSpecification
+
+                        };
+
+                        listProduct.Add(productResponse);
+                    }
                 }
                 result.Result = listProduct;
                 result.IsSuccess = true;
@@ -1177,28 +1263,70 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                        null
                    );
 
-                    ProductByIdResponse productResponse = new ProductByIdResponse
+                    var rentalPrice = await _rentalPriceRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    if (rentalPrice.Items.Count() > 0)
                     {
-                        ProductID = item.ProductID.ToString(),
-                        SerialNumber = item.SerialNumber,
-                        SupplierID = item.SupplierID?.ToString(),
-                        CategoryID = item.CategoryID?.ToString(),
-                        ProductName = item.ProductName,
-                        ProductDescription = item.ProductDescription,
-                        PriceBuy = item.PriceBuy,
-                        PriceRent = item.PriceRent,
-                        Brand = item.Brand,
-                        Quality = item.Quality,
-                        Status = item.Status,
-                        Rating = item.Rating,
-                        CreatedAt = item.CreatedAt,
-                        UpdatedAt = item.UpdatedAt,
-                        listImage = productImage.Items,
-                        listVoucher = listProductVoucher,
-                        listProductSpecification = listProductSpecification
+                        ProductByIdResponse productResponse = new ProductByIdResponse
+                        {
+                            ProductID = item.ProductID.ToString(),
+                            SerialNumber = item.SerialNumber,
+                            SupplierID = item.SupplierID?.ToString(),
+                            CategoryID = item.CategoryID?.ToString(),
+                            ProductName = item.ProductName,
+                            ProductDescription = item.ProductDescription,
+                            PriceBuy = item.PriceBuy,
+                            PriceRent = item.PriceRent,
+                            PricePerHour = rentalPrice.Items[0].PricePerHour,
+                            PricePerDay = rentalPrice.Items[0].PricePerDay,
+                            PricePerWeek = rentalPrice.Items[0].PricePerWeek,
+                            PricePerMonth = rentalPrice.Items[0].PricePerMonth,
+                            Brand = item.Brand,
+                            Quality = item.Quality,
+                            Status = item.Status,
+                            Rating = item.Rating,
+                            CreatedAt = item.CreatedAt,
+                            UpdatedAt = item.UpdatedAt,
+                            listImage = productImage.Items,
+                            listVoucher = listProductVoucher,
+                            listProductSpecification = listProductSpecification
 
-                    };
-                    listProduct.Add(productResponse);
+                        };
+                        listProduct.Add(productResponse);
+
+                    }
+                    else
+                    {
+                        ProductByIdResponse productResponse = new ProductByIdResponse
+                        {
+                            ProductID = item.ProductID.ToString(),
+                            SerialNumber = item.SerialNumber,
+                            SupplierID = item.SupplierID?.ToString(),
+                            CategoryID = item.CategoryID?.ToString(),
+                            ProductName = item.ProductName,
+                            ProductDescription = item.ProductDescription,
+                            PriceBuy = item.PriceBuy,
+                            PriceRent = item.PriceRent,
+                            Brand = item.Brand,
+                            Quality = item.Quality,
+                            Status = item.Status,
+                            Rating = item.Rating,
+                            CreatedAt = item.CreatedAt,
+                            UpdatedAt = item.UpdatedAt,
+                            listImage = productImage.Items,
+                            listVoucher = listProductVoucher,
+                            listProductSpecification = listProductSpecification
+
+                        };
+
+                        listProduct.Add(productResponse);
+                    }
                 }
                 result.Result = listProduct;
                 result.IsSuccess = true;
@@ -1702,6 +1830,73 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             return result;
         }
 
+        public async Task<AppActionResult> UpdateProductRent(ProductUpdateRentDto productResponse)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var productRepository = Resolve<IRepository<Product>>();
+
+                Product productExist = await productRepository.GetById(Guid.Parse(productResponse.ProductID));
+
+                if (productExist == null)
+                {
+                    result = BuildAppActionResultError(result, $"Sản phẩm không tồn tại!");
+                    return result;
+                }
+
+                var productNameExist = await _productRepository.GetAllDataByExpression(
+                    a => a.ProductName.Equals(productResponse.ProductName) && (a.SupplierID == productExist.SupplierID) && (!a.ProductName.Equals(productExist.ProductName)),
+                    1,
+                    10,
+                    orderBy: a => a.Supplier!.SupplierName,
+                    isAscending: true,
+                    null
+                );
+
+                if (productNameExist.Items.Count > 0)
+                {
+                    result = BuildAppActionResultError(result, $"Tên Sản phẩm đã tồn tại shop");
+                    return result;
+
+                }
+
+                productExist.SerialNumber = productResponse.SerialNumber;
+                productExist.CategoryID = Guid.Parse(productResponse.CategoryID);
+                productExist.ProductName = productResponse.ProductName;
+                productExist.ProductDescription = productResponse.ProductDescription;
+
+                productExist.Brand = productResponse.Brand;
+                productExist.Quality = productResponse.Quality;
+                productExist.Status = productResponse.Status;
+                productExist.UpdatedAt = DateTime.UtcNow;
+                var rentalPriceExist = await _rentalPriceRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(productExist.ProductID),
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                rentalPriceExist.Items[0].PricePerHour = productResponse.PricePerHour;
+                rentalPriceExist.Items[0].PricePerDay = productResponse.PricePerDay;
+                rentalPriceExist.Items[0].PricePerWeek = productResponse.PricePerWeek;
+                rentalPriceExist.Items[0].PricePerMonth = productResponse.PricePerMonth;
+                await productRepository.Update(productExist);
+                await _rentalPriceRepository.Update(rentalPriceExist.Items[0]);
+                await _unitOfWork.SaveChangesAsync();
+                result.Result = productExist;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+
+        }
     }
 
 }

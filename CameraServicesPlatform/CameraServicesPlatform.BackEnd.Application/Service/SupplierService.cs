@@ -212,7 +212,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
                     AccountBalance = supplierResponse.AccountBalance,
-                    VourcherID = null
                 };
 
                 await listSupplier.Insert(supplier);

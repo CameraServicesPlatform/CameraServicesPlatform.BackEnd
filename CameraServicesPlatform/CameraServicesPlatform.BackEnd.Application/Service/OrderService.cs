@@ -109,6 +109,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     x => x.OrderDetail
                 );
 
+
                 if (createdOrder == null)
                 {
                     throw new Exception("Không tìm thấy đơn hàng bạn vừa đặt. Hãy tạo lại đơn hàng của bạn.");

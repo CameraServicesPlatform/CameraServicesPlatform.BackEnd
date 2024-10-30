@@ -30,9 +30,7 @@ public class Supplier
     public double AccountBalance { get; set; }
     public string? Img { get; set; } = null!;
 
-    public Guid? VourcherID { get; set; }
-
-
+    
     public Boolean IsDisable { get; set; }
 
 }

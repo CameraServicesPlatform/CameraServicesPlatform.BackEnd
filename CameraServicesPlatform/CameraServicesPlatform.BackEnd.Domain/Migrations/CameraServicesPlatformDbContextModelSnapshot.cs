@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
+namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
     partial class CameraServicesPlatformDbContextModelSnapshot : ModelSnapshot
@@ -1178,9 +1178,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("VourcherID")
-                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("SupplierID");
 

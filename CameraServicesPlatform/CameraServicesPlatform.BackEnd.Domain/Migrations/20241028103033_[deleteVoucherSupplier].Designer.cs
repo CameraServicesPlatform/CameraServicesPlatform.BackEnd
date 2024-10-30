@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    [Migration("20241026162806_updatebool")]
-    partial class updatebool
+    [Migration("20241028103033_[deleteVoucherSupplier]")]
+    partial class deleteVoucherSupplier
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,11 +34,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
                         .HasColumnType("int");
 
                     b.Property<string>("AccountHolder")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AccountNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Address")
@@ -48,7 +46,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("BankName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -1185,7 +1182,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    
                     b.HasKey("SupplierID");
 
                     b.HasIndex("AccountID")

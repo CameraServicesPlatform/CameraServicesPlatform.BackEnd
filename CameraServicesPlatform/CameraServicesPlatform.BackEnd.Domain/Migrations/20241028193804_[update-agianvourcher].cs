@@ -1,18 +1,15 @@
-﻿/*using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
 {
     /// <inheritdoc />
-    public partial class updatebool : Migration
+    public partial class updateagianvourcher : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
-
 
         }
 
@@ -20,9 +17,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
         protected override void Down(MigrationBuilder migrationBuilder)
         {
 
-
-
         }
     }
 }
-*/

@@ -29,6 +29,24 @@ public class ProductController : ControllerBase
         return await _productService.GetAllProduct(pageIndex, pageSize);
     }
 
+    [HttpGet("proposal-product-follow-vourcher")]
+    public async Task<AppActionResult> ProposalFollowVourcher(int pageIndex = 1, int pageSize = 10)
+    {
+        return await _productService.ProposalFollowVourcher(pageIndex, pageSize);
+    }
+
+    [HttpGet("proposal-product-follow-job-buy")]
+    public async Task<AppActionResult> ProposalFollowJobBuy(string accountId,int pageIndex = 1, int pageSize = 10)
+    {
+        return await _productService.ProposalFollowJobBuy(accountId, pageIndex, pageSize);
+    }
+
+    [HttpGet("proposal-product-follow-hobby")]
+    public async Task<AppActionResult> ProposalFollowHobby(string accountId, int pageIndex = 1, int pageSize = 10)
+    {
+        return await _productService.ProposalFollowHobby(accountId, pageIndex, pageSize);
+    }
+
     [HttpGet("get-product-by-id")]
     public async Task<AppActionResult> GetProductById( string id, int pageIndex = 1, int pageSize = 10)
     {

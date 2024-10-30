@@ -5,6 +5,8 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Data;
+using CameraServicesPlatform.BackEnd.Domain.Enum  ;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Account;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
@@ -26,8 +28,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IMapper _mapper;
         private IRepository<Product> _productRepository;
         private IRepository<ProductImage> _productImageRepository;
+        private IRepository<Account> _accountRepository;
         private IRepository<RentalPrice> _rentalPriceRepository;
         private IRepository<ProductVoucher> _productVoucherRepository;
+        private IRepository<Vourcher> _voucherRepository;
         private IRepository<ProductSpecification> _productSpecificationRepository;
         private IRepository<Supplier> _supplierRepository;
         private IRepository<OrderDetail> _orderDetailRepository;
@@ -41,6 +45,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<OrderDetail> orderDetailRepository,
             IRepository<Supplier> supplierRepository,
             IRepository<RentalPrice> rentalPriceRepository,
+            IRepository<Vourcher> voucherRepository,
+            IRepository<Account> accountRepository,
             IRepository<Order> orderRepository,
             IRepository<ProductVoucher> productVoucherRepository,
             IRepository<ProductSpecification> productSpecificationRepository,
@@ -55,6 +61,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _supplierRepository = supplierRepository;
             _rentalPriceRepository = rentalPriceRepository;
             _orderDetailRepository = orderDetailRepository;
+            _voucherRepository = voucherRepository;
+            _accountRepository = accountRepository;
             _productVoucherRepository = productVoucherRepository;
             _productSpecificationRepository = productSpecificationRepository;
             _orderRepository = orderRepository;
@@ -1896,6 +1904,220 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
 
             return result;
 
+        }
+
+        public async Task<AppActionResult> ProposalFollowVourcher(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+
+            var vourcher = await _voucherRepository.GetAllDataByExpression(
+                 v => v.IsActive && v.ValidFrom <= DateTime.Now && v.ExpirationDate >= DateTime.Now ,
+                 1,
+                 10,
+                 orderBy: a => a.DiscountAmount,
+                 isAscending: true,
+                 null
+             );
+            List<ProductVoucher> listProVou = new List<ProductVoucher>();
+            List<ProductResponse> listPro = new List<ProductResponse>();
+            foreach (var item in vourcher.Items)
+            {
+                var productVour = await _productVoucherRepository.GetAllDataByExpression(
+                 v => v.VourcherID.Equals(item.VourcherID) && v.IsDisable == true,
+                 1,
+                 10,
+                 null,
+                 isAscending: true,
+                 null
+                );
+                foreach (var itemPro in productVour.Items)
+                {
+                    listProVou.Add(itemPro);
+                }
+            }
+            for (int i= listProVou.Count-1; i >= 0; i--)
+            {
+                var product = await _productRepository.GetAllDataByExpression(
+                 v => v.ProductID.Equals(listProVou[i].ProductID),
+                 1,
+                 10,
+                 null,
+                 isAscending: true,
+                 null
+                );
+                foreach (var itemPro in product.Items)
+                {
+                    var listImage = await _productImageRepository.GetAllDataByExpression(
+                        v => v.ProductID.Equals(itemPro.ProductID),
+                        1,
+                        10,
+                        null,
+                        isAscending: true,
+                        null
+                        );
+                    ProductResponse productResponse = new ProductResponse
+                    {
+                        ProductID = itemPro.ProductID.ToString(),
+                        SerialNumber = itemPro.SerialNumber,
+                        SupplierID = itemPro.SupplierID?.ToString(),
+                        CategoryID = itemPro.CategoryID?.ToString(),
+                        ProductName = itemPro.ProductName,
+                        ProductDescription = itemPro.ProductDescription,
+                        PriceBuy = itemPro.PriceBuy,
+                        PriceRent = itemPro.PriceRent,
+                        Brand = itemPro.Brand,
+                        Quality = itemPro.Quality,
+                        Status = itemPro.Status,
+                        Rating = itemPro.Rating,
+                        CreatedAt = itemPro.CreatedAt,
+                        UpdatedAt = itemPro.UpdatedAt,
+                        listImage = listImage.Items
+                    };
+                    listPro.Add(productResponse);
+                }
+            }
+            result.Result = listPro;
+            result.IsSuccess = true;
+            return result;
+        }
+
+        public async Task<AppActionResult> ProposalFollowJobBuy(string accountId, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            var accountExist = await _accountRepository.GetById(accountId);
+            List<ProductResponse> listPro = new List<ProductResponse>();
+            Expression<Func<Product, bool>> filter = null;
+            
+            switch (accountExist.Job)
+            {
+                case JobStatus.Student:
+                    filter = a => a.PriceBuy <= 1000000;
+                    break;
+
+                case JobStatus.CasualUser:
+                    filter = a => a.PriceBuy >= 1000000 && a.PriceBuy <= 3000000;
+                    break;
+
+                case JobStatus.Beginner:
+                    filter = a => a.PriceBuy >= 1000000 && a.PriceBuy <= 2000000;
+                    break;
+
+                case JobStatus.ContentCreator:
+                    filter = a => a.PriceBuy >= 6000000 && a.PriceBuy <= 10000000;
+                    break;
+
+                case JobStatus.TravelEnthusiast:
+                    filter = a => a.PriceBuy >= 3000000 && a.PriceBuy <= 60000000;
+                    break;
+
+                default:
+                    filter = a => a.PriceBuy >= 60000000; 
+                    break;
+            }
+            var product = await _productRepository.GetAllDataByExpression(
+                 filter,
+                 1,
+                 10,
+                 null,
+                 isAscending: true,
+                 null
+                );
+            foreach (var item in product.Items)
+            {
+                var listImage = await _productImageRepository.GetAllDataByExpression(
+                        v => v.ProductID.Equals(item.ProductID),
+                        1,
+                        10,
+                        null,
+                        isAscending: true,
+                        null
+                        );
+                ProductResponse productResponse = new ProductResponse
+                {
+                    ProductID = item.ProductID.ToString(),
+                    SerialNumber = item.SerialNumber,
+                    SupplierID = item.SupplierID?.ToString(),
+                    CategoryID = item.CategoryID?.ToString(),
+                    ProductName = item.ProductName,
+                    ProductDescription = item.ProductDescription,
+                    PriceBuy = item.PriceBuy,
+                    PriceRent = item.PriceRent,
+                    Brand = item.Brand,
+                    Quality = item.Quality,
+                    Status = item.Status,
+                    Rating = item.Rating,
+                    CreatedAt = item.CreatedAt,
+                    UpdatedAt = item.UpdatedAt,
+                    listImage = listImage.Items
+                };
+                listPro.Add(productResponse);
+            }
+            result.Result = listPro;
+            result.IsSuccess = true;
+            return result;
+        }
+
+        public async Task<AppActionResult> ProposalFollowHobby(string accountId, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            var accountExist = await _accountRepository.GetById(accountId);
+            List<ProductResponse> listPro = new List<ProductResponse>();
+            Expression<Func<Product, bool>> filter = null;
+
+            if ((accountExist.Hobby == HobbyStatus.LandscapePhotography) || (accountExist.Hobby == HobbyStatus.PortraitPhotography) ||
+                (accountExist.Hobby == HobbyStatus.MacroPhotography) || (accountExist.Hobby == HobbyStatus.SportsPhotography))
+            {
+                filter = a => a.Category.CategoryName.Equals("Máy ảnh DSLR") || a.Category.CategoryName.Equals("Máy ảnh kỹ thuật số");
+            }
+            if (accountExist.Hobby==HobbyStatus.StreetPhotography)
+            {
+                filter = a => a.Category.CategoryName.Equals("Máy ảnh in liền") || a.Category.CategoryName.Equals("Máy ảnh không gương lật");
+            }
+            if (accountExist.Hobby == HobbyStatus.WildlifePhotography)
+            {
+                filter = a => a.Category.CategoryName.Equals("Máy ảnh DSLR") || a.Category.CategoryName.Equals("Drone camera");
+            }
+            var product = await _productRepository.GetAllDataByExpression(
+                 filter,
+                 1,
+                 10,
+                 null,
+                 isAscending: true,
+                 null
+                );
+            foreach (var item in product.Items)
+            {
+                var listImage = await _productImageRepository.GetAllDataByExpression(
+                        v => v.ProductID.Equals(item.ProductID),
+                        1,
+                        10,
+                        null,
+                        isAscending: true,
+                        null
+                        );
+                ProductResponse productResponse = new ProductResponse
+                {
+                    ProductID = item.ProductID.ToString(),
+                    SerialNumber = item.SerialNumber,
+                    SupplierID = item.SupplierID?.ToString(),
+                    CategoryID = item.CategoryID?.ToString(),
+                    ProductName = item.ProductName,
+                    ProductDescription = item.ProductDescription,
+                    PriceBuy = item.PriceBuy,
+                    PriceRent = item.PriceRent,
+                    Brand = item.Brand,
+                    Quality = item.Quality,
+                    Status = item.Status,
+                    Rating = item.Rating,
+                    CreatedAt = item.CreatedAt,
+                    UpdatedAt = item.UpdatedAt,
+                    listImage = listImage.Items
+                };
+                listPro.Add(productResponse);
+            }
+            result.Result = listPro;
+            result.IsSuccess = true;
+            return result;
         }
     }
 

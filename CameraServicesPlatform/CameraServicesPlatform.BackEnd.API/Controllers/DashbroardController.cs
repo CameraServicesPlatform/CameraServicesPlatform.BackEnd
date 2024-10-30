@@ -1,0 +1,178 @@
+﻿using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Application.Service;
+using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace CameraServicesPlatform.BackEnd.API.Controllers
+{
+    [Route("dashbroard")]
+    [ApiController]
+    public class DashbroardController : ControllerBase
+    {
+        private readonly IDashbroardService _dashbroardService;
+
+        public DashbroardController(IDashbroardService dashbroardService)
+        {
+            _dashbroardService = dashbroardService;
+        }
+
+        [HttpGet("best-selling-categories")]
+        public async Task<ActionResult<List<BestSellingCategoryDto>>> GetBestSellingCategories(DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var result = await _dashbroardService.GetBestSellingCategoriesAsync(startDate, endDate);
+            return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("best-selling-categories-by-supplier/{supplierId}")]
+        public async Task<ActionResult<List<BestSellingCategoryDto>>> GetBestSellingCategoriesForSupplier(string supplierId, DateTime startDate, DateTime endDate)
+        {
+            try { 
+            var result = await _dashbroardService.GetBestSellingCategoriesForSupplierAsync(supplierId, startDate, endDate);
+            return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet("get-supplier-product-statistics/{supplierId}")]
+        public async Task<ActionResult<List<ProductStatisticsDto>>> GetSupplierProductStatisticsAsync(string supplierId)
+        {
+            try
+            {
+                var result = await _dashbroardService.GetSupplierProductStatisticsAsync(supplierId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("get-month-order-cost-statistics/{supplierId}")]
+        public async Task<ActionResult<List<MonthlyOrderCostDto>>> GetMonthlyOrderCostStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var result = await _dashbroardService.GetMonthlyOrderCostStatisticsAsync(startDate, endDate);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("get-account-order-statistics/{accountId}")]
+        public async Task<ActionResult<StaffOrderStatisticsDto>> GetStaffOrderStatisticsAsync(string accountId, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var result = await _dashbroardService.GetStaffOrderStatisticsAsync(accountId ,startDate, endDate);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet("get-supplier-order-statistics/{supplierId}")]
+        public async Task<ActionResult<SupplierOrderStatisticsDto>> GetSupplierOrderStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var result = await _dashbroardService.GetSupplierOrderStatisticsAsync(supplierId, startDate, endDate);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("get-calculate-total-revenue-by-supplier/{supplierId}")]
+        public async Task<ActionResult<double>> CalculateTotalRevenueBySupplierAsync(string supplierId)
+        {
+            try
+            {
+                var result = await _dashbroardService.CalculateTotalRevenueBySupplierAsync(supplierId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("get-calculate-monthly-revenue-by-supplier/{supplierId}")]
+        public async Task<ActionResult<List<MonthlyRevenueDto>>> CalculateMonthlyRevenueBySupplierAsync(string supplierId, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var result = await _dashbroardService.CalculateMonthlyRevenueBySupplierAsync(supplierId, startDate, endDate);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // rating
+        [HttpGet("supplier-rating-statistics/{supplierId}")]
+        public async Task<IActionResult> GetSupplierRatingStatistics(string supplierId)
+        {
+            var result = await _dashbroardService.GetSupplierRatingStatisticsAsync(supplierId);
+            return Ok(result);
+        }
+
+        [HttpGet("system-rating-statistics")]
+        public async Task<IActionResult> GetSystemRatingStatistics()
+        {
+            var result = await _dashbroardService.GetSystemRatingStatisticsAsync();
+            return Ok(result);
+        }
+
+        // payment
+        [HttpGet("supplier-payment-statistics/{supplierId}")]
+        public async Task<IActionResult> GetSupplierPaymentStatistics(Guid supplierId, DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashbroardService.GetSupplierPaymentStatisticsAsync(supplierId, startDate, endDate);
+            return Ok(result);
+        }
+
+        [HttpGet("system-payment-statistics")]
+        public async Task<IActionResult> GetSystemPaymentStatistics(DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashbroardService.GetSystemPaymentStatisticsAsync(startDate, endDate);
+            return Ok(result);
+        }
+
+        // transaction
+        [HttpGet("supplier-transaction-statistics/{supplierId}")]
+        public async Task<IActionResult> GetSupplierTransactionStatistics(Guid supplierId, DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashbroardService.GetSupplierTransactionStatisticsAsync(supplierId, startDate, endDate);
+            return Ok(result);
+        }
+
+        [HttpGet("system-transaction-statistics")]
+        public async Task<IActionResult> GetSystemTransactionStatistics(DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashbroardService.GetSystemTransactionStatisticsAsync(startDate, endDate);
+            return Ok(result);
+        }
+    }
+}

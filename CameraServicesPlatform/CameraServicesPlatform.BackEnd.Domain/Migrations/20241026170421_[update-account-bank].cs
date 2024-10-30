@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿/*using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -70,3 +70,4 @@ namespace CameraServicesPlatform.BackEnd.Domain.MigrationHistory
         }
     }
 }
+*/

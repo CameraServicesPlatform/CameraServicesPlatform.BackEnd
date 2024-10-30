@@ -28,6 +28,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private IRepository<ProductImage> _productImageRepository;
         private IRepository<RentalPrice> _rentalPriceRepository;
         private IRepository<ProductVoucher> _productVoucherRepository;
+        private IRepository<Vourcher> _voucherRepository;
         private IRepository<ProductSpecification> _productSpecificationRepository;
         private IRepository<Supplier> _supplierRepository;
         private IRepository<OrderDetail> _orderDetailRepository;
@@ -41,6 +42,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<OrderDetail> orderDetailRepository,
             IRepository<Supplier> supplierRepository,
             IRepository<RentalPrice> rentalPriceRepository,
+            IRepository<Vourcher> voucherRepository,
             IRepository<Order> orderRepository,
             IRepository<ProductVoucher> productVoucherRepository,
             IRepository<ProductSpecification> productSpecificationRepository,
@@ -55,6 +57,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _supplierRepository = supplierRepository;
             _rentalPriceRepository = rentalPriceRepository;
             _orderDetailRepository = orderDetailRepository;
+            _voucherRepository = voucherRepository;
             _productVoucherRepository = productVoucherRepository;
             _productSpecificationRepository = productSpecificationRepository;
             _orderRepository = orderRepository;
@@ -1896,6 +1899,55 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
 
             return result;
 
+        }
+
+        public async Task<AppActionResult> ProposalFollowVourcher(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+
+            var vourcher = await _voucherRepository.GetAllDataByExpression(
+                 v => v.IsActive && v.ValidFrom <= DateTime.Now && v.ExpirationDate >= DateTime.Now ,
+                 1,
+                 10,
+                 orderBy: a => a.DiscountAmount,
+                 isAscending: true,
+                 null
+             );
+            List<ProductVoucher> listProVou = new List<ProductVoucher>();
+            List<Product> listPro = new List<Product>();
+            foreach (var item in vourcher.Items)
+            {
+                var productVour = await _productVoucherRepository.GetAllDataByExpression(
+                 v => v.VourcherID.Equals(item.VourcherID) && v.IsDisable == true,
+                 1,
+                 10,
+                 null,
+                 isAscending: true,
+                 null
+                );
+                foreach (var itemPro in productVour.Items)
+                {
+                    listProVou.Add(itemPro);
+                }
+            }
+            for (int i= listProVou.Count-1; i >= 0; i--)
+            {
+                var product = await _productRepository.GetAllDataByExpression(
+                 v => v.ProductID.Equals(listProVou[i].ProductID),
+                 1,
+                 10,
+                 null,
+                 isAscending: true,
+                 null
+                );
+                foreach (var itemPro in product.Items)
+                {
+                    listPro.Add(itemPro);
+                }
+            }
+            result.Result = listPro;
+            result.IsSuccess = true;
+            return result;
         }
     }
 

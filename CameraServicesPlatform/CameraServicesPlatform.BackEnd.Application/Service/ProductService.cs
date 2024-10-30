@@ -2054,6 +2054,69 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             result.IsSuccess = true;
             return result;
         }
+
+        public async Task<AppActionResult> ProposalFollowHobby(string accountId, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            var accountExist = await _accountRepository.GetById(accountId);
+            List<ProductResponse> listPro = new List<ProductResponse>();
+            Expression<Func<Product, bool>> filter = null;
+
+            if ((accountExist.Hobby == HobbyStatus.LandscapePhotography) || (accountExist.Hobby == HobbyStatus.PortraitPhotography) ||
+                (accountExist.Hobby == HobbyStatus.MacroPhotography) || (accountExist.Hobby == HobbyStatus.SportsPhotography))
+            {
+                filter = a => a.Category.CategoryName.Equals("Máy ảnh DSLR") || a.Category.CategoryName.Equals("Máy ảnh kỹ thuật số");
+            }
+            if (accountExist.Hobby==HobbyStatus.StreetPhotography)
+            {
+                filter = a => a.Category.CategoryName.Equals("Máy ảnh in liền") || a.Category.CategoryName.Equals("Máy ảnh không gương lật");
+            }
+            if (accountExist.Hobby == HobbyStatus.WildlifePhotography)
+            {
+                filter = a => a.Category.CategoryName.Equals("Máy ảnh DSLR") || a.Category.CategoryName.Equals("Drone camera");
+            }
+            var product = await _productRepository.GetAllDataByExpression(
+                 filter,
+                 1,
+                 10,
+                 null,
+                 isAscending: true,
+                 null
+                );
+            foreach (var item in product.Items)
+            {
+                var listImage = await _productImageRepository.GetAllDataByExpression(
+                        v => v.ProductID.Equals(item.ProductID),
+                        1,
+                        10,
+                        null,
+                        isAscending: true,
+                        null
+                        );
+                ProductResponse productResponse = new ProductResponse
+                {
+                    ProductID = item.ProductID.ToString(),
+                    SerialNumber = item.SerialNumber,
+                    SupplierID = item.SupplierID?.ToString(),
+                    CategoryID = item.CategoryID?.ToString(),
+                    ProductName = item.ProductName,
+                    ProductDescription = item.ProductDescription,
+                    PriceBuy = item.PriceBuy,
+                    PriceRent = item.PriceRent,
+                    Brand = item.Brand,
+                    Quality = item.Quality,
+                    Status = item.Status,
+                    Rating = item.Rating,
+                    CreatedAt = item.CreatedAt,
+                    UpdatedAt = item.UpdatedAt,
+                    listImage = listImage.Items
+                };
+                listPro.Add(productResponse);
+            }
+            result.Result = listPro;
+            result.IsSuccess = true;
+            return result;
+        }
     }
 
 }

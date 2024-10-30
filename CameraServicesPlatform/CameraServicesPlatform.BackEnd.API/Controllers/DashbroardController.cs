@@ -129,5 +129,50 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        // rating
+        [HttpGet("supplier-rating-statistics/{supplierId}")]
+        public async Task<IActionResult> GetSupplierRatingStatistics(string supplierId)
+        {
+            var result = await _dashbroardService.GetSupplierRatingStatisticsAsync(supplierId);
+            return Ok(result);
+        }
+
+        [HttpGet("system-rating-statistics")]
+        public async Task<IActionResult> GetSystemRatingStatistics()
+        {
+            var result = await _dashbroardService.GetSystemRatingStatisticsAsync();
+            return Ok(result);
+        }
+
+        // payment
+        [HttpGet("supplier-payment-statistics/{supplierId}")]
+        public async Task<IActionResult> GetSupplierPaymentStatistics(Guid supplierId, DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashbroardService.GetSupplierPaymentStatisticsAsync(supplierId, startDate, endDate);
+            return Ok(result);
+        }
+
+        [HttpGet("system-payment-statistics")]
+        public async Task<IActionResult> GetSystemPaymentStatistics(DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashbroardService.GetSystemPaymentStatisticsAsync(startDate, endDate);
+            return Ok(result);
+        }
+
+        // transaction
+        [HttpGet("supplier-transaction-statistics/{supplierId}")]
+        public async Task<IActionResult> GetSupplierTransactionStatistics(Guid supplierId, DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashbroardService.GetSupplierTransactionStatisticsAsync(supplierId, startDate, endDate);
+            return Ok(result);
+        }
+
+        [HttpGet("system-transaction-statistics")]
+        public async Task<IActionResult> GetSystemTransactionStatistics(DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashbroardService.GetSystemTransactionStatisticsAsync(startDate, endDate);
+            return Ok(result);
+        }
     }
 }

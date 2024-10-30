@@ -17,5 +17,11 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<List<BestSellingCategoryDto>> GetBestSellingCategoriesForSupplierAsync(string supplierId, DateTime startDate, DateTime endDate);
         Task<double> CalculateTotalRevenueBySupplierAsync(string supplierId);
         Task<List<MonthlyRevenueDto>> CalculateMonthlyRevenueBySupplierAsync(string supplierId, DateTime startDate, DateTime endDate);
+        Task<SupplierRatingStatisticsDto> GetSupplierRatingStatisticsAsync(string supplierId);
+        Task<SystemRatingStatisticsDto> GetSystemRatingStatisticsAsync();
+        Task<SystemPaymentStatisticsDto> GetSystemPaymentStatisticsAsync(DateTime startDate, DateTime endDate);
+        Task<SupplierPaymentStatisticsDto> GetSupplierPaymentStatisticsAsync(Guid supplierId, DateTime startDate, DateTime endDate);
+        Task<SupplierTransactionStatisticsDto> GetSupplierTransactionStatisticsAsync(Guid supplierId, DateTime startDate, DateTime endDate);
+        Task<SystemTransactionStatisticsDto> GetSystemTransactionStatisticsAsync(DateTime startDate, DateTime endDate);
     }
 }

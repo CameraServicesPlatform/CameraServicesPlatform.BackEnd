@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Common.DTO.Request;
+using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,6 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
     public interface IPaymentGatewayService
     {
         Task<string> CreatePaymentUrlVnpay(PaymentInformationRequest request, HttpContext httpContext);
+        Task<VNPayResponseDto> PaymentExcute(IQueryCollection coletions);
     }
 }

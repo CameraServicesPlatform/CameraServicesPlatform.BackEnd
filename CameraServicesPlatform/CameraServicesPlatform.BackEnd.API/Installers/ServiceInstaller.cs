@@ -47,6 +47,9 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IFirebaseService, FirebaseService>();
         services.AddScoped<IStaffService, StaffService>();
         services.AddScoped<IDeliveriesMethodService, DeliveriesMethodService>();
+        services.AddScoped<IDashbroardService, DashbroardService>();
+        services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
+        services.AddScoped<IPaymentService, PaymentService>();
 
 
 

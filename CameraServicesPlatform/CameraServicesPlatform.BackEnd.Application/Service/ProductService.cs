@@ -516,6 +516,8 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     result.IsSuccess = true;
                 }
             }
+
+
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);

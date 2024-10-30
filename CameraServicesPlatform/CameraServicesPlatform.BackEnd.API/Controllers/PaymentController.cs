@@ -1,5 +1,6 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.Service;
+using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
     {
 
         private readonly IPaymentService _paymentService;
+        private readonly IPaymentGatewayService _paymentGatewayService;
 
-        public PaymentController(IPaymentService paymentService)
+        public PaymentController(IPaymentService paymentService, IPaymentGatewayService paymentGatewayService)
         {
             _paymentService = paymentService;
+            _paymentGatewayService = paymentGatewayService;
         }
 
         [HttpPut("vnpay-return")]
@@ -31,6 +34,20 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
+        [HttpGet("payment-excute")]
+        public async Task<ActionResult<VNPayResponseDto>> PaymentExcute(IQueryCollection coletions)
+        {
+            try
+            {
+                var response = await _paymentGatewayService.PaymentExcute(coletions);
+                return response;
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-     }
+
+    }
 }

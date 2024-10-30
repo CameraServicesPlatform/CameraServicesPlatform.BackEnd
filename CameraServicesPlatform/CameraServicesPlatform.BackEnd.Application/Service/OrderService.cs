@@ -109,6 +109,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     x => x.OrderDetail
                 );
 
+
                 if (createdOrder == null)
                 {
                     throw new Exception("Không tìm thấy đơn hàng bạn vừa đặt. Hãy tạo lại đơn hàng của bạn.");
@@ -168,7 +169,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
 
-                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetails, totalOrderPrice);
+                await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetaills, totalOrderPrice);
                 result = _mapper.Map<OrderResponse>(createdOrder);
 
             }
@@ -330,7 +331,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
 
-                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetails, totalOrderPrice);
+                await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetaills, totalOrderPrice);
 
                 result = _mapper.Map<OrderResponse>(createdOrder);
 
@@ -343,23 +344,61 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        private async Task SendOrderConfirmationEmail(string email, string firstName, List<OrderDetail> orderDetails, double totalOrderPrice)
+        private async Task SendOrderConfirmationEmail(Account account, string email, string firstName, List<OrderDetail> orderDetails, double totalOrderPrice)
         {
             IEmailService? emailService = Resolve<IEmailService>();
 
-            var orderDetailsString = string.Join("\n", orderDetails.Select(od =>
-                $"Product ID: {od.ProductID}, Quantity: {od.ProductQuality}, Unit Price: {od.ProductPrice:C}, Discount: {od.Discount:C}, Total Price: {od.ProductPriceTotal:C}"
+            // Tạo chuỗi chi tiết từng sản phẩm trong hóa đơn
+            var orderDetailsString = string.Join("\n", orderDetails.Select((od, index) =>
+                $"{index + 1}. Mã sản phẩm: {od.ProductID}\n" +
+                $"   Tình trạng: {od.ProductQuality}\n" +
+                $"   Đơn giá: {od.ProductPrice:C}\n" +
+                $"   Giảm giá: {od.Discount:C}\n" +
+                $"   Thành tiền: {od.ProductPriceTotal:C}\n"
             ));
 
-            var totalOrderString = $"\n\nTotal Order Price: {totalOrderPrice:C}";
+            // Thông tin hóa đơn theo mẫu
+            var invoiceInfo =
+                "HÓA ĐƠN\n\n" +
+                $"Mã hóa đơn: #{Guid.NewGuid()}\n" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}\n" +
+                $"Hạn thanh toán: {DateTime.Now:dd/MM/yyyy}\n\n" +
+                "Khách hàng\n" +
+                $"{firstName}\n" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}\n" +
+                $"Email: {email}\n" +
+                $"Địa chỉ: {account.Address ?? "N/A"}\n\n" +
+                "Nhà cung cấp\n" +
+                "Camera service platform Company\n" +
+                "Điện thoại: 0862448677\n" +
+                "Email: dan1314705@gmail.com\n" +
+                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM\n\n";
 
-            var orderSummary = $"\n\nOrder Details:\n{orderDetailsString}{totalOrderString}";
+            // Chi tiết hóa đơn và tổng cộng
+            var orderSummary =
+                "=====================================\n" +
+                "         CHI TIẾT HÓA ĐƠN\n" +
+                "=====================================\n" +
+                $"{orderDetailsString}\n" +
+                "-------------------------------------\n" +
+                $"Thành tiền: {totalOrderPrice:C}\n" +
+                $"TỔNG CỘNG: {totalOrderPrice:C}\n" +
+                "=====================================\n";
 
-                emailService.SendEmail(
-                    email,
-                    SD.SubjectMail.ORDER_CONFIRMATION,
-                    $"Dear {firstName},\n\nCảm ơn bạn vì đã tin dùng!\nĐơn hàng của bạn đã được đặt thành công."
-                    + orderSummary);
+            var emailMessage =
+                $"Kính chào {firstName},\n\n" +
+                "Cảm ơn quý khách đã tin tưởng sử dụng dịch vụ của chúng tôi. Dưới đây là thông tin hóa đơn chi tiết của quý khách:\n\n" +
+                invoiceInfo +
+                orderSummary +
+                "\nNếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.\n\n" +
+                "Trân trọng,\n" +
+                "Đội ngũ Camera service platform";
+
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION,
+               emailMessage
+           );
         }
         public async Task<OrderResponse> CreateOrderRent(CreateOrderRentRequest request)
         {
@@ -531,7 +570,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new Exception("Không có hợp đồng!");
                 }
 
-                await SendOrderConfirmationEmail(getAccount.Email, getAccount.FirstName, orderDetails, totalOrderPrice);
+                await SendOrderConfirmationEmail( getAccount, getAccount.Email, getAccount.FirstName, orderDetaills, totalOrderPrice);
 
                 var orderResponse = _mapper.Map<OrderResponse>(createdOrder);
                 orderResponse.AccountID = createdOrder.Id.ToString();

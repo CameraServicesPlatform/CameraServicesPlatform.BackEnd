@@ -11,6 +11,10 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> CreateProductRent(ProductRequestRentDto productResponse);
 
         Task<AppActionResult> DeleteProduct(string productId);
+        Task<AppActionResult> ProposalFollowVourcher(int pageIndex, int pageSize);
+        Task<AppActionResult> ProposalFollowJobBuy(string accountId, int pageIndex, int pageSize);
+        Task<AppActionResult> ProposalFollowHobby(string accountId, int pageIndex, int pageSize);
+
         Task<AppActionResult> GetAllProduct(int pageIndex, int pageSize);
         Task<AppActionResult> GetProductById(string id, int pageIndex, int pageSize);
         Task<AppActionResult> GetProductByName([FromQuery] string? filter, int pageIndex, int pageSize);

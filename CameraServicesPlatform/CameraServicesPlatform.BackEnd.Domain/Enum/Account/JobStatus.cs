@@ -13,7 +13,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Enum.Account
         FreelancePhotographer,
         ContentCreator,
         Beginner,
-        PhotographyStudent,
         TravelEnthusiast,
         CasualUser,
         Other

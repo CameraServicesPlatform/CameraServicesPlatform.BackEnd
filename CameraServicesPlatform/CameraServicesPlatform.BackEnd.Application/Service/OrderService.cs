@@ -360,12 +360,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         MemberName = $"{getAccount!.FirstName} {getAccount.LastName}",
                         OrderID = orderDb.Id.ToString(),
                     };
+                    var createPayment = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
 
                     orderDb.OrderStatus = OrderStatus.Payment;
                     _orderRepository.Update(orderDb);
                     await _unitOfWork.SaveChangesAsync();
 
-                result.Result = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
+                    result.Result = createPayment;
                 }
                 else
                 {
@@ -646,6 +647,39 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 _orderRepository.Update(order);
                 await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateOrderStatusPaymentBySupplier(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.Payment;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
                 }
                 var orderResponse = _mapper.Map<OrderResponse>(order);
                 orderResponse.AccountID = order.Id.ToString();

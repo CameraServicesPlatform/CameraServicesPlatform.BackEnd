@@ -360,7 +360,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         MemberName = $"{getAccount!.FirstName} {getAccount.LastName}",
                         OrderID = orderDb.Id.ToString(),
                     };
-                    result.Result = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
+
+                    orderDb.OrderStatus = OrderStatus.Payment;
+                    _orderRepository.Update(orderDb);
+                    await _unitOfWork.SaveChangesAsync();
+
+                result.Result = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
                 }
                 else
                 {

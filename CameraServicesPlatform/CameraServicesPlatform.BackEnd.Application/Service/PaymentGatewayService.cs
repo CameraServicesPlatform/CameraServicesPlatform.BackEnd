@@ -61,7 +61,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             pay.AddRequestData("vnp_TxnRef", requestDto.OrderID);
             paymentUrl = pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
 
-            await SavePaymentInfoAsync(requestDto, PaymentStatus.Pending, PaymentType.Refund);
+            //await SavePaymentInfoAsync(requestDto, PaymentStatus.Pending, PaymentType.Refund);
 
             return paymentUrl;
         }

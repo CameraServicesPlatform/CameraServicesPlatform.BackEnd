@@ -64,28 +64,31 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
-        public async Task<OrderResponse> CreateOrderBuy(CreateOrderBuyRequest request)
+        public async Task<AppActionResult> CreateOrderBuy(CreateOrderBuyRequest request)
         {
-            var result = new OrderResponse();
-
+            var result = new AppActionResult();
             try
             {
-                var utility = Resolve<Utility>();
-                var paymentGatewayService = Resolve<IPaymentGatewayService>();
-                var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
-
+                // Parse product ID and retrieve account details
+                var productID = Guid.Parse(request.ProductID);
                 var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
-
-                var existingOrderDetails = await _orderDetailRepository.GetByExpression(x =>
-                    productIDs.Contains(x.ProductID) && x.Order.OrderType == OrderType.Purchase
-                );
-
-                if (existingOrderDetails != null)
+                if (getAccount == null)
                 {
-                    throw new Exception("Không tạo đơn hàng thành công vì một hoặc nhiều sản phẩm đã được bán!");
+                    throw new Exception("Account not found.");
                 }
 
+                // Check if the product has already been sold
+                var existingOrderDetail = await _orderDetailRepository.GetByExpression(x =>
+                    x.ProductID == productID && x.Order.OrderType == OrderType.Purchase
+                );
+                if (existingOrderDetail != null)
+                {
+                    throw new Exception("Order creation failed because the product has already been sold.");
+                }
+
+                // Map request to Order entity and set order properties
                 var order = _mapper.Map<Order>(request);
+                order.OrderID = Guid.NewGuid();
                 order.OrderDate = DateTime.UtcNow;
                 order.CreatedAt = DateTime.UtcNow;
                 order.UpdatedAt = DateTime.UtcNow;
@@ -94,113 +97,100 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
                 order.DeliveryMethod = request.DeliveryMethod;
-                double totalOrderPrice = 0;
-                var orderDetails = new List<OrderDetail>();
 
- 
-                order.TotalAmount = totalOrderPrice;
+                // Retrieve product price and apply any voucher discount if applicable
+                var product = await _productRepository.GetById(productID);
+                if (product == null)
+                {
+                    throw new Exception("Product not found.");
+                }
 
+                double discount = 0;
+                if (!string.IsNullOrEmpty(request.VourcherID))
+                {
+                    var productVoucher = await _productVoucherRepository.GetByExpression(
+                        x => x.ProductID == productID && x.VourcherID == Guid.Parse(request.VourcherID)
+                    );
+                    if (productVoucher != null)
+                    {
+                        var voucher = await _voucherRepository.GetById(productVoucher.VourcherID);
+                        discount = voucher?.DiscountAmount ?? 0;
+                    }
+                }
+                
+                // Create the OrderDetail entity with applied discount
+                var orderDetail = new OrderDetail
+                {
+                    OrderID = order.OrderID,
+                    ProductID = productID,
+                    ProductPrice = product.PriceBuy ?? 0,
+                    Discount = discount,
+                    ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
+                    ProductPriceTotal = (product.PriceBuy ?? 0) - discount
+                };
+                // Set the order's total amount and save the order and order detail
+                order.TotalAmount = orderDetail.ProductPriceTotal;
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);
-                await _unitOfWork.SaveChangesAsync(); 
+                await _unitOfWork.SaveChangesAsync();
 
-                var createdOrder = await _orderRepository.GetByExpression(x =>
-                    x.Id == request.AccountID && x.OrderDate == order.OrderDate && x.OrderStatus == OrderStatus.Pending,
-                    x => x.OrderDetail
-                );
-
-
-                if (createdOrder == null)
-                {
-                    throw new Exception("Không tìm thấy đơn hàng bạn vừa đặt. Hãy tạo lại đơn hàng của bạn.");
-                }
-                var orderDetaills = new List<OrderDetail>();
-
-                foreach (var product in request.Products)
-                {
-                    var orderDetailRequest = request.OrderDetailRequests
-                    .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
-
-                    var productVouchers = await _productVoucherRepository.GetByExpression(
-                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VourcherID));
-
-                    double discount = 0;
-
-                    if (productVouchers != null)
-                    {
-                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
-
-                        if (voucher != null)
-                        {
-                            discount = voucher.DiscountAmount;
-                        }
-                    }
-                    var orderDetail = new OrderDetail
-                    {
-                        OrderID = createdOrder.OrderID,
-                        ProductID = Guid.Parse(product.ProductID),
-                        ProductPrice = product.PriceBuy ?? 0,
-                        Discount = discount,
-                        ProductQuality = product.Quality,
-                    };
-
-                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
-                    orderDetail.ProductPriceTotal = priceAfterDiscount;
-
-                    totalOrderPrice += priceAfterDiscount;
-
-                    orderDetaills.Add(orderDetail);
-                }
-
-                await _orderDetailRepository.InsertRange(orderDetaills);
+                
+                // Insert the order detail
+                orderDetail.OrderID = order.OrderID;
+                await _orderDetailRepository.Insert(orderDetail);
                 await Task.Delay(200);
                 await _unitOfWork.SaveChangesAsync();
 
-                foreach (var product in request.Products)
+                // Update product status to 'Sold'
+                var productEntity = await _productRepository.GetById(product.ProductID);
+                if (productEntity != null)
                 {
-                    var productEntity = await _productRepository.GetById(Guid.Parse(product.ProductID));
-
-                    if (productEntity != null)
-                    {
-                        productEntity.Status = ProductStatusEnum.Sold;
-                        _productRepository.Update(productEntity);
-                    }
+                    productEntity.Status = ProductStatusEnum.Sold;
+                    _productRepository.Update(productEntity);
                 }
-                await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
 
-                await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetaills, totalOrderPrice);
-                result = _mapper.Map<OrderResponse>(createdOrder);
-
+                // Send confirmation email and map created order to response
+                await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                result.IsSuccess = true;
+                result.Result = order;
             }
             catch (Exception ex)
             {
-                throw new Exception("Không tạo đơn hàng thành công. Lỗi: " + ex.Message);
+                throw new Exception("Order creation failed. Error: " + ex.Message);
             }
 
             return result;
         }
-        public async Task<OrderResponse> CreateOrderWithPayment(CreateOrderBuyRequest request, HttpContext context)
+        public async Task<AppActionResult> CreateOrderWithPayment(CreateOrderBuyRequest request, HttpContext context)
         {
-            var result = new OrderResponse();
+            var result = new AppActionResult();
 
             try
             {
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
-                var productIDs = request.Products.Select(p => Guid.Parse(p.ProductID)).ToList();
+
+                // Parse product ID and retrieve account details
+                var productID = Guid.Parse(request.ProductID);
                 var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
-
-                var existingOrderDetails = await _orderDetailRepository.GetByExpression(x =>
-                    productIDs.Contains(x.ProductID) && x.Order.OrderType == OrderType.Purchase
-                );
-
-                if (existingOrderDetails != null)
+                if (getAccount == null)
                 {
-                    throw new Exception("Không tạo đơn hàng thành công vì một hoặc nhiều sản phẩm đã được bán!");
+                    throw new Exception("Account not found.");
                 }
 
+                // Check if the product has already been sold
+                var existingOrderDetail = await _orderDetailRepository.GetByExpression(x =>
+                    x.ProductID == productID && x.Order.OrderType == OrderType.Purchase
+                );
+                if (existingOrderDetail != null)
+                {
+                    throw new Exception("Order creation failed because the product has already been sold.");
+                }
+
+                // Map request to Order entity and set order properties
                 var order = _mapper.Map<Order>(request);
+                order.OrderID = Guid.NewGuid();
                 order.OrderDate = DateTime.UtcNow;
                 order.CreatedAt = DateTime.UtcNow;
                 order.UpdatedAt = DateTime.UtcNow;
@@ -208,198 +198,141 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
+                order.DeliveryMethod = request.DeliveryMethod;
 
-                double totalOrderPrice = 0;
-                var orderDetails = new List<OrderDetail>();
-
-                foreach (var product in request.Products)
+                // Retrieve product price and apply any voucher discount if applicable
+                var product = await _productRepository.GetById(productID);
+                if (product == null)
                 {
-                    var orderDetailRequest = request.OrderDetailRequests
-                        .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
-
-                    var productVouchers = await _productVoucherRepository.GetByExpression(
-                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VourcherID));
-
-                    double discount = 0;
-
-                    if (productVouchers != null)
-                    {
-                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
-
-                        if (voucher != null)
-                        {
-                            discount = voucher.DiscountAmount;
-                        }
-                    }
-
-                    var orderDetail = new OrderDetail
-                    {
-                        OrderID = order.OrderID,
-                        ProductID = Guid.Parse(product.ProductID),
-                        ProductPrice = product.PriceBuy ?? 0,
-                        Discount = discount,
-                        ProductQuality = product.Quality,
-                    };
-
-                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
-                    orderDetail.ProductPriceTotal = priceAfterDiscount;
-
-                    totalOrderPrice += priceAfterDiscount;
-
-                    orderDetails.Add(orderDetail);
+                    throw new Exception("Product not found.");
                 }
 
-                order.TotalAmount = totalOrderPrice;
+                double discount = 0;
+                if (!string.IsNullOrEmpty(request.VourcherID))
+                {
+                    var productVoucher = await _productVoucherRepository.GetByExpression(
+                        x => x.ProductID == productID && x.VourcherID == Guid.Parse(request.VourcherID)
+                    );
+                    if (productVoucher != null)
+                    {
+                        var voucher = await _voucherRepository.GetById(productVoucher.VourcherID);
+                        discount = voucher?.DiscountAmount ?? 0;
+                    }
+                }
 
+                // Create the OrderDetail entity with applied discount
+                var orderDetail = new OrderDetail
+                {
+                    OrderID = order.OrderID,
+                    ProductID = productID,
+                    ProductPrice = product.PriceBuy ?? 0,
+                    Discount = discount,
+                    ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
+                    ProductPriceTotal = (product.PriceBuy ?? 0) - discount
+                };
+                // Set the order's total amount and save the order and order detail
+                order.TotalAmount = orderDetail.ProductPriceTotal;
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);
                 await _unitOfWork.SaveChangesAsync();
 
-                var createdOrder = await _orderRepository.GetByExpression(x =>
-                    x.Id == request.AccountID && x.OrderDate == order.OrderDate && x.OrderStatus == OrderStatus.Pending,
-                    x => x.OrderDetail
-                );
 
-                if (createdOrder == null)
-                {
-                    throw new Exception("Không tìm thấy đơn hàng bạn vừa đặt. Hãy tạo lại đơn hàng của bạn.");
-                }
-                var orderDetaills = new List<OrderDetail>();
-
-                foreach (var product in request.Products)
-                {
-                    var orderDetailRequest = request.OrderDetailRequests
-                        .FirstOrDefault(x => x.ProductID == Guid.Parse(product.ProductID));
-
-                    var productVouchers = await _productVoucherRepository.GetByExpression(
-                      x => x.ProductID == orderDetailRequest.ProductID && x.VourcherID == Guid.Parse(request.VourcherID));
-
-                    double discount = 0;
-
-                    if (productVouchers != null)
-                    {
-                        var voucher = await _voucherRepository.GetById(productVouchers.VourcherID);
-
-                        if (voucher != null)
-                        {
-                            discount = voucher.DiscountAmount;
-                        }
-                    }
-
-                    var orderDetail = new OrderDetail
-                    {
-                        OrderID = createdOrder.OrderID,
-                        ProductID = Guid.Parse(product.ProductID),
-                        ProductPrice = product.PriceBuy ?? 0,
-                        Discount = discount,
-                        ProductQuality = product.Quality,
-                    };
-
-                    double priceAfterDiscount = orderDetail.ProductPrice -  orderDetail.Discount;
-                    orderDetail.ProductPriceTotal = priceAfterDiscount;
-
-                    totalOrderPrice += priceAfterDiscount;
-
-                    orderDetaills.Add(orderDetail);
-                }
-
-                await _orderDetailRepository.InsertRange(orderDetaills);
+                // Insert the order detail
+                orderDetail.OrderID = order.OrderID;
+                await _orderDetailRepository.Insert(orderDetail);
                 await Task.Delay(200);
                 await _unitOfWork.SaveChangesAsync();
 
-                foreach (var product in request.Products)
+                // Update product status to 'Sold'
+                var productEntity = await _productRepository.GetById(product.ProductID);
+                if (productEntity != null)
                 {
-                    var productEntity = await _productRepository.GetById(Guid.Parse(product.ProductID));
-
-                    if (productEntity != null)
-                    {
-                        productEntity.Status = ProductStatusEnum.Sold;
-                        _productRepository.Update(productEntity);
-                    }
+                    productEntity.Status = ProductStatusEnum.Sold;
+                    _productRepository.Update(productEntity);
                 }
                 await _unitOfWork.SaveChangesAsync();
 
-
+                // Prepare payment request
                 var payment = new PaymentInformationRequest
                 {
-                    AccountID = createdOrder.Id,
+                    AccountID = getAccount.Id,
                     Amount = (double)order.TotalAmount,
-                    MemberName = $"{order.Account!.FirstName} {order.Account.LastName}",
-                    OrderID = order.Id.ToString(),
+                    MemberName = $"{getAccount.FirstName} {getAccount.LastName}",
+                    OrderID = order.OrderID.ToString(),
                     SupplierID = request.SupplierID,
                 };
 
-                await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
-
-                await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetaills, totalOrderPrice);
-
-                result = _mapper.Map<OrderResponse>(createdOrder);
+                // Create payment URL
+                var payMethod = await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
+                // Send order confirmation email
+                await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                result.Result = payMethod;
 
             }
             catch (Exception ex)
             {
-                throw new Exception("Không tạo đơn hàng thành công. Lỗi: " + ex.Message);
+                throw new Exception("Order creation failed. Error: " + ex.Message);
             }
 
             return result;
         }
 
-        private async Task SendOrderConfirmationEmail(Account account, string email, string firstName, List<OrderDetail> orderDetails, double totalOrderPrice)
+        private async Task SendOrderConfirmationEmail(Account account, string email, string firstName, OrderDetail orderDetail, double totalOrderPrice)
         {
             IEmailService? emailService = Resolve<IEmailService>();
 
-            // Tạo chuỗi chi tiết từng sản phẩm trong hóa đơn
-            var orderDetailsString = string.Join("\n", orderDetails.Select((od, index) =>
-                $"{index + 1}. Mã sản phẩm: {od.ProductID}\n" +
-                $"   Tình trạng: {od.ProductQuality}\n" +
-                $"   Đơn giá: {od.ProductPrice:C}\n" +
-                $"   Giảm giá: {od.Discount:C}\n" +
-                $"   Thành tiền: {od.ProductPriceTotal:C}\n"
-            ));
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:C}<br />" +
+                $"   Giảm giá: {orderDetail.Discount:C}<br />" +
+                $"   Thành tiền: {orderDetail.ProductPriceTotal:C}<br />";
 
-            // Thông tin hóa đơn theo mẫu
+            // Invoice information template
             var invoiceInfo =
-                "HÓA ĐƠN\n\n" +
-                $"Mã hóa đơn: #{Guid.NewGuid()}\n" +
-                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}\n" +
-                $"Hạn thanh toán: {DateTime.Now:dd/MM/yyyy}\n\n" +
-                "Khách hàng\n" +
-                $"{firstName}\n" +
-                $"Điện thoại: {account.PhoneNumber ?? "N/A"}\n" +
-                $"Email: {email}\n" +
-                $"Địa chỉ: {account.Address ?? "N/A"}\n\n" +
-                "Nhà cung cấp\n" +
-                "Camera service platform Company\n" +
-                "Điện thoại: 0862448677\n" +
-                "Email: dan1314705@gmail.com\n" +
-                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM\n\n";
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{firstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {email}<br />" +
+                $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
+                "Nhà cung cấp<br />" +
+                "Camera service platform Company<br />" +
+                "Điện thoại: 0862448677<br />" +
+                "Email: dan1314705@gmail.com<br />" +
+                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
 
-            // Chi tiết hóa đơn và tổng cộng
+            // Order summary and total
             var orderSummary =
-                "=====================================\n" +
-                "         CHI TIẾT HÓA ĐƠN\n" +
-                "=====================================\n" +
-                $"{orderDetailsString}\n" +
-                "-------------------------------------\n" +
-                $"Thành tiền: {totalOrderPrice:C}\n" +
-                $"TỔNG CỘNG: {totalOrderPrice:C}\n" +
-                "=====================================\n";
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:C}<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:C}<br />" +
+                "=====================================<br />";
 
             var emailMessage =
-                $"Kính chào {firstName},\n\n" +
-                "Cảm ơn quý khách đã tin tưởng sử dụng dịch vụ của chúng tôi. Dưới đây là thông tin hóa đơn chi tiết của quý khách:\n\n" +
+                $"Kính chào {firstName},<br /><br />" +
+                "Cảm ơn quý khách đã tin tưởng sử dụng dịch vụ của chúng tôi. Dưới đây là thông tin hóa đơn chi tiết của quý khách:<br /><br />" +
                 invoiceInfo +
                 orderSummary +
-                "\nNếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.\n\n" +
-                "Trân trọng,\n" +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
                 "Đội ngũ Camera service platform";
 
-            emailService.SendEmail(
-               email,
-               SD.SubjectMail.ORDER_CONFIRMATION,
-               emailMessage
-           );
+            // Send the email asynchronously and wait for completion
+             emailService.SendEmail(
+                email,
+                SD.SubjectMail.ORDER_CONFIRMATION,
+                emailMessage
+            );
         }
+
         public async Task<OrderResponse> CreateOrderRent(CreateOrderRentRequest request)
         {
             var result = new OrderResponse();
@@ -570,7 +503,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new Exception("Không có hợp đồng!");
                 }
 
-                await SendOrderConfirmationEmail( getAccount, getAccount.Email, getAccount.FirstName, orderDetaills, totalOrderPrice);
+                //await SendOrderConfirmationEmail( getAccount, getAccount.Email, getAccount.FirstName, orderDetaill, totalOrderPrice);
 
                 var orderResponse = _mapper.Map<OrderResponse>(createdOrder);
                 orderResponse.AccountID = createdOrder.Id.ToString();

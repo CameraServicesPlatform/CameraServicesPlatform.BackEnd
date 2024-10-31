@@ -687,7 +687,7 @@ public class AccountService : GenericBackendService, IAccountService
             // Assign role to each account
             foreach (Account account in staffAccountList)
             {
-                Account? accountDb = await _accountRepository.GetByExpression(a => a.PhoneNumber == account.PhoneNumber);
+                var accountDb = await _accountRepository.GetById(account.Id);
                 if (accountDb != null)
                 {
                     IdentityResult result = await _userManager.AddToRoleAsync(accountDb, roleName);
@@ -757,8 +757,9 @@ public class AccountService : GenericBackendService, IAccountService
             }
 
             // Assign roles if necessary
-            bool isSuccessful = await AssignStaffRole([staffAccount]); // Update method to assign staff role
-            if (isSuccessful)
+            //bool isSuccessful = await AssignStaffRole([staffAccount]); // Update method to assign staff role
+            IdentityResult roleResult = await _userManager.AddToRoleAsync(staffAccount, "STAFF");
+            if (roleResult != null)
             {
                 // Insert the Staff entity into the database
                 Staff staff = _mapper.Map<Staff>(dto);

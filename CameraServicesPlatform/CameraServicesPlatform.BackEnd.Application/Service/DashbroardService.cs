@@ -207,34 +207,37 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var orders = await _orderRepository.GetAllDataByExpression(
                 o => o.OrderDate >= startDate && o.OrderDate <= endDate && o.SupplierID == Guid.Parse(supplierId),
                 1, int.MaxValue,
-                 includes: new Expression<Func<Order, object>>[]
-                    {
-                o => o.OrderDetail,
-                    }
+                includes: new Expression<Func<Order, object>>[]
+                {
+            o => o.OrderDetail,
+                }
             );
 
-            var categorySales = new Dictionary<string, BestSellingCategoryDto>(); 
+            var categorySales = new Dictionary<string, BestSellingCategoryDto>();
             foreach (var order in orders.Items)
             {
                 foreach (var detail in order.OrderDetail)
                 {
                     var product = await _productRepository.GetById(detail.ProductID);
-                    if (product != null)
+                    if (product != null && product.Category != null) // Add null check for product.Category
                     {
-                        if (!categorySales.ContainsKey(product.CategoryID.ToString()))
+                        var categoryId = product.CategoryID.ToString();
+
+                        if (!categorySales.ContainsKey(categoryId))
                         {
-                            categorySales[product.CategoryID.ToString()] = new BestSellingCategoryDto
+                            categorySales[categoryId] = new BestSellingCategoryDto
                             {
-                                CategoryID = product.CategoryID.ToString(),
-                                CategoryName = product.Category.CategoryName, 
-                                TotalSold = 0 
+                                CategoryID = categoryId,
+                                CategoryName = product.Category.CategoryName,
+                                TotalSold = 0
                             };
                         }
 
-                        categorySales[product.CategoryID.ToString()].TotalSold += 1; 
+                        categorySales[categoryId].TotalSold += 1;
                     }
                 }
             }
+
             return categorySales.Values.OrderByDescending(c => c.TotalSold).ToList();
         }
 

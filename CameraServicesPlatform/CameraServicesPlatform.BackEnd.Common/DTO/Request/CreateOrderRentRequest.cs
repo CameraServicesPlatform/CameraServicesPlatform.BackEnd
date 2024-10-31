@@ -13,11 +13,11 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public string SupplierID { get; set; }
         public string AccountID { get; set; }
         public string ProductID { get; set; }
-        public string VoucherID { get; set; }
+        public string? VoucherID { get; set; }
         public DateTime OrderDate { get; set; }
         public OrderStatus OrderStatus { get; set; }
-        public decimal TotalAmount { get; set; }
-        public List<OrderProductRequest> Products { get; set; }
+        public double TotalAmount { get; set; }
+        //public List<OrderProductRequest> Products { get; set; }
         public OrderType OrderType { get; set; }
         public string? ShippingAddress { get; set; }
         public DateTime? RentalStartDate { get; set; }
@@ -25,7 +25,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public RentalDurationUnit DurationUnit { get; set; }
         public int DurationValue { get; set; }
         public DateTime? ReturnDate { get; set; }
-        public List<OrderDetailRequest> OrderDetailRequests { get; set; } 
+        //public List<OrderDetailRequest> OrderDetailRequests { get; set; } 
         public CreateContractRequestDTO ContractRequest {  get; set; }
         public DeliveryMethod DeliveryMethod { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

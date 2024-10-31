@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Request;
  
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
  
 using Microsoft.AspNetCore.Mvc;
@@ -90,6 +91,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("purchase-order/{orderId}")]
+        public async Task<AppActionResult> PurchaseOrder(string orderId)
+        {
+            return await _orderService.PurchaseOrder(orderId, HttpContext);
+        }
+
         [HttpPut("update-order-status-completed/{orderId}")]
         public async Task<AppActionResult> UpdateOrderStatusCompletedBySupplier(string orderId)
         {

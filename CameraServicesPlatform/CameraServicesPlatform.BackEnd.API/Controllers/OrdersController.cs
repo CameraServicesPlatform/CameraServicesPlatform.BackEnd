@@ -126,6 +126,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.CancelOrder(orderId);
         }
+
+        [HttpPut("accept-cancel-order/{orderId}")]
+        public async Task<AppActionResult> AcceptCancelOrder(string orderId)
+        {
+            return await _orderService.AcceptCancelOrder(orderId);
+        }
     }
 }
 

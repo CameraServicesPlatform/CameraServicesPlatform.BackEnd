@@ -25,6 +25,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> UpdateOrderStatusApprovedBySupplier(string OrderID);
 
         Task<AppActionResult> CancelOrder(string OrderID);
+        Task<AppActionResult> AcceptCancelOrder(string OrderID);
 
 
 

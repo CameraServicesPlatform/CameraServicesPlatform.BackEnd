@@ -18,5 +18,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string VnPayResponseCode { get; set; }
         public string Amount { get; set; }
         public string PayDate { get; set; }
+        public string AccountId {  get; set; }
     }
 }

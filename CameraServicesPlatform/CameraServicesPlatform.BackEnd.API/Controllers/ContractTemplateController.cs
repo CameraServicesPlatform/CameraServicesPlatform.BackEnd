@@ -80,7 +80,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             try
             {
-                var response = await _contractTemplateService.DeleteContractTemplate(contractTemplateId);
+                var response = await _contractTemplateService.GetContractTemplateById(contractTemplateId);
                 if (!response.IsSuccess)
                 {
                     return NotFound(response);

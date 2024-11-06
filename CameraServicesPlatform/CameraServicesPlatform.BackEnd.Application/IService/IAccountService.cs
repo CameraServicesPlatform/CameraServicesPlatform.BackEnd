@@ -54,6 +54,7 @@ public interface IAccountService
     Task<AppActionResult> AssignUserIntoStaff(string userId, string staffId);
     Task<AppActionResult> AssignRoleForUserId(string userId, IList<string> roleId);
     Task<AppActionResult> RemoveRoleForUserId(string userId, IList<string> roleId);
+    //Task<bool> AssignStaffRole(Account staffAccountList);
     Task<bool> AssignStaffRole(List<Account> staffAccountList);
     Task<AppActionResult> AddStaff(CreateStaffDTO dto);
     void SendAccountCreationEmailForStaff(List<Account> tourGuideAccountList);

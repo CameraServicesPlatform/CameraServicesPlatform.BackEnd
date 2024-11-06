@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Request;
  
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
  
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             _orderService = orderService;
         }
+
         [HttpGet("get-all-order")]
         public async Task<AppActionResult> GetAllOrder(int pageIndex = 1, int pageSize = 10)
         {
@@ -30,6 +32,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         public async Task<AppActionResult> GetOrderByOrderType(OrderType type, int pageIndex = 1, int pageSize = 10)
         {
             return await _orderService.GetOrderByOrderType(type, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-order-by-order-status")]
+        public async Task<AppActionResult> GetOrderByOrderStatus(OrderStatus orderStatus, int pageIndex, int pageSize)
+        {
+            return await _orderService.GetOrderByOrderStatus(orderStatus, pageIndex, pageSize);
         }
 
         [HttpGet("get-order-of-supplierId")]
@@ -90,6 +98,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("purchase-order/{orderId}")]
+        public async Task<AppActionResult> PurchaseOrder(string orderId)
+        {
+            return await _orderService.PurchaseOrder(orderId, HttpContext);
+        }
+
         [HttpPut("update-order-status-completed/{orderId}")]
         public async Task<AppActionResult> UpdateOrderStatusCompletedBySupplier(string orderId)
         {
@@ -107,11 +122,23 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.UpdateOrderStatusApprovedBySupplier(orderId);
         }
+        [HttpPut("update-order-status-payment/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderStatusPaymentBySupplier(string orderId)
+        {
+            return await _orderService.UpdateOrderStatusPaymentBySupplier(orderId);
+        }
 
         [HttpPut("cancel-order/{orderId}")]
         public async Task<AppActionResult> CancelOrder(string orderId)
         {
             return await _orderService.CancelOrder(orderId);
         }
+
+        [HttpPut("accept-cancel-order/{orderId}")]
+        public async Task<AppActionResult> AcceptCancelOrder(string orderId)
+        {
+            return await _orderService.AcceptCancelOrder(orderId);
+        }
     }
 }
+

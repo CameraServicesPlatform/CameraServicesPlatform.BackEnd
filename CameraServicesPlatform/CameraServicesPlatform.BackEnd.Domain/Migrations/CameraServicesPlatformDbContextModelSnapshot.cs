@@ -1226,10 +1226,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AccountID")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<double>("Amount")
                         .HasColumnType("float");
 
@@ -1258,8 +1254,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("TransactionID");
-
-                    b.HasIndex("AccountID");
 
                     b.HasIndex("OrderID")
                         .IsUnique();
@@ -1652,19 +1646,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             modelBuilder.Entity("Transaction", b =>
                 {
-                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
                         .WithOne("Transaction")
                         .HasForeignKey("Transaction", "OrderID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Account");
 
                     b.Navigation("Order");
                 });

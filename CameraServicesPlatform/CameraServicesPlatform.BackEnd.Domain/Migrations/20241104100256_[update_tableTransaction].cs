@@ -1,4 +1,4 @@
-﻿/*using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class updateDB : Migration
+    public partial class update_tableTransaction : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -634,13 +634,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     PaymentMethod = table.Column<int>(type: "int", nullable: false),
                     VNPAYTransactionID = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     VNPAYTransactionStatus = table.Column<int>(type: "int", nullable: true),
-                    VNPAYTransactionTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-
+                    VNPAYTransactionTime = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Transactions", x => x.TransactionID);
-                    
                     table.ForeignKey(
                         name: "FK_Transactions_Orders_OrderID",
                         column: x => x.OrderID,
@@ -1083,11 +1081,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 filter: "[AccountID] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Transactions_AccountID",
-                table: "Transactions",
-                column: "AccountID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Transactions_OrderID",
                 table: "Transactions",
                 column: "OrderID",
@@ -1208,4 +1201,3 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         }
     }
 }
-*/

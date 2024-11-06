@@ -55,6 +55,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     {
                         ProductVoucherID = item.ProductVoucherID.ToString(),
                         VourcherID = item.VourcherID.ToString(),
+                        ProductID = item.ProductID.ToString(),
+
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt,
                     };

@@ -27,7 +27,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> CancelOrder(string OrderID);
         Task<AppActionResult> AcceptCancelOrder(string OrderID);
 
-
+        Task<AppActionResult> GetOrderByOrderStatus(OrderStatus orderStatus, int pageIndex, int pageSize);
 
     }
 }

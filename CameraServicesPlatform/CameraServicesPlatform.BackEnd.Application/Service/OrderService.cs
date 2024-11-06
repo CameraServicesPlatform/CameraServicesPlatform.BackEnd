@@ -138,7 +138,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(200);
                 await _unitOfWork.SaveChangesAsync();
 
-                
+                var supplier = await _supplierRepository.GetById(order.SupplierID);
+                var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
                 // Insert the order detail
                 orderDetail.OrderID = order.OrderID;
                 await _orderDetailRepository.Insert(orderDetail);
@@ -156,6 +157,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 // Send confirmation email and map created order to response
                 await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                await Task.Delay(100);
+                await SendOrderConfirmationEmailToSupplier(getAccount , supplierAccount.Email, supplierAccount.FirstName, orderDetail, (double)order.TotalAmount);
                 result.IsSuccess = true;
                 result.Result = order;
             }
@@ -265,11 +268,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     OrderID = order.OrderID.ToString(),
                     SupplierID = request.SupplierID,
                 };
-
+                var supplier = await _supplierRepository.GetById(order.SupplierID);
+                var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
                 // Create payment URL
                 var payMethod = await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
                 // Send order confirmation email
                 await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                await Task.Delay(100);
+                await SendOrderConfirmationEmailToSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                await Task.Delay(100);
                 result.Result = payMethod;
 
             }
@@ -282,6 +289,62 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         }
 
         private async Task SendOrderConfirmationEmail(Account account, string email, string firstName, OrderDetail orderDetail, double totalOrderPrice)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{account.FirstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {account.Email}<br />" +
+                $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
+                "Nhà cung cấp<br />" +
+                "Camera service platform Company<br />" +
+                "Điện thoại: 0862448677<br />" +
+                "Email: dan1314705@gmail.com<br />" +
+                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+
+            var emailMessage =
+                $"Kính chào {firstName},<br /><br />" +
+                "Bạn vừa có đơn đặt hàng. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Send the email asynchronously and wait for completion
+             emailService.SendEmail(
+                email,
+                SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
+                emailMessage
+            );
+        }
+
+        private async Task SendOrderConfirmationEmailToSupplier(Account account, string email, string firstName, OrderDetail orderDetail, double totalOrderPrice)
         {
             IEmailService? emailService = Resolve<IEmailService>();
 
@@ -330,11 +393,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 "Đội ngũ Camera service platform";
 
             // Send the email asynchronously and wait for completion
-             emailService.SendEmail(
-                email,
-                SD.SubjectMail.ORDER_CONFIRMATION,
-                emailMessage
-            );
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION,
+               emailMessage
+           );
         }
 
         public async Task<AppActionResult> PurchaseOrder(string orderId, HttpContext context)
@@ -539,6 +602,30 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     x => x.OrderType == orderType,
                     pageIndex,
                     pageSize,includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
+                );
+
+                var convertedResult = pagedResult.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+
+                result.Result = convertedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetOrderByOrderStatus(OrderStatus orderStatus, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    x => x.OrderStatus == orderStatus,
+                    pageIndex,
+                    pageSize, includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
                 );
 
                 var convertedResult = pagedResult.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();

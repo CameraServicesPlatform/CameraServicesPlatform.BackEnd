@@ -90,6 +90,7 @@ public class SD
         public static string REMIND_PAYMENT = "[CAMERASERVICEPLATFORM] NHẮC NHỞ THANH TOÁN";
         public static string PASSCODE_FORGOT_PASSWORD = "[CAMERASERVICEPLATFORM] MÃ XÁC THỰC QUÊN MẬT KHẨU";
         public static string ORDER_CONFIRMATION = "[CAMERASERVICEPLATFORM] BẠN VỪA ĐẶT ĐƠN HÀNG";
+        public static string ORDER_CONFIRMATION_SUPPLIER = "[CAMERASERVICEPLATFORM] BẠN VỪA CÓ ĐƠN HÀNG";
         public static string ORDER_CONFIRMATION_CANCEL_SUPPLIER = "[CAMERASERVICEPLATFORM] CÓ ĐƠN ĐẶT ĐƠN HÀNG VỪA HỦY";
         public static string ORDER_CONFIRMATION_CANCEL_SUPPLIER_TO_MEMBER = "[CAMERASERVICEPLATFORM] ĐƠN HÀNG CỦA BẠN ĐÃ HỦY";
 

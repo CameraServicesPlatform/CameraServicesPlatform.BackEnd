@@ -21,6 +21,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             _orderService = orderService;
         }
+
         [HttpGet("get-all-order")]
         public async Task<AppActionResult> GetAllOrder(int pageIndex = 1, int pageSize = 10)
         {
@@ -31,6 +32,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         public async Task<AppActionResult> GetOrderByOrderType(OrderType type, int pageIndex = 1, int pageSize = 10)
         {
             return await _orderService.GetOrderByOrderType(type, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-order-by-order-status")]
+        public async Task<AppActionResult> GetOrderByOrderStatus(OrderStatus orderStatus, int pageIndex, int pageSize)
+        {
+            return await _orderService.GetOrderByOrderStatus(orderStatus, pageIndex, pageSize);
         }
 
         [HttpGet("get-order-of-supplierId")]

@@ -350,6 +350,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             // Generate a string representation of the order detail with HTML line breaks
             var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                "   Hình thức đơn hàng: Mua<br />" +
                 $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
                 $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
                 $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
@@ -405,7 +406,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var result = new AppActionResult();
             try
             {
-                
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 var orderDb = await _orderRepository.GetByExpression(p => p!.OrderID == Guid.Parse(orderId), p => p.Account!);
                 if (orderDb == null)
@@ -456,6 +456,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var productID = Guid.Parse(request.ProductID);
 
                 // Kiểm tra tài khoản người dùng
                 var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
@@ -467,8 +468,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new Exception("Hãy chọn mẫu hợp đồng!");
                 }
 
+                var supplier = await _supplierRepository.GetById(Guid.Parse(request.SupplierID));
+                var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
+
                 // Khởi tạo và ánh xạ đơn hàng từ request
                 var order = _mapper.Map<Order>(request);
+                order.OrderID = Guid.NewGuid();
                 order.OrderDate = DateTime.UtcNow;
                 order.CreatedAt = DateTime.UtcNow;
                 order.UpdatedAt = DateTime.UtcNow;
@@ -477,24 +482,49 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.OrderType = OrderType.Rental;
 
                 // Tính tổng tiền thuê
-                double totalOrderPrice = CalculateRentalPrice( request.TotalAmount, request.DurationUnit, request.DurationValue);
-                order.TotalAmount = totalOrderPrice;
+                //double totalOrderPrice = CalculateRentalPrice( request.TotalAmount, request.DurationUnit, request.DurationValue);
+                order.TotalAmount = request.TotalAmount;
 
-                // Chèn đơn hàng vào cơ sở dữ liệu
+                var product = await _productRepository.GetById(productID);
+                if (product == null)
+                {
+                    throw new Exception("Product not found.");
+                }
+
+                double discount = 0;
+                if (!string.IsNullOrEmpty(request.VoucherID))
+                {
+                    var productVoucher = await _productVoucherRepository.GetByExpression(
+                        x => x.ProductID == productID && x.VourcherID == Guid.Parse(request.VoucherID)
+                    );
+                    if (productVoucher != null)
+                    {
+                        var voucher = await _voucherRepository.GetById(productVoucher.VourcherID);
+                        discount = voucher?.DiscountAmount ?? 0;
+                    }
+                }
+
+                var orderDetail = new OrderDetail
+                {
+                    OrderID = order.OrderID,
+                    ProductID = productID,
+                    ProductPrice = request.ProductPriceRent,
+                    Discount = discount,
+                    ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
+                    ProductPriceTotal = request.TotalAmount
+                };
+
+                order.TotalAmount = orderDetail.ProductPriceTotal;
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Lấy lại đơn hàng sau khi đã lưu để xác thực
-                var createdOrder = await _orderRepository.GetByExpression(x =>
-                    x.Id == request.AccountID && x.OrderDate == order.OrderDate && x.OrderStatus == OrderStatus.Pending,
-                    x => x.OrderDetail
-                );
 
-                if (createdOrder == null)
-                {
-                    throw new Exception("Không tìm thấy đơn hàng bạn vừa đặt. Hãy tạo lại đơn hàng của bạn.");
-                }
+                // Insert the order detail
+                orderDetail.OrderID = order.OrderID;
+                await _orderDetailRepository.Insert(orderDetail);
+                await Task.Delay(200);
+                await _unitOfWork.SaveChangesAsync();
 
                 // Cập nhật trạng thái sản phẩm thành `Rented`
                 if (Guid.TryParse(request.ProductID, out var productGuid))
@@ -511,7 +541,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Tạo hợp đồng từ thông tin sản phẩm
                 var contract = new Contract
                 {
-                    OrderID = createdOrder.OrderID,
+                    OrderID = order.OrderID,
                     ContractTerms = $"ProductID: {request.ProductID}, Duration: {request.DurationValue} {request.DurationUnit}",
                     PenaltyPolicy = request.ContractRequest.PenaltyPolicy,
                 };
@@ -528,9 +558,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 // Ánh xạ thông tin đơn hàng sang response
-                var orderResponse = _mapper.Map<OrderResponse>(createdOrder);
-                orderResponse.AccountID = createdOrder.Id.ToString();
-                orderResponse.SupplierID = createdOrder.SupplierID.ToString();
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                //await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                //await Task.Delay(100);
+                //await SendOrderConfirmationEmailToSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, orderDetail, (double)order.TotalAmount);
 
                 result = orderResponse;
             }
@@ -541,6 +575,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+
+
 
         // Hàm tính tổng giá thuê dựa trên đơn vị thời gian và giá trị
         //private double CalculateTotalOrderPrice(RentalDurationUnit durationUnit, int durationValue, decimal baseAmount)

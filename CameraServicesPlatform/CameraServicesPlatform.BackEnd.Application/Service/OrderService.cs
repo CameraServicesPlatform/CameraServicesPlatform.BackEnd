@@ -32,6 +32,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Order> _orderRepository;
         private readonly IRepository<ProductVoucher> _productVoucherRepository;
         private readonly IRepository<Vourcher> _voucherRepository;
+        private readonly IRepository<Transaction> _transactionRepository;
+        private readonly IRepository<Payment> _paymentRepository;
         private readonly IRepository<OrderDetail> _orderDetailRepository;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Contract> _contractRepository;
@@ -44,6 +46,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Order> orderRepository,
             IRepository<ProductVoucher> productVoucherRepository,
             IRepository<Account> accountRepository,
+            IRepository<Payment> paymentRepository,
+            IRepository<Transaction> transactionRepository,
             IRepository<Supplier> supplierRepository,
             IRepository<Vourcher> voucherRepository,
             IRepository<OrderDetail> orderDetailRepository,
@@ -58,6 +62,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _productVoucherRepository = productVoucherRepository;
             _voucherRepository = voucherRepository;
             _accountRepository = accountRepository;
+            _transactionRepository = transactionRepository;
+            _paymentRepository = paymentRepository;
             _supplierRepository = supplierRepository;
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
@@ -66,6 +72,56 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _contractRepository = contractRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+        }
+
+        public async Task<AppActionResult> GetOrderByOrderID(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderGetId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+
+                var order = await _orderRepository.GetById(OrderGetId);
+                if (order == null)
+                {
+                    result = BuildAppActionResultError(result, "Đơn hàng không tồn tại!");
+                    return result;
+                }
+
+                var orderDetail = await _orderDetailRepository.GetByExpression(
+                   filter: o => o.OrderID == OrderGetId);
+
+                var paymentInfor = await _paymentRepository.GetByExpression(
+                   filter: o => o.OrderID == OrderGetId);
+
+
+
+                var transactionInfor = await _transactionRepository.GetByExpression(
+                   filter: o => o.OrderID == OrderGetId);
+
+
+                var orderResponse = new OrderDetailByOrderIDResponse
+                {
+                    OrderID = OrderID,
+                    SupplierID = order.SupplierID.ToString(),
+                    OrderDetailID = orderDetail?.OrderDetailsID.ToString() ?? "N/A",
+                    PaymentID = paymentInfor?.PaymentID.ToString() ?? "N/A",
+                    TransactionID = transactionInfor?.TransactionID.ToString() ?? "N/A" 
+                };
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
         }
 
         public async Task<AppActionResult> CreateOrderBuy(CreateOrderBuyRequest request)

@@ -100,7 +100,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
-                order.DeliveryMethod = request.DeliveryMethod;
+                order.DeliveriesMethod = request.DeliveryMethod;
 
                 // Retrieve product price and apply any voucher discount if applicable
                 var product = await _productRepository.GetById(productID);
@@ -205,7 +205,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
-                order.DeliveryMethod = request.DeliveryMethod;
+                order.DeliveriesMethod = request.DeliveryMethod;
 
                 // Retrieve product price and apply any voucher discount if applicable
                 var product = await _productRepository.GetById(productID);
@@ -480,6 +480,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Rental;
+                order.DeliveriesMethod = request.DeliveryMethod;
 
                 // Tính tổng tiền thuê
                 //double totalOrderPrice = CalculateRentalPrice( request.TotalAmount, request.DurationUnit, request.DurationValue);

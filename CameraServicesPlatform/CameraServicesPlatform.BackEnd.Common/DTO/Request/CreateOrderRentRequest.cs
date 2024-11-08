@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Delivery;
 
 namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 {
@@ -29,7 +30,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public DateTime? ReturnDate { get; set; }
         //public List<OrderDetailRequest> OrderDetailRequests { get; set; } 
         public CreateContractRequestDTO ContractRequest {  get; set; }
-        public DeliveryMethod DeliveryMethod { get; set; }
+        public DeliveryStatus? DeliveryMethod { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }

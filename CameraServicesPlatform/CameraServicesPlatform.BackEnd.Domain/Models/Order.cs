@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Delivery;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using System.ComponentModel.DataAnnotations;
 
@@ -28,7 +29,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime? ReturnDate { get; set; }
 
         public string? ShippingAddress { get; set; }
-        public DeliveryMethod DeliveryMethod { get; set; }
+        public DeliveryStatus? DeliveriesMethod { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
@@ -37,10 +38,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Account? Account { get; set; }
 
         public Guid? OrderDetailID { get; set; }
-        public Guid? DeliveriesMethodID { get; set; }
 
         public virtual ICollection<OrderDetail>? OrderDetail { get; set; }
-        public DeliveriesMethod? DeliveriesMethod { get; set; }
 
         public Transaction? Transaction { get; set; }
     }

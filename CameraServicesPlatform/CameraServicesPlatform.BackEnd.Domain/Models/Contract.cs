@@ -10,13 +10,12 @@ public class Contract
     [ForeignKey(nameof(Order))]
     public Guid OrderID { get; set; }
     public Order Order { get; set; }
+    public Guid ProductID { get; set; }
 
     public Guid ContractTemplateId { get; set; }
     [ForeignKey("ContractTemplateId")]
     public ContractTemplate ContractTemplate { get; set; }
 
-    public string ContractTerms { get; set; }
-    public string PenaltyPolicy { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

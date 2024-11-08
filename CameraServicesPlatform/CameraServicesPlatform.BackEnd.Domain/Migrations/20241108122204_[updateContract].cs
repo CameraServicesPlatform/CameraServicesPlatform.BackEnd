@@ -1,4 +1,4 @@
-﻿/*using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class update_tableTransaction : Migration
+    public partial class updateContract : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -249,7 +249,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     ContractTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TemplateName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    ContractTerms = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     TemplateDetails = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PenaltyPolicy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     AccountID = table.Column<string>(type: "nvarchar(450)", nullable: false)
@@ -532,6 +534,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     ContractID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ContractTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -1197,4 +1200,3 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         }
     }
 }
-*/

@@ -541,9 +541,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Tạo hợp đồng từ thông tin sản phẩm
                 var contract = new Contract
                 {
-                    OrderID = order.OrderID,
-                    ContractTerms = $"ProductID: {request.ProductID}, Duration: {request.DurationValue} {request.DurationUnit}",
-                    PenaltyPolicy = request.ContractRequest.PenaltyPolicy,
+                    OrderID = order.OrderID
                 };
 
                 await _contractRepository.Insert(contract);

@@ -52,9 +52,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 var contract = new Contract
                 {
-                    OrderID = NOrderID,
-                    ContractTerms = request.ContractTerms,
-                    PenaltyPolicy = request.PenaltyPolicy,
+                    OrderID = NOrderID
                 };
 
                 await _contractRepository.Insert(contract);
@@ -92,8 +90,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                existingContract.ContractTerms = request.ContractTerms;
-                existingContract.PenaltyPolicy = request.PenaltyPolicy;
                 existingContract.UpdatedAt = DateTime.UtcNow; 
 
                 await _contractRepository.Update(existingContract);

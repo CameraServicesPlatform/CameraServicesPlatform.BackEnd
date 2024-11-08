@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
@@ -13,6 +14,7 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -44,22 +46,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var newTransaction = Resolve<IRepository<Transaction>>();
 
             AppActionResult result = new AppActionResult();
-            //List<string> roleListDb = await _accountService.GetRoleListByAccountId(account);
-
-            // Call the newly defined method
-            /*List<string> roleNameList = await _accountService.GetRoleNameListById(roleListDb);
-
-            if (roleNameList.Contains("ADMIN"))
-            {
-                _tokenDto.MainRole = "ADMIN";
-            }
-            else
-            {
-                _tokenDto.MainRole = roleNameList.Contains("STAFF")
-                    ? "STAFF"
-                    : roleNameList.Count > 0 ? roleNameList.FirstOrDefault(n => !n.Equals("MEMBER")) : "MEMBER";
-            }*/
-           
+            
             if (response.VnPayResponseCode == "00")
             {
                 Transaction transaction = new Transaction()
@@ -107,6 +94,34 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                         
         }
-    
+
+        public async Task<AppActionResult> GetAllTransaction(int pageIndex, int pageSize)
+        {
+            var result = new AppActionResult();
+
+            try
+            {
+                Expression<Func<Transaction, bool>>? filter = null;
+                var pagedResult = await _repository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                List<TransactionResponse> listVoucher = new List<TransactionResponse>();
+
+                result.Result = listVoucher;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
     }
 }

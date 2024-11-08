@@ -9,6 +9,9 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
 {
     public interface ITransactionService
     {
+        
         Task<AppActionResult> CreateTransaction(VNPayResponseDto response, double amount, string account);
+        Task<AppActionResult> GetAllTransaction(int pageIndex, int pageSize);
+
     }
 }

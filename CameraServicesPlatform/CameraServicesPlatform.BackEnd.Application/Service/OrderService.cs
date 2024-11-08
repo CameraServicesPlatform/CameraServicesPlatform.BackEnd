@@ -98,16 +98,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var paymentInfor = await _paymentRepository.GetByExpression(
                    filter: o => o.OrderID == OrderGetId);
 
+
+
                 var transactionInfor = await _transactionRepository.GetByExpression(
                    filter: o => o.OrderID == OrderGetId);
+
 
                 var orderResponse = new OrderDetailByOrderIDResponse
                 {
                     OrderID = OrderID,
                     SupplierID = order.SupplierID.ToString(),
-                    OrderDetailID = orderDetail.OrderDetailsID.ToString(),
-                    PaymentID = paymentInfor.PaymentID.ToString(),
-                    TransactionID = transactionInfor.TransactionID.ToString(),
+                    OrderDetailID = orderDetail?.OrderDetailsID.ToString() ?? "N/A",
+                    PaymentID = paymentInfor?.PaymentID.ToString() ?? "N/A",
+                    TransactionID = transactionInfor?.TransactionID.ToString() ?? "N/A" 
                 };
 
                 result.Result = orderResponse;

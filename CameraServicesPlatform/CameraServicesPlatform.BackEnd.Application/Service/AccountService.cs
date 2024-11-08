@@ -573,14 +573,14 @@ public class AccountService : GenericBackendService, IAccountService
         }
         return result;
     }
-    private async Task<List<string>> GetRoleListByAccountId(string accountId)
+    public async Task<List<string>> GetRoleListByAccountId(string accountId)
     {
         return await _context.Set<IdentityUserRole<string>>()
             .Where(ur => ur.UserId == accountId)
             .Select(ur => ur.RoleId)
             .ToListAsync();
     }
-    private async Task<List<string>> GetRoleNameListById(List<string> roleIds)
+    public async Task<List<string>> GetRoleNameListById(List<string> roleIds)
     {
         // Fetch role names from the database based on the provided role IDs
         return await _context.Set<IdentityRole>()

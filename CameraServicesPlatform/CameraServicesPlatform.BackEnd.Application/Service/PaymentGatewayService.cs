@@ -13,7 +13,9 @@ using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Printing;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using Twilio.TwiML.Voice;
@@ -24,16 +26,22 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IConfiguration _configuration;
         private readonly IRepository<Payment> _paymentRepository;
+        private readonly IRepository<Staff> _staffRepository;
+        private readonly IRepository<Order> _orderRepository;
         private readonly IRepository<Transaction> _transactionRepository;
         private readonly IUnitOfWork _unitOfWork;
 
         public PaymentGatewayService(IConfiguration configuration,
             IRepository<Payment> paymentRepository,
             IRepository<Transaction> transactionRepository,
+            IRepository<Order> orderRepository,
+            IRepository<Staff> staffRepository,
             IUnitOfWork unitOfWork)
         {
             _configuration = configuration;
             _paymentRepository = paymentRepository;
+            _orderRepository = orderRepository;
+            _staffRepository = staffRepository;
             _unitOfWork = unitOfWork;
             _transactionRepository = transactionRepository;
         }
@@ -105,43 +113,77 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     vnpay.AddResponseData(key, value.ToString());
                 }
             }
+
             var vnp_orderId = vnpay.GetResponseData("vnp_TxnRef");
             var vnp_TransactionId = vnpay.GetResponseData("vnp_TransactionNo");
             var vnp_SecureHash = coletions.FirstOrDefault(p => p.Key == "vnp_SecureHash").Value;
             var vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
             var vnp_OrderInfo = vnpay.GetResponseData("vnp_OrderInfo");
             var vnp_Amount = vnpay.GetResponseData("vnp_Amount");
+            var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    a => a.OrderID == Guid.Parse(vnp_orderId) ,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+           // List<string> roleListDb = await _accountService.GetRoleListByAccountId(pagedResult.Items[0].Id);
+           var staffExist = await _staffRepository.GetAllDataByExpression(
+                    a => a.AccountID == pagedResult.Items[0].Id,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+            
+           var payment = new Payment
+            {
+                PaymentID = Guid.NewGuid(),
+                OrderID = Guid.Parse(vnp_orderId),
+                SupplierID = pagedResult.Items[0].SupplierID,
+                AccountID = pagedResult.Items[0].Id,
+                PaymentDate = DateTime.UtcNow,
+                PaymentAmount = Int32.Parse(vnp_Amount),
+                PaymentStatus = PaymentStatus.Completed,
+                PaymentType = PaymentType.Refund,
+                PaymentMethod = PaymentMethod.VNPAY,
+                PaymentDetails = $"Payment for Order {vnp_orderId}",
+                CreatedAt = DateTime.UtcNow,
+                Image = "a",
+                IsDisable = true
+            };
+            TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
+            ;
+            await _paymentRepository.Insert(payment);
 
 
-            /*bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, _configuration["VnPay:HashSecret"]);
-            if (checkSignature)
+                if (vnp_ResponseCode == "00")
             {
-                return new VNPayResponseDto
-                {
-                    Success = false
-                };
-            }*/
-            if(vnp_ResponseCode == "00")
-            {
-                Transaction transaction = new Transaction
-                {
-                    TransactionID = Guid.NewGuid(),
-                    OrderID = Guid.Parse(vnp_orderId),
-                    TransactionDate = DateTime.UtcNow,
-                    Order = null,
-                    Amount = Int32.Parse(vnp_Amount),
-                    TransactionType = TransactionType.Payment,
-                    PaymentStatus = PaymentStatus.Completed,
-                    PaymentMethod = PaymentMethod.VNPAY,
-                    VNPAYTransactionID = vnp_TransactionId,
-                    VNPAYTransactionStatus = VNPAYTransactionStatus.Success,
-                    VNPAYTransactionTime = DateTime.UtcNow,
-                };
-                await _transactionRepository.Insert(transaction);
-                await _unitOfWork.SaveChangesAsync();
+
+                 Transaction transaction = new Transaction
+                    {
+                        TransactionID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        TransactionDate = DateTime.UtcNow,
+                        Order = null,
+                        Amount = Int32.Parse(vnp_Amount),
+                        TransactionType = transactionType,
+                        PaymentStatus = PaymentStatus.Completed,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        VNPAYTransactionID = vnp_TransactionId,
+                        VNPAYTransactionStatus = VNPAYTransactionStatus.Success,
+                        VNPAYTransactionTime = DateTime.UtcNow,
+                    };
+                    await _transactionRepository.Insert(transaction);
+                    await _unitOfWork.SaveChangesAsync();
+                
+                
             }
             if (vnp_ResponseCode != "00")
             {
+                
                 Transaction transaction = new Transaction
                 {
                     TransactionID = Guid.NewGuid(),
@@ -149,7 +191,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     TransactionDate = DateTime.UtcNow,
                     Order = null,
                     Amount = Int32.Parse(vnp_Amount),
-                    TransactionType = TransactionType.Payment,
+                    TransactionType = transactionType,
                     PaymentStatus = PaymentStatus.Failed,
                     PaymentMethod = PaymentMethod.VNPAY,
                     VNPAYTransactionID = vnp_TransactionId,

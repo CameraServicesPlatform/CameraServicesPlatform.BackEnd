@@ -1927,8 +1927,91 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 rentalPriceExist.Items[0].PricePerDay = productResponse.PricePerDay;
                 rentalPriceExist.Items[0].PricePerWeek = productResponse.PricePerWeek;
                 rentalPriceExist.Items[0].PricePerMonth = productResponse.PricePerMonth;
+
                 await productRepository.Update(productExist);
                 await _rentalPriceRepository.Update(rentalPriceExist.Items[0]);
+                var firebaseService = Resolve<IFirebaseService>();
+                var productImageExist = await _productImageRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(productExist.ProductID),
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                if (productResponse.File != null)
+                {
+                    var pathName = SD.FirebasePathName.PRODUCTS_PREFIX + $"{productExist.ProductID}_{Guid.NewGuid()}.jpg";
+                    var uploadResult = await firebaseService.UploadFileToFirebase(productResponse.File, pathName);
+
+                    if (!string.IsNullOrEmpty(uploadResult?.Result.ToString()) && productImageExist.Items.Count() == 0)
+                    {
+                        var imgUrl = uploadResult.Result.ToString();
+
+                        // Save Product Image
+                        ProductImage productImage = new ProductImage
+                        {
+                            ProductImagesID = Guid.NewGuid(),
+                            ProductID = productExist.ProductID,
+                            Image = imgUrl
+                        };
+                        await _productImageRepository.Insert(productImage);
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(uploadResult?.Result.ToString()) && productImageExist.Items.Count() >= 0)
+                        {
+                            var imgUrl = uploadResult.Result.ToString();
+
+                            // Save Product Image
+                            ProductImage productImage = new ProductImage
+                            {
+                                ProductImagesID = productImageExist.Items[0].ProductImagesID,
+                                ProductID = productImageExist.Items[0].ProductID,
+
+
+                                Image = imgUrl
+                            };
+                            await _productImageRepository.Update(productImage);
+                        }
+                        else
+                        {
+                            result = BuildAppActionResultError(result, "Lỗi khi upload hình ảnh.");
+                            return result;
+                        }
+                    }
+
+                }
+                var productSpecificationExist = await _productSpecificationRepository.GetAllDataByExpression(
+                    a => a.ProductID.Equals(productExist.ProductID),
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                foreach (var spec in productSpecificationExist.Items)
+                {
+                    await _productSpecificationRepository.DeleteById(spec.ProductSpecificationID);
+                }
+
+                if (productResponse.listProductSpecification != null && productResponse.listProductSpecification.Count > 0 && productSpecificationExist.Items.Count() == 0)
+                {
+                    foreach (var spec in productResponse.listProductSpecification)
+                    {
+                        int index = spec.IndexOf(':');
+                        string specification = spec.Substring(0, index);
+                        string detail = spec.Substring(index + 1);
+                        ProductSpecification productSpecification = new ProductSpecification
+                        {
+                            ProductSpecificationID = Guid.NewGuid(),
+                            ProductID = productExist.ProductID,
+                            Specification = specification,
+                            Details = detail
+                        };
+                        await _productSpecificationRepository.Insert(productSpecification);
+                    }
+                }
                 await _unitOfWork.SaveChangesAsync();
                 result.Result = productExist;
                 result.IsSuccess = true;

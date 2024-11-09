@@ -110,9 +110,27 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-                List<TransactionResponse> listVoucher = new List<TransactionResponse>();
+                List<TransactionResponse> listTransaction = new List<TransactionResponse>();
+                foreach (var item in pagedResult.Items)
+                {
 
-                result.Result = listVoucher;
+                    TransactionResponse transactionResponse = new TransactionResponse
+                    {
+                        TransactionID = item.TransactionID.ToString(),
+                        OrderID = item.OrderID.ToString(),
+                        TransactionDate = item.TransactionDate,
+                        Amount = item.Amount,
+                        TransactionType = item.TransactionType,
+                        PaymentStatus = item.PaymentStatus,
+                        PaymentMethod = item.PaymentMethod,
+                        VNPAYTransactionID=item.VNPAYTransactionID,
+                        VNPAYTransactionStatus=item.VNPAYTransactionStatus,
+                        VNPAYTransactionTime=item.VNPAYTransactionTime
+
+                    };
+                    listTransaction.Add(transactionResponse);
+                }
+                result.Result = listTransaction;
                 result.IsSuccess = true;
             }
             catch (Exception ex)

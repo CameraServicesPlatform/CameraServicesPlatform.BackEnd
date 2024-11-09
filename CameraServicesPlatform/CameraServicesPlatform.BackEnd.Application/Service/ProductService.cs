@@ -29,6 +29,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private IRepository<Product> _productRepository;
         private IRepository<ProductImage> _productImageRepository;
         private IRepository<Account> _accountRepository;
+        private IRepository<Rating> _ratingRepository;
         private IRepository<RentalPrice> _rentalPriceRepository;
         private IRepository<ProductVoucher> _productVoucherRepository;
         private IRepository<Vourcher> _voucherRepository;
@@ -47,6 +48,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<RentalPrice> rentalPriceRepository,
             IRepository<Vourcher> voucherRepository,
             IRepository<Account> accountRepository,
+            IRepository<Rating> ratingRepository,
             IRepository<Order> orderRepository,
             IRepository<ProductVoucher> productVoucherRepository,
             IRepository<ProductSpecification> productSpecificationRepository,
@@ -56,6 +58,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IDbContext context
         ) : base(serviceProvider)
         {
+            _ratingRepository = ratingRepository;
             _productRepository = productRepository;
             _productImageRepository = productImageRepository;
             _supplierRepository = supplierRepository;
@@ -534,6 +537,20 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
+                    var rating = _ratingRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    Double averageRating = 0;
+                    if (rating.Result.Items.Count() > 0)
+                    {
+                        averageRating = rating.Result.Items.Average(r => r.RatingValue);
+                        averageRating = Math.Min(averageRating, 5);
+                    }
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductResponse productResponse = new ProductResponse
@@ -552,7 +569,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items
@@ -674,7 +691,21 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
-                if( rentalPrice.Items.Count()>0 )
+                var rating = _ratingRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(productId),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                Double averageRating = 0;
+                if (rating.Result.Items.Count() > 0)
+                {
+                    averageRating = rating.Result.Items.Average(r => r.RatingValue);
+                    averageRating = Math.Min(averageRating, 5);
+                }
+                if ( rentalPrice.Items.Count()>0 )
                 {
                     ProductByIdResponse productResponse = new ProductByIdResponse
                     {
@@ -692,7 +723,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         Brand = product.Brand,
                         Quality = product.Quality,
                         Status = product.Status,
-                        Rating = product.Rating,
+                        Rating = averageRating,
                         CreatedAt = product.CreatedAt,
                         UpdatedAt = product.UpdatedAt,
                         listImage = productImage.Items,
@@ -718,7 +749,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         Brand = product.Brand,
                         Quality = product.Quality,
                         Status = product.Status,
-                        Rating = product.Rating,
+                        Rating = averageRating,
                         CreatedAt = product.CreatedAt,
                         UpdatedAt = product.UpdatedAt,
                         listImage = productImage.Items,
@@ -825,6 +856,20 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
+                    var rating = _ratingRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+                    Double averageRating = 0;
+                    if (rating.Result.Items.Count() > 0)
+                    {
+                        averageRating = rating.Result.Items.Average(r => r.RatingValue);
+                        averageRating = Math.Min(averageRating, 5);
+                    }
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
@@ -843,7 +888,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,
@@ -868,7 +913,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,
@@ -976,6 +1021,20 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
+                    var rating = _ratingRepository.GetAllDataByExpression(
+                       a => a.ProductID.Equals(item.ProductID),
+                       pageIndex,
+                       pageSize,
+                       null,
+                       isAscending: true,
+                       null
+                   );
+                    Double averageRating = 0;
+                    if (rating.Result.Items.Count() > 0)
+                    {
+                        averageRating = rating.Result.Items.Average(r => r.RatingValue);
+                        averageRating = Math.Min(averageRating, 5);
+                    }
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
@@ -994,7 +1053,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,
@@ -1019,7 +1078,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,
@@ -1126,6 +1185,20 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
+                    var rating = _ratingRepository.GetAllDataByExpression(
+                       a => a.ProductID.Equals(item.ProductID),
+                       pageIndex,
+                       pageSize,
+                       null,
+                       isAscending: true,
+                       null
+                   );
+                    Double averageRating = 0;
+                    if (rating.Result.Items.Count() > 0)
+                    {
+                        averageRating = rating.Result.Items.Average(r => r.RatingValue);
+                        averageRating = Math.Min(averageRating, 5);
+                    }
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
@@ -1144,7 +1217,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,
@@ -1169,7 +1242,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,
@@ -1321,6 +1394,20 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
+                    var rating = _ratingRepository.GetAllDataByExpression(
+                       a => a.ProductID.Equals(item.ProductID),
+                       pageIndex,
+                       pageSize,
+                       null,
+                       isAscending: true,
+                       null
+                   );
+                    Double averageRating = 0;
+                    if (rating.Result.Items.Count() > 0)
+                    {
+                        averageRating = rating.Result.Items.Average(r => r.RatingValue);
+                        averageRating = Math.Min(averageRating, 5);
+                    }
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
@@ -1339,7 +1426,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,
@@ -1364,7 +1451,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,
@@ -1466,6 +1553,20 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
+                    var rating = _ratingRepository.GetAllDataByExpression(
+                       a => a.ProductID.Equals(item.ProductID),
+                       pageIndex,
+                       pageSize,
+                       null,
+                       isAscending: true,
+                       null
+                   );
+                    Double averageRating = 0;
+                    if (rating.Result.Items.Count() > 0)
+                    {
+                        averageRating = rating.Result.Items.Average(r => r.RatingValue);
+                        averageRating = Math.Min(averageRating, 5);
+                    }
                     ProductResponseRent productResponse = new ProductResponseRent
                     {
                         ProductID = item.ProductID.ToString(),
@@ -1481,7 +1582,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         Brand = item.Brand,
                         Quality = item.Quality,
                         Status = item.Status,
-                        Rating = item.Rating,
+                        Rating = averageRating,
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt,
                         listImage = productImage.Items,
@@ -1573,6 +1674,20 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
+                    var rating = _ratingRepository.GetAllDataByExpression(
+                       a => a.ProductID.Equals(item.ProductID),
+                       pageIndex,
+                       pageSize,
+                       null,
+                       isAscending: true,
+                       null
+                   );
+                    Double averageRating = 0;
+                    if (rating.Result.Items.Count() > 0)
+                    {
+                        averageRating = rating.Result.Items.Average(r => r.RatingValue);
+                        averageRating = Math.Min(averageRating, 5);
+                    }
                     ProductByIdResponse productResponse = new ProductByIdResponse
                     {
                         ProductID = item.ProductID.ToString(),
@@ -1585,7 +1700,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         Brand = item.Brand,
                         Quality = item.Quality,
                         Status = item.Status,
-                        Rating = item.Rating,
+                        Rating = averageRating,
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt,
                         listImage = productImage.Items,
@@ -1689,7 +1804,20 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
-
+                    var rating = _ratingRepository.GetAllDataByExpression(
+                       a => a.ProductID.Equals(item.ProductID),
+                       pageIndex,
+                       pageSize,
+                       null,
+                       isAscending: true,
+                       null
+                   );
+                    Double averageRating = 0;
+                    if (rating.Result.Items.Count() > 0)
+                    {
+                        averageRating = rating.Result.Items.Average(r => r.RatingValue);
+                        averageRating = Math.Min(averageRating, 5);
+                    }
                     ProductByIdResponse productResponse = new ProductByIdResponse
                     {
                         ProductID = item.ProductID.ToString(),
@@ -1705,7 +1833,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         Brand = item.Brand,
                         Quality = item.Quality,
                         Status = item.Status,
-                        Rating = item.Rating,
+                        Rating = averageRating,
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt,
                         listImage = productImage.Items,
@@ -1811,6 +1939,20 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
+                    var rating = _ratingRepository.GetAllDataByExpression(
+                       a => a.ProductID.Equals(item.ProductID),
+                       pageIndex,
+                       pageSize,
+                       null,
+                       isAscending: true,
+                       null
+                   );
+                    Double averageRating = 0;
+                    if (rating.Result.Items.Count() > 0)
+                    {
+                        averageRating = rating.Result.Items.Average(r => r.RatingValue);
+                        averageRating = Math.Min(averageRating, 5);
+                    }
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
@@ -1829,7 +1971,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,
@@ -1853,7 +1995,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
-                            Rating = item.Rating,
+                            Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,

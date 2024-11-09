@@ -11,7 +11,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         [Required, MaxLength(255)]
         public string TemplateName { get; set; }
+
         public Guid ProductID { get; set; }
+        [ForeignKey("ProductID")]
+        public Product Product  { get; set; }
 
         public string ContractTerms { get; set; }
 

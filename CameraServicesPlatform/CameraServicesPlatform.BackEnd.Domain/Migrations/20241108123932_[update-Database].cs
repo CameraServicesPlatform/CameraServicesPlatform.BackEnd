@@ -1,6 +1,5 @@
-﻿using System;
+﻿/*using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-
 #nullable disable
 
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
@@ -10,7 +9,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
-        {
+        { 
             migrationBuilder.DropForeignKey(
                 name: "FK_Orders_DeliveriesMethod_DeliveriesMethodID",
                 table: "Orders");
@@ -68,3 +67,4 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         }
     }
 }
+*/

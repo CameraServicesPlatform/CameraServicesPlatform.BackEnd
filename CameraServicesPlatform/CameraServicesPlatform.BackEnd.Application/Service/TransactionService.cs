@@ -141,5 +141,56 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+
+        public async Task<AppActionResult> GetTransactionById(string id, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(id, out Guid transactionId))
+                {
+                    result = BuildAppActionResultError(result, "Invalid Voucher ID format.");
+                    result.IsSuccess = false;
+                    return result;
+                }
+
+                var pagedResult = await _repository.GetAllDataByExpression(
+                    a => a.TransactionID == transactionId ,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+
+                if (pagedResult.Items.Count() == 0)
+                {
+                    result = BuildAppActionResultError(result, "Transaction not exist");
+                    return result;
+                }
+                TransactionResponse transactionResponse = new TransactionResponse
+                {
+                    TransactionID = pagedResult.Items[0].TransactionID.ToString(),
+                    OrderID = pagedResult.Items[0].OrderID.ToString(),
+                    TransactionDate = pagedResult.Items[0].TransactionDate,
+                    Amount = pagedResult.Items[0].Amount,
+                    TransactionType = pagedResult.Items[0].TransactionType,
+                    PaymentStatus = pagedResult.Items[0].PaymentStatus,
+                    PaymentMethod = pagedResult.Items[0].PaymentMethod,
+                    VNPAYTransactionID = pagedResult.Items[0].VNPAYTransactionID,
+                    VNPAYTransactionStatus = pagedResult.Items[0].VNPAYTransactionStatus,
+                    VNPAYTransactionTime = pagedResult.Items[0].VNPAYTransactionTime
+
+                };
+                result.Result = transactionResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
     }
 }

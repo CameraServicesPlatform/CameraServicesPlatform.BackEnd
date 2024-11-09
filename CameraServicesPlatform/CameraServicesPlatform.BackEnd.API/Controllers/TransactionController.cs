@@ -33,6 +33,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _transactionService.GetAllTransaction(pageIndex, pageSize);
         }
 
+        [HttpGet("get-transaction-by-id")]
+        public async Task<AppActionResult> GetTransactionById(string id, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _transactionService.GetTransactionById(id, pageIndex, pageSize);
+        }
+
         [HttpGet("payment-callback")]
         public async Task<IActionResult> PaymentCallBack()
         {

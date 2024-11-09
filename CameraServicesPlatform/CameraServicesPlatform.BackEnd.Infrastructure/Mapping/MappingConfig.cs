@@ -48,7 +48,8 @@ public class MappingConfig
             config.CreateMap<RatingRequest, Rating>();            
             config.CreateMap<Rating, RatingResponse>();
             config.CreateMap<Contract, ContractResponse>();
-            config.CreateMap<ContractTemplate, ContractTemplateResponse>();
+            config.CreateMap<ContractTemplate, ContractTemplateResponse>()
+            .ForMember(dest => dest.ProductID, opt => opt.MapFrom(src => src.ProductID.ToString()));
             config.CreateMap<Policy, PolicyResponse>()
             .ForMember(dest => dest.PolicyID, opt => opt.MapFrom(src => src.PolicyID.ToString()));
 

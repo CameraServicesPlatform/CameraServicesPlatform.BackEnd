@@ -46,6 +46,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     TemplateName = request.TemplateName,
                     TemplateDetails = request.TemplateDetails,
                     PenaltyPolicy = request.PenaltyPolicy,
+                    ProductID = Guid.Parse(request.ProductID),
                 };
 
                 await _contractTemplateRepository.Insert(contractTemplate);

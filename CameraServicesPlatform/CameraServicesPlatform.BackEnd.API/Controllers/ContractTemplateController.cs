@@ -56,7 +56,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpDelete("delete-contract-template-by-id")]
+        [HttpPut("delete-contract-template-by-id")]
         public async Task<IActionResult> DeleteContract(string contractTemplateId)
         {
             try

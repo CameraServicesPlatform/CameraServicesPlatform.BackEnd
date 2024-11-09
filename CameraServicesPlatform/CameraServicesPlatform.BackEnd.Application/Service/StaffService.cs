@@ -52,16 +52,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
-                var pl = await _repository.GetById(DLStaffID);
-                if (pl == null)
+                var existingST = await _repository.GetById(DLStaffID);
+                if (existingST == null)
                 {
                     result.IsSuccess = false;
-                    result = BuildAppActionResultError(result, "Staff không tồn tại!");
+                    result = BuildAppActionResultError(result, "staff không tồn tại!");
                     return result;
                 }
 
-                await _repository.DeleteById(DLStaffID);
+                existingST.IsDisable = true;
+
+                await _repository.Update(existingST);
                 await _unitOfWork.SaveChangesAsync();
+
+                result.IsSuccess = true;
                 result.IsSuccess = true;
                 result = BuildAppActionResultError(result, "Staff đã được xóa!");
             }

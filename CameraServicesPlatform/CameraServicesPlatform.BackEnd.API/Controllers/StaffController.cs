@@ -39,7 +39,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpDelete("delete-staff-by-id")]
+        [HttpPut("delete-staff-by-id")]
         public async Task<IActionResult> DeleteStaff(string StaffID)
         {
             try

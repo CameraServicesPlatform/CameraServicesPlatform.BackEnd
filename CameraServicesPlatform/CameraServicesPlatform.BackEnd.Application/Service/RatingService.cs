@@ -49,19 +49,28 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "giá trị đánh không được lớn hơn 5");
                     return result;
                 }
-                var account = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
+                //var account = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
 
-                var hasOrder = await _orderRepository.GetByExpression(x => x.Id == account.Id);
+                //var hasOrder = await _orderRepository.GetByExpression(x => x.Id == request.AccountID);
 
-                if (hasOrder == null)
-                {
-                    result = BuildAppActionResultError(result, "Không thể đánh giá sản phẩm mà bạn chưa đặt hàng");
-                    return result;
-                }
+                //if (hasOrder == null)
+                //{
+                //    result = BuildAppActionResultError(result, "Không thể đánh giá sản phẩm mà bạn chưa đặt hàng");
+                //    return result;
+                //}
 
-                var hasOrderDetail = await _orderDetailRepository.GetByExpression(x => x.ProductID == RatingProductID);
+                //var hasOrderDetail = await _orderDetailRepository.GetByExpression(x => x.ProductID == Guid.Parse(request.ProductID));
 
-                if (hasOrderDetail == null)
+                //if (hasOrderDetail == null)
+                //{
+                //    result = BuildAppActionResultError(result, "Không thể đánh giá sản phẩm mà bạn chưa đặt hàng");
+                //    return result;
+                //}
+                var order = await _orderRepository.GetByExpression(
+           x => x.Id == request.AccountID && x.OrderDetail.Any(d => d.ProductID == RatingProductID),
+           x => x.OrderDetail);
+
+                if (order == null || !order.OrderDetail.Any(d => d.ProductID == RatingProductID))
                 {
                     result = BuildAppActionResultError(result, "Không thể đánh giá sản phẩm mà bạn chưa đặt hàng");
                     return result;
@@ -239,12 +248,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "Không tìm thấy đánh giá");
                     return result;
                 }
+              
+                rating.IsDisable = true;
 
-                await _ratingRepository.DeleteById(ratingId);
+                _ratingRepository.Update(rating);
                 await _unitOfWork.SaveChangesAsync();
 
+                var ratingResponse = _mapper.Map<RatingResponse>(rating);
+                ratingResponse.RatingID = rating.RatingID.ToString();
+                ratingResponse.ProductID = rating.ProductID.ToString();
+                ratingResponse.AccountID = rating.AccountID.ToString();
+
                 result.IsSuccess = true;
-                result = BuildAppActionResultError(result, "Xóa phản hồi thành công");
+                result.Result = ratingResponse;
             }
             catch (Exception ex)
             {

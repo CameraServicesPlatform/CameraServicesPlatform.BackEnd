@@ -45,7 +45,7 @@ public class MappingConfig
             config.CreateMap<OrderDetailRequest, OrderDetail>();
 
             ///Mapper Rating
-            config.CreateMap<RatingRequest, Rating>();
+            config.CreateMap<RatingRequest, Rating>();            
             config.CreateMap<Rating, RatingResponse>();
             config.CreateMap<Contract, ContractResponse>();
             config.CreateMap<ContractTemplate, ContractTemplateResponse>();

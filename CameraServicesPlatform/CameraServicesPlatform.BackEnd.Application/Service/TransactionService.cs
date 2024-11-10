@@ -192,5 +192,63 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+
+        public async Task<AppActionResult> GetTransactionBySupplierId(string id, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(id, out Guid supplierId))
+                {
+                    result = BuildAppActionResultError(result, "Invalid Supplier ID format.");
+                    result.IsSuccess = false;
+                    return result;
+                }
+
+                var pagedResult = await _repository.GetAllDataByExpression(
+                    a => a.Order.SupplierID == supplierId,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+
+                if (pagedResult.Items.Count() == 0)
+                {
+                    result = BuildAppActionResultError(result, "Supplier not exist");
+                    return result;
+                }
+                List<TransactionResponse> listTransaction = new List<TransactionResponse>();
+                foreach (var item in pagedResult.Items)
+                {
+
+                    TransactionResponse transactionResponse = new TransactionResponse
+                    {
+                        TransactionID = item.TransactionID.ToString(),
+                        OrderID = item.OrderID.ToString(),
+                        TransactionDate = item.TransactionDate,
+                        Amount = item.Amount,
+                        TransactionType = item.TransactionType,
+                        PaymentStatus = item.PaymentStatus,
+                        PaymentMethod = item.PaymentMethod,
+                        VNPAYTransactionID = item.VNPAYTransactionID,
+                        VNPAYTransactionStatus = item.VNPAYTransactionStatus,
+                        VNPAYTransactionTime = item.VNPAYTransactionTime
+
+                    };
+                    listTransaction.Add(transactionResponse);
+                }
+                result.Result = listTransaction;
+                result.IsSuccess = true;
+
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
     }
 }

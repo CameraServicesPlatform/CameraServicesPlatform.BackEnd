@@ -15,7 +15,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public string AccountID { get; set; }
         public string ProductID { get; set; }
         public double ProductPriceRent { get; set; }
-
         public string? VoucherID { get; set; }
         public DateTime OrderDate { get; set; }
         public OrderStatus OrderStatus { get; set; }
@@ -29,7 +28,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public int DurationValue { get; set; }
         public DateTime? ReturnDate { get; set; }
         //public List<OrderDetailRequest> OrderDetailRequests { get; set; } 
-        public CreateContractRequestDTO ContractRequest {  get; set; }
         public DeliveryStatus? DeliveryMethod { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

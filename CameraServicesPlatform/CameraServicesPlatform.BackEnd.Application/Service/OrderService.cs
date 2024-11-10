@@ -14,9 +14,12 @@ using Firebase.Auth;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Identity.Client;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Drawing;
 using System.Drawing.Printing;
 using System.Linq;
 using System.Linq.Expressions;
@@ -517,13 +520,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Kiểm tra tài khoản người dùng
                 var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
 
-                // Kiểm tra mẫu hợp đồng
-                var checkTemplate = await _contractTemplateRepository.GetById(request.ContractRequest.ContractTemplateId);
-                if (checkTemplate == null)
-                {
-                    throw new Exception("Hãy chọn mẫu hợp đồng!");
-                }
-
                 var supplier = await _supplierRepository.GetById(Guid.Parse(request.SupplierID));
                 var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
 
@@ -537,6 +533,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Rental;
                 order.DeliveriesMethod = request.DeliveryMethod;
+                order.DurationValue = request.DurationValue;
+                order.DurationUnit = request.DurationUnit;
+                order.ReturnDate = request.ReturnDate;
+                order.ShippingAddress = request.ShippingAddress;
+                order.RentalEndDate = request.RentalEndDate;
+                order.RentalStartDate = request.RentalStartDate;
+
 
                 // Tính tổng tiền thuê
                 //double totalOrderPrice = CalculateRentalPrice( request.TotalAmount, request.DurationUnit, request.DurationValue);
@@ -572,6 +575,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 };
 
                 order.TotalAmount = orderDetail.ProductPriceTotal;
+                double TotalPrice = (double)order.TotalAmount;
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);
                 await _unitOfWork.SaveChangesAsync();
@@ -595,18 +599,40 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 await _unitOfWork.SaveChangesAsync();
 
-                // Tạo hợp đồng từ thông tin sản phẩm
-                var contract = new Contract
-                {
-                    OrderID = order.OrderID
-                };
+                var pagedContractTemplates = await _contractTemplateRepository.GetAllDataByExpression( 
+                    x => x.ProductID == Guid.Parse(request.ProductID), 
+                    pageNumber: 1,
+                    pageSize: int.MaxValue );
 
-                await _contractRepository.Insert(contract);
-                await Task.Delay(100);
-                await _unitOfWork.SaveChangesAsync();
+                // Kiểm tra nếu có item trong kết quả phân trang
+                if (pagedContractTemplates != null && pagedContractTemplates.Items.Any())
+                {
+                    var contractOfProductContract = pagedContractTemplates.Items;
+
+                    foreach (var template in contractOfProductContract)
+                    {
+                        var contract = new Contract
+                        {
+                            OrderID = order.OrderID,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow,
+                            ContractTemplateId = template.ContractTemplateId
+                        };
+
+                        await _contractRepository.Insert(contract);
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception("Không có mẫu hợp đồng nào phù hợp cho sản phẩm này.");
+                }
 
                 // Xác nhận hợp đồng đã được tạo
-                var checkContract = await _contractRepository.GetByExpression(x => x.CreatedAt == request.CreatedAt && x.OrderID == order.OrderID);
+                var checkContract = await _contractRepository.GetAllDataByExpression(x => x.CreatedAt == request.CreatedAt && x.OrderID == order.OrderID, 
+                    pageNumber: 1,
+                    pageSize: int.MaxValue);
                 if (checkContract == null)
                 {
                     throw new Exception("Không có hợp đồng!");
@@ -617,9 +643,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 orderResponse.AccountID = order.Id.ToString();
                 orderResponse.SupplierID = order.SupplierID.ToString();
 
-                //await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
-                //await Task.Delay(100);
-                //await SendOrderConfirmationEmailToSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                var contractOfProduct = pagedContractTemplates.Items;
+                // Send confirmation email to the customer
+                await SendOrderRentConfirmationEmail(getAccount, getAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
+
+                // Send confirmation email to the supplier
+                await SendOrderRentConfirmationEmailSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
 
                 result = orderResponse;
             }
@@ -1317,6 +1346,168 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
 
             return totalPrice; 
+        }
+
+        private async Task SendOrderRentConfirmationEmail(Account account, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Ngày thuê: {order.RentalStartDate}<br />" +
+                $"   Ngày trả: {order.RentalEndDate}<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{account.FirstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {account.Email}<br />" +
+                $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
+                "Nhà cung cấp<br />" +
+                "Camera service platform Company<br />" +
+                "Điện thoại: 0862448677<br />" +
+                "Email: dan1314705@gmail.com<br />" +
+                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+
+            var emailMessage =
+                $"Kính chào {account.FirstName},<br /><br />" +
+                $"Bạn vừa đặt hàng từ {firstName}. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Prepare the list of attachment file paths
+            var attachmentFilePaths = new List<string>();
+
+            // Generate PDF contracts from the provided templates and add to attachment list
+            foreach (var template in contractTemplates)
+            {
+                string contractPdfPath = await GenerateContractPdf(template); // Method to generate PDF contract
+                if (File.Exists(contractPdfPath))
+                {
+                    attachmentFilePaths.Add(contractPdfPath); // Add the generated contract PDF to attachment list
+                }
+            }
+
+            // Send email with contract templates attached
+            emailService.SendEmailWithAttachments(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
+               emailMessage,
+               attachmentFilePaths
+           );
+        }
+
+        private async Task SendOrderRentConfirmationEmailSupplier(Account account, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                 "   Hình thức: thuê<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Ngày thuê: {order.RentalStartDate}<br />" +
+                $"   Ngày trả: {order.RentalEndDate}<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{account.FirstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {account.Email}<br />" +
+                $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
+                "Nhà cung cấp<br />" +
+                "Camera service platform Company<br />" +
+                "Điện thoại: 0862448677<br />" +
+                "Email: dan1314705@gmail.com<br />" +
+                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+
+            var emailMessage =
+                $"Kính chào {firstName},<br /><br />" +
+                "Bạn vừa có đơn đặt hàng. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Prepare the list of attachment file paths
+            var attachmentFilePaths = new List<string>();
+
+            // Generate PDF contracts from the provided templates and add to attachment list
+            foreach (var template in contractTemplates)
+            {
+                string contractPdfPath = await GenerateContractPdf(template); // Method to generate PDF contract
+                if (File.Exists(contractPdfPath))
+                {
+                    attachmentFilePaths.Add(contractPdfPath); // Add the generated contract PDF to attachment list
+                }
+            }
+
+            // Send email with contract templates attached
+            emailService.SendEmailWithAttachments(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
+               emailMessage,
+               attachmentFilePaths
+           );
+        }
+
+        private async Task<string> GenerateContractPdf(ContractTemplate template)
+        {
+
+            string filePath = Path.Combine("path_to_save_pdfs", $"{template.ContractTemplateId}.pdf");
+
+            var pdfDocument = new PdfDocument();
+            var page = pdfDocument.AddPage();
+            var gfx = XGraphics.FromPdfPage(page);
+            var font = new XFont("Verdana", 12, XFontStyleEx.Regular);
+
+            gfx.DrawString($"Contract Template: {template.TemplateName}", font, XBrushes.Black, new XPoint(40, 40));
+            gfx.DrawString($"Terms: {template.ContractTerms}", font, XBrushes.Black, new XPoint(40, 60));
+            gfx.DrawString($"Penalty Policy: {template.PenaltyPolicy}", font, XBrushes.Black, new XPoint(40, 80));
+
+            pdfDocument.Save(filePath);
+
+            return filePath; 
         }
     }
 }

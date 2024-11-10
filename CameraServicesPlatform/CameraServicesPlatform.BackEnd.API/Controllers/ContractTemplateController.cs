@@ -94,6 +94,25 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
+        [HttpGet("get-contract-template-by-product--id")]
+        public async Task<IActionResult> GetContractByProductId(string productID)
+        {
+            try
+            {
+                var response = await _contractTemplateService.GetContractByProductId(productID);
+                if (!response.IsSuccess)
+                {
+                    return NotFound(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("get-all-contract-templates")]
         public async Task<AppActionResult> GetAllContracts(int pageIndex = 1, int pageSize = 10)
         {

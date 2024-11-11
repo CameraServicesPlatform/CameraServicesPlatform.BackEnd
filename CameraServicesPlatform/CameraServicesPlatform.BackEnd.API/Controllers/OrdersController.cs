@@ -91,6 +91,21 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("create-order-rent-with-payment")]
+        public async Task<IActionResult> CreateOrderRentWithPayment(CreateOrderRentRequest request)
+        {
+            try
+            {
+                var response = await _orderService.CreateOrderRentWithPayment(request, HttpContext);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("create-order-rent")]
         public async Task<IActionResult> CreateOrderRent(CreateOrderRentRequest request)
         {

@@ -156,6 +156,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.CreatedAt = DateTime.UtcNow;
                 order.UpdatedAt = DateTime.UtcNow;
                 order.Id = request.AccountID;
+                order.ShippingAddress = request.ShippingAddress;
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
@@ -261,6 +262,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.CreatedAt = DateTime.UtcNow;
                 order.UpdatedAt = DateTime.UtcNow;
                 order.Id = request.AccountID;
+                order.ShippingAddress = request.ShippingAddress;
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
@@ -531,6 +533,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.UpdatedAt = DateTime.UtcNow;
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
+                order.ShippingAddress = request.ShippingAddress;
                 order.OrderType = OrderType.Rental;
                 order.DeliveriesMethod = request.DeliveryMethod;
                 order.DurationValue = request.DurationValue;
@@ -660,7 +663,171 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> CreateOrderRentWithPayment(CreateOrderRentRequest request, HttpContext context)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var utility = Resolve<Utility>();
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var productID = Guid.Parse(request.ProductID);
 
+                // Kiểm tra tài khoản người dùng
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == request.AccountID);
+
+                var supplier = await _supplierRepository.GetById(Guid.Parse(request.SupplierID));
+                var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
+
+                // Khởi tạo và ánh xạ đơn hàng từ request
+                var order = _mapper.Map<Order>(request);
+                order.OrderID = Guid.NewGuid();
+                order.OrderDate = DateTime.UtcNow;
+                order.CreatedAt = DateTime.UtcNow;
+                order.UpdatedAt = DateTime.UtcNow;
+                order.SupplierID = Guid.Parse(request.SupplierID);
+                order.OrderStatus = OrderStatus.Pending;
+                order.ShippingAddress = request.ShippingAddress;
+                order.OrderType = OrderType.Rental;
+                order.DeliveriesMethod = request.DeliveryMethod;
+                order.DurationValue = request.DurationValue;
+                order.DurationUnit = request.DurationUnit;
+                order.ReturnDate = request.ReturnDate;
+                order.ShippingAddress = request.ShippingAddress;
+                order.RentalEndDate = request.RentalEndDate;
+                order.RentalStartDate = request.RentalStartDate;
+
+
+                // Tính tổng tiền thuê
+                //double totalOrderPrice = CalculateRentalPrice( request.TotalAmount, request.DurationUnit, request.DurationValue);
+                order.TotalAmount = request.TotalAmount;
+
+                var product = await _productRepository.GetById(productID);
+                if (product == null)
+                {
+                    throw new Exception("Product not found.");
+                }
+
+                double discount = 0;
+                if (!string.IsNullOrEmpty(request.VoucherID))
+                {
+                    var productVoucher = await _productVoucherRepository.GetByExpression(
+                        x => x.ProductID == productID && x.VourcherID == Guid.Parse(request.VoucherID)
+                    );
+                    if (productVoucher != null)
+                    {
+                        var voucher = await _voucherRepository.GetById(productVoucher.VourcherID);
+                        discount = voucher?.DiscountAmount ?? 0;
+                    }
+                }
+
+                var orderDetail = new OrderDetail
+                {
+                    OrderID = order.OrderID,
+                    ProductID = productID,
+                    ProductPrice = request.ProductPriceRent,
+                    Discount = discount,
+                    ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
+                    ProductPriceTotal = request.TotalAmount
+                };
+
+                order.TotalAmount = orderDetail.ProductPriceTotal;
+                double TotalPrice = (double)order.TotalAmount;
+                await _orderRepository.Insert(order);
+                await Task.Delay(200);
+                await _unitOfWork.SaveChangesAsync();
+
+
+                // Insert the order detail
+                orderDetail.OrderID = order.OrderID;
+                await _orderDetailRepository.Insert(orderDetail);
+                await Task.Delay(200);
+                await _unitOfWork.SaveChangesAsync();
+
+                // Cập nhật trạng thái sản phẩm thành `Rented`
+                if (Guid.TryParse(request.ProductID, out var productGuid))
+                {
+                    var productEntity = await _productRepository.GetById(productGuid);
+                    if (productEntity != null)
+                    {
+                        productEntity.Status = ProductStatusEnum.Rented;
+                        _productRepository.Update(productEntity);
+                    }
+                }
+                await _unitOfWork.SaveChangesAsync();
+
+                var pagedContractTemplates = await _contractTemplateRepository.GetAllDataByExpression(
+                    x => x.ProductID == Guid.Parse(request.ProductID),
+                    pageNumber: 1,
+                    pageSize: int.MaxValue);
+
+                // Kiểm tra nếu có item trong kết quả phân trang
+                if (pagedContractTemplates != null && pagedContractTemplates.Items.Any())
+                {
+                    var contractOfProductContract = pagedContractTemplates.Items;
+
+                    foreach (var template in contractOfProductContract)
+                    {
+                        var contract = new Contract
+                        {
+                            OrderID = order.OrderID,
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow,
+                            ContractTemplateId = template.ContractTemplateId
+                        };
+
+                        await _contractRepository.Insert(contract);
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new Exception("Không có mẫu hợp đồng nào phù hợp cho sản phẩm này.");
+                }
+
+                // Xác nhận hợp đồng đã được tạo
+                var checkContract = await _contractRepository.GetAllDataByExpression(x => x.CreatedAt == request.CreatedAt && x.OrderID == order.OrderID,
+                    pageNumber: 1,
+                    pageSize: int.MaxValue);
+                if (checkContract == null)
+                {
+                    throw new Exception("Không có hợp đồng!");
+                }
+
+                // Ánh xạ thông tin đơn hàng sang response
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                var payment = new PaymentInformationRequest
+                {
+                    AccountID = getAccount.Id,
+                    Amount = (double)order.TotalAmount,
+                    MemberName = $"{getAccount.FirstName} {getAccount.LastName}",
+                    OrderID = order.OrderID.ToString(),
+                    SupplierID = request.SupplierID,
+                };
+
+                var payMethod = await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
+
+
+                var contractOfProduct = pagedContractTemplates.Items;
+                // Send confirmation email to the customer
+                await SendOrderRentConfirmationEmail(getAccount, getAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
+                await Task.Delay(100);
+                // Send confirmation email to the supplier
+                await SendOrderRentConfirmationEmailSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
+
+                await Task.Delay(100);
+                result.Result = payMethod;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Không tạo đơn hàng thành công", ex);
+            }
+
+            return result;
+        }
 
         // Hàm tính tổng giá thuê dựa trên đơn vị thời gian và giá trị
         //private double CalculateTotalOrderPrice(RentalDurationUnit durationUnit, int durationValue, decimal baseAmount)

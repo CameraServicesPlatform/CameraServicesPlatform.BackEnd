@@ -17,16 +17,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     public class WishlistService : GenericBackendService, IWishlistService
     {
         private readonly IRepository<Wishlist> _wishListRepository;
+        private readonly IRepository<Product> _productRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         public WishlistService(
             IRepository<Wishlist> wishListRepository,
-            IUnitOfWork unitOfWork,
+            IRepository<Product> productRepository,
+        IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
             _wishListRepository = wishListRepository;
+            _productRepository = productRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -36,11 +39,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var result = new AppActionResult();
             try
             {
-                var hasM = await _wishListRepository.GetByExpression(x => x.AccountID == request.AccountID);
+                var hasM = await _productRepository.GetByExpression(x => x.ProductID == Guid.Parse(request.ProductID));
 
                 if (hasM == null)
                 {
                     result = BuildAppActionResultError(result, "Không tìm thấy sản phẩm nào!");
+                    return result;
+                }
+
+                var hasM1 = await _wishListRepository.GetByExpression(
+                    x => x.ProductID == Guid.Parse(request.ProductID) && x.AccountID == request.AccountID
+                );
+                if (hasM1 != null)
+                {
+                    result = BuildAppActionResultError(result, "Sản phẩm đã có trong danh sách!");
                     return result;
                 }
 
@@ -80,8 +92,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "Danh sách không tồn tại!");
                     return result;
                 }
-
-                await _wishListRepository.DeleteById(WishlistDTID);
+                WL.IsDisable = true;
+                await _wishListRepository.Update(WL);
                 await _unitOfWork.SaveChangesAsync();
                 result.IsSuccess = true;
                 result = BuildAppActionResultError(result, "Đã xóa khỏi danh sách!");
@@ -106,12 +118,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize: pageSize
                 );
 
-                var responses = Result.Items.Select(WL =>
+                var responses = Result.Items.Select(Result =>
                 {
                     var response = _mapper.Map<WishlistResponse>(Result);
-                    response.WishlistID = WL.WishlistID.ToString();
-                    response.ProductID = WL.ProductID.ToString();
-                    response.AccountID = WL.AccountID;
+                    response.WishlistID = Result.WishlistID.ToString();
+                    response.ProductID = Result.ProductID.ToString();
+                    response.AccountID = Result.AccountID;
 
                     return response;
                 }).ToList();

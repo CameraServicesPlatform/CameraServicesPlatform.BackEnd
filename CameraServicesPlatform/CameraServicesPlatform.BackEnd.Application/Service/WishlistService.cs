@@ -92,8 +92,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "Danh sách không tồn tại!");
                     return result;
                 }
-                WL.IsDisable = true;
-                await _wishListRepository.Update(WL);
+
+                await _wishListRepository.DeleteById(WishlistDTID);
                 await _unitOfWork.SaveChangesAsync();
                 result.IsSuccess = true;
                 result = BuildAppActionResultError(result, "Đã xóa khỏi danh sách!");

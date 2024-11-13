@@ -56,7 +56,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpPut("delete-wish-list-detail-by-id")]
+        [HttpDelete("delete-wish-list-detail-by-id")]
         public async Task<IActionResult> DeleteWishlist(string wishlistId)
         {
             try

@@ -652,7 +652,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var contractOfProduct = pagedContractTemplates.Items;
                 // Send confirmation email to the customer
                 await SendOrderRentConfirmationEmail(getAccount, getAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
-
+                await Task.Delay(100);
                 // Send confirmation email to the supplier
                 await SendOrderRentConfirmationEmailSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
 
@@ -681,6 +681,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var supplier = await _supplierRepository.GetById(Guid.Parse(request.SupplierID));
                 var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
 
+                var existingOrderDetail = await _orderDetailRepository.GetByExpression(x =>
+                   x.ProductID == productID && x.Order.OrderType == OrderType.Rental
+               );
+                if (existingOrderDetail != null)
+                {
+                    throw new Exception("Order creation failed because the product has already been sold.");
+                }
                 // Khởi tạo và ánh xạ đơn hàng từ request
                 var order = _mapper.Map<Order>(request);
                 order.OrderID = Guid.NewGuid();
@@ -797,11 +804,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new Exception("Không có hợp đồng!");
                 }
 
-                // Ánh xạ thông tin đơn hàng sang response
-                var orderResponse = _mapper.Map<OrderResponse>(order);
-                orderResponse.AccountID = order.Id.ToString();
-                orderResponse.SupplierID = order.SupplierID.ToString();
-
                 var payment = new PaymentInformationRequest
                 {
                     AccountID = getAccount.Id,
@@ -820,6 +822,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(100);
                 // Send confirmation email to the supplier
                 await SendOrderRentConfirmationEmailSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
+
 
                 await Task.Delay(100);
                 result.Result = payMethod;

@@ -96,7 +96,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _wishListRepository.DeleteById(WishlistDTID);
                 await _unitOfWork.SaveChangesAsync();
                 result.IsSuccess = true;
-                result = BuildAppActionResultError(result, "Đã xóa khỏi danh sách!");
+                result.Result = "Đã xóa khỏi danh sách!";
             }
             catch (Exception ex)
             {

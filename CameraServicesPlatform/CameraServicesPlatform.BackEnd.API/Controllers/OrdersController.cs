@@ -143,6 +143,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.UpdateOrderStatusApprovedBySupplier(orderId);
         }
+
+        [HttpPut("update-order-status-placed/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderStatusPlaced(string orderId)
+        {
+            return await _orderService.UpdateOrderStatusPlaced(orderId);
+        }
+
         [HttpPut("update-order-status-payment/{orderId}")]
         public async Task<AppActionResult> UpdateOrderStatusPaymentBySupplier(string orderId)
         {

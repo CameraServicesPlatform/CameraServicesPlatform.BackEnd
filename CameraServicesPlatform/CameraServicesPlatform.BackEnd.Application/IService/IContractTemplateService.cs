@@ -16,5 +16,6 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetContractTemplateById(string contractTemplateId);
         Task<AppActionResult> GetContractByProductId(string productID);
         Task<AppActionResult> GetAllContractTemplates(int pageIndex, int pageSize);
+        Task<AppActionResult> GetContractByAccountId(string accountID);
     }
 }

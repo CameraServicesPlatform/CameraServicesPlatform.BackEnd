@@ -1628,12 +1628,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
                 $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
                 "=====================================<br />";
-            var contractTemplatesString = "Danh sách hợp đồng:<br />";
+            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
             for (int i = 0; i < contractTemplates.Count; i++)
             {
                 var template = contractTemplates[i];
                 contractTemplatesString += $"<b>{i + 1}. {template.TemplateName}</b><br />";
-                contractTemplatesString += $"<i>Điều khoản hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
+                contractTemplatesString += $"<i>Nội dung hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
                 contractTemplatesString += $"<i>Chi tiết hợp đồng:</i> {template.TemplateDetails ?? "N/A"}<br />";
                 contractTemplatesString += $"<i>Chính sách phạt:</i> {template.PenaltyPolicy ?? "N/A"}<br /><br />";
             }

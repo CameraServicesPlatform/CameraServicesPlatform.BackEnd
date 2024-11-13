@@ -84,10 +84,10 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             VNPayResponseDto response = await _paymentGatewayService.PaymentExcute(queryParams);
             if(responseCode == "00") 
             {
-                return Ok("Thanh toán thành công");
+                return Redirect("http://localhost:5173/verify-payment");
 
             }
-            return Ok("Thanh toán thất bại");
+            return Redirect("http://localhost:5173/verify-payment");
         }
 
 

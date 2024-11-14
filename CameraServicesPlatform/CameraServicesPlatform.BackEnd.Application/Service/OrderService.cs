@@ -525,13 +525,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var supplier = await _supplierRepository.GetById(Guid.Parse(request.SupplierID));
                 var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
 
-                var existingOrderDetail = await _orderDetailRepository.GetByExpression(x =>
-                   x.ProductID == productID && x.Order.OrderType == OrderType.Rental
-               );
-                if (existingOrderDetail != null)
-                {
-                    throw new Exception("Order creation failed because the product has already been rent.");
-                }
                 // Khởi tạo và ánh xạ đơn hàng từ request
                 var order = _mapper.Map<Order>(request);
                 order.OrderID = Guid.NewGuid();
@@ -559,9 +552,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var product = await _productRepository.GetById(productID);
                 if (product == null)
                 {
-                    throw new Exception("Product not found.");
+                    throw new Exception("Không tìm thấy sản phẩm thuê.");
                 }
 
+                if (product.Status == ProductStatusEnum.Rented)
+                {
+                    throw new Exception("Sản phẫm đã được thuê");
+                }
                 double discount = 0;
                 if (!string.IsNullOrEmpty(request.VoucherID))
                 {
@@ -686,13 +683,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var supplier = await _supplierRepository.GetById(Guid.Parse(request.SupplierID));
                 var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
 
-                var existingOrderDetail = await _orderDetailRepository.GetByExpression(x =>
-                   x.ProductID == productID && x.Order.OrderType == OrderType.Rental
-               );
-                if (existingOrderDetail != null)
-                {
-                    throw new Exception("Order creation failed because the product has already been sold.");
-                }
                 // Khởi tạo và ánh xạ đơn hàng từ request
                 var order = _mapper.Map<Order>(request);
                 order.OrderID = Guid.NewGuid();
@@ -720,7 +710,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var product = await _productRepository.GetById(productID);
                 if (product == null)
                 {
-                    throw new Exception("Product not found.");
+                    throw new Exception("Không tìm thấy sản phẩm.");
+                }
+
+                if (product.Status == ProductStatusEnum.Rented)
+                {
+                    throw new Exception("Sản phẫm đã được thuê");
                 }
 
                 double discount = 0;
@@ -745,6 +740,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
                     ProductPriceTotal = request.TotalAmount
                 };
+
 
                 order.Deposit = product.DepositProduct;
                 order.TotalAmount = orderDetail.ProductPriceTotal;

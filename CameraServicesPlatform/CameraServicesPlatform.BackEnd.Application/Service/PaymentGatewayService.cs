@@ -6,6 +6,7 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Transaction;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.AspNetCore.Http;
@@ -29,6 +30,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Payment> _paymentRepository;
         private readonly IRepository<Staff> _staffRepository;
         private readonly IRepository<Order> _orderRepository;
+        private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Supplier> _supplierRepository;
 
         private readonly IRepository<Transaction> _transactionRepository;
@@ -40,6 +42,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Payment> paymentRepository,
             IRepository<Transaction> transactionRepository,
             IRepository<Order> orderRepository,
+            IRepository<Product> productRepository,
             IRepository<Staff> staffRepository,
             IRepository<HistoryTransaction> historyTransaction,
             IRepository<Supplier> supplierRepository,
@@ -48,6 +51,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _configuration = configuration;
             _paymentRepository = paymentRepository;
             _orderRepository = orderRepository;
+            _productRepository = productRepository;
             _staffRepository = staffRepository;
             _unitOfWork = unitOfWork;
             _historyTransaction = historyTransaction;
@@ -212,6 +216,34 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     _orderRepository.Update(orderDb);
                     await _unitOfWork.SaveChangesAsync();
 
+                    var productEntity = await _orderRepository.GetByExpression(
+                    x => x.OrderID == Guid.Parse(vnp_orderId),
+                    a => a.OrderDetail 
+                    );
+
+                    if (productEntity != null && productEntity.OrderDetail != null)
+                    {
+                        foreach (var detail in productEntity.OrderDetail)
+                        {
+                            var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID);
+
+                            if (product != null)
+                            {
+                                if (orderDb.OrderType == OrderType.Purchase) {
+                                    product.Status = ProductStatusEnum.Sold;
+                                    _productRepository.Update(product);
+                                }
+                                else
+                                {
+                                    product.Status = ProductStatusEnum.Rented;
+                                    _productRepository.Update(product);
+                                }
+                               
+                            }
+                        }
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+
                     var payment = new Payment
                     {
                         PaymentID = Guid.NewGuid(),
@@ -272,10 +304,30 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
                     ;
                     await _paymentRepository.Insert(payment);
+                    await _unitOfWork.SaveChangesAsync();
 
                     orderDb.OrderStatus = OrderStatus.PaymentFail;
                     _orderRepository.Update(orderDb);
                     await _unitOfWork.SaveChangesAsync();
+
+                    var productEntity = await _orderRepository.GetByExpression(
+                        x => x.OrderID == Guid.Parse(vnp_orderId),
+                        a => a.OrderDetail);
+
+                    if (productEntity != null && productEntity.OrderDetail != null)
+                    {
+                        foreach (var detail in productEntity.OrderDetail)
+                        {
+                            var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID);
+
+                            if (product != null)
+                            {
+                                product.Status = ProductStatusEnum.Pending;
+                                _productRepository.Update(product);
+                            }
+                        }
+                        await _unitOfWork.SaveChangesAsync();
+                    }
 
 
                     Transaction transaction = new Transaction

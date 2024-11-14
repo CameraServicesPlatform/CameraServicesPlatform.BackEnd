@@ -248,12 +248,23 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 // Check if the product has already been sold
-                var existingOrderDetail = await _orderDetailRepository.GetByExpression(x =>
-                    x.ProductID == productID && x.Order.OrderType == OrderType.Purchase
-                );
-                if (existingOrderDetail != null)
+                //var existingOrderDetail = await _orderDetailRepository.GetByExpression(x =>
+                //    x.ProductID == productID && x.Order.OrderType == OrderType.Purchase
+                //);
+                //if (existingOrderDetail != null)
+                //{
+                //    throw new Exception("Order creation failed because the product has already been sold.");
+                //}
+
+                var product = await _productRepository.GetById(productID);
+                if (product == null)
                 {
-                    throw new Exception("Order creation failed because the product has already been sold.");
+                    throw new Exception("Không tìm thấy sản phẩm thuê.");
+                }
+
+                if (product.Status == ProductStatusEnum.Sold)
+                {
+                    throw new Exception("Sản phẫm đã được bán");
                 }
 
                 // Map request to Order entity and set order properties
@@ -270,11 +281,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.DeliveriesMethod = request.DeliveryMethod;
 
                 // Retrieve product price and apply any voucher discount if applicable
-                var product = await _productRepository.GetById(productID);
-                if (product == null)
-                {
-                    throw new Exception("Product not found.");
-                }
 
                 double discount = 0;
                 if (!string.IsNullOrEmpty(request.VourcherID))

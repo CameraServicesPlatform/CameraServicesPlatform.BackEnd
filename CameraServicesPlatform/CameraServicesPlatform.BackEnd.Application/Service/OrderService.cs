@@ -489,10 +489,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         OrderID = orderDb.Id.ToString(),
                     };
                     var createPayment = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
-
-                    orderDb.OrderStatus = OrderStatus.Payment;
-                    _orderRepository.Update(orderDb);
-                    await _unitOfWork.SaveChangesAsync();
+                    
+                    //orderDb.OrderStatus = OrderStatus.Payment;
+                    //_orderRepository.Update(orderDb);
+                    //await _unitOfWork.SaveChangesAsync();
 
                     result.Result = createPayment;
                 }
@@ -710,7 +710,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var product = await _productRepository.GetById(productID);
                 if (product == null)
                 {
-                    throw new Exception("Không tìm thấy sản phẩm.");
+                    throw new Exception("Không tìm thấy sản .");
                 }
 
                 if (product.Status == ProductStatusEnum.Rented)
@@ -737,7 +737,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductID = productID,
                     ProductPrice = request.ProductPriceRent,
                     Discount = discount,
-                    ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
+                    ProductQuality = product.Quality,  
                     ProductPriceTotal = request.TotalAmount
                 };
 

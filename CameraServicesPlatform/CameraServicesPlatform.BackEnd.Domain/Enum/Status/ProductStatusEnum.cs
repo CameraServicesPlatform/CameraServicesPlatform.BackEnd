@@ -6,7 +6,6 @@ public enum ProductStatusEnum
     Rented,
     Sold,
     discontinuedProduct,
-    Pending,
 
 }
 

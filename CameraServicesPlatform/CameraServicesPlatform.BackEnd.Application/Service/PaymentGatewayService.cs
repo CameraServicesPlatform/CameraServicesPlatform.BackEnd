@@ -310,26 +310,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     _orderRepository.Update(orderDb);
                     await _unitOfWork.SaveChangesAsync();
 
-                    var productEntity = await _orderRepository.GetByExpression(
-                        x => x.OrderID == Guid.Parse(vnp_orderId),
-                        a => a.OrderDetail);
-
-                    if (productEntity != null && productEntity.OrderDetail != null)
-                    {
-                        foreach (var detail in productEntity.OrderDetail)
-                        {
-                            var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID);
-
-                            if (product != null)
-                            {
-                                product.Status = ProductStatusEnum.Pending;
-                                _productRepository.Update(product);
-                            }
-                        }
-                        await _unitOfWork.SaveChangesAsync();
-                    }
-
-
                     Transaction transaction = new Transaction
                     {
                         TransactionID = Guid.NewGuid(),

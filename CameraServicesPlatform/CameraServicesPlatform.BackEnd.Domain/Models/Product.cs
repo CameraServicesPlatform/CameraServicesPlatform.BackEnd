@@ -29,6 +29,7 @@ public class Product
     public double? PriceRent { get; set; }
     public double? PriceBuy { get; set; }
 
+    public double? DepositProduct { get; set; }
 
 
     public BrandEnum? Brand { get; set; }

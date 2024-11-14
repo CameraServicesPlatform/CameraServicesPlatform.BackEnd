@@ -15,5 +15,6 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> DeleteContract(string contractId);
         Task<AppActionResult> GetContractById(string contractId);
         Task<AppActionResult> GetAllContracts(int pageIndex, int pageSize);
+        Task<AppActionResult> GetContractByOrderID(string orderID, int pageIndex, int pageSize);
     }
 }

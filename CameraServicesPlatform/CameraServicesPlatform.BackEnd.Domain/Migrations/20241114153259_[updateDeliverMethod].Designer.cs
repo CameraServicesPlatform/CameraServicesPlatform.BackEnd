@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    partial class CameraServicesPlatformDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241114153259_[updateDeliverMethod]")]
+    partial class updateDeliverMethod
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -281,9 +284,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<int?>("DeliveriesMethod")
                         .HasColumnType("int");
-
-                    b.Property<double?>("Deposit")
-                        .HasColumnType("float");
 
                     b.Property<int>("DurationUnit")
                         .HasColumnType("int");
@@ -1063,9 +1063,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<double?>("DepositProduct")
-                        .HasColumnType("float");
 
                     b.Property<double?>("PriceBuy")
                         .HasColumnType("float");

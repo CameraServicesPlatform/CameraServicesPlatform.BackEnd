@@ -17,6 +17,5 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public string SupplierName { get; set; }
         public double Amount { get; set; }
 
-
     }
 }

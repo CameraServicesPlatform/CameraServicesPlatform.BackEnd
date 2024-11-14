@@ -28,6 +28,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Payment> _paymentRepository;
         private readonly IRepository<Staff> _staffRepository;
         private readonly IRepository<Order> _orderRepository;
+        private readonly IRepository<Supplier> _supplierRepository;
+
         private readonly IRepository<Transaction> _transactionRepository;
         private readonly IRepository<HistoryTransaction> _historyTransaction;
 
@@ -39,6 +41,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Order> orderRepository,
             IRepository<Staff> staffRepository,
             IRepository<HistoryTransaction> historyTransaction,
+            IRepository<Supplier> supplierRepository,
             IUnitOfWork unitOfWork)
         {
             _configuration = configuration;
@@ -47,6 +50,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _staffRepository = staffRepository;
             _unitOfWork = unitOfWork;
             _historyTransaction = historyTransaction;
+            _supplierRepository = supplierRepository;
             _transactionRepository = transactionRepository;
         }
 
@@ -105,11 +109,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(httpContext));
             pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
             pay.AddRequestData("vnp_OrderInfo",
-                $"Thanh toan: {requestDto.SupplierName} da nop tien: {requestDto.Amount} vnd");
+                $"{requestDto.SupplierID} shop: {requestDto.SupplierName} da nop tien: {requestDto.Amount} vnd");
             pay.AddRequestData("vnp_OrderType", "other");
-            //pay.AddRequestData("vnp_Account", requestDto.AccountID);
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
-            pay.AddRequestData("vnp_TxnRef", requestDto.SupplierID);
+            pay.AddRequestData("vnp_TxnRef", Guid.NewGuid().ToString());
             paymentUrl = pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
 
             //await SavePaymentInfoAsync(requestDto, PaymentStatus.Pending, PaymentType.Refund);
@@ -140,18 +143,25 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
            // List<string> roleListDb = await _accountService.GetRoleListByAccountId(pagedResult.Items[0].Id);
            if(vnp_OrderInfo.Contains("da nop tien"))
             {
-                if(vnp_ResponseCode == "00")
+                int spaceIndex = vnp_OrderInfo.IndexOf(' ');
+                string supplierId = vnp_OrderInfo.Substring(0, spaceIndex);
+                var pagedResult = await _supplierRepository.GetById(Guid.Parse(supplierId));
+                pagedResult.AccountBalance = pagedResult.AccountBalance + Int32.Parse(vnp_Amount);
+                _supplierRepository.Update(pagedResult);
+                if (vnp_ResponseCode == "00")
                 {
                     var historyTransaction = new HistoryTransaction
                     {
                         HistoryTransactionId = Guid.NewGuid(),
-                        SupplierID = Guid.Parse(vnp_orderId),
+                        SupplierID = pagedResult.SupplierID,
                         Price = Int32.Parse(vnp_Amount),
                         TransactionDescription = vnp_OrderInfo,
                         Status = TransactionStatus.Success,
                         CreatedAt = DateTime.Now
                     };
                     await _historyTransaction.Insert(historyTransaction);
+                    await _unitOfWork.SaveChangesAsync();
+
                 }
                 else
                 {
@@ -165,8 +175,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         CreatedAt = DateTime.Now
                     };
                     await _historyTransaction.Insert(historyTransaction);
+                    await _unitOfWork.SaveChangesAsync();
+
                 }
-                
+
             }
             else
             {

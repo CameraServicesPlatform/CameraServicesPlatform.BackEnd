@@ -1046,6 +1046,39 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> UpdateOrderStatusPlaced(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.Placed;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
         public async Task<AppActionResult> UpdateOrderStatusPaymentBySupplier(string OrderID)
         {
             AppActionResult result = new AppActionResult();
@@ -1628,12 +1661,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
                 $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
                 "=====================================<br />";
-            var contractTemplatesString = "Danh sách hợp đồng:<br />";
+            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
             for (int i = 0; i < contractTemplates.Count; i++)
             {
                 var template = contractTemplates[i];
                 contractTemplatesString += $"<b>{i + 1}. {template.TemplateName}</b><br />";
-                contractTemplatesString += $"<i>Điều khoản hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
+                contractTemplatesString += $"<i>Nội dung hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
                 contractTemplatesString += $"<i>Chi tiết hợp đồng:</i> {template.TemplateDetails ?? "N/A"}<br />";
                 contractTemplatesString += $"<i>Chính sách phạt:</i> {template.PenaltyPolicy ?? "N/A"}<br /><br />";
             }

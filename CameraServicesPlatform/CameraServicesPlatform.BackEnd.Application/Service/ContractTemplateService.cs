@@ -160,6 +160,37 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> GetContractByAccountId(string accountID)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var ctl = await _contractTemplateRepository.GetAllDataByExpression(
+                    x => x.AccountID == accountID,
+                    pageNumber: 1,
+                    pageSize: int.MaxValue);
+
+                var responses = ctl.Items.Select(contractTL =>
+                {
+                    var response = _mapper.Map<ContractTemplateResponse>(contractTL);
+                    response.ContractTemplateID = contractTL.ContractTemplateId.ToString();
+                    response.ProductID = contractTL.ProductID.ToString();
+                    return response;
+                }).ToList();
+                var pagedResult = new PagedResult<ContractTemplateResponse>
+                {
+                    Items = responses
+                };
+
+                result.IsSuccess = true;
+                result.Result = pagedResult;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
         public async Task<AppActionResult> GetContractTemplateById(string contractTemplateId)
         {
             var result = new AppActionResult();

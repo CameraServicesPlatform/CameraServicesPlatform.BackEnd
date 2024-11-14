@@ -94,7 +94,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpGet("get-contract-template-by-product--id")]
+        [HttpGet("get-contract-template-by-product-id")]
         public async Task<IActionResult> GetContractByProductId(string productID)
         {
             try
@@ -113,8 +113,26 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
+        [HttpGet("get-contract-template-by-account-id")]
+        public async Task<IActionResult> GetContractByAccountId(string accountID)
+        {
+            try
+            {
+                var response = await _contractTemplateService.GetContractByAccountId(accountID);
+                if (!response.IsSuccess)
+                {
+                    return NotFound(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpGet("get-all-contract-templates")]
-        public async Task<AppActionResult> GetAllContracts(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllContracts(int pageIndex, int pageSize)
         {
             return await _contractTemplateService.GetAllContractTemplates(pageIndex, pageSize);
         }

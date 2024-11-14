@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
+using static QRCoder.PayloadGenerator;
 using Utility = CameraServicesPlatform.BackEnd.Common.Utils.Utility;
 
 
@@ -393,11 +394,12 @@ public class AccountService : GenericBackendService, IAccountService
                     }
                     else
                     {
-                        emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
-        TemplateMappingHelper.GetTemplateOTPEmail(
-            TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
-            user.FirstName) +
-        $"\n\nWelcome {user.FirstName}, thank you for signing up with Google!");
+                       await SendEmailGoogleLogin(user.Email, user.FirstName);
+        //                emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+        //TemplateMappingHelper.GetTemplateOTPEmail(
+        //    TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
+        //    user.FirstName) +
+        //$"\n\nWelcome {user.FirstName}, thank you for signing up with Google!");
                     }
                 }
                 else
@@ -418,6 +420,25 @@ public class AccountService : GenericBackendService, IAccountService
         }
 
         return result;
+    }
+
+    private async Task SendEmailGoogleLogin(string email, string firstName)
+    {
+        IEmailService? emailService = Resolve<IEmailService>();
+
+        var emailMessage =
+            $"Kính chào {firstName},<br /><br />" +
+            $"Bạn vừa đăng nhập vào hệ thống của chúng tôi bằng tài khoản google với email là: {email}.<br /><br />" +
+            "<br />Chúc bạn có những trải nghiệm tuyệt vời.<br /><br />" +
+            "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+            "Trân trọng,<br />" +
+            "Đội ngũ Camera service platform";
+
+        emailService.SendEmail(
+           email,
+           SD.SubjectMail.WELCOME,
+           emailMessage
+       );
     }
 
     public async Task<AppActionResult> AssignUserIntoStaff(string userId, string staffId)

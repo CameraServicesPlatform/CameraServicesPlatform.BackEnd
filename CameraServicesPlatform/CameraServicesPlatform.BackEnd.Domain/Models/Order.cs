@@ -33,7 +33,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
+        public double? Deposit {  get; set; }
         public Supplier? Supplier { get; set; }
         public Account? Account { get; set; }
 

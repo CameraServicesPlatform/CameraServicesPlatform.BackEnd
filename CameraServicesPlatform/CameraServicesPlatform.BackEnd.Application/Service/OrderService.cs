@@ -539,6 +539,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.CreatedAt = DateTime.UtcNow;
                 order.UpdatedAt = DateTime.UtcNow;
                 order.SupplierID = Guid.Parse(request.SupplierID);
+                order.Id = request.AccountID;
                 order.OrderStatus = OrderStatus.Pending;
                 order.ShippingAddress = request.ShippingAddress;
                 order.OrderType = OrderType.Rental;
@@ -695,6 +696,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.CreatedAt = DateTime.UtcNow;
                 order.UpdatedAt = DateTime.UtcNow;
                 order.SupplierID = Guid.Parse(request.SupplierID);
+                order.Id = request.AccountID;
                 order.OrderStatus = OrderStatus.Pending;
                 order.ShippingAddress = request.ShippingAddress;
                 order.OrderType = OrderType.Rental;

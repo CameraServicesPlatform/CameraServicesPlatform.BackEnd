@@ -530,7 +530,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                );
                 if (existingOrderDetail != null)
                 {
-                    throw new Exception("Order creation failed because the product has already been sold.");
+                    throw new Exception("Order creation failed because the product has already been rent.");
                 }
                 // Khởi tạo và ánh xạ đơn hàng từ request
                 var order = _mapper.Map<Order>(request);
@@ -1217,7 +1217,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Notify the supplier about the cancelled order
                 var supplier = await _supplierRepository.GetById(order.SupplierID);
                 var account = await _accountRepository.GetById(supplier.AccountID);
-                var orderDetail = await _orderDetailRepository.GetById(OrderUpdateId);
+                var orderDetail = await _orderDetailRepository.GetByExpression(x => x.OrderID == OrderUpdateId);
                 double totalOrderPrice = (double)order.TotalAmount;
 
                 await SendOrderCancelNotificationToSupplier(account, account.Email, account.FirstName, orderDetail, totalOrderPrice);
@@ -1274,7 +1274,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var supplier = await _supplierRepository.GetById(order.SupplierID);
                 var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
                 var account = await _accountRepository.GetById(order.Id);
-                var orderDetail = await _orderDetailRepository.GetById(OrderUpdateId);
+                var orderDetail = await _orderDetailRepository.GetByExpression(x => x.OrderID == OrderUpdateId);
                 double totalOrderPrice = (double)order.TotalAmount;
 
                 await SendOrderCancelConfirmationEmailForSupplierToMember(account, account.Email, supplierAccount.Email, account.FirstName, orderDetail, totalOrderPrice);

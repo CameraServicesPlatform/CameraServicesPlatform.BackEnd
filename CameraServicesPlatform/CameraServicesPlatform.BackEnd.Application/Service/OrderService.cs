@@ -627,7 +627,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             OrderID = order.OrderID,
                             CreatedAt = DateTime.UtcNow,
                             UpdatedAt = DateTime.UtcNow,
-                            ContractTemplateId = template.ContractTemplateId
+                            ContractTemplateId = template.ContractTemplateId,
+                            ContractTerms = template.ContractTerms,
+                            TemplateDetails = template.TemplateDetails,
+                            PenaltyPolicy = template.PenaltyPolicy,
                         };
 
                         await _contractRepository.Insert(contract);
@@ -784,7 +787,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             OrderID = order.OrderID,
                             CreatedAt = DateTime.UtcNow,
                             UpdatedAt = DateTime.UtcNow,
-                            ContractTemplateId = template.ContractTemplateId
+                            ContractTemplateId = template.ContractTemplateId,
+                            ContractTerms = template.ContractTerms,
+                            TemplateDetails = template.TemplateDetails,
+                            PenaltyPolicy = template.PenaltyPolicy,
                         };
 
                         await _contractRepository.Insert(contract);

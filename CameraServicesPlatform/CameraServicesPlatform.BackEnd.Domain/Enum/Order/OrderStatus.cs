@@ -6,7 +6,7 @@ public enum OrderStatus
     Completed,
     Placed,
     Shipped,
-    Delivered,
+    PaymentFail,
     Canceling,
     Cancelled,
     Payment

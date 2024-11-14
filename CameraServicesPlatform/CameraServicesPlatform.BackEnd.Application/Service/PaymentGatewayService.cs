@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Application.PaymentLibrary;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Enum;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Transaction;
 using CameraServicesPlatform.BackEnd.Domain.Models;
@@ -199,29 +200,36 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         null
                     );
 
-                var payment = new Payment
-                {
-                    PaymentID = Guid.NewGuid(),
-                    OrderID = Guid.Parse(vnp_orderId),
-                    SupplierID = pagedResult.Items[0].SupplierID,
-                    AccountID = pagedResult.Items[0].Id,
-                    PaymentDate = DateTime.UtcNow,
-                    PaymentAmount = Int32.Parse(vnp_Amount),
-                    PaymentStatus = PaymentStatus.Completed,
-                    PaymentType = PaymentType.Refund,
-                    PaymentMethod = PaymentMethod.VNPAY,
-                    PaymentDetails = $"Payment for Order {vnp_orderId}",
-                    CreatedAt = DateTime.UtcNow,
-                    Image = "a",
-                    IsDisable = true
-                };
-                TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
-                ;
-                await _paymentRepository.Insert(payment);
+                var orderDb = await _orderRepository.GetByExpression(a => a.OrderID == Guid.Parse(vnp_orderId));
+
+               
 
 
                 if (vnp_ResponseCode == "00")
                 {
+                    orderDb.OrderStatus = OrderStatus.Payment;
+                    _orderRepository.Update(orderDb);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    var payment = new Payment
+                    {
+                        PaymentID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        SupplierID = pagedResult.Items[0].SupplierID,
+                        AccountID = pagedResult.Items[0].Id,
+                        PaymentDate = DateTime.UtcNow,
+                        PaymentAmount = Int32.Parse(vnp_Amount),
+                        PaymentStatus = PaymentStatus.Completed,
+                        PaymentType = PaymentType.Refund,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        PaymentDetails = $"Payment for Order {vnp_orderId}",
+                        CreatedAt = DateTime.UtcNow,
+                        Image = "a",
+                        IsDisable = true
+                    };
+                    TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
+                    ;
+                    await _paymentRepository.Insert(payment);
 
                     Transaction transaction = new Transaction
                     {
@@ -244,6 +252,30 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 if (vnp_ResponseCode != "00")
                 {
+                    var payment = new Payment
+                    {
+                        PaymentID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        SupplierID = pagedResult.Items[0].SupplierID,
+                        AccountID = pagedResult.Items[0].Id,
+                        PaymentDate = DateTime.UtcNow,
+                        PaymentAmount = Int32.Parse(vnp_Amount),
+                        PaymentStatus = PaymentStatus.Failed,
+                        PaymentType = PaymentType.Refund,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        PaymentDetails = $"Payment for Order {vnp_orderId}",
+                        CreatedAt = DateTime.UtcNow,
+                        Image = "a",
+                        IsDisable = true
+                    };
+                    TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
+                    ;
+                    await _paymentRepository.Insert(payment);
+
+                    orderDb.OrderStatus = OrderStatus.PaymentFail;
+                    _orderRepository.Update(orderDb);
+                    await _unitOfWork.SaveChangesAsync();
+
 
                     Transaction transaction = new Transaction
                     {

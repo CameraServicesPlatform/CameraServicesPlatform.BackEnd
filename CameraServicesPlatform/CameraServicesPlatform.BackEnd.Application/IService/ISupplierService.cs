@@ -1,4 +1,5 @@
-﻿using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+﻿using CameraServicesPlatform.BackEnd.Common.DTO.Request;
+using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;

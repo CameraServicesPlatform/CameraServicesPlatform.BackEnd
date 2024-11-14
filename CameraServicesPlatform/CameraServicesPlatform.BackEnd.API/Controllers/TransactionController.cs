@@ -22,9 +22,9 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpPost("create-transaction")]
-        public async Task<IActionResult> CreateTransaction(PaymentInformationRequest voucherResponse)
+        public async Task<IActionResult> CreateTransaction(PaymentInformationRequest paymentInformationRequest)
         {
-            return Ok(await _paymentGatewayService.CreatePaymentUrlVnpay(voucherResponse, HttpContext));
+            return Ok(await _paymentGatewayService.CreatePaymentUrlVnpay(paymentInformationRequest, HttpContext));
         }
 
         [HttpGet("get-all-transaction")]
@@ -45,10 +45,15 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _transactionService.GetTransactionBySupplierId(id, pageIndex, pageSize);
         }
+
+        [HttpPost("create-supplier-payment")]
+        public async Task<IActionResult> CreateSupplierPayment(SupplierPaymentDto supplierResponse)
+        {
+            return Ok(await _paymentGatewayService.CreateSupplierPayment(supplierResponse, HttpContext));
+        }
         [HttpGet("payment-callback")]
         public async Task<IActionResult> PaymentCallBack()
         {
-            //VNPayResponseDto response = await _paymentGatewayService.PaymentExcute(Request.Query);
             string amount = Request.Query["vnp_Amount"];
             string bankCode = Request.Query["vnp_BankCode"];
             string bankTranNo = Request.Query["vnp_BankTranNo"];
@@ -88,6 +93,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
 
             }
             return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={orderInfo}&vnp_TxnRef={txnRef}");
+        
         }
 
 

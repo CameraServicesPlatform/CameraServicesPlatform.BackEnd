@@ -89,7 +89,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             VNPayResponseDto response = await _paymentGatewayService.PaymentExcute(queryParams);
             if(responseCode == "00") 
             {
-                return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={orderInfo}&vnp_TxnRef={txnRef}");
+                return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={response.OrderDescription}&vnp_TxnRef={txnRef}");
 
             }
             return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={orderInfo}&vnp_TxnRef={txnRef}");

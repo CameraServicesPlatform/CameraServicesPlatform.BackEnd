@@ -285,6 +285,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     CategoryID = categoryGuid,
                     ProductName = productResponse.ProductName,
                     ProductDescription = productResponse.ProductDescription,
+                    DepositProduct = productResponse.DepositProduct,
                     Brand = productResponse.Brand,
                     Status = ProductStatusEnum.AvailableRent,
                     Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
@@ -562,6 +563,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             ProductName = item.ProductName,
                             ProductDescription = item.ProductDescription,
                             PriceBuy = item.PriceBuy,
+                            DepositProduct = item.DepositProduct,
                             PricePerHour = rentalPrice.Items[0].PricePerHour,
                             PricePerDay = rentalPrice.Items[0].PricePerDay,
                             PricePerWeek = rentalPrice.Items[0].PricePerWeek,
@@ -716,6 +718,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         ProductName = product.ProductName,
                         ProductDescription = product.ProductDescription,
                         PriceBuy = product.PriceBuy,
+                        DepositProduct = product.DepositProduct,
                         PricePerHour = rentalPrice.Items[0].PricePerHour,
                         PricePerDay = rentalPrice.Items[0].PricePerDay,
                         PricePerWeek = rentalPrice.Items[0].PricePerWeek,
@@ -2057,6 +2060,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 productExist.Quality = productResponse.Quality;
                 productExist.Status = productResponse.Status;
                 productExist.UpdatedAt = DateTime.UtcNow;
+                productExist.DepositProduct = productExist.DepositProduct;
                 var rentalPriceExist = await _rentalPriceRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,

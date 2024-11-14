@@ -109,7 +109,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(httpContext));
             pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
             pay.AddRequestData("vnp_OrderInfo",
-                $"{requestDto.SupplierID} shop: {requestDto.SupplierName} da nop tien: {requestDto.Amount} vnd");
+                $"{requestDto.SupplierID} shop: {requestDto.SupplierName} da nap tien: {requestDto.Amount} vnd");
             pay.AddRequestData("vnp_OrderType", "other");
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
             pay.AddRequestData("vnp_TxnRef", Guid.NewGuid().ToString());
@@ -139,12 +139,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
             var vnp_OrderInfo = vnpay.GetResponseData("vnp_OrderInfo");
             var vnp_Amount = vnpay.GetResponseData("vnp_Amount");
-            
-           // List<string> roleListDb = await _accountService.GetRoleListByAccountId(pagedResult.Items[0].Id);
-           if(vnp_OrderInfo.Contains("da nop tien"))
+            int spaceIndex = vnp_OrderInfo.IndexOf(' ');
+            string supplierId = vnp_OrderInfo.Substring(0, spaceIndex);
+            vnp_OrderInfo = vnp_OrderInfo.Substring(spaceIndex + 1);
+            // List<string> roleListDb = await _accountService.GetRoleListByAccountId(pagedResult.Items[0].Id);
+            if (vnp_OrderInfo.Contains("da nap tien"))
             {
-                int spaceIndex = vnp_OrderInfo.IndexOf(' ');
-                string supplierId = vnp_OrderInfo.Substring(0, spaceIndex);
+                
                 var pagedResult = await _supplierRepository.GetById(Guid.Parse(supplierId));
                 pagedResult.AccountBalance = pagedResult.AccountBalance + Int32.Parse(vnp_Amount);
                 _supplierRepository.Update(pagedResult);

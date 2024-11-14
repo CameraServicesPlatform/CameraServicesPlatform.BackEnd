@@ -217,7 +217,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _unitOfWork.SaveChangesAsync();
 
                 // Send confirmation email and map created order to response
-                await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                await SendOrderConfirmationEmail(getAccount,supplierAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
                 await Task.Delay(100);
                 await SendOrderConfirmationEmailToSupplier(getAccount , supplierAccount.Email, supplierAccount.FirstName, orderDetail, (double)order.TotalAmount);
                 result.IsSuccess = true;
@@ -335,7 +335,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Create payment URL
                 var payMethod = await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
                 // Send order confirmation email
-                await SendOrderConfirmationEmail(getAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                await SendOrderConfirmationEmail(getAccount, supplierAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
                 await Task.Delay(100);
                 await SendOrderConfirmationEmailToSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, orderDetail, (double)order.TotalAmount);
                 await Task.Delay(100);
@@ -350,7 +350,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        private async Task SendOrderConfirmationEmail(Account account, string email, string firstName, OrderDetail orderDetail, double totalOrderPrice)
+        private async Task SendOrderConfirmationEmail(Account account, Account supplierAccount, string email, string firstName, OrderDetail orderDetail, double totalOrderPrice)
         {
             IEmailService? emailService = Resolve<IEmailService>();
 
@@ -373,10 +373,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"Email: {account.Email}<br />" +
                 $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
                 "Nhà cung cấp<br />" +
-                "Camera service platform Company<br />" +
-                "Điện thoại: 0862448677<br />" +
-                "Email: dan1314705@gmail.com<br />" +
-                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
+                $"Tên: {supplierAccount.FirstName}<br />" +
+                $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
+                $"Email: {supplierAccount.Email}<br />" +
+                $"Địa chỉ: {supplierAccount.Address}<br /><br />";
 
             // Order summary and total
             var orderSummary =
@@ -429,7 +429,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
                 $"Email: {email}<br />" +
                 $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
-                "Nhà cung cấp<br />" +
+                "Thông báo từ<br />" +
                 "Camera service platform Company<br />" +
                 "Điện thoại: 0862448677<br />" +
                 "Email: dan1314705@gmail.com<br />" +
@@ -585,6 +585,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductPriceTotal = request.TotalAmount
                 };
 
+                order.Deposit = product.DepositProduct;
                 order.TotalAmount = orderDetail.ProductPriceTotal;
                 double TotalPrice = (double)order.TotalAmount;
                 await _orderRepository.Insert(order);
@@ -655,7 +656,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Ánh xạ thông tin đơn hàng sang response               
                 var contractOfProduct = pagedContractTemplates.Items;
                 // Send confirmation email to the customer
-                await SendOrderRentConfirmationEmail(getAccount, getAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
+                await SendOrderRentConfirmationEmail(getAccount, supplierAccount, getAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
                 await Task.Delay(100);
                 // Send confirmation email to the supplier
                 await SendOrderRentConfirmationEmailSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
@@ -745,6 +746,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductPriceTotal = request.TotalAmount
                 };
 
+                order.Deposit = product.DepositProduct;
                 order.TotalAmount = orderDetail.ProductPriceTotal;
                 double TotalPrice = (double)order.TotalAmount;
                 await _orderRepository.Insert(order);
@@ -826,7 +828,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var contractOfProduct = pagedContractTemplates.Items;
                 // Send confirmation email to the customer
-                await SendOrderRentConfirmationEmail(getAccount, getAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
+                await SendOrderRentConfirmationEmail(getAccount, supplierAccount, getAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
                 await Task.Delay(100);
                 // Send confirmation email to the supplier
                 await SendOrderRentConfirmationEmailSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
@@ -1562,7 +1564,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return totalPrice; 
         }
 
-        private async Task SendOrderRentConfirmationEmail(Account account, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
+        private async Task SendOrderRentConfirmationEmail(Account account, Account supplierAccount, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
         {
             IEmailService? emailService = Resolve<IEmailService>();
             // Generate a string representation of the order detail with HTML line breaks
@@ -1587,10 +1589,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"Email: {account.Email}<br />" +
                 $"Địa chỉ: {order.ShippingAddress ?? "Khách đến lấy"}<br /><br />" +
                 "Nhà cung cấp<br />" +
-                "Camera service platform Company<br />" +
-                "Điện thoại: 0862448677<br />" +
-                "Email: dan1314705@gmail.com<br />" +
-                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
+                 $"Tên: {supplierAccount.FirstName}<br />" +
+                $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
+                $"Email: {supplierAccount.Email}<br />" +
+                $"Địa chỉ: {supplierAccount.Address}<br /><br />";
 
             // Order summary and total
             var orderSummary =

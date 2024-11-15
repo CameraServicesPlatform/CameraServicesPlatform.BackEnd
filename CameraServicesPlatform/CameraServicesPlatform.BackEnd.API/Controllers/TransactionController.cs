@@ -27,6 +27,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return Ok(await _paymentGatewayService.CreatePaymentUrlVnpay(paymentInformationRequest, HttpContext));
         }
 
+        [HttpPost("create-transaction")]
+        public async Task<IActionResult> CreateSupplierPaymentAgain(PaymentInformationRequest paymentInformationRequest)
+        {
+            return Ok(await _paymentGatewayService.CreatePaymentUrlVnpay(paymentInformationRequest, HttpContext));
+        }
+
         [HttpGet("get-all-transaction")]
         public async Task<AppActionResult> GetAllTransaction(int pageIndex = 1, int pageSize = 10)
         {
@@ -50,6 +56,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         public async Task<IActionResult> CreateSupplierPayment(SupplierPaymentDto supplierResponse)
         {
             return Ok(await _paymentGatewayService.CreateSupplierPayment(supplierResponse, HttpContext));
+        }
+
+        [HttpPost("create-supplier-payment-again")]
+        public async Task<IActionResult> CreateSupplierPaymentAgain(SupplierPaymentAgainDto supplierResponse)
+        {
+            return Ok(await _paymentGatewayService.CreateSupplierPaymentAgain(supplierResponse, HttpContext));
         }
         [HttpGet("payment-callback")]
         public async Task<IActionResult> PaymentCallBack()
@@ -89,7 +101,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             VNPayResponseDto response = await _paymentGatewayService.PaymentExcute(queryParams);
             if(responseCode == "00") 
             {
-                return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={response.OrderDescription}&vnp_TxnRef={txnRef}");
+                return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={orderInfo}&vnp_TxnRef={txnRef}");
 
             }
             return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={orderInfo}&vnp_TxnRef={txnRef}");

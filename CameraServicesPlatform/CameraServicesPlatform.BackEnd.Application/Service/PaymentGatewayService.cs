@@ -121,7 +121,36 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return paymentUrl;
         }
 
+        public async Task<string> CreateSupplierPaymentAgain(SupplierPaymentAgainDto requestDto, HttpContext httpContext)
+        {
+            var paymentUrl = "";
 
+
+
+            var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
+            var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
+            var pay = new VNPayLibrary();
+            //var urlCallBack = $"{_configuration["Vnpay:ReturnUrl"]}/{requestDto.OrderID}";
+            var urlCallBack = $"{_configuration["Vnpay:ReturnUrl"]}";
+            pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
+            pay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"]);
+            pay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"]);
+            pay.AddRequestData("vnp_Amount", ((int)requestDto.Amount * 100).ToString());
+            pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
+            pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
+            pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(httpContext));
+            pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
+            pay.AddRequestData("vnp_OrderInfo",
+                $"{requestDto.SupplierID} shop: {requestDto.MemberName} da nap tien: {requestDto.Amount} vnd");
+            pay.AddRequestData("vnp_OrderType", "other");
+            pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
+            pay.AddRequestData("vnp_TxnRef", Guid.NewGuid().ToString());
+            paymentUrl = pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
+
+            //await SavePaymentInfoAsync(requestDto, PaymentStatus.Pending, PaymentType.Refund);
+
+            return paymentUrl;
+        }
 
         public async Task<VNPayResponseDto> PaymentExcute(IQueryCollection coletions)
         {

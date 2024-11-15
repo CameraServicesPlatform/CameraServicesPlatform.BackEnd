@@ -26,5 +26,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-    }*/
+
+        public async Task<AppActionResult> GetAllHistoryTransaction(int pageIndex, int pageSize)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<AppActionResult> GetHistoryTransactionById(string id, int pageIndex, int pageSize)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

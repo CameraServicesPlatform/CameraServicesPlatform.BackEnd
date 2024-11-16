@@ -1,4 +1,6 @@
-﻿using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+﻿using CameraServicesPlatform.BackEnd.Common.DTO.Request;
+using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +16,10 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
 
         Task<AppActionResult> GetAllTransaction(int pageIndex, int pageSize);
         Task<AppActionResult> GetTransactionById(string id, int pageIndex, int pageSize); 
-        Task<AppActionResult> GetTransactionBySupplierId(string id, int pageIndex, int pageSize);
+        Task<AppActionResult> GetTransactionBySupplierId(string id, int pageIndex, int pageSize); 
+        Task<AppActionResult> CreateSupplierPaymentAgain1(SupplierPaymentAgainDto supplierResponse, HttpContext context);
+        
+        Task<AppActionResult> CreateSupplierPaymentPurchuse(string historyTransaction, HttpContext context);
+
     }
 }

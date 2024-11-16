@@ -53,9 +53,15 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpPost("create-supplier-payment-again")]
-        public async Task<IActionResult> CreateSupplierPaymentAgain(SupplierPaymentAgainDto supplierResponse)
+        public async Task<IActionResult> CreateSupplierPaymentAgain1(SupplierPaymentAgainDto supplierResponse)
         {
-            return Ok(await _paymentGatewayService.CreateSupplierPaymentAgain(supplierResponse, HttpContext));
+            return Ok(await _transactionService.CreateSupplierPaymentAgain1(supplierResponse, HttpContext));
+        }
+
+        [HttpPost("create-supplier-payment-purchuse/{orderId}")]
+        public async Task<IActionResult> CreateSupplierPaymentPurchuse(string orderId)
+        {
+            return Ok(await _transactionService.CreateSupplierPaymentPurchuse(orderId, HttpContext));
         }
 
         [HttpGet("payment-callback")]

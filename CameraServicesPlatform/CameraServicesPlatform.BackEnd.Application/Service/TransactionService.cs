@@ -4,10 +4,14 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Data;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Transaction;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Firebase.Auth;
+using MailKit.Search;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using StackExchange.Redis;
@@ -15,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -23,7 +28,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     public class TransactionService : GenericBackendService, ITransactionService
     {
         private readonly IRepository<Transaction> _repository;
+        private readonly IRepository<Payment> _paymentRepository;
         IRepository<Account> _accountRepository;
+        IRepository<HistoryTransaction> _historyTransactionRepository;
+
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -31,12 +39,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Transaction> repository,
             IUnitOfWork unitOfWork,
             IRepository<Account> accountRepository,
+            IRepository<Payment> paymentRepository,
+            IRepository<HistoryTransaction> historyTransactionRepository,
             IMapper mapper,
             IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
             _repository = repository;
             _accountRepository = accountRepository;
+            _paymentRepository = paymentRepository;
+            _historyTransactionRepository = historyTransactionRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -248,6 +260,72 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 result = BuildAppActionResultError(result, ex.Message);
             }
 
+            return result;
+        }
+
+        public async Task<AppActionResult> CreateSupplierPaymentAgain1(SupplierPaymentAgainDto supplierResponse, HttpContext context)
+        {
+            var result = new AppActionResult();
+
+            try
+            {
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                
+                // Create payment URL
+                var createPayment = await paymentGatewayService.CreateSupplierPaymentAgain(supplierResponse, context);
+                // Send order confirmation email
+                await Task.Delay(100);
+                await Task.Delay(100);
+                result.Result = createPayment;
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Order creation failed. Error: " + ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> CreateSupplierPaymentPurchuse(string historyTransaction, HttpContext context)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var historyTransactionExist = await _historyTransactionRepository.GetByExpression(p => p.HistoryTransactionId == Guid.Parse(historyTransaction));
+                if (historyTransactionExist == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy giao dịch với id {historyTransaction}");
+                }
+                else
+                {
+                   if( historyTransactionExist.Status == TransactionStatus.Unsuccess)
+                    {
+                        var payment = new PaymentInformationRequest
+                        {
+                            SupplierID = historyTransactionExist.SupplierID.ToString(),
+                            Amount = historyTransactionExist.Price,
+                            OrderID = historyTransactionExist.HistoryTransactionId.ToString(),
+                        };
+                        var createPayment = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
+                        result.Result = createPayment;
+
+                    }
+                    else
+                    {
+                        result.Messages.Add("Giao dịch này đã được thành công hoặc đã hủy");
+                        result.IsSuccess = true;
+                        return result;
+                    }
+                }
+                
+                
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
             return result;
         }
     }

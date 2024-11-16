@@ -173,13 +173,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var vnp_ResponseCode = vnpay.GetResponseData("vnp_ResponseCode");
             var vnp_OrderInfo = vnpay.GetResponseData("vnp_OrderInfo");
             var vnp_Amount = vnpay.GetResponseData("vnp_Amount");
-            int spaceIndex = vnp_OrderInfo.IndexOf(' ');
-            string supplierId = vnp_OrderInfo.Substring(0, spaceIndex);
-            vnp_OrderInfo = vnp_OrderInfo.Substring(spaceIndex + 1);
+            
             // List<string> roleListDb = await _accountService.GetRoleListByAccountId(pagedResult.Items[0].Id);
             if (vnp_OrderInfo.Contains("da nap tien"))
             {
-                
+                int spaceIndex = vnp_OrderInfo.IndexOf(' ');
+                string supplierId = vnp_OrderInfo.Substring(0, spaceIndex);
+                vnp_OrderInfo = vnp_OrderInfo.Substring(spaceIndex + 1);
                 var pagedResult = await _supplierRepository.GetById(Guid.Parse(supplierId));
                 pagedResult.AccountBalance = pagedResult.AccountBalance + Int32.Parse(vnp_Amount);
                 _supplierRepository.Update(pagedResult);

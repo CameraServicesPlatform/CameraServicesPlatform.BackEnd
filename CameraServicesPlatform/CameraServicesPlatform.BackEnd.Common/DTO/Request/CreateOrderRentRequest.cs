@@ -22,6 +22,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         //public List<OrderProductRequest> Products { get; set; }
         public OrderType OrderType { get; set; }
         public string? ShippingAddress { get; set; }
+        public double? Deposit { get; set; }
         public DateTime? RentalStartDate { get; set; }
         public DateTime? RentalEndDate { get; set; }
         public RentalDurationUnit DurationUnit { get; set; }

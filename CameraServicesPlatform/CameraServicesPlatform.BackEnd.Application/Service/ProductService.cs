@@ -731,7 +731,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         UpdatedAt = product.UpdatedAt,
                         listImage = productImage.Items,
                         listVoucher = listProductVoucher,
-                        listProductSpecification = listProductSpecification
+                        listProductSpecification = listProductSpecification,
 
                     };
 
@@ -888,6 +888,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             PricePerDay = rentalPrice.Items[0].PricePerDay,
                             PricePerWeek = rentalPrice.Items[0].PricePerWeek,
                             PricePerMonth = rentalPrice.Items[0].PricePerMonth,
+                            DepositProduct = item.DepositProduct,
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
@@ -1048,6 +1049,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             CategoryID = item.CategoryID?.ToString(),
                             ProductName = item.ProductName,
                             ProductDescription = item.ProductDescription,
+                            DepositProduct = item.DepositProduct,
                             PriceBuy = item.PriceBuy,
                             PricePerHour = rentalPrice.Items[0].PricePerHour,
                             PricePerDay = rentalPrice.Items[0].PricePerDay,
@@ -1212,6 +1214,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             CategoryID = item.CategoryID?.ToString(),
                             ProductName = item.ProductName,
                             ProductDescription = item.ProductDescription,
+                            DepositProduct = item.DepositProduct,
                             PriceBuy = item.PriceBuy,
                             PricePerHour = rentalPrice.Items[0].PricePerHour,
                             PricePerDay = rentalPrice.Items[0].PricePerDay,
@@ -1422,6 +1425,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             ProductName = item.ProductName,
                             ProductDescription = item.ProductDescription,
                             PriceBuy = item.PriceBuy,
+                            DepositProduct = item.DepositProduct,
                             PricePerHour = rentalPrice.Items[0].PricePerHour,
                             PricePerDay = rentalPrice.Items[0].PricePerDay,
                             PricePerWeek = rentalPrice.Items[0].PricePerWeek,
@@ -1578,6 +1582,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         CategoryID = item.CategoryID?.ToString(),
                         ProductName = item.ProductName,
                         ProductDescription = item.ProductDescription,
+                        DepositProduct = item.DepositProduct,
                         PricePerHour = rentalPrice.Items[0].PricePerHour,
                         PricePerDay = rentalPrice.Items[0].PricePerDay,
                         PricePerWeek = rentalPrice.Items[0].PricePerWeek,
@@ -1979,6 +1984,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,
                             listVoucher = listProductVoucher,
+                            DepositProduct = item.DepositProduct,
                             listProductSpecification = listProductSpecification
 
                         };

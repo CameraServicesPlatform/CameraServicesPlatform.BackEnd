@@ -20,6 +20,7 @@ public class ProductUpdateResponseDto
         public string? ProductDescription { get; set; }
         public double? PriceBuy { get; set; }
         public BrandEnum? Brand { get; set; }
+
         public string Quality { get; set; }
         public ProductStatusEnum Status { get; set; }
         public IFormFile? File { get; set; }

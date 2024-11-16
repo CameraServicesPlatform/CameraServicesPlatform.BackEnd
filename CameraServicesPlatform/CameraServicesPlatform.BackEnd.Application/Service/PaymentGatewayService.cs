@@ -187,7 +187,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     var historyTransaction = new HistoryTransaction
                     {
-                        HistoryTransactionId = Guid.NewGuid(),
+                        HistoryTransactionId = Guid.Parse(vnp_orderId),
                         SupplierID = pagedResult.SupplierID,
                         Price = Int32.Parse(vnp_Amount),
                         TransactionDescription = vnp_OrderInfo,

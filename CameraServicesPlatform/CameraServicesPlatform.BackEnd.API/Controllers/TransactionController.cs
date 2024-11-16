@@ -27,12 +27,6 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return Ok(await _paymentGatewayService.CreatePaymentUrlVnpay(paymentInformationRequest, HttpContext));
         }
 
-        [HttpPost("create-transaction")]
-        public async Task<IActionResult> CreateSupplierPaymentAgain(PaymentInformationRequest paymentInformationRequest)
-        {
-            return Ok(await _paymentGatewayService.CreatePaymentUrlVnpay(paymentInformationRequest, HttpContext));
-        }
-
         [HttpGet("get-all-transaction")]
         public async Task<AppActionResult> GetAllTransaction(int pageIndex = 1, int pageSize = 10)
         {

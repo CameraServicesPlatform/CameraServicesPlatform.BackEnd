@@ -57,6 +57,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return Ok(await _paymentGatewayService.CreateSupplierPaymentAgain(supplierResponse, HttpContext));
         }
+
         [HttpGet("payment-callback")]
         public async Task<IActionResult> PaymentCallBack()
         {

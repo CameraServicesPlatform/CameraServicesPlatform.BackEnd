@@ -128,9 +128,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<string> CreateSupplierPaymentAgain(SupplierPaymentAgainDto requestDto, HttpContext httpContext)
         {
             var paymentUrl = "";
-
-
-
+            
             var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
             var pay = new VNPayLibrary();
@@ -145,10 +143,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(httpContext));
             pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
             pay.AddRequestData("vnp_OrderInfo",
-                $"{requestDto.SupplierID} shop: {requestDto.MemberName} da nap tien: {requestDto.Amount} vnd");
+                $"{requestDto.SupplierID} Khach hang: da nap tien {requestDto.Amount} VND");
             pay.AddRequestData("vnp_OrderType", "other");
+            //pay.AddRequestData("vnp_Account", requestDto.AccountID);
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
-            pay.AddRequestData("vnp_TxnRef", Guid.NewGuid().ToString());
+
+            pay.AddRequestData("vnp_TxnRef", requestDto.OrderID);
             paymentUrl = pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
 
             //await SavePaymentInfoAsync(requestDto, PaymentStatus.Pending, PaymentType.Refund);

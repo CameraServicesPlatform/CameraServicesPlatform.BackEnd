@@ -549,6 +549,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.ShippingAddress = request.ShippingAddress;
                 order.RentalEndDate = request.RentalEndDate;
                 order.RentalStartDate = request.RentalStartDate;
+                order.Deposit = request.Deposit;
 
 
                 // Tính tổng tiền thuê
@@ -707,6 +708,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.ShippingAddress = request.ShippingAddress;
                 order.RentalEndDate = request.RentalEndDate;
                 order.RentalStartDate = request.RentalStartDate;
+                order.Deposit = request.Deposit;
 
 
                 // Tính tổng tiền thuê

@@ -547,13 +547,46 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.DurationUnit = request.DurationUnit;
                 order.ReturnDate = request.ReturnDate;
                 order.ShippingAddress = request.ShippingAddress;
-                order.RentalEndDate = request.RentalEndDate;
-                order.RentalStartDate = request.RentalStartDate;
+                order.RentalStartDate = request.RentalStartDate ?? DateTime.UtcNow;
+
+                switch (order.DurationUnit)
+                {
+                    case RentalDurationUnit.Hour:
+                        order.RentalEndDate = order.RentalStartDate?.AddHours(order.DurationValue);
+                        break;
+                    case RentalDurationUnit.Day:
+                        order.RentalEndDate = order.RentalStartDate?.AddDays(order.DurationValue);
+                        break;
+                    case RentalDurationUnit.Week:
+                        order.RentalEndDate = order.RentalStartDate?.AddDays(order.DurationValue * 7);
+                        break;
+                    case RentalDurationUnit.Month:
+                        order.RentalEndDate = order.RentalStartDate?.AddMonths(order.DurationValue);
+                        break;
+                    default:
+                        throw new InvalidOperationException("DurationUnit is not supported.");
+                }
+
+                switch (order.DurationUnit)
+                {
+                    case RentalDurationUnit.Hour:
+                        order.ReturnDate = order.RentalStartDate?.AddHours(order.DurationValue);
+                        break;
+                    case RentalDurationUnit.Day:
+                        order.ReturnDate = order.RentalStartDate?.AddDays(order.DurationValue);
+                        break;
+                    case RentalDurationUnit.Week:
+                        order.ReturnDate = order.RentalStartDate?.AddDays(order.DurationValue * 7);
+                        break;
+                    case RentalDurationUnit.Month:
+                        order.ReturnDate = order.RentalStartDate?.AddMonths(order.DurationValue);
+                        break;
+                    default:
+                        throw new InvalidOperationException("DurationUnit is not supported.");
+                }
                 order.Deposit = request.Deposit;
+                order.TotalAmount = request.TotalAmount;
 
-
-                // Tính tổng tiền thuê
-                //double totalOrderPrice = CalculateRentalPrice( request.TotalAmount, request.DurationUnit, request.DurationValue);
                 order.TotalAmount = request.TotalAmount;
 
                 var product = await _productRepository.GetById(productID);
@@ -704,15 +737,47 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.DeliveriesMethod = request.DeliveryMethod;
                 order.DurationValue = request.DurationValue;
                 order.DurationUnit = request.DurationUnit;
-                order.ReturnDate = request.ReturnDate;
                 order.ShippingAddress = request.ShippingAddress;
-                order.RentalEndDate = request.RentalEndDate;
-                order.RentalStartDate = request.RentalStartDate;
+                order.RentalStartDate = request.RentalStartDate ?? DateTime.UtcNow;
+
+                switch (order.DurationUnit)
+                {
+                    case RentalDurationUnit.Hour:
+                        order.RentalEndDate = order.RentalStartDate?.AddHours(order.DurationValue);
+                        break;
+                    case RentalDurationUnit.Day:
+                        order.RentalEndDate = order.RentalStartDate?.AddDays(order.DurationValue);
+                        break;
+                    case RentalDurationUnit.Week:
+                        order.RentalEndDate = order.RentalStartDate?.AddDays(order.DurationValue * 7);
+                        break;
+                    case RentalDurationUnit.Month:
+                        order.RentalEndDate = order.RentalStartDate?.AddMonths(order.DurationValue);
+                        break;
+                    default:
+                        throw new InvalidOperationException("DurationUnit is not supported.");
+                }
+
+
+                switch (order.DurationUnit)
+                {
+                    case RentalDurationUnit.Hour:
+                        order.ReturnDate = order.RentalStartDate?.AddHours(order.DurationValue);
+                        break;
+                    case RentalDurationUnit.Day:
+                        order.ReturnDate = order.RentalStartDate?.AddDays(order.DurationValue);
+                        break;
+                    case RentalDurationUnit.Week:
+                        order.ReturnDate = order.RentalStartDate?.AddDays(order.DurationValue * 7);
+                        break;
+                    case RentalDurationUnit.Month:
+                        order.ReturnDate = order.RentalStartDate?.AddMonths(order.DurationValue);
+                        break;
+                    default:
+                        throw new InvalidOperationException("DurationUnit is not supported.");
+                }
                 order.Deposit = request.Deposit;
 
-
-                // Tính tổng tiền thuê
-                //double totalOrderPrice = CalculateRentalPrice( request.TotalAmount, request.DurationUnit, request.DurationValue);
                 order.TotalAmount = request.TotalAmount;
 
                 var product = await _productRepository.GetById(productID);
@@ -1576,9 +1641,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
                 $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
                 $"   Ngày thuê: {order.OrderDate}<br />" +
-                $"   Ngày nhận: {order.RentalStartDate}<br />" +
+                $"   Ngày nhận dự kiến: {order.RentalStartDate}<br />" +
                 $"   Ngày trả: {order.RentalEndDate}<br />" +
                 $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
                 $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
 
             // Invoice information template
@@ -1643,9 +1709,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                  "   Hình thức: thuê<br />" +
                 $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
                 $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
-                $"   Ngày thuê: {order.RentalStartDate}<br />" +
+                $"   Ngày thuê: {order.OrderDate}<br />" +
+                $"   Ngày nhận dự kiến: {order.RentalStartDate}<br />" +
                 $"   Ngày trả: {order.RentalEndDate}<br />" +
                 $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
                 $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
 
             // Invoice information template

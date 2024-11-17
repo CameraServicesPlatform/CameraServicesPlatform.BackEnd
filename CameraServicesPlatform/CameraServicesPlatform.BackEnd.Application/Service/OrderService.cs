@@ -776,20 +776,21 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     default:
                         throw new InvalidOperationException("DurationUnit is not supported.");
                 }
-                order.Deposit = request.Deposit;
 
                 order.TotalAmount = request.TotalAmount;
 
-                var product = await _productRepository.GetById(productID);
+                var product = await _productRepository.GetByExpression(x=> x.ProductID == productID);
                 if (product == null)
                 {
-                    throw new Exception("Không tìm thấy sản .");
+                    throw new Exception("Không tìm thấy sản phẩm.");
                 }
 
                 if (product.Status == ProductStatusEnum.Rented)
                 {
                     throw new Exception("Sản phẫm đã được thuê");
                 }
+
+                order.Deposit = product.DepositProduct;
 
                 double discount = 0;
                 if (!string.IsNullOrEmpty(request.VoucherID))

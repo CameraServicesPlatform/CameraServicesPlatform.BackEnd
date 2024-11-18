@@ -1671,7 +1671,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
                 $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
                 "=====================================<br />";
-            var contractTemplatesString = "Danh sách hợp đồng:<br />";
+            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
             for (int i = 0; i < contractTemplates.Count; i++)
             {
                 var template = contractTemplates[i];

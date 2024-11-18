@@ -31,7 +31,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Staff> _staffRepository;
         private readonly IRepository<Order> _orderRepository;
         private readonly IRepository<Product> _productRepository;
-        private readonly IRepository<Supplier> _supplierRepository;
+        private readonly IRepository<Account> _accountRepository;
 
         private readonly IRepository<Transaction> _transactionRepository;
         private readonly IRepository<HistoryTransaction> _historyTransaction;
@@ -45,7 +45,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Product> productRepository,
             IRepository<Staff> staffRepository,
             IRepository<HistoryTransaction> historyTransaction,
-            IRepository<Supplier> supplierRepository,
+            IRepository<Account> accountRepository,
             IUnitOfWork unitOfWork)
         {
             _configuration = configuration;
@@ -55,7 +55,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _staffRepository = staffRepository;
             _unitOfWork = unitOfWork;
             _historyTransaction = historyTransaction;
-            _supplierRepository = supplierRepository;
+            _accountRepository = accountRepository;
             _transactionRepository = transactionRepository;
         }
 
@@ -143,7 +143,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(httpContext));
             pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
             pay.AddRequestData("vnp_OrderInfo",
-                $"{requestDto.SupplierID} Khach hang: da nap tien {requestDto.Amount} VND");
+                $"{requestDto.AccountId} Khach hang: da nap tien {requestDto.Amount} VND");
             pay.AddRequestData("vnp_OrderType", "other");
             //pay.AddRequestData("vnp_Account", requestDto.AccountID);
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
@@ -178,17 +178,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             if (vnp_OrderInfo.Contains("da nap tien"))
             {
                 int spaceIndex = vnp_OrderInfo.IndexOf(' ');
-                string supplierId = vnp_OrderInfo.Substring(0, spaceIndex);
+                string accountId = vnp_OrderInfo.Substring(0, spaceIndex);
                 vnp_OrderInfo = vnp_OrderInfo.Substring(spaceIndex + 1);
-                var pagedResult = await _supplierRepository.GetById(Guid.Parse(supplierId));
-               // pagedResult.AccountBalance = pagedResult.AccountBalance + Int32.Parse(vnp_Amount);
-                _supplierRepository.Update(pagedResult);
+                var pagedResult = await _accountRepository.GetById(accountId);
+                pagedResult.AccountBalance = pagedResult.AccountBalance + Int32.Parse(vnp_Amount);
+                _accountRepository.Update(pagedResult);
                 if (vnp_ResponseCode == "00")
                 {
                     var historyTransaction = new HistoryTransaction
                     {
                         HistoryTransactionId = Guid.Parse(vnp_orderId),
-                        SupplierID = pagedResult.SupplierID,
+                        AccountID = pagedResult.Id,
                         Price = Int32.Parse(vnp_Amount),
                         TransactionDescription = vnp_OrderInfo,
                         Status = TransactionStatus.Success,
@@ -203,7 +203,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     var historyTransaction = new HistoryTransaction
                     {
                         HistoryTransactionId = Guid.NewGuid(),
-                        SupplierID = Guid.Parse(vnp_orderId),
+                        AccountID = pagedResult.Id,
                         Price = Int32.Parse(vnp_Amount),
                         TransactionDescription = vnp_OrderInfo,
                         Status = TransactionStatus.Unsuccess,

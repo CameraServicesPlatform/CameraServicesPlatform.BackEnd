@@ -304,9 +304,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     {
                         var payment = new PaymentInformationRequest
                         {
-                            SupplierID = historyTransactionExist.SupplierID.ToString(),
+                            AccountID = historyTransactionExist.AccountID.ToString(),
                             Amount = historyTransactionExist.Price,
-                            OrderID = historyTransactionExist.HistoryTransactionId.ToString(),
+                            OrderID = historyTransactionExist.HistoryTransactionId.ToString(),  
                         };
                         var createPayment = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
                         result.Result = createPayment;

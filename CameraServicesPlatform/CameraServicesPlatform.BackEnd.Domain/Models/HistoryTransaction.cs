@@ -7,11 +7,9 @@ public class HistoryTransaction
     [Key]
     public Guid HistoryTransactionId { get; set; }
 
-    public Guid SupplierID { get; set; }
+    public string AccountID { get; set; }
 
-    [ForeignKey(nameof(SupplierID))]
-    public Supplier Supplier { get; set; }
-
+    
     public double Price { get; set; }
 
 

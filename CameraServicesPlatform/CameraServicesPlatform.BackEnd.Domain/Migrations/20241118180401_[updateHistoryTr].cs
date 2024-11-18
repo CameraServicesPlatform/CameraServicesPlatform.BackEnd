@@ -1,4 +1,4 @@
-﻿/*using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class updateAccount : Migration
+    public partial class updateHistoryTr : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -99,6 +99,22 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DeliveriesMethod", x => x.DeliveriesMethodID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "HistoryTransactions",
+                columns: table => new
+                {
+                    HistoryTransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountID = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<double>(type: "float", nullable: false),
+                    TransactionDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HistoryTransactions", x => x.HistoryTransactionId);
                 });
 
             migrationBuilder.CreateTable(
@@ -343,28 +359,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         column: x => x.AccountID,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "HistoryTransactions",
-                columns: table => new
-                {
-                    HistoryTransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Price = table.Column<double>(type: "float", nullable: false),
-                    TransactionDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_HistoryTransactions", x => x.HistoryTransactionId);
-                    table.ForeignKey(
-                        name: "FK_HistoryTransactions_Suppliers_SupplierID",
-                        column: x => x.SupplierID,
-                        principalTable: "Suppliers",
-                        principalColumn: "SupplierID",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -937,11 +931,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 column: "ProductID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_HistoryTransactions_SupplierID",
-                table: "HistoryTransactions",
-                column: "SupplierID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_OrderID",
                 table: "OrderDetails",
                 column: "OrderID");
@@ -1205,4 +1194,3 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         }
     }
 }
-*/

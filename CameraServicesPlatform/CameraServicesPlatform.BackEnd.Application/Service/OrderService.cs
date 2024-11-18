@@ -217,9 +217,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _unitOfWork.SaveChangesAsync();
 
                 // Send confirmation email and map created order to response
-                await SendOrderConfirmationEmail(getAccount,supplierAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                await SendOrderConfirmationEmail(getAccount,supplierAccount, getAccount.Email, getAccount.FirstName, order, orderDetail, (double)order.TotalAmount);
                 await Task.Delay(100);
-                await SendOrderConfirmationEmailToSupplier(getAccount , supplierAccount.Email, supplierAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                await SendOrderConfirmationEmailToSupplier(getAccount , supplierAccount.Email, supplierAccount.FirstName, order, orderDetail, (double)order.TotalAmount);
                 result.IsSuccess = true;
                 result.Result = order;
             }
@@ -341,9 +341,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Create payment URL
                 var payMethod = await paymentGatewayService.CreatePaymentUrlVnpay(payment, context);
                 // Send order confirmation email
-                await SendOrderConfirmationEmail(getAccount, supplierAccount, getAccount.Email, getAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                await SendOrderConfirmationEmail(getAccount, supplierAccount, getAccount.Email, getAccount.FirstName, order, orderDetail, (double)order.TotalAmount);
                 await Task.Delay(100);
-                await SendOrderConfirmationEmailToSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, orderDetail, (double)order.TotalAmount);
+                await SendOrderConfirmationEmailToSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, order, orderDetail, (double)order.TotalAmount);
                 await Task.Delay(100);
                 result.Result = payMethod;
 
@@ -356,12 +356,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        private async Task SendOrderConfirmationEmail(Account account, Account supplierAccount, string email, string firstName, OrderDetail orderDetail, double totalOrderPrice)
+        private async Task SendOrderConfirmationEmail(Account account, Account supplierAccount, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice)
         {
             IEmailService? emailService = Resolve<IEmailService>();
 
             // Generate a string representation of the order detail with HTML line breaks
             var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                "   Hình thức đơn hàng: Mua<br />" +
                 $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
                 $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
                 $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
@@ -377,7 +378,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"{account.FirstName}<br />" +
                 $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
                 $"Email: {account.Email}<br />" +
-                $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
+                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến tiệm lấy"}<br /><br />" +
                 "Nhà cung cấp<br />" +
                 $"Tên: {supplierAccount.FirstName}<br />" +
                 $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
@@ -412,7 +413,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             );
         }
 
-        private async Task SendOrderConfirmationEmailToSupplier(Account account, string email, string firstName, OrderDetail orderDetail, double totalOrderPrice)
+        private async Task SendOrderConfirmationEmailToSupplier(Account account, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice)
         {
             IEmailService? emailService = Resolve<IEmailService>();
 
@@ -434,7 +435,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"{firstName}<br />" +
                 $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
                 $"Email: {email}<br />" +
-                $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
+                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến tiệm lấy."}<br /><br />" +
                 "Thông báo từ<br />" +
                 "Camera service platform Company<br />" +
                 "Điện thoại: 0862448677<br />" +
@@ -623,7 +624,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 };
 
                 order.Deposit = product.DepositProduct;
-                order.TotalAmount = orderDetail.ProductPriceTotal + order.Deposit;
+                order.TotalAmount = request.TotalAmount;
                 double TotalPrice = (double)order.TotalAmount;
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);
@@ -813,7 +814,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
 
                 order.Deposit = product.DepositProduct;
-                order.TotalAmount = orderDetail.ProductPriceTotal + order.Deposit;
+                order.TotalAmount = request.TotalAmount;
                 double TotalPrice = (double)order.TotalAmount;
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);
@@ -1671,7 +1672,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
                 $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
                 "=====================================<br />";
-            var contractTemplatesString = "Danh sách hợp đồng:<br />";
+            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
             for (int i = 0; i < contractTemplates.Count; i++)
             {
                 var template = contractTemplates[i];

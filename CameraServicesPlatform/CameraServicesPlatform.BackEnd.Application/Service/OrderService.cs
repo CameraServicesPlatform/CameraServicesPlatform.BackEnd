@@ -621,7 +621,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductPrice = request.ProductPriceRent,
                     Discount = discount,
                     ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
-                    ProductPriceTotal = request.TotalAmount
+                    ProductPriceTotal = request.TotalAmount,
+                    PeriodRental = order.ReturnDate,
                 };
 
                 order.Deposit = product.DepositProduct;
@@ -810,7 +811,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductPrice = request.ProductPriceRent,
                     Discount = discount,
                     ProductQuality = product.Quality,  
-                    ProductPriceTotal = request.TotalAmount
+                    ProductPriceTotal = request.TotalAmount,
+                    PeriodRental = order.ReturnDate,
                 };
 
 

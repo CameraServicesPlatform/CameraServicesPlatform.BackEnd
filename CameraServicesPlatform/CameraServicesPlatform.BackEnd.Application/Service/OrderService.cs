@@ -623,7 +623,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 };
 
                 order.Deposit = product.DepositProduct;
-                order.TotalAmount = orderDetail.ProductPriceTotal;
+                order.TotalAmount = orderDetail.ProductPriceTotal + order.Deposit;
                 double TotalPrice = (double)order.TotalAmount;
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);
@@ -777,8 +777,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         throw new InvalidOperationException("DurationUnit is not supported.");
                 }
 
-                order.TotalAmount = request.TotalAmount;
-
                 var product = await _productRepository.GetByExpression(x=> x.ProductID == productID);
                 if (product == null)
                 {
@@ -789,8 +787,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     throw new Exception("Sản phẫm đã được thuê");
                 }
-
-                order.Deposit = product.DepositProduct;
 
                 double discount = 0;
                 if (!string.IsNullOrEmpty(request.VoucherID))
@@ -817,7 +813,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
 
                 order.Deposit = product.DepositProduct;
-                order.TotalAmount = orderDetail.ProductPriceTotal;
+                order.TotalAmount = orderDetail.ProductPriceTotal + order.Deposit;
                 double TotalPrice = (double)order.TotalAmount;
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);

@@ -181,6 +181,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 string accountId = vnp_OrderInfo.Substring(0, spaceIndex);
                 vnp_OrderInfo = vnp_OrderInfo.Substring(spaceIndex + 1);
                 var pagedResult = await _accountRepository.GetById(accountId);
+                if (pagedResult.AccountBalance == null)
+                    pagedResult.AccountBalance = 0;
                 pagedResult.AccountBalance = pagedResult.AccountBalance + Int32.Parse(vnp_Amount);
                 _accountRepository.Update(pagedResult);
                 if (vnp_ResponseCode == "00")

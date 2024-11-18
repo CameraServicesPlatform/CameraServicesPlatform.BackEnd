@@ -1642,7 +1642,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"   Ngày trả: {order.RentalEndDate}<br />" +
                 $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
                 $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
-                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
+                $"   Thành tiền: {order.TotalAmount:N0} ₫<br />";
 
             // Invoice information template
             var invoiceInfo =
@@ -1711,7 +1711,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"   Ngày trả: {order.RentalEndDate}<br />" +
                 $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
                 $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
-                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
+                $"   Thành tiền: {order.TotalAmount:N0} ₫<br />";
 
             // Invoice information template
             var invoiceInfo =

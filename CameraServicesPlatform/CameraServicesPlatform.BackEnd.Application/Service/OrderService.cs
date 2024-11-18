@@ -11,6 +11,7 @@ using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models;
 using Firebase.Auth;
+using Google.Apis.Util;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Identity.Client;
@@ -1038,7 +1039,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 int totalRentals = orders.Items
-                    .Sum(order => order.OrderDetail.Where(od => od.ProductID == productIdGuid).Sum(od => od.RentalPeriod ?? 0));
+                    .Count(order => order.OrderDetail.Any(od => od.ProductID == productIdGuid));
 
                 result.IsSuccess = true;
                 result.Result = new

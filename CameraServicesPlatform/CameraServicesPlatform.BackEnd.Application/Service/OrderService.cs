@@ -831,16 +831,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _unitOfWork.SaveChangesAsync();
 
                 // Cập nhật trạng thái sản phẩm thành `Rented`
-                if (Guid.TryParse(request.ProductID, out var productGuid))
-                {
-                    var productEntity = await _productRepository.GetById(productGuid);
-                    if (productEntity != null)
-                    {
-                        productEntity.Status = ProductStatusEnum.Rented;
-                        _productRepository.Update(productEntity);
-                    }
-                }
-                await _unitOfWork.SaveChangesAsync();
+                //if (Guid.TryParse(request.ProductID, out var productGuid))
+                //{
+                //    var productEntity = await _productRepository.GetById(productGuid);
+                //    if (productEntity != null)
+                //    {
+                //        productEntity.Status = ProductStatusEnum.Rented;
+                //        _productRepository.Update(productEntity);
+                //    }
+                //}
+                //await _unitOfWork.SaveChangesAsync();
 
                 var pagedContractTemplates = await _contractTemplateRepository.GetAllDataByExpression(
                     x => x.ProductID == Guid.Parse(request.ProductID),

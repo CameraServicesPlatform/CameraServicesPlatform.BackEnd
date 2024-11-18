@@ -623,7 +623,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 };
 
                 order.Deposit = product.DepositProduct;
-                order.TotalAmount = orderDetail.ProductPriceTotal + order.Deposit;
+                order.TotalAmount = request.TotalAmount;
                 double TotalPrice = (double)order.TotalAmount;
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);
@@ -813,7 +813,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
 
                 order.Deposit = product.DepositProduct;
-                order.TotalAmount = orderDetail.ProductPriceTotal + order.Deposit;
+                order.TotalAmount = request.TotalAmount;
                 double TotalPrice = (double)order.TotalAmount;
                 await _orderRepository.Insert(order);
                 await Task.Delay(200);

@@ -30,6 +30,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<double?>("AccountBalance")
+                        .HasColumnType("float");
+
                     b.Property<string>("AccountHolder")
                         .HasColumnType("nvarchar(max)");
 
@@ -1148,9 +1151,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid>("SupplierID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("AccountBalance")
-                        .HasColumnType("float");
 
                     b.Property<string>("AccountID")
                         .HasColumnType("nvarchar(450)");

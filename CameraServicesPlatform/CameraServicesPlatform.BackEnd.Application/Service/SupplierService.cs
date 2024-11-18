@@ -212,7 +212,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     BlockedAt = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
-                    AccountBalance = supplierResponse.AccountBalance,
+                    //AccountBalance = supplierResponse.AccountBalance,
                 };
 
                 await listSupplier.Insert(supplier);

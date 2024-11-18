@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateTableContract : Migration
+    public partial class updateaccount : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -53,6 +53,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     BankName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AccountNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AccountHolder = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AccountBalance = table.Column<double>(type: "float", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -331,7 +332,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     BlockedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AccountBalance = table.Column<double>(type: "float", nullable: false),
                     Img = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDisable = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -387,6 +387,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     DeliveriesMethod = table.Column<int>(type: "int", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Deposit = table.Column<double>(type: "float", nullable: true),
                     AccountId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     OrderDetailID = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
@@ -418,6 +419,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     ProductDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PriceRent = table.Column<double>(type: "float", nullable: true),
                     PriceBuy = table.Column<double>(type: "float", nullable: true),
+                    DepositProduct = table.Column<double>(type: "float", nullable: true),
                     Brand = table.Column<int>(type: "int", nullable: true),
                     Quality = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
@@ -841,6 +843,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     ContractID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ContractTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ContractTerms = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TemplateDetails = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PenaltyPolicy = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },

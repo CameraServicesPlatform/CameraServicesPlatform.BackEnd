@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    [Migration("20241114153259_[updateDeliverMethod]")]
-    partial class updateDeliverMethod
+    [Migration("20241118164743_[update-account]")]
+    partial class updateaccount
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,6 +32,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<double?>("AccountBalance")
+                        .HasColumnType("float");
 
                     b.Property<string>("AccountHolder")
                         .HasColumnType("nvarchar(max)");
@@ -284,6 +287,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<int?>("DeliveriesMethod")
                         .HasColumnType("int");
+
+                    b.Property<double?>("Deposit")
+                        .HasColumnType("float");
 
                     b.Property<int>("DurationUnit")
                         .HasColumnType("int");
@@ -1064,6 +1070,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<double?>("DepositProduct")
+                        .HasColumnType("float");
+
                     b.Property<double?>("PriceBuy")
                         .HasColumnType("float");
 
@@ -1145,9 +1154,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid>("SupplierID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("AccountBalance")
-                        .HasColumnType("float");
 
                     b.Property<string>("AccountID")
                         .HasColumnType("nvarchar(450)");

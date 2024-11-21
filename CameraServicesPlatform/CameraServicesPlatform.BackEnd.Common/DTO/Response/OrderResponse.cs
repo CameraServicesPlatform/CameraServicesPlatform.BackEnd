@@ -1,4 +1,5 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Delivery;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 
@@ -14,7 +15,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public decimal TotalAmount { get; set; }
         public OrderType OrderType { get; set; }
         public string? ShippingAddress { get; set; }
-        public DeliveryMethod DeliveryMethod { get; set; }
+        public DeliveryStatus DeliveriesMethod { get; set; }
         public List<OrderDetailResponse> OrderDetails { get; set; }
     }
 }

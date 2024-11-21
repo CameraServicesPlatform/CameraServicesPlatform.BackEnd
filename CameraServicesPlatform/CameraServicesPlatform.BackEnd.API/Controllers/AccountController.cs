@@ -113,6 +113,12 @@ public class AccountController : ControllerBase
         return await _accountService.GetSupplierIDByAccountID(accountId);
     }
 
+    [HttpGet("get-staff-id-by-account-id/{accountId}")]
+    public async Task<AppActionResult> GetStafIDByAccountID(string accountId)
+    {
+        return await _accountService.GetStafIDByAccountID(accountId);
+    }
+
     [HttpPut("update-account")]
     public async Task<AppActionResult> UpdateAccount(UpdateAccountRequestDTO request)
     {

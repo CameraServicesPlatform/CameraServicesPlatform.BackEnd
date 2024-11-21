@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
-    public class DashbroardService : GenericBackendService, IDashbroardService
+    public class DashboardService: GenericBackendService, IDashboardService
     {
         private readonly IRepository<Order> _orderRepository;
         private readonly IRepository<OrderDetail> _orderDetailRepository;
@@ -26,7 +26,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public DashbroardService(
+        public DashboardService(
             IRepository<Order> orderRepository,
             IRepository<OrderDetail> orderDetailRepository,
             IRepository<Rating> ratingRepository,
@@ -64,7 +64,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
             );
 
-            var totalSales = ordersResult.Items.Sum(order => order.TotalAmount); 
+            var totalSales = ordersResult.Items.Sum(order => order.TotalAmount);
             var totalOrders = ordersResult.Items.Count;
             var pendingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Pending);
             var completedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Completed);
@@ -127,7 +127,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 .Select(g => new MonthlyOrderCostDto
                 {
                     Month = new DateTime(g.Key.Year, g.Key.Month, 1),
-                    TotalCost = (double)g.Sum(order => order.TotalAmount) 
+                    TotalCost = (double)g.Sum(order => order.TotalAmount)
                 });
 
             monthlyCosts.AddRange(groupedData);
@@ -146,7 +146,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             foreach (var product in products.Items)
             {
                 var orderDetails = await _orderDetailRepository.GetAllDataByExpression(
-                    od => od.ProductID == product.ProductID, 
+                    od => od.ProductID == product.ProductID,
                     1, int.MaxValue
                 );
 
@@ -171,7 +171,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
             );
 
-            var categorySales = new Dictionary<string, BestSellingCategoryDto>(); 
+            var categorySales = new Dictionary<string, BestSellingCategoryDto>();
 
             foreach (var order in orders.Items)
             {
@@ -189,12 +189,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             categorySales[product.CategoryID.ToString()] = new BestSellingCategoryDto
                             {
                                 CategoryID = product.CategoryID.ToString(),
-                                CategoryName = product.Category.CategoryName, 
-                                TotalSold = 0 
+                                CategoryName = product.Category.CategoryName,
+                                TotalSold = 0
                             };
                         }
 
-                        categorySales[product.CategoryID.ToString()].TotalSold += 1; 
+                        categorySales[product.CategoryID.ToString()].TotalSold += 1;
                     }
                 }
             }
@@ -262,7 +262,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                              && o.OrderDate <= endDate
                              && o.OrderStatus == OrderStatus.Completed,
                 pageNumber: 0,
-                pageSize: 0 
+                pageSize: 0
             );
 
             var monthlyRevenue = orders.Items
@@ -273,7 +273,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     Month = g.Key.Month,
                     TotalRevenue = (double)g.Sum(o => o.TotalAmount)
                 })
-                .OrderBy(r => r.Year).ThenBy(r => r.Month)  
+                .OrderBy(r => r.Year).ThenBy(r => r.Month)
                 .ToList();
 
             return monthlyRevenue;

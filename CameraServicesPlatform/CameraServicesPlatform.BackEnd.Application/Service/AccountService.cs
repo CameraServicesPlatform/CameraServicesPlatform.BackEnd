@@ -96,6 +96,24 @@ public class AccountService : GenericBackendService, IAccountService
                 Result = supplier.SupplierID
             };
     }
+
+    public async Task<AppActionResult> GetStafIDByAccountID(string accountId)
+    {
+        Staff? staff = await _context.Staffs
+            .FirstOrDefaultAsync(s => s.AccountID == accountId);
+
+        return staff == null
+            ? new AppActionResult
+            {
+                IsSuccess = false,
+                Messages = ["Staff not found."]
+            }
+            : new AppActionResult
+            {
+                IsSuccess = true,
+                Result = staff.StaffID
+            };
+    }
     public async Task<AppActionResult> CreateAccountSupplier(CreateSupplierAccountDTO dto, bool isGoogle)
     {
         IFirebaseService? firebaseService = Resolve<IFirebaseService>();
@@ -737,6 +755,7 @@ public class AccountService : GenericBackendService, IAccountService
     }
     public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
     {
+        IFirebaseService? firebaseService = Resolve<IFirebaseService>();
         AppActionResult result = new();
         try
         {
@@ -755,18 +774,28 @@ public class AccountService : GenericBackendService, IAccountService
             staffAccount.IsVerified = true;
             staffAccount.VerifyCode = null;
 
+            string? ImageUrl = null;
+
+            if (dto.Img != null)
+            {
+                string frontPathName = SD.FirebasePathName.STAFF_PREFIX + $"{staffAccount.Id}.jpg";
+                AppActionResult frontUpload = await firebaseService.UploadFileToFirebase(dto.Img, frontPathName);
+                ImageUrl = frontUpload?.Result?.ToString();
+            }
+            staffAccount.Img = ImageUrl;
+
             // Upload the image and assign the URL to the Account
-            string pathName = SD.FirebasePathName.STAFF_PREFIX + staffAccount.Id; // Update prefix to STAF_PREFIX
-            AppActionResult url = await _firebaseService.UploadFileToFirebase(dto.Img, pathName);
-            if (url.IsSuccess)
-            {
-                staffAccount.Img = (string)url.Result;
-            }
-            else
-            {
-                result = BuildAppActionResultError(result, "Failed to upload staff image. Please try again.");
-                return result;
-            }
+            //string pathName = SD.FirebasePathName.STAFF_PREFIX + staffAccount.Id; // Update prefix to STAF_PREFIX
+            //AppActionResult url = await _firebaseService.UploadFileToFirebase(dto.Img, pathName);
+            //if (url.IsSuccess)
+            //{
+            //    staffAccount.Img = (string)url.Result;
+            //}
+            //else
+            //{
+            //    result = BuildAppActionResultError(result, "Failed to upload staff image. Please try again.");
+            //    return result;
+            //}
 
             // Create the user in Identity
             //IdentityResult resultCreateUser = await _userManager.CreateAsync(staffAccount, SD.DefaultAccountInformation.PASSWORD);

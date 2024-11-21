@@ -53,7 +53,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
         
-        public async Task<AppActionResult> CreateTransaction(VNPayResponseDto response, double amount, string account)
+        /*public async Task<AppActionResult> CreateTransaction(VNPayResponseDto response, double amount, string account)
         {
             var newTransaction = Resolve<IRepository<Transaction>>();
 
@@ -105,7 +105,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
 
                         
-        }
+        }*/
 
         public async Task<AppActionResult> GetAllTransaction(int pageIndex, int pageSize)
         {

@@ -21,11 +21,11 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             _transactionService = transactionService;
         }
 
-        [HttpPost("create-transaction")]
+        /*[HttpPost("create-transaction")]
         public async Task<IActionResult> CreateTransaction(PaymentInformationRequest paymentInformationRequest)
         {
             return Ok(await _paymentGatewayService.CreatePaymentUrlVnpay(paymentInformationRequest, HttpContext));
-        }
+        }*/
 
         [HttpGet("get-all-transaction")]
         public async Task<AppActionResult> GetAllTransaction(int pageIndex = 1, int pageSize = 10)

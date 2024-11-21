@@ -46,24 +46,30 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _transactionService.GetTransactionBySupplierId(id, pageIndex, pageSize);
         }
 
-        [HttpPost("create-supplier-payment-again")]
+        [HttpPost("create-supplier-payment")]
         public async Task<IActionResult> CreateSupplierPayment(SupplierPaymentAgainDto supplierResponse)
         {
             return Ok(await _transactionService.CreateSupplierPayment(supplierResponse, HttpContext));
         }
 
-        [HttpPost("create-staff-refund")]
-        public async Task<IActionResult> CreateStaffRefund(StaffRefundDto supplierResponse)
+        [HttpPost("create-staff-refund-member")]
+        public async Task<IActionResult> CreateStaffRefundMember(StaffRefundDto supplierResponse)
         {
             return Ok(await _transactionService.CreateStaffRefund(supplierResponse, HttpContext));
         }
 
-        [HttpPost("create-staff-refund-purchuse")]
-        public async Task<IActionResult> CreateStaffRefundPurchuse(string orderId)
+        [HttpPost("create-staff-refund-member-purchuse")]
+        public async Task<IActionResult> CreateStaffRefundMemberPurchuse(string orderId)
         {
             return Ok(await _transactionService.CreateStaffRefundPurchuse(orderId, HttpContext));
         }
 
+        /*[HttpPost("create-member-refund")]//member rút tìn từ ví ra tìn mặt
+        public async Task<IActionResult> CreateMemberRefund(string orderId)
+        {
+            return Ok(await _transactionService.CreateMemberRefund(orderId, HttpContext));
+        }
+*/
         [HttpPost("create-supplier-payment-purchuse/{orderId}")]
         public async Task<IActionResult> CreateSupplierPaymentPurchuse(string orderId)
         {

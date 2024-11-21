@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
-    [Route("voucher")]
+    [Route("historyTransaction")]
     [ApiController]
     public class HistoryTransactionController : ControllerBase
     {

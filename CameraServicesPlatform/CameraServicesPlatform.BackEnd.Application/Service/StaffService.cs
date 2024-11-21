@@ -203,20 +203,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                var Result = await _repository.GetAllDataByExpression(
-                    a => a.StaffID == GStaffID,
-                    pageIndex,
-                    pageSize,
-                    orderBy: a => a.Name,
-                    isAscending: true,
-                    includes: new Expression<Func<Staff, object>>[]
-                    {
-                         a => a.Account
-                    }
-                );
-                var pagedResult = _mapper.Map<StaffResponseDto>(Result);
+                var staff = await _repository.GetByExpression(
+           a => a.StaffID == GStaffID,
+           includeProperties: new Expression<Func<Staff, object>>[] { a => a.Account }
+       );
 
-                result.Result = pagedResult;
+                if (staff == null)
+                {
+                    result = BuildAppActionResultError(result, "Nhân viên không tồn tại.");
+                    return result;
+                }
+
+                var staffResponse = _mapper.Map<StaffResponseDto>(staff);
+
+                result.Result = staffResponse;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -229,36 +229,38 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
         public async Task<AppActionResult> GetStaffByName(string? staffName, int pageIndex, int pageSize)
         {
-
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Staff, bool>>? filter = a => a.Name.Contains(staffName);
+                // Kiểm tra nếu staffName rỗng hoặc null, sẽ tìm tất cả
+                Expression<Func<Staff, bool>>? filter = null;
 
-                if (string.IsNullOrEmpty(staffName))
+                if (!string.IsNullOrEmpty(staffName))
                 {
-                    filter = null;
+                    filter = a => a.Name.Contains(staffName);
                 }
 
-                var Result = await _repository.GetAllDataByExpression(
-                   filter,
-                   pageIndex,
-                   pageSize,
-                   orderBy: a => a.Name,
-                   isAscending: true,
-                   includes: new Expression<Func<Staff, object>>[]
-                   {
-                        a => a.Account
-                   }
-               );
-                var responses = Result.Items.Select(ST =>
+                // Truy vấn từ repository với filter, phân trang và sắp xếp
+                var resultData = await _repository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    orderBy: a => a.Name,
+                    isAscending: true,
+                    includes: new Expression<Func<Staff, object>>[] { a => a.Account }
+                );
+
+                // Ánh xạ các kết quả thành StaffResponseDto
+                var responses = resultData.Items.Select(ST =>
                 {
                     var response = _mapper.Map<StaffResponseDto>(ST);
                     return response;
                 }).ToList();
+
+                // Tạo PagedResult cho kết quả
                 var pagedResult = new PagedResult<StaffResponseDto>
                 {
-                    Items = responses
+                    Items = responses,
                 };
 
                 result.Result = pagedResult;

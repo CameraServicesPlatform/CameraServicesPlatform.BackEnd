@@ -17,6 +17,6 @@ public class Contract
     public string ContractTerms { get; set; }
     public string TemplateDetails { get; set; }
     public string PenaltyPolicy { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } 
+    public DateTime UpdatedAt { get; set; } 
 }

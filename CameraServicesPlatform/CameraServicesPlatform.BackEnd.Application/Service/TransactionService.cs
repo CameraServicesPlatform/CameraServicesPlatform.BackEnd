@@ -14,6 +14,7 @@ using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
+using PdfSharp;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IRepository<Transaction> _repository;
         private readonly IRepository<Payment> _paymentRepository;
+        IRepository<Domain.Models.Order> _orderRepository;
         IRepository<Account> _accountRepository;
         IRepository<HistoryTransaction> _historyTransactionRepository;
 
@@ -40,6 +42,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IUnitOfWork unitOfWork,
             IRepository<Account> accountRepository,
             IRepository<Payment> paymentRepository,
+            IRepository<Domain.Models.Order> orderRepository,
             IRepository<HistoryTransaction> historyTransactionRepository,
             IMapper mapper,
             IServiceProvider serviceProvider
@@ -48,6 +51,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _repository = repository;
             _accountRepository = accountRepository;
             _paymentRepository = paymentRepository;
+            _orderRepository = orderRepository;
             _historyTransactionRepository = historyTransactionRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -263,7 +267,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> CreateSupplierPayment(SupplierPaymentAgainDto supplierResponse, HttpContext context)
+        public async Task<AppActionResult> CreateSupplierOrMemberPayment(SupplierPaymentAgainDto supplierResponse, HttpContext context)
         {
             var result = new AppActionResult();
 
@@ -272,7 +276,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 
                 // Create payment URL
-                var createPayment = await paymentGatewayService.CreateSupplierPaymentAgain(supplierResponse, context);
+                var createPayment = await paymentGatewayService.CreateSupplierOrMemberPayment(supplierResponse, context);
                 // Send order confirmation email
                 await Task.Delay(100);
                 await Task.Delay(100);
@@ -308,7 +312,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             Amount = historyTransactionExist.Price,
                             OrderID = historyTransactionExist.HistoryTransactionId.ToString(),  
                         };
-                        var createPayment = await paymentGatewayService!.CreateSupplierPaymentAgain(payment, context);
+                        var createPayment = await paymentGatewayService!.CreateSupplierOrMemberPayment(payment, context);
                         result.Result = createPayment;
 
                     }
@@ -334,7 +338,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
-                var accountExist = _accountRepository.GetById(response.AccountId);     
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    a => a.OrderID == Guid.Parse(response.OrderID),
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                response.Amount = pagedResult.Items[0].TotalAmount;
+                response.AccountId = pagedResult.Items[0].Id;
                 var createPayment = await paymentGatewayService.CreateStaffRefund(response, context);
                 await Task.Delay(100);
                 await Task.Delay(100);

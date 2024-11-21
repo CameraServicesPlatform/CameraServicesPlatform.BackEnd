@@ -34,6 +34,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Order> _orderRepository;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Account> _accountRepository;
+        private readonly IRepository<Supplier> _supplierRepository;
 
         private readonly IRepository<Transaction> _transactionRepository;
         private readonly IRepository<HistoryTransaction> _historyTransaction;
@@ -44,6 +45,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Payment> paymentRepository,
             IRepository<Transaction> transactionRepository,
             IRepository<Order> orderRepository,
+            IRepository<Supplier> supplierRepository,
             IRepository<Product> productRepository,
             IRepository<Staff> staffRepository,
             IRepository<HistoryTransaction> historyTransaction,
@@ -54,6 +56,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _paymentRepository = paymentRepository;
             _orderRepository = orderRepository;
             _productRepository = productRepository;
+            _supplierRepository = supplierRepository;
             _staffRepository = staffRepository;
             _unitOfWork = unitOfWork;
             _historyTransaction = historyTransaction;
@@ -118,7 +121,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             
             
             pay.AddRequestData("vnp_OrderInfo",
-                $"{request.StaffId} {request.AccountId} Đơn hàng {request.OrderID} đã được hoàn tiền");
+                $"{request.StaffId} {request.AccountId} don hang {request.OrderID} da duoc hoan tien");
             pay.AddRequestData("vnp_OrderType", "other");
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
               
@@ -130,7 +133,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return paymentUrl;
         }
 
-        public async Task<string> CreateSupplierPaymentAgain(SupplierPaymentAgainDto requestDto, HttpContext httpContext)
+        public async Task<string> CreateSupplierOrMemberPayment(SupplierPaymentAgainDto requestDto, HttpContext httpContext)
         {
             var paymentUrl = "";
             
@@ -160,21 +163,28 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return paymentUrl;
         }
-        public async Task<bool> deposit(string vnp_ResponseCode, string vnp_orderId, string vnp_OrderInfo, string vnp_Amount)
+        public async Task<VNPayResponseDto> deposit(string vnp_ResponseCode, string vnp_orderId, string vnp_OrderInfo, string vnp_Amount, string vnp_TransactionId, string vnp_SecureHash)
         { 
             int spaceIndex = vnp_OrderInfo.IndexOf(' ');
             string accountId = vnp_OrderInfo.Substring(0, spaceIndex);
             vnp_OrderInfo = vnp_OrderInfo.Substring(spaceIndex + 1);
-            var pagedResult = await _accountRepository.GetById(accountId);
-            if (pagedResult.AccountBalance == null)
-                pagedResult.AccountBalance = 0;
-            pagedResult.AccountBalance = pagedResult.AccountBalance + Int32.Parse(vnp_Amount);
-            _accountRepository.Update(pagedResult);
+            var pagedResult = await _accountRepository.GetAllDataByExpression(
+                        a => a.Id == accountId,
+                        1,
+                        10,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+            if (pagedResult.Items[0].AccountBalance == null)
+                pagedResult.Items[0].AccountBalance = 0;
+            pagedResult.Items[0].AccountBalance = pagedResult.Items[0].AccountBalance + Int32.Parse(vnp_Amount);
+            _accountRepository.Update(pagedResult.Items[0]);
             TransactionStatus status = (vnp_ResponseCode != "00") ? TransactionStatus.Unsuccess : TransactionStatus.Success;
             var historyTransaction = new HistoryTransaction
             {
                 HistoryTransactionId = Guid.Parse(vnp_orderId),
-                AccountID = pagedResult.Id,
+                AccountID = pagedResult.Items[0].Id,
                 StaffID = null,
                 Price = Int32.Parse(vnp_Amount),
                 TransactionDescription = vnp_OrderInfo,
@@ -183,7 +193,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             };
             await _historyTransaction.Insert(historyTransaction);
             await _unitOfWork.SaveChangesAsync();
-            return true;
+            return new VNPayResponseDto
+            {
+                Success = true,
+                PaymentMethod = "VnPay",
+                OrderDescription = vnp_OrderInfo,
+                OrderId = vnp_orderId.ToString(),
+                TransactionId = vnp_TransactionId.ToString(),
+                Token = vnp_SecureHash,
+                VnPayResponseCode = vnp_ResponseCode,
+            };
         }
 
         public async Task<bool> StaffRefund(string vnp_ResponseCode, string vnp_orderId, string vnp_OrderInfo, string vnp_Amount)
@@ -271,11 +290,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             if (vnp_OrderInfo.Contains("da nap tien"))
             {
-                deposit(vnp_ResponseCode, vnp_orderId, vnp_OrderInfo, vnp_Amount);
+                return await deposit(vnp_ResponseCode, vnp_orderId, vnp_OrderInfo, vnp_Amount, vnp_TransactionId, vnp_SecureHash);
             }
             else
             {
-                if (vnp_OrderInfo.Contains("đã được hoàn tiền"))
+                if (vnp_OrderInfo.Contains("da duoc hoan tien"))
                 {
                     //StaffRefund(vnp_ResponseCode, vnp_orderId, vnp_OrderInfo, vnp_Amount);
                     var infoParts = vnp_OrderInfo.Split(' ', 3);

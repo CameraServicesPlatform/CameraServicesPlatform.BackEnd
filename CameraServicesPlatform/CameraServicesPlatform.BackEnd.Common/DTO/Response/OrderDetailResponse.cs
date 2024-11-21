@@ -16,7 +16,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string ProductQuality { get; set; } 
         public double Discount { get; set; }
         public double ProductPriceTotal { get; set; } 
-        public int? RentalPeriod { get; set; } 
+        public DateTime? PeriodRental { get; set; } 
         public DateTime CreatedAt { get; set; } 
         public DateTime UpdatedAt { get; set; } 
     }

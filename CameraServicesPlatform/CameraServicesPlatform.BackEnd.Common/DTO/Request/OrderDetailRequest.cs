@@ -11,5 +11,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public string ProductQuality { get; set; }
         public double Discount { get; set; }
         public double ProductPriceTotal { get; set; }
+        public DateTime? PeriodRental { get; set; }
     }
 }

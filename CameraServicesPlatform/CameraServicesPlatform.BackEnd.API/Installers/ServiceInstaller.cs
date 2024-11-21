@@ -52,6 +52,7 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<ITransactionService, TransactionService>();
+        services.AddScoped<IHistoryTransactionService, HistoryTransactionService>();
 
 
 

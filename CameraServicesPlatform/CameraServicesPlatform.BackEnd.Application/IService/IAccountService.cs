@@ -8,6 +8,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService;
 public interface IAccountService
 {
     Task<AppActionResult> GetSupplierIDByAccountID(string accountId);
+    Task<AppActionResult> GetStafIDByAccountID(string accountId);
 
     public Task<AppActionResult> CreateAccountSupplier(CreateSupplierAccountDTO dto, bool isGoogle);
 

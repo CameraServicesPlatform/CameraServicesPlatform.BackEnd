@@ -1,20 +1,19 @@
 ﻿using CameraServicesPlatform.BackEnd.Application.IService;
-using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
-    [Route("dashbroard")]
+    [Route("dashboard")]
     [ApiController]
-    public class DashbroardController : ControllerBase
+    public class DashboardController : ControllerBase
     {
-        private readonly IDashbroardService _dashbroardService;
+        private readonly IDashboardService _dashboardService;
 
-        public DashbroardController(IDashbroardService dashbroardService)
+        public DashboardController(IDashboardService dashboardService)
         {
-            _dashbroardService = dashbroardService;
+            _dashboardService = dashboardService;
         }
 
         [HttpGet("best-selling-categories")]
@@ -22,8 +21,8 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             try
             {
-                var result = await _dashbroardService.GetBestSellingCategoriesAsync(startDate, endDate);
-            return Ok(result);
+                var result = await _dashboardService.GetBestSellingCategoriesAsync(startDate, endDate);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -34,9 +33,10 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         [HttpGet("best-selling-categories-by-supplier/{supplierId}")]
         public async Task<ActionResult<List<BestSellingCategoryDto>>> GetBestSellingCategoriesForSupplier(string supplierId, DateTime startDate, DateTime endDate)
         {
-            try { 
-            var result = await _dashbroardService.GetBestSellingCategoriesForSupplierAsync(supplierId, startDate, endDate);
-            return Ok(result);
+            try
+            {
+                var result = await _dashboardService.GetBestSellingCategoriesForSupplierAsync(supplierId, startDate, endDate);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -50,7 +50,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             try
             {
-                var result = await _dashbroardService.GetSupplierProductStatisticsAsync(supplierId);
+                var result = await _dashboardService.GetSupplierProductStatisticsAsync(supplierId);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -64,7 +64,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             try
             {
-                var result = await _dashbroardService.GetMonthlyOrderCostStatisticsAsync(startDate, endDate);
+                var result = await _dashboardService.GetMonthlyOrderCostStatisticsAsync(startDate, endDate);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -78,7 +78,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             try
             {
-                var result = await _dashbroardService.GetStaffOrderStatisticsAsync(accountId ,startDate, endDate);
+                var result = await _dashboardService.GetStaffOrderStatisticsAsync(accountId, startDate, endDate);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -93,7 +93,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             try
             {
-                var result = await _dashbroardService.GetSupplierOrderStatisticsAsync(supplierId, startDate, endDate);
+                var result = await _dashboardService.GetSupplierOrderStatisticsAsync(supplierId, startDate, endDate);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -107,7 +107,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             try
             {
-                var result = await _dashbroardService.CalculateTotalRevenueBySupplierAsync(supplierId);
+                var result = await _dashboardService.CalculateTotalRevenueBySupplierAsync(supplierId);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -121,7 +121,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             try
             {
-                var result = await _dashbroardService.CalculateMonthlyRevenueBySupplierAsync(supplierId, startDate, endDate);
+                var result = await _dashboardService.CalculateMonthlyRevenueBySupplierAsync(supplierId, startDate, endDate);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -134,14 +134,14 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         [HttpGet("supplier-rating-statistics/{supplierId}")]
         public async Task<IActionResult> GetSupplierRatingStatistics(string supplierId)
         {
-            var result = await _dashbroardService.GetSupplierRatingStatisticsAsync(supplierId);
+            var result = await _dashboardService.GetSupplierRatingStatisticsAsync(supplierId);
             return Ok(result);
         }
 
         [HttpGet("system-rating-statistics")]
         public async Task<IActionResult> GetSystemRatingStatistics()
         {
-            var result = await _dashbroardService.GetSystemRatingStatisticsAsync();
+            var result = await _dashboardService.GetSystemRatingStatisticsAsync();
             return Ok(result);
         }
 
@@ -149,14 +149,14 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         [HttpGet("supplier-payment-statistics/{supplierId}")]
         public async Task<IActionResult> GetSupplierPaymentStatistics(Guid supplierId, DateTime startDate, DateTime endDate)
         {
-            var result = await _dashbroardService.GetSupplierPaymentStatisticsAsync(supplierId, startDate, endDate);
+            var result = await _dashboardService.GetSupplierPaymentStatisticsAsync(supplierId, startDate, endDate);
             return Ok(result);
         }
 
         [HttpGet("system-payment-statistics")]
         public async Task<IActionResult> GetSystemPaymentStatistics(DateTime startDate, DateTime endDate)
         {
-            var result = await _dashbroardService.GetSystemPaymentStatisticsAsync(startDate, endDate);
+            var result = await _dashboardService.GetSystemPaymentStatisticsAsync(startDate, endDate);
             return Ok(result);
         }
 
@@ -164,14 +164,14 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         [HttpGet("supplier-transaction-statistics/{supplierId}")]
         public async Task<IActionResult> GetSupplierTransactionStatistics(Guid supplierId, DateTime startDate, DateTime endDate)
         {
-            var result = await _dashbroardService.GetSupplierTransactionStatisticsAsync(supplierId, startDate, endDate);
+            var result = await _dashboardService.GetSupplierTransactionStatisticsAsync(supplierId, startDate, endDate);
             return Ok(result);
         }
 
         [HttpGet("system-transaction-statistics")]
         public async Task<IActionResult> GetSystemTransactionStatistics(DateTime startDate, DateTime endDate)
         {
-            var result = await _dashbroardService.GetSystemTransactionStatisticsAsync(startDate, endDate);
+            var result = await _dashboardService.GetSystemTransactionStatisticsAsync(startDate, endDate);
             return Ok(result);
         }
     }

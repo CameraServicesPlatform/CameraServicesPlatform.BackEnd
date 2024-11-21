@@ -154,9 +154,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Map request to Order entity and set order properties
                 var order = _mapper.Map<Order>(request);
                 order.OrderID = Guid.NewGuid();
-                order.OrderDate = DateTime.UtcNow;
-                order.CreatedAt = DateTime.UtcNow;
-                order.UpdatedAt = DateTime.UtcNow;
+                order.OrderDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                order.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                order.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 order.Id = request.AccountID;
                 order.ShippingAddress = request.ShippingAddress;
                 order.SupplierID = Guid.Parse(request.SupplierID);
@@ -271,9 +271,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Map request to Order entity and set order properties
                 var order = _mapper.Map<Order>(request);
                 order.OrderID = Guid.NewGuid();
-                order.OrderDate = DateTime.UtcNow;
-                order.CreatedAt = DateTime.UtcNow;
-                order.UpdatedAt = DateTime.UtcNow;
+                order.OrderDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                order.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow); 
+                order.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 order.Id = request.AccountID;
                 order.ShippingAddress = request.ShippingAddress;
                 order.SupplierID = Guid.Parse(request.SupplierID);
@@ -413,7 +413,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 emailMessage
             );
         }
+        public static class DateTimeHelper
+        {
+            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
+            // Convert UTC DateTime to Vietnam Time
+            public static DateTime ToVietnamTime(DateTime utcDateTime)
+            {
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
+            }
+        }
         private async Task SendOrderConfirmationEmailToSupplier(Account account, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice)
         {
             IEmailService? emailService = Resolve<IEmailService>();
@@ -536,9 +545,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Khởi tạo và ánh xạ đơn hàng từ request
                 var order = _mapper.Map<Order>(request);
                 order.OrderID = Guid.NewGuid();
-                order.OrderDate = DateTime.UtcNow;
-                order.CreatedAt = DateTime.UtcNow;
-                order.UpdatedAt = DateTime.UtcNow;
+                order.OrderDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                order.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                order.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.Id = request.AccountID;
                 order.OrderStatus = OrderStatus.Pending;
@@ -549,7 +558,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.DurationUnit = request.DurationUnit;
                 order.ReturnDate = request.ReturnDate;
                 order.ShippingAddress = request.ShippingAddress;
-                order.RentalStartDate = request.RentalStartDate ?? DateTime.UtcNow;
+                order.RentalStartDate = DateTimeHelper.ToVietnamTime(request.RentalStartDate ?? DateTime.UtcNow);
 
                 switch (order.DurationUnit)
                 {
@@ -666,8 +675,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         var contract = new Contract
                         {
                             OrderID = order.OrderID,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow,
+                            CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                            UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                             ContractTemplateId = template.ContractTemplateId,
                             ContractTerms = template.ContractTerms,
                             TemplateDetails = template.TemplateDetails,
@@ -729,9 +738,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Khởi tạo và ánh xạ đơn hàng từ request
                 var order = _mapper.Map<Order>(request);
                 order.OrderID = Guid.NewGuid();
-                order.OrderDate = DateTime.UtcNow;
-                order.CreatedAt = DateTime.UtcNow;
-                order.UpdatedAt = DateTime.UtcNow;
+                order.OrderDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                order.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                order.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.Id = request.AccountID;
                 order.OrderStatus = OrderStatus.Pending;
@@ -741,7 +750,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.DurationValue = request.DurationValue;
                 order.DurationUnit = request.DurationUnit;
                 order.ShippingAddress = request.ShippingAddress;
-                order.RentalStartDate = request.RentalStartDate ?? DateTime.UtcNow;
+                order.RentalStartDate = DateTimeHelper.ToVietnamTime(request.RentalStartDate ?? DateTime.UtcNow);
 
                 switch (order.DurationUnit)
                 {
@@ -857,8 +866,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         var contract = new Contract
                         {
                             OrderID = order.OrderID,
-                            CreatedAt = DateTime.UtcNow,
-                            UpdatedAt = DateTime.UtcNow,
+                            CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                            UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                             ContractTemplateId = template.ContractTemplateId,
                             ContractTerms = template.ContractTerms,
                             TemplateDetails = template.TemplateDetails,

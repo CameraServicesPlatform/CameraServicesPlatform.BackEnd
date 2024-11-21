@@ -31,8 +31,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string? ShippingAddress { get; set; }
         public DeliveryStatus? DeliveriesMethod { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
         public double? Deposit {  get; set; }
         public Supplier? Supplier { get; set; }
         public Account? Account { get; set; }

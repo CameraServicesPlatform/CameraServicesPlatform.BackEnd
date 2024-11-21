@@ -78,11 +78,11 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-staff-by-staff-name")]
-        public async Task<IActionResult> GetPolicyByApplicableObject([FromBody] string? Name, int pageIndex, int pageSize)
+        public async Task<IActionResult> GetStaffByName([FromQuery] string? name, [FromQuery] int pageIndex, [FromQuery] int pageSize)
         {
             try
             {
-                var response = await _staffService.GetStaffByName(Name, pageIndex, pageSize);
+                var response = await _staffService.GetStaffByName(name, pageIndex, pageSize);
                 if (!response.IsSuccess)
                 {
                     return NotFound(response);

@@ -17,5 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string? ShippingAddress { get; set; }
         public DeliveryStatus DeliveriesMethod { get; set; }
         public List<OrderDetailResponse> OrderDetails { get; set; }
+        public double? Deposit { get; set; }
+
     }
 }

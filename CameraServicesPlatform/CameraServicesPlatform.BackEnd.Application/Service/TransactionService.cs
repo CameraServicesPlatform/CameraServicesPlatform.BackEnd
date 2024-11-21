@@ -263,7 +263,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> CreateSupplierPaymentAgain1(SupplierPaymentAgainDto supplierResponse, HttpContext context)
+        public async Task<AppActionResult> CreateSupplierPayment(SupplierPaymentAgainDto supplierResponse, HttpContext context)
         {
             var result = new AppActionResult();
 
@@ -302,13 +302,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                    if( historyTransactionExist.Status == TransactionStatus.Unsuccess)
                     {
-                        var payment = new PaymentInformationRequest
+                        var payment = new SupplierPaymentAgainDto
                         {
-                            AccountID = historyTransactionExist.AccountID.ToString(),
+                            AccountId = historyTransactionExist.AccountID.ToString(),
                             Amount = historyTransactionExist.Price,
                             OrderID = historyTransactionExist.HistoryTransactionId.ToString(),  
                         };
-                        var createPayment = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
+                        var createPayment = await paymentGatewayService!.CreateSupplierPaymentAgain(payment, context);
                         result.Result = createPayment;
 
                     }
@@ -319,8 +319,68 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         return result;
                     }
                 }
-                
-                
+                 
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> CreateStaffRefund(StaffRefundDto response, HttpContext context)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var accountExist = _accountRepository.GetById(response.AccountId);     
+                var createPayment = await paymentGatewayService.CreateStaffRefund(response, context);
+                await Task.Delay(100);
+                await Task.Delay(100);
+                result.Result = createPayment;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Order creation failed. Error: " + ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> CreateStaffRefundPurchuse(string historyTransaction, HttpContext context)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var historyTransactionExist = await _historyTransactionRepository.GetByExpression(p => p.HistoryTransactionId == Guid.Parse(historyTransaction));
+                if (historyTransactionExist == null)
+                {
+                    result = BuildAppActionResultError(result, $"Không tìm thấy giao dịch với id {historyTransaction}");
+                }
+                else
+                {
+                    if (historyTransactionExist.Status == TransactionStatus.Unsuccess)
+                    {
+                        var staffRefundDto = new StaffRefundDto
+                        {
+                            StaffId = historyTransactionExist.StaffID.ToString(),
+                            AccountId = historyTransactionExist.AccountID.ToString(),
+                            Amount = historyTransactionExist.Price,
+                            OrderID = historyTransactionExist.HistoryTransactionId.ToString(),
+                        };
+                        var createPayment = await paymentGatewayService!.CreateStaffRefund(staffRefundDto, context);
+                        result.Result = createPayment;
+
+                    }
+                    else
+                    {
+                        result.Messages.Add("Giao dịch này đã được thành công hoặc đã hủy");
+                        result.IsSuccess = true;
+                        return result;
+                    }
+                }
+
             }
             catch (Exception ex)
             {

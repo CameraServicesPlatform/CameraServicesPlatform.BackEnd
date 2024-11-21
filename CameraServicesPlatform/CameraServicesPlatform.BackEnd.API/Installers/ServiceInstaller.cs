@@ -5,6 +5,7 @@ using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Infrastructure.Repositories;
 using CameraServicesPlatform.BackEnd.Infrastructure.UnitOfWork;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 
 namespace CameraServicesPlatform.BackEnd.API.Installers;

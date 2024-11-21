@@ -12,8 +12,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
     public interface IPaymentGatewayService
     {
         Task<string> CreatePaymentUrlVnpay(PaymentInformationRequest request, HttpContext httpContext);
-        Task<string> CreateSupplierPayment(SupplierPaymentDto request, HttpContext httpContext);
-        Task<string> CreateSupplierPaymentAgain(SupplierPaymentAgainDto request, HttpContext httpContext);
+        Task<string> CreateSupplierPaymentAgain(SupplierPaymentAgainDto request, HttpContext httpContext); 
+        Task<string> CreateStaffRefund(StaffRefundDto request, HttpContext httpContext);
         Task<VNPayResponseDto> PaymentExcute(IQueryCollection coletions);
     }
 }

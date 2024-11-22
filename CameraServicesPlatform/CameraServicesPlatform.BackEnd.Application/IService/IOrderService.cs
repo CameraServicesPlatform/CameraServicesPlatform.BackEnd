@@ -32,5 +32,10 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
 
         Task<AppActionResult> CreateOrderRentWithPayment(CreateOrderRentRequest request, HttpContext context);
         Task<AppActionResult> UpdateOrderStatusPlaced(string OrderID);
+
+        Task<AppActionResult> AddImageProductAfter(ImageProductAfterDTO dto);
+        Task<AppActionResult> AddImageProductBefore(ImageProductBeforeDTO dto);
+
+
     }
 }

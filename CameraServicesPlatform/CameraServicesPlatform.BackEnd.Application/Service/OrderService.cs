@@ -1801,5 +1801,84 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return filePath; 
         }
+
+        public async Task<AppActionResult> AddImageProductAfter(ImageProductAfterDTO dto)
+        {
+            IFirebaseService? firebaseService = Resolve<IFirebaseService>();
+            AppActionResult result = new();
+            try
+            {
+
+                if (!Guid.TryParse(dto.OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order == null)
+                {
+                    result = BuildAppActionResultError(result, "Đơn hàng không tồn tại!");
+                    return result;
+                }
+
+                string? ImageUrl = null;
+                if (dto.Img != null)
+                {
+                    string PathName = SD.FirebasePathName.AFTER_IMAGE + $"{dto.OrderID}_after.jpg";
+                    AppActionResult frontUpload = await firebaseService.UploadFileToFirebase(dto.Img, PathName);
+                    ImageUrl = frontUpload?.Result?.ToString();
+                }
+
+                result.Result = ImageUrl;
+                result.IsSuccess = true;
+                
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> AddImageProductBefore(ImageProductBeforeDTO dto)
+        {
+            IFirebaseService? firebaseService = Resolve<IFirebaseService>();
+            AppActionResult result = new();
+            try
+            {
+
+                if (!Guid.TryParse(dto.OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order == null)
+                {
+                    result = BuildAppActionResultError(result, "Đơn hàng không tồn tại!");
+                    return result;
+                }
+
+                string? ImageUrl = null;
+
+                if (dto.Img != null)
+                {
+                    string PathName = SD.FirebasePathName.BEFORE_IMAGE + $"{dto.OrderID}_.jpg";
+                    AppActionResult frontUpload = await firebaseService.UploadFileToFirebase(dto.Img, PathName);
+                    ImageUrl = frontUpload?.Result?.ToString();
+                }
+
+                result.Result = ImageUrl;
+                result.IsSuccess = true;
+
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
     }
 }

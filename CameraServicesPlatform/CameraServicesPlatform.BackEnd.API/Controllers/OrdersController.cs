@@ -90,6 +90,34 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
+        [HttpPost("add-img-product-after")]
+        public async Task<IActionResult> AddImageProductAfter(ImageProductAfterDTO request)
+        {
+            try
+            {
+                var response = await _orderService.AddImageProductAfter(request);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("add-img-product-after")]
+        public async Task<IActionResult> AddImageProductBefore(ImageProductBeforeDTO request)
+        {
+            try
+            {
+                var response = await _orderService.AddImageProductBefore(request);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("create-order-rent-with-payment")]
         public async Task<IActionResult> CreateOrderRentWithPayment(CreateOrderRentRequest request)
         {

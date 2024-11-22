@@ -52,9 +52,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 var contract = new Contract
                 {
-                    OrderID = NOrderID,
-                    ContractTerms = request.ContractTerms,
-                    PenaltyPolicy = request.PenaltyPolicy,
+                    OrderID = NOrderID
                 };
 
                 await _contractRepository.Insert(contract);
@@ -92,8 +90,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                existingContract.ContractTerms = request.ContractTerms;
-                existingContract.PenaltyPolicy = request.PenaltyPolicy;
                 existingContract.UpdatedAt = DateTime.UtcNow; 
 
                 await _contractRepository.Update(existingContract);
@@ -174,6 +170,49 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> GetContractByOrderID(string orderID, int pageIndex, int pageSize)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(orderID, out Guid GOrderID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var contracts = await _contractRepository.GetAllDataByExpression(
+                    filter: x => x.OrderID == GOrderID,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize
+                );
+
+                if(contracts == null)
+                {
+                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, "Không tìm thấy hợp đồng");
+                }
+
+                var contractResponses = contracts.Items.Select(contract =>
+                {
+                    var contractResponse = _mapper.Map<ContractResponse>(contract);
+                    contractResponse.ContractID = contract.ContractID.ToString();
+                    return contractResponse;
+                }).ToList();
+                var pagedResult = new PagedResult<ContractResponse>
+                {
+                    Items = contractResponses
+                };
+
+                result.IsSuccess = true;
+                result.Result = pagedResult;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
         public async Task<AppActionResult> GetAllContracts(int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
@@ -184,6 +223,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageNumber: pageIndex,
                     pageSize: pageSize
                 );
+
+                if (contracts == null)
+                {
+                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, "Không tìm thấy hợp đồng");
+                }
 
                 var contractResponses = contracts.Items.Select(contract =>
                 {

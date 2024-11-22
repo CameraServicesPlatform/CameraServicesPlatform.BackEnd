@@ -25,9 +25,9 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 
         public string? ProductDescription { get; set; }
 
-        public double? PriceRent { get; set; }
-
         public double? PriceBuy { get; set; }
+        public double? DepositProduct { get; set; }
+
         public double? PricePerHour { get; set; }
 
 

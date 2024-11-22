@@ -21,16 +21,64 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             _transactionService = transactionService;
         }
 
-        [HttpPost("create-transaction")]
-        public async Task<IActionResult> CreateTransaction(PaymentInformationRequest voucherResponse)
+        /*[HttpPost("create-transaction")]
+        public async Task<IActionResult> CreateTransaction(PaymentInformationRequest paymentInformationRequest)
         {
-            return Ok(await _paymentGatewayService.CreatePaymentUrlVnpay(voucherResponse, HttpContext));
+            return Ok(await _paymentGatewayService.CreatePaymentUrlVnpay(paymentInformationRequest, HttpContext));
+        }*/
+
+        [HttpGet("get-all-transaction")]
+        public async Task<AppActionResult> GetAllTransaction(int pageIndex = 1, int pageSize = 10)
+        {
+            return await _transactionService.GetAllTransaction(pageIndex, pageSize);
+        }
+
+        [HttpGet("get-transaction-by-id")]
+        public async Task<AppActionResult> GetTransactionById(string id, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _transactionService.GetTransactionById(id, pageIndex, pageSize);
+        }
+        
+        
+        [HttpGet("get-transaction-by-supplier-id")]
+        public async Task<AppActionResult> GetTransactionBySupplierId(string id, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _transactionService.GetTransactionBySupplierId(id, pageIndex, pageSize);
+        }
+
+        [HttpPost("create-supplier-or-member-payment")]
+        public async Task<IActionResult> CreateSupplierOrMemberPayment(SupplierPaymentAgainDto supplierResponse)
+        {
+            return Ok(await _transactionService.CreateSupplierOrMemberPayment(supplierResponse, HttpContext));
+        }
+
+        [HttpPost("create-staff-refund-member")]
+        public async Task<IActionResult> CreateStaffRefundMember(StaffRefundDto supplierResponse)
+        {
+            return Ok(await _transactionService.CreateStaffRefund(supplierResponse, HttpContext));
+        }
+
+        [HttpPost("create-staff-refund-member-purchuse")]
+        public async Task<IActionResult> CreateStaffRefundMemberPurchuse(string orderId)
+        {
+            return Ok(await _transactionService.CreateStaffRefundPurchuse(orderId, HttpContext));
+        }
+
+        /*[HttpPost("create-member-refund")]//member rút tìn từ ví ra tìn mặt
+        public async Task<IActionResult> CreateMemberRefund(string orderId)
+        {
+            return Ok(await _transactionService.CreateMemberRefund(orderId, HttpContext));
+        }
+*/
+        [HttpPost("create-supplier-payment-purchuse/{orderId}")]
+        public async Task<IActionResult> CreateSupplierPaymentPurchuse(string orderId)
+        {
+            return Ok(await _transactionService.CreateSupplierPaymentPurchuse(orderId, HttpContext));
         }
 
         [HttpGet("payment-callback")]
         public async Task<IActionResult> PaymentCallBack()
         {
-            //VNPayResponseDto response = await _paymentGatewayService.PaymentExcute(Request.Query);
             string amount = Request.Query["vnp_Amount"];
             string bankCode = Request.Query["vnp_BankCode"];
             string bankTranNo = Request.Query["vnp_BankTranNo"];
@@ -64,11 +112,14 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             // Chuyển đổi Dictionary sang IQueryCollection
             IQueryCollection queryParams = new QueryCollection(dictionary);
             VNPayResponseDto response = await _paymentGatewayService.PaymentExcute(queryParams);
+
             if(responseCode == "00") 
             {
-                return Ok("Thanh toán VNPay thành công");
+                return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={response.OrderDescription}&vnp_TxnRef={txnRef}");
+
             }
-            return Ok("Thanh toán VNPay thất bại"); // Success response
+            return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={orderInfo}&vnp_TxnRef={txnRef}");
+        
         }
 
 

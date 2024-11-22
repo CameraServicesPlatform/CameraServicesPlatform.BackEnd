@@ -55,7 +55,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpDelete("delete-rating-by-id")]
+        [HttpPut("delete-rating-by-id")]
         public async Task<IActionResult> DeleteRating(string ratingId)
         {
             try

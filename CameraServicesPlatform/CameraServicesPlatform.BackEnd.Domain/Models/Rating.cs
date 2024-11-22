@@ -17,10 +17,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string AccountID { get; set; }
 
         public Account Account { get; set; }
-
         public int RatingValue { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
         public string ReviewComment { get; set; }
         public bool IsDisable { get; set; }
 

@@ -14,9 +14,9 @@ public class Contract
     public Guid ContractTemplateId { get; set; }
     [ForeignKey("ContractTemplateId")]
     public ContractTemplate ContractTemplate { get; set; }
-
     public string ContractTerms { get; set; }
+    public string TemplateDetails { get; set; }
     public string PenaltyPolicy { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } 
+    public DateTime UpdatedAt { get; set; } 
 }

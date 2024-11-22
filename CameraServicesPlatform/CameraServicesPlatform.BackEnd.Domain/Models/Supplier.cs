@@ -27,7 +27,6 @@ public class Supplier
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public double AccountBalance { get; set; }
     public string? Img { get; set; } = null!;
  
     public Boolean IsDisable { get; set; }

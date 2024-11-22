@@ -20,6 +20,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public bool IsAdmin { get; set; }
-        public string Img { get; set; } = null!;
+        public string? Img { get; set; } = null!;
     }
 }

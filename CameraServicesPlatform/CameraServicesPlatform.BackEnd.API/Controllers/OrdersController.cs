@@ -16,12 +16,10 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
-
         public OrdersController(IOrderService orderService)
         {
             _orderService = orderService;
         }
-
         [HttpGet("get-all-order")]
         public async Task<AppActionResult> GetAllOrder(int pageIndex = 1, int pageSize = 10)
         {
@@ -50,6 +48,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         public async Task<AppActionResult> CountProductRentals(string productId, int pageIndex = 1, int pageSize = 10)
         {
             return await _orderService.CountProductRentals(productId, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-order-by-order-id")]
+        public async Task<AppActionResult> GetOrderByOrderID(string orderID)
+        {
+            return await _orderService.GetOrderByOrderID(orderID);
         }
 
         [HttpGet("get-order-of-account")]
@@ -85,6 +89,49 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("add-img-product-after")]
+        public async Task<IActionResult> AddImageProductAfter(ImageProductAfterDTO request)
+        {
+            try
+            {
+                var response = await _orderService.AddImageProductAfter(request);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("add-img-product-after")]
+        public async Task<IActionResult> AddImageProductBefore(ImageProductBeforeDTO request)
+        {
+            try
+            {
+                var response = await _orderService.AddImageProductBefore(request);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("create-order-rent-with-payment")]
+        public async Task<IActionResult> CreateOrderRentWithPayment(CreateOrderRentRequest request)
+        {
+            try
+            {
+                var response = await _orderService.CreateOrderRentWithPayment(request, HttpContext);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("create-order-rent")]
         public async Task<IActionResult> CreateOrderRent(CreateOrderRentRequest request)
         {
@@ -122,6 +169,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.UpdateOrderStatusApprovedBySupplier(orderId);
         }
+
+        [HttpPut("update-order-status-placed/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderStatusPlaced(string orderId)
+        {
+            return await _orderService.UpdateOrderStatusPlaced(orderId);
+        }
+
         [HttpPut("update-order-status-payment/{orderId}")]
         public async Task<AppActionResult> UpdateOrderStatusPaymentBySupplier(string orderId)
         {

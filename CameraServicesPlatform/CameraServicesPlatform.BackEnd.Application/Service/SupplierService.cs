@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Data;
@@ -211,7 +212,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     BlockedAt = null,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
-                    AccountBalance = supplierResponse.AccountBalance,
+                    //AccountBalance = supplierResponse.AccountBalance,
                 };
 
                 await listSupplier.Insert(supplier);
@@ -248,5 +249,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        
     }
 }

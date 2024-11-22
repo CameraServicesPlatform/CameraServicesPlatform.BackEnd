@@ -18,10 +18,13 @@ public class ProductUpdateResponseDto
         public string? CategoryID { get; set; }
         public string ProductName { get; set; }
         public string? ProductDescription { get; set; }
-        public double? PriceRent { get; set; }
         public double? PriceBuy { get; set; }
         public BrandEnum? Brand { get; set; }
+
         public string Quality { get; set; }
         public ProductStatusEnum Status { get; set; }
-        public IFormFile? File { get; set; } // Add this property
-    }}
+        public IFormFile? File { get; set; }
+        public List<string> listProductSpecification { get; set; } = new List<string>();
+
+    }
+}

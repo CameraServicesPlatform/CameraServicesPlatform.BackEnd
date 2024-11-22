@@ -22,6 +22,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 
         public string? ProductDescription { get; set; }
         public string Quality { get; set; }
+        public double? DepositProduct { get; set; }
 
         public double? PricePerHour { get; set; }
 

@@ -76,9 +76,15 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-contracts")]
-        public async Task<AppActionResult> GetAllContracts(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllContracts(int pageIndex, int pageSize)
         {
             return await _contractService.GetAllContracts(pageIndex, pageSize);
+        }
+
+        [HttpGet("get-all-contracts-by-order-id")]
+        public async Task<AppActionResult> GetContractByOrderID(string orderID, int pageIndex, int pageSize)
+        {
+            return await _contractService.GetContractByOrderID(orderID, pageIndex, pageSize);
         }
     }
 }

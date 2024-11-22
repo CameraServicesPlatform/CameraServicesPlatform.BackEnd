@@ -69,7 +69,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     OrderDetailsID = orderd.OrderDetailsID.ToString(),
                     ProductName = orderd.Product.ProductName,
                     orderd.Discount,
-                    orderd.RentalPeriod,
+                    orderd.PeriodRental,
                     orderd.ProductPrice,
                     orderd.ProductPriceTotal,
                     orderd.ProductQuality,

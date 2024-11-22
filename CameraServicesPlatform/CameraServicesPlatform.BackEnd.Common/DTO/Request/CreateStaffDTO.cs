@@ -24,6 +24,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 
          public bool IsAdmin { get; set; }
 
-         public IFormFile Img { get; set; }
+         public IFormFile? Img { get; set; }
     }
 }

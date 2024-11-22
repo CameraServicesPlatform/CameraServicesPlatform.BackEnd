@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
+using static QRCoder.PayloadGenerator;
 using Utility = CameraServicesPlatform.BackEnd.Common.Utils.Utility;
 
 
@@ -93,6 +94,24 @@ public class AccountService : GenericBackendService, IAccountService
             {
                 IsSuccess = true,
                 Result = supplier.SupplierID
+            };
+    }
+
+    public async Task<AppActionResult> GetStafIDByAccountID(string accountId)
+    {
+        Staff? staff = await _context.Staffs
+            .FirstOrDefaultAsync(s => s.AccountID == accountId);
+
+        return staff == null
+            ? new AppActionResult
+            {
+                IsSuccess = false,
+                Messages = ["Staff not found."]
+            }
+            : new AppActionResult
+            {
+                IsSuccess = true,
+                Result = staff.StaffID
             };
     }
     public async Task<AppActionResult> CreateAccountSupplier(CreateSupplierAccountDTO dto, bool isGoogle)
@@ -393,11 +412,12 @@ public class AccountService : GenericBackendService, IAccountService
                     }
                     else
                     {
-                        emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
-        TemplateMappingHelper.GetTemplateOTPEmail(
-            TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
-            user.FirstName) +
-        $"\n\nWelcome {user.FirstName}, thank you for signing up with Google!");
+                       await SendEmailGoogleLogin(user.Email, user.FirstName);
+        //                emailService!.SendEmail(user.Email, SD.SubjectMail.VERIFY_ACCOUNT,
+        //TemplateMappingHelper.GetTemplateOTPEmail(
+        //    TemplateMappingHelper.ContentEmailType.VERIFICATION_CODE, verifyCode,
+        //    user.FirstName) +
+        //$"\n\nWelcome {user.FirstName}, thank you for signing up with Google!");
                     }
                 }
                 else
@@ -418,6 +438,25 @@ public class AccountService : GenericBackendService, IAccountService
         }
 
         return result;
+    }
+
+    private async Task SendEmailGoogleLogin(string email, string firstName)
+    {
+        IEmailService? emailService = Resolve<IEmailService>();
+
+        var emailMessage =
+            $"Kính chào {firstName},<br /><br />" +
+            $"Bạn vừa đăng nhập vào hệ thống của chúng tôi bằng tài khoản google với email là: {email}.<br /><br />" +
+            "<br />Chúc bạn có những trải nghiệm tuyệt vời.<br /><br />" +
+            "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+            "Trân trọng,<br />" +
+            "Đội ngũ Camera service platform";
+
+        emailService.SendEmail(
+           email,
+           SD.SubjectMail.WELCOME,
+           emailMessage
+       );
     }
 
     public async Task<AppActionResult> AssignUserIntoStaff(string userId, string staffId)
@@ -573,14 +612,14 @@ public class AccountService : GenericBackendService, IAccountService
         }
         return result;
     }
-    private async Task<List<string>> GetRoleListByAccountId(string accountId)
+    public async Task<List<string>> GetRoleListByAccountId(string accountId)
     {
         return await _context.Set<IdentityUserRole<string>>()
             .Where(ur => ur.UserId == accountId)
             .Select(ur => ur.RoleId)
             .ToListAsync();
     }
-    private async Task<List<string>> GetRoleNameListById(List<string> roleIds)
+    public async Task<List<string>> GetRoleNameListById(List<string> roleIds)
     {
         // Fetch role names from the database based on the provided role IDs
         return await _context.Set<IdentityRole>()
@@ -716,6 +755,7 @@ public class AccountService : GenericBackendService, IAccountService
     }
     public async Task<AppActionResult> AddStaff(CreateStaffDTO dto)
     {
+        IFirebaseService? firebaseService = Resolve<IFirebaseService>();
         AppActionResult result = new();
         try
         {
@@ -734,18 +774,28 @@ public class AccountService : GenericBackendService, IAccountService
             staffAccount.IsVerified = true;
             staffAccount.VerifyCode = null;
 
+            string? ImageUrl = null;
+
+            if (dto.Img != null)
+            {
+                string frontPathName = SD.FirebasePathName.STAFF_PREFIX + $"{staffAccount.Id}.jpg";
+                AppActionResult frontUpload = await firebaseService.UploadFileToFirebase(dto.Img, frontPathName);
+                ImageUrl = frontUpload?.Result?.ToString();
+            }
+            staffAccount.Img = ImageUrl;
+
             // Upload the image and assign the URL to the Account
-            string pathName = SD.FirebasePathName.STAFF_PREFIX + staffAccount.Id; // Update prefix to STAF_PREFIX
-            AppActionResult url = await _firebaseService.UploadFileToFirebase(dto.Img, pathName);
-            if (url.IsSuccess)
-            {
-                staffAccount.Img = (string)url.Result;
-            }
-            else
-            {
-                result = BuildAppActionResultError(result, "Failed to upload staff image. Please try again.");
-                return result;
-            }
+            //string pathName = SD.FirebasePathName.STAFF_PREFIX + staffAccount.Id; // Update prefix to STAF_PREFIX
+            //AppActionResult url = await _firebaseService.UploadFileToFirebase(dto.Img, pathName);
+            //if (url.IsSuccess)
+            //{
+            //    staffAccount.Img = (string)url.Result;
+            //}
+            //else
+            //{
+            //    result = BuildAppActionResultError(result, "Failed to upload staff image. Please try again.");
+            //    return result;
+            //}
 
             // Create the user in Identity
             //IdentityResult resultCreateUser = await _userManager.CreateAsync(staffAccount, SD.DefaultAccountInformation.PASSWORD);

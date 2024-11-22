@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.IService
 {
-    public interface IDashbroardService
+    public interface IDashboardService
     {
         Task<List<ProductStatisticsDto>> GetSupplierProductStatisticsAsync(string supplierId);
         Task<List<MonthlyOrderCostDto>> GetMonthlyOrderCostStatisticsAsync(DateTime startDate, DateTime endDate);

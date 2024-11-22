@@ -1,6 +1,7 @@
 ﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Category;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public string ProductName { get; set; }
 
         public string? ProductDescription { get; set; }
+        public double? DepositProduct { get; set; }
+
 
         public double? PricePerHour { get; set; }
 
@@ -35,6 +38,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public string Quality { get; set; }
 
         public ProductStatusEnum Status { get; set; }
-        
+
+        public IFormFile? File { get; set; }
+        public List<string> listProductSpecification { get; set; } = new List<string>();
     }
 }

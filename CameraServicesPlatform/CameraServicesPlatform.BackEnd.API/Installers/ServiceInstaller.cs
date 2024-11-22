@@ -5,6 +5,7 @@ using CameraServicesPlatform.BackEnd.Application.Service;
 using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Infrastructure.Repositories;
 using CameraServicesPlatform.BackEnd.Infrastructure.UnitOfWork;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 
 namespace CameraServicesPlatform.BackEnd.API.Installers;
@@ -47,13 +48,11 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IFirebaseService, FirebaseService>();
         services.AddScoped<IStaffService, StaffService>();
         services.AddScoped<IDeliveriesMethodService, DeliveriesMethodService>();
-        services.AddScoped<IDashbroardService, DashbroardService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IPaymentGatewayService, PaymentGatewayService>();
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<ITransactionService, TransactionService>();
-
-
-
+        services.AddScoped<IHistoryTransactionService, HistoryTransactionService>();
     }
 
 }

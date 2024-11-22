@@ -9,7 +9,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
     public interface IOrderService
     {
         Task<AppActionResult> CreateOrderBuy(CreateOrderBuyRequest request);
-        Task<OrderResponse> CreateOrderRent(CreateOrderRentRequest request);
+        Task<AppActionResult> CreateOrderRent(CreateOrderRentRequest request);
         Task<AppActionResult> CreateOrderWithPayment(CreateOrderBuyRequest request, HttpContext context);
         Task<AppActionResult> GetOrderByOrderType(OrderType orderType, int pageIndex, int pageSize);
         Task<AppActionResult> GetOrderOfSupplier(string SupplierID, int pageIndex, int pageSize);
@@ -28,6 +28,14 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> AcceptCancelOrder(string OrderID);
 
         Task<AppActionResult> GetOrderByOrderStatus(OrderStatus orderStatus, int pageIndex, int pageSize);
+        Task<AppActionResult> GetOrderByOrderID(string OrderID);
+
+        Task<AppActionResult> CreateOrderRentWithPayment(CreateOrderRentRequest request, HttpContext context);
+        Task<AppActionResult> UpdateOrderStatusPlaced(string OrderID);
+
+        Task<AppActionResult> AddImageProductAfter(ImageProductAfterDTO dto);
+        Task<AppActionResult> AddImageProductBefore(ImageProductBeforeDTO dto);
+
 
     }
 }

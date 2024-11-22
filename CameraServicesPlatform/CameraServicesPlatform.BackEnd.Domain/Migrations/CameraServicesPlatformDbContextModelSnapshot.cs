@@ -30,6 +30,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<double?>("AccountBalance")
+                        .HasColumnType("float");
+
                     b.Property<string>("AccountHolder")
                         .HasColumnType("nvarchar(max)");
 
@@ -219,6 +222,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("ProductID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("TemplateDetails")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -234,6 +240,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.HasKey("ContractTemplateId");
 
                     b.HasIndex("AccountID");
+
+                    b.HasIndex("ProductID");
 
                     b.ToTable("ContractTemplates");
                 });
@@ -274,11 +282,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("DeliveriesMethodID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("DeliveryMethod")
+                    b.Property<int?>("DeliveriesMethod")
                         .HasColumnType("int");
+
+                    b.Property<double?>("Deposit")
+                        .HasColumnType("float");
 
                     b.Property<int>("DurationUnit")
                         .HasColumnType("int");
@@ -326,8 +334,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.HasIndex("DeliveriesMethodID");
-
                     b.HasIndex("SupplierID");
 
                     b.ToTable("Orders");
@@ -345,6 +351,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid>("OrderID")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("PeriodRental")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
 
@@ -357,9 +366,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<string>("ProductQuality")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("RentalPeriod")
-                        .HasColumnType("int");
 
                     b.HasKey("OrderDetailsID");
 
@@ -782,6 +788,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("TemplateDetails")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -800,25 +810,27 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AccountID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
+                    b.Property<Guid?>("StaffID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
-
-                    b.Property<Guid>("SupplierID")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("TransactionDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("HistoryTransactionId");
-
-                    b.HasIndex("SupplierID");
 
                     b.ToTable("HistoryTransactions");
                 });
@@ -1057,6 +1069,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<double?>("DepositProduct")
+                        .HasColumnType("float");
+
                     b.Property<double?>("PriceBuy")
                         .HasColumnType("float");
 
@@ -1138,9 +1153,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid>("SupplierID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("AccountBalance")
-                        .HasColumnType("float");
 
                     b.Property<string>("AccountID")
                         .HasColumnType("nvarchar(450)");
@@ -1316,7 +1328,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Account");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Order", b =>
@@ -1325,10 +1345,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .WithMany()
                         .HasForeignKey("AccountId");
 
-                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.DeliveriesMethod", "DeliveriesMethod")
-                        .WithMany()
-                        .HasForeignKey("DeliveriesMethodID");
-
                     b.HasOne("Supplier", "Supplier")
                         .WithMany()
                         .HasForeignKey("SupplierID")
@@ -1336,8 +1352,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .IsRequired();
 
                     b.Navigation("Account");
-
-                    b.Navigation("DeliveriesMethod");
 
                     b.Navigation("Supplier");
                 });
@@ -1509,17 +1523,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Navigation("ContractTemplate");
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("HistoryTransaction", b =>
-                {
-                    b.HasOne("Supplier", "Supplier")
-                        .WithMany()
-                        .HasForeignKey("SupplierID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

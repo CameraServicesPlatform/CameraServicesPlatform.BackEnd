@@ -355,10 +355,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-                /*if(accountExist.Items[0].AccountNumber == null || accountExist.Items[0].BankName == null || accountExist.Items[0].AccountHolder == null)
+                if(accountExist.Items[0].AccountNumber == null || accountExist.Items[0].BankName == null || accountExist.Items[0].AccountHolder == null)
                 {
                     await SendUpdateBankInformation(accountExist.Items[0]);
-                }*/
+                }
+                else
+                {
                     StaffRefundMemberDto staffRefundMemberDto = new StaffRefundMemberDto
                     {
                         BankName = accountExist.Items[0].BankName,
@@ -368,6 +370,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         TotalAmount = pagedResult.Items[0].TotalAmount
                     };
                     result.Result = staffRefundMemberDto;
+                }
 
                 await Task.Delay(100);
                 await Task.Delay(100);

@@ -931,6 +931,9 @@ public class AccountService : GenericBackendService, IAccountService
                 account!.FirstName = accountRequest.FirstName;
                 account.LastName = accountRequest.LastName;
                 account.PhoneNumber = accountRequest.PhoneNumber;
+                account.BankName = accountRequest.BankName;
+                account.AccountNumber = accountRequest.AccountNumber;
+                account.AccountHolder = accountRequest.AccountHolder;
                 string imageUrlFrontOfCitizenIdentificationCard = null;
                 string imageUrlBackOfCitizenIdentificationCard = null;
                 if (accountRequest.FrontOfCitizenIdentificationCard != null || accountRequest.BackOfCitizenIdentificationCard != null)

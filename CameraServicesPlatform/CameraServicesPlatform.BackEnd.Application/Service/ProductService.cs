@@ -145,7 +145,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             ProductName = productResponse.ProductName,
             ProductDescription = productResponse.ProductDescription,
             PriceBuy = productResponse.PriceBuy,
-            PriceRent = productResponse.PriceRent,
+            PriceRent = null,
             Brand = productResponse.Brand,
             Status = productResponse.Status,
             Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
@@ -2042,7 +2042,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 }
 
                 var productNameExist = await _productRepository.GetAllDataByExpression(
-                    a => a.ProductName.Equals(productResponse.ProductName) && (a.SupplierID == productExist.SupplierID) && (!a.ProductName.Equals(productExist.ProductName)),
+                    a => a.ProductName.Equals(productResponse.ProductName),
                     1,
                     10,
                     orderBy: a => a.Supplier!.SupplierName,
@@ -2050,7 +2050,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     null
                 );
 
-                if (productNameExist.Items.Count > 0)
+                if (productNameExist.Items.Count > 1)
                 {
                     result = BuildAppActionResultError(result, $"Tên Sản phẩm đã tồn tại shop");
                     return result;

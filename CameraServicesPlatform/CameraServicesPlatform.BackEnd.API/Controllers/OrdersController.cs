@@ -176,6 +176,30 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _orderService.UpdateOrderStatusPlaced(orderId);
         }
 
+        [HttpPut("update-order-status-pending-refund/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderPendingRefund(string orderId)
+        {
+            return await _orderService.UpdateOrderPendingRefund(orderId);
+        }
+
+        [HttpPut("update-order-status-refund/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderRefund(string orderId)
+        {
+            return await _orderService.UpdateOrderRefund(orderId);
+        }
+
+        [HttpPut("update-order-status-deposit-refund/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderDepositReturn(string orderId)
+        {
+            return await _orderService.UpdateOrderDepositReturn(orderId);
+        }
+
+        [HttpPut("update-order-just-status-completed/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderCompleted(string orderId)
+        {
+            return await _orderService.UpdateOrderFinalCompleted(orderId);
+        }
+
         [HttpPut("update-order-status-payment/{orderId}")]
         public async Task<AppActionResult> UpdateOrderStatusPaymentBySupplier(string orderId)
         {

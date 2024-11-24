@@ -1179,6 +1179,137 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> UpdateOrderPendingRefund(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.PendingRefund;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateOrderRefund(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.Refund;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateOrderDepositReturn(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.DepositReturn;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateOrderFinalCompleted(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.Completed;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
         public async Task<AppActionResult> UpdateOrderStatusPaymentBySupplier(string OrderID)
         {
             AppActionResult result = new AppActionResult();
@@ -1374,6 +1505,29 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var account = await _accountRepository.GetById(order.Id);
                 var orderDetail = await _orderDetailRepository.GetByExpression(x => x.OrderID == OrderUpdateId);
                 double totalOrderPrice = (double)order.TotalAmount;
+
+                if (order.OrderType == OrderType.Rental)
+                {
+                    if (orderDetail != null)
+                    {
+                        var product = await _productRepository.GetByExpression(x => x.ProductID == orderDetail.ProductID);
+                        product.Status = ProductStatusEnum.AvailableRent;
+                        _productRepository.Update(product);
+                        await Task.Delay(100);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                }
+                else
+                {
+                    if (orderDetail != null)
+                    {
+                        var product = await _productRepository.GetByExpression(x => x.ProductID == orderDetail.ProductID);
+                        product.Status = ProductStatusEnum.AvailableSell;
+                        _productRepository.Update(product);
+                        await Task.Delay(100);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                }
 
                 await SendOrderCancelConfirmationEmailForSupplierToMember(account, account.Email, supplierAccount.Email, account.FirstName, orderDetail, totalOrderPrice);
                 await Task.Delay(100);

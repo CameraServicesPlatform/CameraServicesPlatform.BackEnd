@@ -133,12 +133,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             if (responseCode == "00")
             {
                 var encodedOrderDescription = Uri.EscapeDataString(response.OrderDescription);
-                return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={encodedOrderDescription}&vnp_TxnRef={txnRef}");
+                return Redirect($"http://14.225.212.43/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={encodedOrderDescription}&vnp_TxnRef={txnRef}");
             }
             else
             {
                 var encodedOrderInfo = Uri.EscapeDataString(orderInfo);
-                return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={encodedOrderInfo}&vnp_TxnRef={txnRef}");
+                return Redirect($"http://14.225.212.43/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={encodedOrderInfo}&vnp_TxnRef={txnRef}");
             }
         }
 

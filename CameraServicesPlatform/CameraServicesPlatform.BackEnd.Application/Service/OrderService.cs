@@ -1120,6 +1120,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
                 }
+                if (order.OrderType == OrderType.Rental) {
+                    var orderDetail = await _orderDetailRepository.GetByExpression(x => x.OrderID == OrderUpdateId);
+                    if (orderDetail != null)
+                    {
+                        var product = await _productRepository.GetByExpression(x => x.ProductID == orderDetail.ProductID);
+                        product.Status = ProductStatusEnum.AvailableRent;
+                        _productRepository.Update(product);
+                        await Task.Delay(100);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                }
                 var orderResponse = _mapper.Map<OrderResponse>(order);
                 orderResponse.AccountID = order.Id.ToString();
                 orderResponse.SupplierID = order.SupplierID.ToString();

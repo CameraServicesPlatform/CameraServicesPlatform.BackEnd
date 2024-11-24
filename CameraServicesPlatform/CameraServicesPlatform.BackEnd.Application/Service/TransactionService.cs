@@ -516,5 +516,51 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             return result;
         }
+
+        public async Task<AppActionResult> CreateStaffRefundSupplier(StaffRefundDto response, HttpContext context)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    a => a.OrderID == Guid.Parse(response.OrderID),
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                string id = pagedResult.Items[0].Id;
+                var accountExist = await _accountRepository.GetAllDataByExpression(
+                    a => a.Id == pagedResult.Items[0].Supplier.AccountID,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                
+                    StaffRefundMemberDto staffRefundMemberDto = new StaffRefundMemberDto
+                    {
+                        BankName = accountExist.Items[0].BankName,
+                        AccountNumber = accountExist.Items[0].AccountNumber,
+                        AccountHolder = accountExist.Items[0].AccountHolder,
+                        OrderId = pagedResult.Items[0].OrderID.ToString(),
+                        TotalAmount = pagedResult.Items[0].TotalAmount
+                    };
+                    
+                    result.Result = staffRefundMemberDto;
+                
+
+                await Task.Delay(100);
+                await Task.Delay(100);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Order creation failed. Error: " + ex.Message);
+            }
+            return result;
+        }
     }
 }

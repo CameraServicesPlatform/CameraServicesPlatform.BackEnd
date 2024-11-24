@@ -10,7 +10,8 @@ public enum OrderStatus
     Canceling,
     Cancelled,
     Payment,
-    PendingRefurn,
-    Refurn
+    PendingRefund,
+    Refund,
+    DepositReturn
 }
 

@@ -51,11 +51,17 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return Ok(await _transactionService.CreateSupplierOrMemberPayment(supplierResponse, HttpContext));
         }
-
-        [HttpPost("create-staff-refund-member")]
-        public async Task<IActionResult> CreateStaffRefundMember(StaffRefundDto supplierResponse)
+        //
+        [HttpPost("create-staff-refund-return-detail")]
+        public async Task<IActionResult> CreateStaffRefundReturnDetail(StaffRefundDto supplierResponse)
         {
-            return Ok(await _transactionService.CreateStaffRefundMember(supplierResponse, HttpContext));
+            return Ok(await _transactionService.CreateStaffRefundReturnDetail(supplierResponse, HttpContext));
+        }
+
+        [HttpPost("create-staff-refund-deposit")]
+        public async Task<IActionResult> CreateStaffRefundDeposit(StaffRefundDto supplierResponse)
+        {
+            return Ok(await _transactionService.CreateStaffRefundDeposit(supplierResponse, HttpContext));
         }
 
         [HttpPost("create-staff-refund-member-purchuse")]

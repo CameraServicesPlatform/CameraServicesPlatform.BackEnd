@@ -332,7 +332,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> CreateStaffRefundMember(StaffRefundDto response, HttpContext context)
+        public async Task<AppActionResult> CreateStaffRefundReturnDetail(StaffRefundDto response, HttpContext context)
         {
             var result = new AppActionResult();
             try
@@ -369,6 +369,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         OrderId = pagedResult.Items[0].OrderID.ToString(),
                         TotalAmount = pagedResult.Items[0].TotalAmount
                     };
+                    pagedResult.Items[0].OrderStatus = OrderStatus.Refund;
+                    _orderRepository.Update(pagedResult.Items[0]);
+                    await _unitOfWork.SaveChangesAsync();
                     result.Result = staffRefundMemberDto;
                 }
 
@@ -387,8 +390,28 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             var emailMessage =
                 $"Kính chào {account.LastName} {account.FirstName},<br /><br />" +
-                "Quý khách vui lòng cập nhật thông tin tài khoản ngân hàng trên app Camera service platform <br /><br />" +
-                "Camera service platform sẽ lấy thông tin quý khách cung cấp để tiến hành hoàn tiền lại cho đơn hàng quý khách đã hủy <br /><br />" +
+                "Quý khách vui lòng cập nhật thông tin tài khoản ngân hàng trên app Camera service platform.<br /><br />" +
+                "Camera service platform sẽ lấy thông tin quý khách cung cấp để tiến hành hoàn tiền lại cho đơn hàng quý khách đã hủy. <br /><br />" +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Send the email asynchronously and wait for completion
+            emailService.SendEmail(
+               account.Email,
+               SD.SubjectMail.UPDATE_BANK_INFORMATION,
+               emailMessage
+           );
+        }
+
+        private async Task SendUpdateBankInformation1(Account account)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            var emailMessage =
+                $"Kính chào {account.LastName} {account.FirstName},<br /><br />" +
+                "Quý khách vui lòng cập nhật thông tin tài khoản ngân hàng trên app Camera service platform. <br /><br />" +
+                "Camera service platform sẽ lấy thông tin quý khách cung cấp để tiến hành hoàn trả lại tiền cọc cho đơn hàng đã thuê. <br /><br />" +
                 "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
                 "Trân trọng,<br />" +
                 "Đội ngũ Camera service platform";
@@ -437,6 +460,59 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> CreateStaffRefundDeposit(StaffRefundDto response, HttpContext context)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    a => a.OrderID == Guid.Parse(response.OrderID),
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                string id = pagedResult.Items[0].Id;
+                var accountExist = await _accountRepository.GetAllDataByExpression(
+                    a => a.Id == pagedResult.Items[0].Id,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                if (accountExist.Items[0].AccountNumber == null || accountExist.Items[0].BankName == null || accountExist.Items[0].AccountHolder == null)
+                {
+                    await SendUpdateBankInformation1(accountExist.Items[0]);
+                }
+                else
+                {
+                    StaffRefundMemberDto staffRefundMemberDto = new StaffRefundMemberDto
+                    {
+                        BankName = accountExist.Items[0].BankName,
+                        AccountNumber = accountExist.Items[0].AccountNumber,
+                        AccountHolder = accountExist.Items[0].AccountHolder,
+                        OrderId = pagedResult.Items[0].OrderID.ToString(),
+                        TotalAmount = pagedResult.Items[0].TotalAmount
+                    };
+                    pagedResult.Items[0].OrderStatus = OrderStatus.Completed;
+                    _orderRepository.Update(pagedResult.Items[0]);
+                    await _unitOfWork.SaveChangesAsync();
+                    result.Result = staffRefundMemberDto;
+                }
+
+                await Task.Delay(100);
+                await Task.Delay(100);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Order creation failed. Error: " + ex.Message);
             }
             return result;
         }

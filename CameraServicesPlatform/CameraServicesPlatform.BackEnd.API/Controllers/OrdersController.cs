@@ -104,7 +104,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpPost("add-img-product-after")]
+        [HttpPost("add-img-product-before")]
         public async Task<IActionResult> AddImageProductBefore(ImageProductBeforeDTO request)
         {
             try

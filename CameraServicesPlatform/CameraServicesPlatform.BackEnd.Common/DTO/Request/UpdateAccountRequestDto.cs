@@ -14,4 +14,9 @@ public class UpdateAccountRequestDTO
     public Gender Gender { get; set; }
     public IFormFile? FrontOfCitizenIdentificationCard { get; set; }
     public IFormFile? BackOfCitizenIdentificationCard { get; set; }
+    public string? BankName { get; set; }
+
+    public string? AccountNumber { get; set; }
+
+    public string? AccountHolder { get; set; }
 }

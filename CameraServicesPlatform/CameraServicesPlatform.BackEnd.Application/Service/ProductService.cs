@@ -20,6 +20,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using static CameraServicesPlatform.BackEnd.Application.Service.OrderService;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -150,9 +151,9 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             Status = productResponse.Status,
             Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
             Rating = 0,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
-        };
+            CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+            UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
+            };
 
         // Firebase Image Upload
         var firebaseService = Resolve<IFirebaseService>();
@@ -290,8 +291,8 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     Status = ProductStatusEnum.AvailableRent,
                     Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
                     Rating = 0,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
                 };
                 RentalPrice newRentalPrice = new RentalPrice
                 {
@@ -301,8 +302,8 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     PricePerDay = productResponse.PricePerDay,
                     PricePerWeek = productResponse.PricePerWeek,
                     PricePerMonth = productResponse.PricePerMonth,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
                 };
                 await _rentalPriceRepository.Insert(newRentalPrice);
                 // Firebase Image Upload
@@ -382,7 +383,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 }
 
                 var productNameExist = await _productRepository.GetAllDataByExpression(
-                    a => a.ProductName.Equals(productResponse.ProductName) && (a.SupplierID ==productExist.SupplierID) &&(!a.ProductName.Equals(productExist.ProductName)),
+                    a => a.ProductName.Equals(productResponse.ProductName),
                     1,
                     10,
                     orderBy: a => a.Supplier!.SupplierName,
@@ -390,7 +391,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     null
                 );
 
-                if (productNameExist.Items.Count > 0 )
+                if (productNameExist.Items.Count > 1 )
                 {
                     result = BuildAppActionResultError(result, $"Tên Sản phẩm đã tồn tại shop");
                     return result;
@@ -405,7 +406,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 productExist.Brand = productResponse.Brand;
                 productExist.Quality = productResponse.Quality;
                 productExist.Status = productResponse.Status;
-                productExist.UpdatedAt = DateTime.Now;
+                productExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
 
                 await productRepository.Update(productExist);
 
@@ -2065,7 +2066,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 productExist.Brand = productResponse.Brand;
                 productExist.Quality = productResponse.Quality;
                 productExist.Status = productResponse.Status;
-                productExist.UpdatedAt = DateTime.UtcNow;
+                productExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 productExist.DepositProduct = productExist.DepositProduct;
                 var rentalPriceExist = await _rentalPriceRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),

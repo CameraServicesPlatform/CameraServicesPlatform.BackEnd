@@ -34,6 +34,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         IRepository<Domain.Models.Order> _orderRepository;
         IRepository<Account> _accountRepository;
         IRepository<HistoryTransaction> _historyTransactionRepository;
+        IRepository<Supplier> _supplierRepository;
+
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -42,6 +44,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IUnitOfWork unitOfWork,
             IRepository<Account> accountRepository,
             IRepository<Payment> paymentRepository,
+            IRepository<Supplier> supplierRepository,
             IRepository<Domain.Models.Order> orderRepository,
             IRepository<HistoryTransaction> historyTransactionRepository,
             IMapper mapper,
@@ -49,6 +52,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         ) : base(serviceProvider)
         {
             _repository = repository;
+            _supplierRepository = supplierRepository;
             _accountRepository = accountRepository;
             _paymentRepository = paymentRepository;
             _orderRepository = orderRepository;
@@ -531,9 +535,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-                string id = pagedResult.Items[0].Id;
+                var supplierExist = await _supplierRepository.GetAllDataByExpression(
+                    a => a.SupplierID == pagedResult.Items[0].SupplierID,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
                 var accountExist = await _accountRepository.GetAllDataByExpression(
-                    a => a.Id == pagedResult.Items[0].Supplier.AccountID,
+                    a => a.Id == supplierExist.Items[0].AccountID,
                     1,
                     10,
                     null,

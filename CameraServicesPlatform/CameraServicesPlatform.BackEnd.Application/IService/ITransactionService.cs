@@ -11,8 +11,6 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
 {
     public interface ITransactionService
     {
-        
-   
         Task<AppActionResult> GetAllTransaction(int pageIndex, int pageSize);
         Task<AppActionResult> GetTransactionById(string id, int pageIndex, int pageSize); 
         Task<AppActionResult> GetTransactionBySupplierId(string id, int pageIndex, int pageSize); 
@@ -22,6 +20,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> CreateStaffRefundDeposit(StaffRefundDto supplierResponse, HttpContext context);
         Task<AppActionResult> CreateStaffRefundPurchuse(string historyTransaction, HttpContext context);
         Task<AppActionResult> CreateSupplierPaymentPurchuse(string historyTransaction, HttpContext context);
+       // Task<AppActionResult> AddImagePayment(ImageProductAfterDTO dto);
 
     }
 }

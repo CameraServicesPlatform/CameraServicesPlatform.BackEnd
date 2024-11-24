@@ -36,6 +36,11 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> AddImageProductAfter(ImageProductAfterDTO dto);
         Task<AppActionResult> AddImageProductBefore(ImageProductBeforeDTO dto);
 
+        Task<AppActionResult> UpdateOrderPendingRefund(string OrderID);
+        Task<AppActionResult> UpdateOrderRefund(string OrderID);
+        Task<AppActionResult> UpdateOrderDepositReturn(string OrderID);
+        Task<AppActionResult> UpdateOrderFinalCompleted(string OrderID);
+
 
     }
 }

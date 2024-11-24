@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
@@ -33,7 +34,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         IRepository<Domain.Models.Order> _orderRepository;
         IRepository<Account> _accountRepository;
         IRepository<HistoryTransaction> _historyTransactionRepository;
-
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -332,7 +332,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> CreateStaffRefund(StaffRefundDto response, HttpContext context)
+        public async Task<AppActionResult> CreateStaffRefundMember(StaffRefundDto response, HttpContext context)
         {
             var result = new AppActionResult();
             try
@@ -346,12 +346,31 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-                response.Amount = pagedResult.Items[0].TotalAmount;
-                response.AccountId = pagedResult.Items[0].Id;
-                var createPayment = await paymentGatewayService.CreateStaffRefund(response, context);
+                string id = pagedResult.Items[0].Id;
+                var accountExist = await _accountRepository.GetAllDataByExpression(
+                    a => a.Id == pagedResult.Items[0].Id,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                /*if(accountExist.Items[0].AccountNumber == null || accountExist.Items[0].BankName == null || accountExist.Items[0].AccountHolder == null)
+                {
+                    await SendUpdateBankInformation(accountExist.Items[0]);
+                }*/
+                    StaffRefundMemberDto staffRefundMemberDto = new StaffRefundMemberDto
+                    {
+                        BankName = accountExist.Items[0].BankName,
+                        AccountNumber = accountExist.Items[0].AccountNumber,
+                        AccountHolder = accountExist.Items[0].AccountHolder,
+                        OrderId = pagedResult.Items[0].OrderID.ToString(),
+                        TotalAmount = pagedResult.Items[0].TotalAmount
+                    };
+                    result.Result = staffRefundMemberDto;
+
                 await Task.Delay(100);
                 await Task.Delay(100);
-                result.Result = createPayment;
             }
             catch (Exception ex)
             {
@@ -359,7 +378,25 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             return result;
         }
+        private async Task SendUpdateBankInformation(Account account)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
 
+            var emailMessage =
+                $"Kính chào {account.LastName} {account.FirstName},<br /><br />" +
+                "Quý khách vui lòng cập nhật thông tin tài khoản ngân hàng trên app Camera service platform <br /><br />" +
+                "Camera service platform sẽ lấy thông tin quý khách cung cấp để tiến hành hoàn tiền lại cho đơn hàng quý khách đã hủy <br /><br />" +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Send the email asynchronously and wait for completion
+            emailService.SendEmail(
+               account.Email,
+               SD.SubjectMail.UPDATE_BANK_INFORMATION,
+               emailMessage
+           );
+        }
         public async Task<AppActionResult> CreateStaffRefundPurchuse(string historyTransaction, HttpContext context)
         {
             var result = new AppActionResult();
@@ -378,8 +415,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         var staffRefundDto = new StaffRefundDto
                         {
                             StaffId = historyTransactionExist.StaffID.ToString(),
-                            AccountId = historyTransactionExist.AccountID.ToString(),
-                            Amount = historyTransactionExist.Price,
+                            
                             OrderID = historyTransactionExist.HistoryTransactionId.ToString(),
                         };
                         var createPayment = await paymentGatewayService!.CreateStaffRefund(staffRefundDto, context);

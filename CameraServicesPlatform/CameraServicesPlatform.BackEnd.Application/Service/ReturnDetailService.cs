@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using System;
@@ -48,12 +49,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "Không tìm thấy có đơn hàng nào!");
                     return result;
                 }
+                hasOrder.OrderStatus = OrderStatus.PendingRefurn;
+                await _orderRepository.Update(hasOrder);
+                await _unitOfWork.SaveChangesAsync();
+
 
                 var returnDetail = _mapper.Map<ReturnDetail>(request);
                 returnDetail.PenaltyApplied = request.PenaltyApplied;
                 returnDetail.OrderID = request.OrderID;
                 returnDetail.Condition = request.Condition;
                 returnDetail.ReturnDate = DateTime.UtcNow;
+                
 
                 await _returnDetailRepository.Insert(returnDetail);
                 await _unitOfWork.SaveChangesAsync();

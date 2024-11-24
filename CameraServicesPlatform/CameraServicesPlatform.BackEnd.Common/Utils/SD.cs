@@ -147,6 +147,7 @@ public class SD
     {
         public static string SUPPLIER_PREFIX = "supplier/";
         public static string AFTER_IMAGE = "img-after/";
+        public static string RETURN_DETAIL_IMAGE = "return-detail-img/";
         public static string BEFORE_IMAGE = "img-before/";
         public static string ACCOUNT_CARD = "cards/";
         public static string ACCOUNT_CITIZEN_IDENTIFICATION_CARD = "account-citizen-identification-cards/";

@@ -55,7 +55,16 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.GetOrderByOrderID(orderID);
         }
-
+        [HttpGet("get-image-product-after-by-order-id")]
+        public async Task<AppActionResult> GetImageProductAfter(string orderID)
+        {
+            return await _orderService.GetImageProductAfter(orderID);
+        }
+        [HttpGet("get-image-product-before-by-order-id")]
+        public async Task<AppActionResult> GetImageProductBefore(string orderID)
+        {
+            return await _orderService.GetImageProductBefore(orderID);
+        }
         [HttpGet("get-order-of-account")]
         public async Task<AppActionResult> GetOrderByAccountID(string AccountID, int pageIndex = 1, int pageSize = 10)
         {

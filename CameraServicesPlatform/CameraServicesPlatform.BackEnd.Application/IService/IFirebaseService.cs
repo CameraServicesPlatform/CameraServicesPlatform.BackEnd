@@ -13,6 +13,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> UploadFileToFirebase(IFormFile file, string pathFileName);
 
         public Task<string> GetUrlImageFromFirebase(string pathFileName);
+        Task<string> GetUrlImageAfterAndBeforeFromFirebase(string pathFileName);
 
         public Task<AppActionResult> DeleteFileFromFirebase(string pathFileName);
         //public Task<List<IFormFile>> GetFilesAsFormFilesAsync(List<string> fileUrls);

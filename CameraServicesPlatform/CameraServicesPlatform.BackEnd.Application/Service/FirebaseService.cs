@@ -85,6 +85,53 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return string.Empty;
         }
 
+        public async Task<string> GetUrlImageAfterAndBeforeFromFirebase(string pathFileName)
+        {
+            try
+            {
+                // Kiểm tra đầu vào
+                if (string.IsNullOrEmpty(pathFileName))
+                    return string.Empty;
+
+                // Lấy cấu hình Firebase Bucket từ appsettings.json
+                string bucket = _configuration["Firebase:Bucket"];
+                if (string.IsNullOrEmpty(bucket))
+                    throw new Exception("Firebase Bucket chưa được cấu hình!");
+
+                // Firebase API để lấy metadata của file
+                string api = $"https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{Uri.EscapeDataString(pathFileName)}";
+
+                using (HttpClient client = new HttpClient())
+                {
+                    HttpResponseMessage response = await client.GetAsync(api);
+
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        // Parse JSON response từ Firebase
+                        string content = await response.Content.ReadAsStringAsync();
+                        var json = JObject.Parse(content);
+
+                        // Lấy token tải file
+                        string downloadToken = json["downloadTokens"]?.ToString();
+                        if (!string.IsNullOrEmpty(downloadToken))
+                        {
+                            // Trả về URL đầy đủ
+                            return $"https://firebasestorage.googleapis.com/v0/b/{bucket}/o/{Uri.EscapeDataString(pathFileName)}?alt=media&token={downloadToken}";
+                        }
+                    }
+
+                    // Nếu không thành công, trả về chuỗi rỗng
+                    return string.Empty;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Ghi log lỗi hoặc trả về lỗi chi tiết hơn nếu cần
+                Console.WriteLine($"Lỗi khi lấy URL từ Firebase: {ex.Message}");
+                return string.Empty;
+            }
+        }
+
         public async Task<AppActionResult> UploadFileToFirebase(IFormFile file, string pathFileName)
         {
             var _result = new AppActionResult();

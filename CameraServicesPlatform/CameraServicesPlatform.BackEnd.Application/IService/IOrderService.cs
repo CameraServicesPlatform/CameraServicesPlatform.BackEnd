@@ -41,6 +41,9 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> UpdateOrderDepositReturn(string OrderID);
         Task<AppActionResult> UpdateOrderFinalCompleted(string OrderID);
 
+        Task<AppActionResult> GetImageProductAfter(string orderId);
+        Task<AppActionResult> GetImageProductBefore(string orderId);
+
 
     }
 }

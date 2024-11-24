@@ -834,7 +834,7 @@ public class AccountService : GenericBackendService, IAccountService
         {
             foreach (Account account in tourGuideAccountList)
             {
-                _emailService?.SendEmail(account.Email, $"Account information for sponsor {account.FirstName} {account.LastName} at Camera-Service-Platform",
+                _emailService?.SendEmail(account.Email, SD.SubjectMail.WELLCOME_STAFF,
                    TemplateMappingHelper.GetTemplateOTPEmail(TemplateMappingHelper.ContentEmailType.STAFF_ACCOUNT_CREATION,
                        $"Username: {account.Email} \nPassword: {SD.DefaultAccountInformation.PASSWORD}\n Vui lòng không chia sẻ thông tin tài khoản của bạn với bất kì ai", $"{account.FirstName} {account.LastName}"));
             }

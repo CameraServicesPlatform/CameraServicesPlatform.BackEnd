@@ -49,7 +49,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "Không tìm thấy có đơn hàng nào!");
                     return result;
                 }
-                hasOrder.OrderStatus = OrderStatus.PendingRefurn;
+                hasOrder.OrderStatus = OrderStatus.DepositReturn;
                 await _orderRepository.Update(hasOrder);
                 await _unitOfWork.SaveChangesAsync();
 

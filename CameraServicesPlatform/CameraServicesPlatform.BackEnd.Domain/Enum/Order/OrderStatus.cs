@@ -9,6 +9,8 @@ public enum OrderStatus
     PaymentFail,
     Canceling,
     Cancelled,
-    Payment
+    Payment,
+    PendingRefurn,
+    Refurn
 }
 

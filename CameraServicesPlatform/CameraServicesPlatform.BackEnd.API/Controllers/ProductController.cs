@@ -102,7 +102,6 @@ public class ProductController : ControllerBase
     {
         return await _productService.GetProductByCategoryId(filter, pageIndex, pageSize);
     }
-
     
     [HttpPost("create-product-buy")]
     public async Task<AppActionResult> CreateProductBuy([FromForm] ProductResponseDto listProduct)

@@ -32,6 +32,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public double? PricePerWeek { get; set; }
 
         public double? PricePerMonth { get; set; }
+        public DateTime DateOfManufacture { get; set; }
+        public double? OriginalPrice { get; set; }
 
         public BrandEnum? Brand { get; set; }
 

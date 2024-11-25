@@ -44,6 +44,9 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 
         public DateTime UpdatedAt { get; set; }
         public double? DepositProduct { get; set; }
+        public DateTime DateOfManufacture { get; set; }
+        public double? OriginalPrice { get; set; }
+        public int? CountRent { get; set; }
 
         public List<ProductImage> listImage { get; set; } = null!;
         public List<ProductVoucherResponse> listVoucher { get; set; } = null!;

@@ -21,6 +21,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> CreateStaffRefundPurchuse(string historyTransaction, HttpContext context);
         Task<AppActionResult> CreateSupplierPaymentPurchuse(string historyTransaction, HttpContext context);
         Task<AppActionResult> AddImagePayment(ImageProductAfterDTO dto);
+        Task<AppActionResult> GetImagePayment(string orderId);
 
     }
 }

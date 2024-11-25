@@ -68,7 +68,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return Ok(await _transactionService.CreateStaffRefundSupplier(supplierResponse, HttpContext));
         }
-        
+
+        [HttpPost("get-image")]
+        public async Task<IActionResult> GetImage(string orderId)
+        {
+            return Ok(await _transactionService.GetImagePayment(orderId));
+        }
+
         [HttpPost("add-image-payment")]
         public async Task<IActionResult> AddImagePayment(ImageProductAfterDTO dto)
         {

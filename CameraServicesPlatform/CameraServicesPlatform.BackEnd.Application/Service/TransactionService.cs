@@ -612,5 +612,46 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             return result;
         }
+
+        public async Task<AppActionResult> GetImagePayment(string orderId)
+        {
+            IFirebaseService? firebaseService = Resolve<IFirebaseService>();
+            AppActionResult result = new();
+
+            try
+            {
+                if (!Guid.TryParse(orderId, out Guid orderGuid))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+
+                var order = await _orderRepository.GetById(orderGuid);
+                if (order == null)
+                {
+                    result = BuildAppActionResultError(result, "Đơn hàng không tồn tại!");
+                    return result;
+                }
+
+                string pathName = SD.FirebasePathName.RETURN_DETAIL_IMAGE + $"{orderId}.jpg.png";
+
+                string? imageUrl = await firebaseService.GetUrlImageAfterAndBeforeFromFirebase(pathName);
+
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    result = BuildAppActionResultError(result, "Không tìm thấy ảnh!");
+                    return result;
+                }
+
+                result.Result = imageUrl;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
     }
 }

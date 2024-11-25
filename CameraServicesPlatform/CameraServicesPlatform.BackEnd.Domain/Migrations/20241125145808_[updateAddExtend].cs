@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class updateAddCombo : Migration
+    public partial class updateAddExtend : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -84,6 +84,22 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.CategoryID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Combos",
+                columns: table => new
+                {
+                    ComboId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ComboName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ComboPrice = table.Column<double>(type: "float", nullable: false),
+                    IsDisable = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Combos", x => x.ComboId);
                 });
 
             migrationBuilder.CreateTable(
@@ -363,6 +379,26 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ComboOfSuppliers",
+                columns: table => new
+                {
+                    ComboId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    StartTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDisable = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ComboOfSuppliers", x => x.ComboId);
+                    table.ForeignKey(
+                        name: "FK_ComboOfSuppliers_Suppliers_SupplierID",
+                        column: x => x.SupplierID,
+                        principalTable: "Suppliers",
+                        principalColumn: "SupplierID");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Orders",
                 columns: table => new
                 {
@@ -493,6 +529,31 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         column: x => x.SupplierID,
                         principalTable: "Suppliers",
                         principalColumn: "SupplierID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Extends",
+                columns: table => new
+                {
+                    ExtendId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DurationUnit = table.Column<int>(type: "int", nullable: false),
+                    DurationValue = table.Column<int>(type: "int", nullable: false),
+                    ExtendReturnDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    RentalExtendStartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TotalAmount = table.Column<double>(type: "float", nullable: true),
+                    RentalExtendEndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDisable = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Extends", x => x.ExtendId);
+                    table.ForeignKey(
+                        name: "FK_Extends_Orders_OrderID",
+                        column: x => x.OrderID,
+                        principalTable: "Orders",
+                        principalColumn: "OrderID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -913,6 +974,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ComboOfSuppliers_SupplierID",
+                table: "ComboOfSuppliers",
+                column: "SupplierID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Contracts_ContractTemplateId",
                 table: "Contracts",
                 column: "ContractTemplateId");
@@ -931,6 +997,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 name: "IX_ContractTemplates_ProductID",
                 table: "ContractTemplates",
                 column: "ProductID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Extends_OrderID",
+                table: "Extends",
+                column: "OrderID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_OrderID",
@@ -1111,10 +1182,19 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ComboOfSuppliers");
+
+            migrationBuilder.DropTable(
+                name: "Combos");
+
+            migrationBuilder.DropTable(
                 name: "Contracts");
 
             migrationBuilder.DropTable(
                 name: "DeliveriesMethod");
+
+            migrationBuilder.DropTable(
+                name: "Extends");
 
             migrationBuilder.DropTable(
                 name: "HistoryTransactions");

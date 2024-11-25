@@ -8,10 +8,11 @@ using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.Application.Service.Extension
+namespace CameraServicesPlatform.BackEnd.Application.Service
 {
     public class ComboService : GenericBackendService, IComboService
     {
@@ -38,9 +39,50 @@ namespace CameraServicesPlatform.BackEnd.Application.Service.Extension
             throw new NotImplementedException();
         }
 
-        public Task<AppActionResult> GetAllCombo(int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetAllCombo(int pageIndex, int pageSize)
         {
-            throw new NotImplementedException();
+            var result = new AppActionResult();
+
+            try
+            {
+                Expression<Func<Combo, bool>>? filter = a => a.IsDisable == true;
+                var pagedResult = await _comboRepository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                List<ComboResponseDto> listCombo = new List<ComboResponseDto>();
+
+
+                foreach (var item in pagedResult.Items)
+                {
+
+                    ComboResponseDto comboResponse = new ComboResponseDto
+                    {
+                        ComboId = item.ComboId.ToString(),
+                        ComboName = item.ComboName.ToString(),
+                        ComboPrice = item.ComboPrice,
+                        IsDisable = item.IsDisable,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt
+                        
+                    };
+                    listCombo.Add(comboResponse);
+                }
+
+                result.Result = listCombo;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
         }
 
         public Task<AppActionResult> GetComboById(string id, int pageIndex, int pageSize)

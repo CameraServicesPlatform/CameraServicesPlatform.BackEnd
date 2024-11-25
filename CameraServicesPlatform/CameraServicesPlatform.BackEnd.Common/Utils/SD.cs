@@ -94,6 +94,8 @@ public class SD
         public static string ORDER_CONFIRMATION_SUPPLIER = "[CAMERASERVICEPLATFORM] BẠN VỪA CÓ ĐƠN HÀNG";
         public static string ORDER_CONFIRMATION_CANCEL_SUPPLIER = "[CAMERASERVICEPLATFORM] CÓ ĐƠN ĐẶT ĐƠN HÀNG VỪA HỦY";
         public static string ORDER_CONFIRMATION_CANCEL_SUPPLIER_TO_MEMBER = "[CAMERASERVICEPLATFORM] ĐƠN HÀNG CỦA BẠN ĐÃ HỦY";
+        public static string WELLCOME_STAFF = "[CAMERASERVICEPLATFORM] CHÀO MỪNG BẠN ĐẾN VỚI CAMERASERVICEPLATFORM";
+
 
         public static string SIGN_CONTRACT_VERIFICATION_CODE =
             "[CAMERASERVICEPLATFORM] You are in the process of completing contract procedures".ToUpper();

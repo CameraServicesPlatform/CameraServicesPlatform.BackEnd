@@ -1721,35 +1721,23 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
-                if (OrderSupplierID != null)
+                if (OrderSupplierID == null)
                 {
-                    var pagedResult1 = await _orderRepository.GetAllDataByExpression(
+                    result = BuildAppActionResultError(result, "ID không được để tróng!");
+                    return result;
+                }
+                var pagedResult1 = await _orderRepository.GetAllDataByExpression(
                         x => x.SupplierID == OrderSupplierID,
                         pageIndex,
                         pageSize,
                         includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
 
                     );
-                    var convertedResult1 = pagedResult1.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+                var convertedResult1 = pagedResult1.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
 
-                    result.Result = convertedResult1;
-                    result.IsSuccess = true;
-                }
-
-                Expression<Func<Order, bool>>? filter = null;
-
-                var pagedResult = await _orderRepository.GetAllDataByExpression(
-                    filter: null,
-                    pageNumber: pageIndex,
-                    pageSize: pageSize,
-                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
-
-                );
-
-                var convertedResult = pagedResult.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
-
-                result.Result = convertedResult;
+                result.Result = convertedResult1;
                 result.IsSuccess = true;
+
             }
             catch (Exception ex)
             {

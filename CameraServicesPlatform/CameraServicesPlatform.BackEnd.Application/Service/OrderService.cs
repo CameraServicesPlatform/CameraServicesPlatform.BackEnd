@@ -556,7 +556,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.DeliveriesMethod = request.DeliveryMethod;
                 order.DurationValue = request.DurationValue;
                 order.DurationUnit = request.DurationUnit;
-                order.ReturnDate = request.ReturnDate;
                 order.ShippingAddress = request.ShippingAddress;
                 order.RentalStartDate = DateTimeHelper.ToVietnamTime(request.RentalStartDate ?? DateTime.UtcNow);
 
@@ -578,6 +577,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         throw new InvalidOperationException("DurationUnit is not supported.");
                 }
 
+
                 switch (order.DurationUnit)
                 {
                     case RentalDurationUnit.Hour:
@@ -595,21 +595,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     default:
                         throw new InvalidOperationException("DurationUnit is not supported.");
                 }
-                order.Deposit = request.Deposit;
-                order.TotalAmount = request.TotalAmount;
 
-                order.TotalAmount = request.TotalAmount;
-
-                var product = await _productRepository.GetById(productID);
+                var product = await _productRepository.GetByExpression(x => x.ProductID == productID);
                 if (product == null)
                 {
-                    throw new Exception("Không tìm thấy sản phẩm thuê.");
+                    throw new Exception("Không tìm thấy sản phẩm.");
                 }
 
                 if (product.Status == ProductStatusEnum.Rented)
                 {
                     throw new Exception("Sản phẫm đã được thuê");
                 }
+
                 double discount = 0;
                 if (!string.IsNullOrEmpty(request.VoucherID))
                 {
@@ -629,10 +626,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductID = productID,
                     ProductPrice = request.ProductPriceRent,
                     Discount = discount,
-                    ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
+                    ProductQuality = product.Quality,
                     ProductPriceTotal = request.TotalAmount,
                     PeriodRental = order.ReturnDate,
                 };
+
 
                 order.Deposit = product.DepositProduct;
                 order.TotalAmount = request.TotalAmount;
@@ -648,7 +646,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(200);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Cập nhật trạng thái sản phẩm thành `Rented`
                 if (Guid.TryParse(request.ProductID, out var productGuid))
                 {
                     var productEntity = await _productRepository.GetById(productGuid);
@@ -660,12 +657,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 await _unitOfWork.SaveChangesAsync();
 
-                var pagedContractTemplates = await _contractTemplateRepository.GetAllDataByExpression( 
-                    x => x.ProductID == Guid.Parse(request.ProductID), 
+                var pagedContractTemplates = await _contractTemplateRepository.GetAllDataByExpression(
+                    x => x.ProductID == Guid.Parse(request.ProductID),
                     pageNumber: 1,
-                    pageSize: int.MaxValue );
+                    pageSize: int.MaxValue);
 
-                // Kiểm tra nếu có item trong kết quả phân trang
                 if (pagedContractTemplates != null && pagedContractTemplates.Items.Any())
                 {
                     var contractOfProductContract = pagedContractTemplates.Items;
@@ -694,7 +690,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 // Xác nhận hợp đồng đã được tạo
-                var checkContract = await _contractRepository.GetAllDataByExpression(x => x.CreatedAt == request.CreatedAt && x.OrderID == order.OrderID, 
+                var checkContract = await _contractRepository.GetAllDataByExpression(x => x.CreatedAt == request.CreatedAt && x.OrderID == order.OrderID,
                     pageNumber: 1,
                     pageSize: int.MaxValue);
                 if (checkContract == null)
@@ -702,13 +698,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new Exception("Không có hợp đồng!");
                 }
 
-                // Ánh xạ thông tin đơn hàng sang response               
                 var contractOfProduct = pagedContractTemplates.Items;
                 // Send confirmation email to the customer
                 await SendOrderRentConfirmationEmail(getAccount, supplierAccount, getAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
                 await Task.Delay(100);
                 // Send confirmation email to the supplier
                 await SendOrderRentConfirmationEmailSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
+                await Task.Delay(100);
 
                 result.Result = order;
             }
@@ -896,7 +892,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var payment = new PaymentInformationRequest
                 {
                     AccountID = getAccount.Id,
-                    Amount = (double)order.TotalAmount,
+                    Amount = (double)order.Deposit,
                     MemberName = $"{getAccount.FirstName} {getAccount.LastName}",
                     OrderID = order.OrderID.ToString(),
                     SupplierID = request.SupplierID,
@@ -2106,6 +2102,99 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 result.Result = imageUrl;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAllOrderRent(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Order, bool>>? filter = x => x.OrderType == OrderType.Rental;
+
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    filter: filter,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize,
+                    includes: new Expression<Func<Order, object>>[]
+                    {
+                o => o.OrderDetail,
+                    }
+                );
+
+                var currentVietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+
+                foreach (var order in pagedResult.Items)
+                {
+                    if (order.RentalStartDate < currentVietnamTime.AddHours(-24) && order.OrderStatus == OrderStatus.Pending)
+                    {
+                        order.OrderStatus = OrderStatus.Cancelled;
+                        await _orderRepository.Update(order);
+                        var orderDetail = await _orderDetailRepository.GetByExpression(x => x.OrderID == order.OrderID);
+                        if (orderDetail != null)
+                        {
+                            var product = await _productRepository.GetByExpression(x => x.ProductID == orderDetail.ProductID);
+                            product.Status = ProductStatusEnum.AvailableRent;
+                            _productRepository.Update(product);
+                            await Task.Delay(100);
+                            await _unitOfWork.SaveChangesAsync();
+                        }
+
+                    }
+                }
+
+                var convertedResult = pagedResult.Items.Select(order =>
+                {
+                    var orderResponse = _mapper.Map<OrderRentResponse>(order);
+
+                    orderResponse.OrderDetails = _mapper.Map<List<OrderDetailResponse>>(order.OrderDetail.ToList());
+                    return orderResponse;
+                }).ToList();
+
+                result.Result = convertedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAllOrderBuy(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Order, bool>>? filter = x => x.OrderType == OrderType.Purchase;
+
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    filter: filter,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize,
+                    includes: new Expression<Func<Order, object>>[]
+                    {
+                o => o.OrderDetail,
+                    }
+                );
+
+                var convertedResult = pagedResult.Items.Select(order =>
+                {
+                    var orderResponse = _mapper.Map<OrderResponse>(order);
+
+                    orderResponse.OrderDetails = _mapper.Map<List<OrderDetailResponse>>(order.OrderDetail.ToList());
+                    return orderResponse;
+                }).ToList();
+
+                result.Result = convertedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)

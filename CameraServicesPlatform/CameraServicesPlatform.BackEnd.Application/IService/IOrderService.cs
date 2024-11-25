@@ -19,6 +19,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> PurchaseOrder(string orderId, HttpContext context);
 
         Task<AppActionResult> GetAllOrder(int pageIndex, int pageSize);
+        Task<AppActionResult> GetAllOrderRent(int pageIndex, int pageSize);
+        Task<AppActionResult> GetAllOrderBuy(int pageIndex, int pageSize);
         Task<AppActionResult> UpdateOrderStatusCompletedBySupplier(string OrderID);
         Task<AppActionResult> UpdateOrderStatusShippedBySupplier(string OrderID);
         Task<AppActionResult> UpdateOrderStatusPaymentBySupplier(string OrderID);

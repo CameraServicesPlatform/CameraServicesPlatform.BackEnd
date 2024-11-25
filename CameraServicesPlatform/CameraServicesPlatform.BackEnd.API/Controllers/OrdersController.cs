@@ -25,6 +25,16 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.GetAllOrder(pageIndex, pageSize);
         }
+        [HttpGet("get-all-order-rent")]
+        public async Task<AppActionResult> GetAllOrderRent(int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetAllOrderRent(pageIndex, pageSize);
+        }
+        [HttpGet("get-all-order-buy")]
+        public async Task<AppActionResult> GetAllOrderBuy(int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetAllOrderBuy(pageIndex, pageSize);
+        }
 
         [HttpGet("get-order-by-order-type")]
         public async Task<AppActionResult> GetOrderByOrderType(OrderType type, int pageIndex = 1, int pageSize = 10)

@@ -39,7 +39,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private IRepository<OrderDetail> _orderDetailRepository;
         private IRepository<Order> _orderRepository;
         private IUnitOfWork _unitOfWork;
-
+        private IOrderService _orderService;
 
         public ProductService(
             IRepository<Product> productRepository,
@@ -49,6 +49,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<RentalPrice> rentalPriceRepository,
             IRepository<Vourcher> voucherRepository,
             IRepository<Account> accountRepository,
+            IOrderService orderService,
             IRepository<Rating> ratingRepository,
             IRepository<Order> orderRepository,
             IRepository<ProductVoucher> productVoucherRepository,
@@ -61,6 +62,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             _ratingRepository = ratingRepository;
             _productRepository = productRepository;
+            _orderService = orderService;
             _productImageRepository = productImageRepository;
             _supplierRepository = supplierRepository;
             _rentalPriceRepository = rentalPriceRepository;
@@ -511,7 +513,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             try
             {
                 Expression<Func<Product, bool>>? filter = null;
-                List<ProductResponse> listProduct = new List<ProductResponse>();
+                List<ProductGetAllResponse> listProduct = new List<ProductGetAllResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
@@ -547,6 +549,18 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
+                    int totalRentals = 0;
+                    if (item.PriceBuy == null)
+                    {
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                        if(countRent.IsSuccess == true)
+                        {
+                            var rentalData = countRent.Result as dynamic;
+                            totalRentals = rentalData.TotalRentals;
+                        }
+                        
+                    }
+                    
                     Double averageRating = 0;
                     if (rating.Result.Items.Count() > 0)
                     {
@@ -555,15 +569,17 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     }
                     if (rentalPrice.Items.Count() > 0)
                     {
-                        ProductResponse productResponse = new ProductResponse
+                        ProductGetAllResponse productResponse = new ProductGetAllResponse
                         {
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
                             CategoryID = item.CategoryID?.ToString(),
                             ProductName = item.ProductName,
+                            CountRent = totalRentals,
                             ProductDescription = item.ProductDescription,
                             PriceBuy = item.PriceBuy,
+                            OriginalPrice = item.OriginalPrice,
                             DepositProduct = item.DepositProduct,
                             PricePerHour = rentalPrice.Items[0].PricePerHour,
                             PricePerDay = rentalPrice.Items[0].PricePerDay,
@@ -581,7 +597,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     }
                     else
                     {
-                        ProductResponse productResponse = new ProductResponse
+                        ProductGetAllResponse productResponse = new ProductGetAllResponse
                         {
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
@@ -590,6 +606,8 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             ProductName = item.ProductName,
                             ProductDescription = item.ProductDescription,
                             PriceBuy = item.PriceBuy,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             Brand = item.Brand,
                             Quality = item.Quality,
                             Status = item.Status,
@@ -599,13 +617,11 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             listImage = productImage.Items
                         };
                         listProduct.Add(productResponse);
-
                     }
 
-
-                    result.Result = listProduct;
-                    result.IsSuccess = true;
                 }
+                result.Result = listProduct;
+                result.IsSuccess = true;
             }
 
 

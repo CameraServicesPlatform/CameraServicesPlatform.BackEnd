@@ -148,6 +148,7 @@ public class SD
     public class FirebasePathName
     {
         public static string SUPPLIER_PREFIX = "supplier/";
+        public static string ACCOUNT_PREFIX = "account/";
         public static string AFTER_IMAGE = "img-after/";
         public static string RETURN_DETAIL_IMAGE = "return-detail-img/";
         public static string BEFORE_IMAGE = "img-before/";

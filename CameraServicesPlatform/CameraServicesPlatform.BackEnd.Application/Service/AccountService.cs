@@ -380,6 +380,7 @@ public class AccountService : GenericBackendService, IAccountService
                 // Upload ảnh căn cước công dân lên Firebase nếu có
                 string? frontCardImageUrl = null;
                 string? backCardImageUrl = null;
+                string accountImgUrl = null;
 
                 if (signUpRequest.FrontOfCitizenIdentificationCard != null)
                 {
@@ -395,9 +396,16 @@ public class AccountService : GenericBackendService, IAccountService
                     backCardImageUrl = backUpload?.Result?.ToString();
                 }
 
+                if (signUpRequest.Img != null)
+                {
+                    string PathName = SD.FirebasePathName.ACCOUNT_PREFIX + $"{Guid.NewGuid()}.jpg";
+                    AppActionResult backUpload = await firebaseService.UploadFileToFirebase(signUpRequest.Img, PathName);
+                    accountImgUrl = backUpload?.Result?.ToString();
+                }
                 // Gán URL ảnh căn cước vào tài khoản
                 user.FrontOfCitizenIdentificationCard = frontCardImageUrl;
                 user.BackOfCitizenIdentificationCard = backCardImageUrl;
+                user.Img = accountImgUrl;
 
                 IdentityResult resultCreateUser = await _userManager.CreateAsync(user, signUpRequest.Password);
                 if (resultCreateUser.Succeeded)
@@ -935,8 +943,9 @@ public class AccountService : GenericBackendService, IAccountService
                 account.AccountNumber = accountRequest.AccountNumber;
                 account.AccountHolder = accountRequest.AccountHolder;
                 string imageUrlFrontOfCitizenIdentificationCard = null;
+                string imageUrlAccount = null;
                 string imageUrlBackOfCitizenIdentificationCard = null;
-                if (accountRequest.FrontOfCitizenIdentificationCard != null || accountRequest.BackOfCitizenIdentificationCard != null)
+                if (accountRequest.FrontOfCitizenIdentificationCard != null || accountRequest.Img != null || accountRequest.BackOfCitizenIdentificationCard != null)
                 {
 
                     if (accountRequest.FrontOfCitizenIdentificationCard != null && accountRequest.FrontOfCitizenIdentificationCard.ToString() != account.FrontOfCitizenIdentificationCard)
@@ -951,6 +960,17 @@ public class AccountService : GenericBackendService, IAccountService
                         imageUrlFrontOfCitizenIdentificationCard = imgUpload?.Result?.ToString();
                     }
 
+                    if (accountRequest.Img != null && accountRequest.Img.ToString() != account.Img)
+                    {
+                        if (!string.IsNullOrEmpty(account.Img))
+                        {
+                            await firebaseService.DeleteFileFromFirebase(account.Img);
+                        }
+
+                        var imgPathName = SD.FirebasePathName.ACCOUNT_PREFIX + $"{account.Id}.jpg";
+                        var imgUpload = await firebaseService.UploadFileToFirebase(accountRequest.Img, imgPathName);
+                        imageUrlAccount = imgUpload?.Result?.ToString();
+                    }
 
                     if (accountRequest.BackOfCitizenIdentificationCard != null && accountRequest.BackOfCitizenIdentificationCard.ToString() != account.BackOfCitizenIdentificationCard)
                     {
@@ -966,6 +986,7 @@ public class AccountService : GenericBackendService, IAccountService
 
                     account.BackOfCitizenIdentificationCard = imageUrlBackOfCitizenIdentificationCard;
                     account.FrontOfCitizenIdentificationCard = imageUrlFrontOfCitizenIdentificationCard;
+                    account.Img = imageUrlAccount;
                 }
                 account.Gender = accountRequest.Gender;
                 account.Hobby = accountRequest.Hobby;

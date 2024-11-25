@@ -14,12 +14,13 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> ProposalFollowVourcher(int pageIndex, int pageSize);
         Task<AppActionResult> ProposalFollowJobBuy(string accountId, int pageIndex, int pageSize);
         Task<AppActionResult> ProposalFollowHobby(string accountId, int pageIndex, int pageSize);
-
         Task<AppActionResult> GetAllProduct(int pageIndex, int pageSize);
+
         Task<AppActionResult> GetProductById(string id, int pageIndex, int pageSize);
         Task<AppActionResult> GetProductByName([FromQuery] string? filter, int pageIndex, int pageSize);
         Task<AppActionResult> GetProductByCategoryName([FromQuery] string? filter, int pageIndex, int pageSize);
-        Task<AppActionResult> GetProductByRent(int pageIndex, int pageSize);
+        Task<AppActionResult> GetProductByRent(int pageIndex, int pageSize); 
+        Task<AppActionResult> GetProductRentBySupplier(string supplierId);
         Task<AppActionResult> GetProductBySold(int pageIndex, int pageSize); 
         Task<AppActionResult> GetProductAvaibleRentAndSell (int pageIndex, int pageSize);
         Task<AppActionResult> UpdateProduct(ProductUpdateResponseDto productResponse);

@@ -22,6 +22,5 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public string ReviewComment { get; set; }
         public bool IsDisable { get; set; }
 
-
     }
 }

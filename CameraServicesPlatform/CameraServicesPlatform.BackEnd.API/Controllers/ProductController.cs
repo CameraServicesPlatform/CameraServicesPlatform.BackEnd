@@ -60,6 +60,12 @@ public class ProductController : ControllerBase
         return await _productService.GetProductByRent(pageIndex, pageSize);
     }
 
+    [HttpGet("get-product-rent-by-supplier")]
+    public async Task<AppActionResult> GetProductRentBySupplier(string supplierId)
+    {
+        return await _productService.GetProductRentBySupplier(supplierId);
+    }
+
     [HttpGet("get-product-by-buy")]
     public async Task<AppActionResult> GetProductBySold(int pageIndex = 1, int pageSize = 10)
     {

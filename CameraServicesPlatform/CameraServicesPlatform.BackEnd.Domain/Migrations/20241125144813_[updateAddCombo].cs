@@ -1,4 +1,4 @@
-﻿/*using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class updateHistoryTr : Migration
+    public partial class updateAddCombo : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -107,6 +107,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 {
                     HistoryTransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AccountID = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StaffID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Price = table.Column<double>(type: "float", nullable: false),
                     TransactionDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
@@ -414,6 +415,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     PriceRent = table.Column<double>(type: "float", nullable: true),
                     PriceBuy = table.Column<double>(type: "float", nullable: true),
                     DepositProduct = table.Column<double>(type: "float", nullable: true),
+                    OriginalPrice = table.Column<double>(type: "float", nullable: true),
                     Brand = table.Column<int>(type: "int", nullable: true),
                     Quality = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
@@ -626,7 +628,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     ProductQuality = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Discount = table.Column<double>(type: "float", nullable: false),
                     ProductPriceTotal = table.Column<double>(type: "float", nullable: false),
-                    RentalPeriod = table.Column<int>(type: "int", nullable: true)
+                    PeriodRental = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -1194,4 +1196,3 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         }
     }
 }
-*/

@@ -31,7 +31,8 @@ public class Product
 
     public double? DepositProduct { get; set; }
 
-
+    public double? OriginalPrice { get; set; }
+    DateTime DateOfManufacture {  get; set; }
     public BrandEnum? Brand { get; set; }
 
     public string Quality { get; set; }

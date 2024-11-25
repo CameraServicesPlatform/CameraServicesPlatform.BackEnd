@@ -2389,6 +2389,11 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             result.IsSuccess = true;
             return result;
         }
+
+        public Task<AppActionResult> GetProductRentBySupplier(string supplierId)
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }

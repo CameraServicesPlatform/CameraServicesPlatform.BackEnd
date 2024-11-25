@@ -17,7 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public string ReportDetails { get; set; }
 
-        public DateTime ReportDate { get; set; } = DateTime.UtcNow;
+        public DateTime ReportDate { get; set; } 
 
         public ReportStatus Status { get; set; }
     }

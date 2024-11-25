@@ -107,8 +107,13 @@ public class MappingConfig
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
-            
-               
+            // map Extend
+            config.CreateMap<CreateExtendRequest, Extend>();
+            config.CreateMap<Extend, ExtendResponse>();
+
+
+
+
 
 
         });

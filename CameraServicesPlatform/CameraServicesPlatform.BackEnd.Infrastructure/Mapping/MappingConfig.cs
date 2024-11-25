@@ -33,6 +33,12 @@ public class MappingConfig
             .ForMember(dest => dest.SupplierID, opt => opt.MapFrom(src => src.SupplierID.ToString())) 
             .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetail));
 
+
+            config.CreateMap<Order, OrderRentResponse>()
+          .ForMember(dest => dest.OrderID, opt => opt.MapFrom(src => src.OrderID.ToString()))
+          .ForMember(dest => dest.AccountID, opt => opt.MapFrom(src => src.Id.ToString()))
+          .ForMember(dest => dest.SupplierID, opt => opt.MapFrom(src => src.SupplierID.ToString()))
+          .ForMember(dest => dest.OrderDetails, opt => opt.MapFrom(src => src.OrderDetail));
             ///Mapper OrderDetail
 
             config.CreateMap<OrderDetailRequest, OrderDetail>();
@@ -41,6 +47,7 @@ public class MappingConfig
             .ForMember(dest => dest.OrderID, opt => opt.MapFrom(src => src.OrderID.ToString()))
             .ForMember(dest => dest.ProductID, opt => opt.MapFrom(src => src.ProductID.ToString()))
             .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.ProductName));
+
             ///Mapper product
             config.CreateMap<OrderDetailRequest, OrderDetail>();
 
@@ -107,8 +114,13 @@ public class MappingConfig
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
-            
-               
+            // map Extend
+            config.CreateMap<CreateExtendRequest, Extend>();
+            config.CreateMap<Extend, ExtendResponse>();
+
+
+
+
 
 
         });

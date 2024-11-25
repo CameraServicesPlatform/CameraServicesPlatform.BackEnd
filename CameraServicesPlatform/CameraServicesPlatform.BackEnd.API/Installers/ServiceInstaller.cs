@@ -55,6 +55,7 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IHistoryTransactionService, HistoryTransactionService>();
 
         services.AddScoped<IExtendService, ExtendService>();
+        services.AddScoped<IComboService, ComboService>();
     }
 
 }

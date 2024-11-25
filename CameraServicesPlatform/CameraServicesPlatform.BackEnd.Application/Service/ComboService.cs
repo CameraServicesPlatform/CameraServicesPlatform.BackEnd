@@ -11,6 +11,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static CameraServicesPlatform.BackEnd.Application.Service.OrderService;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -34,9 +35,52 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
-        public Task<AppActionResult> CreateCombo(ComboCreateDto voucherResponse)
+        public async Task<AppActionResult> CreateCombo(ComboCreateDto comboResponse)
         {
-            throw new NotImplementedException();
+            AppActionResult result = new AppActionResult();
+
+            try
+            {
+                var combo = Resolve<IRepository<Combo>>();
+                
+                var pagedResult = await _comboRepository.GetAllDataByExpression(
+                    a => a.ComboName.Equals(comboResponse.ComboName),
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                if (pagedResult.Items.Count() > 0)
+                {
+                    result.Result = "Combo name existed, combo name cannot duplicate";
+                    result.IsSuccess = false;
+                    return result;
+
+                }
+                Combo comboNew = new Combo
+                {
+                    ComboId = Guid.NewGuid(),
+                    ComboName = comboResponse.ComboName.ToString(),
+                    ComboPrice = comboResponse.ComboPrice,
+                    DurationCombo = comboResponse.DurationCombo,
+                    IsDisable = true,
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
+
+                };
+
+                await combo.Insert(comboNew);
+                await _unitOfWork.SaveChangesAsync();
+
+                result.Result = comboNew;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
         }
 
         public async Task<AppActionResult> GetAllCombo(int pageIndex, int pageSize)
@@ -65,6 +109,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ComboId = item.ComboId.ToString(),
                         ComboName = item.ComboName.ToString(),
                         ComboPrice = item.ComboPrice,
+                        DurationCombo = item.DurationCombo,
                         IsDisable = item.IsDisable,
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt
@@ -116,6 +161,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ComboId = pagedResult.Items[0].ComboId.ToString(),
                     ComboName = pagedResult.Items[0].ComboName.ToString(),
                     ComboPrice = pagedResult.Items[0].ComboPrice,
+                    DurationCombo = pagedResult.Items[0].DurationCombo,
                     IsDisable = pagedResult.Items[0].IsDisable,
                     CreatedAt = pagedResult.Items[0].CreatedAt,
                     UpdatedAt = pagedResult.Items[0].UpdatedAt

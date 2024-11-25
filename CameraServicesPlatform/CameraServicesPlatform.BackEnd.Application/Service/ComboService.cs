@@ -85,9 +85,51 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public Task<AppActionResult> GetComboById(string id, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetComboById(string id, int pageIndex, int pageSize)
         {
-            throw new NotImplementedException();
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(id, out Guid comboId))
+                {
+                    result = BuildAppActionResultError(result, "Invalid Combo ID format.");
+                    result.IsSuccess = false;
+                    return result;
+                }
+
+                var pagedResult = await _comboRepository.GetAllDataByExpression(
+                    a => a.ComboId == comboId && a.IsDisable == true,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+
+                if (pagedResult.Items.Count() == 0)
+                {
+                    result = BuildAppActionResultError(result, "Combo not exist");
+                    return result;
+                }
+                ComboResponseDto comboResponse = new ComboResponseDto
+                {
+                    ComboId = pagedResult.Items[0].ComboId.ToString(),
+                    ComboName = pagedResult.Items[0].ComboName.ToString(),
+                    ComboPrice = pagedResult.Items[0].ComboPrice,
+                    IsDisable = pagedResult.Items[0].IsDisable,
+                    CreatedAt = pagedResult.Items[0].CreatedAt,
+                    UpdatedAt = pagedResult.Items[0].UpdatedAt
+
+                };
+                result.Result = comboResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
         }
 
         public Task<AppActionResult> UpdateCombo(ComboUpdateResponseDto voucherResponse)

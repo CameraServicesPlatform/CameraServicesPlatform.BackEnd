@@ -12,6 +12,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public Gender Gender { get; set; }
         public IFormFile? BackOfCitizenIdentificationCard { get; set; }
         public IFormFile? FrontOfCitizenIdentificationCard { get; set; }
+        public IFormFile? Img { get; set; }
+
         public string PhoneNumber { get; set; } = null!;
         public   string? BankName { get; set; }
 

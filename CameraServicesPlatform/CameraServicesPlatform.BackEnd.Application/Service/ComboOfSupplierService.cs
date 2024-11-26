@@ -110,6 +110,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                     ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
                     {
+                        ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
                         ComboId = item.ComboId.ToString(),
                         SupplierID = item.SupplierID.ToString(),
                         StartTime = item.StartTime,

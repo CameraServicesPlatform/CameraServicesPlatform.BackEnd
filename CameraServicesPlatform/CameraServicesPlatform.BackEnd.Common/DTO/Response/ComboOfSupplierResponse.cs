@@ -9,6 +9,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
     public class ComboOfSupplierResponse
     {
+        public string ComboOfSupplierId { get; set; }
         public string ComboId { get; set; }
         public string? SupplierID { get; set; }
         public DateTime StartTime { get; set; }

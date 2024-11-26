@@ -17,7 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DurationCombo? DurationCombo { get; set; }
         public bool IsDisable {  get; set; }
         public DateTime CreatedAt { get; set; }
-        
         public DateTime UpdatedAt { get; set; }
+
     }
 }

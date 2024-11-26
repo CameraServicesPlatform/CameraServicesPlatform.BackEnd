@@ -11,9 +11,9 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
 {
     public interface IComboService
     {
-        Task<AppActionResult> CreateCombo(ComboCreateDto voucherResponse);
+        Task<AppActionResult> CreateCombo(ComboCreateDto response);
         Task<AppActionResult> GetAllCombo(int pageIndex, int pageSize);
         Task<AppActionResult> GetComboById(string id, int pageIndex, int pageSize);
-        Task<AppActionResult> UpdateCombo(ComboUpdateResponseDto voucherResponse);
+        Task<AppActionResult> UpdateCombo(ComboUpdateResponseDto response);
     }
 }

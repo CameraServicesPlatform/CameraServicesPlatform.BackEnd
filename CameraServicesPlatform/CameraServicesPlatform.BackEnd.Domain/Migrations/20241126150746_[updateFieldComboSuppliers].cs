@@ -1,11 +1,11 @@
-﻿/*using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class updateCombos : Migration
+    public partial class updateFieldComboSuppliers : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -20,4 +20,3 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
         }
     }
 }
-*/

@@ -233,8 +233,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ComboOfSupplier", b =>
                 {
-                    b.Property<Guid>("ComboId")
+                    b.Property<Guid>("ComboOfSupplierId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ComboId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("EndTime")
@@ -249,7 +252,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid?>("SupplierID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ComboId");
+                    b.HasKey("ComboOfSupplierId");
+
+                    b.HasIndex("ComboId");
 
                     b.HasIndex("SupplierID");
 
@@ -1420,9 +1425,17 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ComboOfSupplier", b =>
                 {
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Combo", "Combo")
+                        .WithMany()
+                        .HasForeignKey("ComboId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Supplier", "Supplier")
                         .WithMany()
                         .HasForeignKey("SupplierID");
+
+                    b.Navigation("Combo");
 
                     b.Navigation("Supplier");
                 });

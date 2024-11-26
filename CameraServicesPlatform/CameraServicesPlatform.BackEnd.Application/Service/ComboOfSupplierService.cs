@@ -84,9 +84,50 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public Task<AppActionResult> GetComboOfSupplierById(string id, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetComboOfSupplierById(string id, int pageIndex, int pageSize)
         {
-            throw new NotImplementedException();
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(id, out Guid comboSupplierId))
+                {
+                    result = BuildAppActionResultError(result, "Invalid Combo Supplier ID format.");
+                    result.IsSuccess = false;
+                    return result;
+                }
+
+                var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
+                    a => a.ComboId == comboSupplierId && a.IsDisable == true,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+
+                if (pagedResult.Items.Count() == 0)
+                {
+                    result = BuildAppActionResultError(result, "Combo not exist");
+                    return result;
+                }
+                ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
+                {
+                    ComboId = pagedResult.Items[0].ComboId.ToString(),
+                    SupplierID = pagedResult.Items[0].SupplierID.ToString(),
+                    StartTime = pagedResult.Items[0].StartTime,
+                    EndTime = pagedResult.Items[0].EndTime,
+                    IsDisable = pagedResult.Items[0].IsDisable
+
+                };
+                result.Result = comboResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
         }
 
         public Task<AppActionResult> UpdateComboOfSupplier(ComboOfSupplierUpdateDto Response)

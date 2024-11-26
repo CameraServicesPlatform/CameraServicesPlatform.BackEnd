@@ -558,7 +558,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         AccountNumber = accountExist.Items[0].AccountNumber,
                         AccountHolder = accountExist.Items[0].AccountHolder,
                         OrderId = pagedResult.Items[0].OrderID.ToString(),
-                        TotalAmount = pagedResult.Items[0].TotalAmount
+                        TotalAmount = pagedResult.Items[0].Deposit
                     };
                     
                     result.Result = staffRefundMemberDto;

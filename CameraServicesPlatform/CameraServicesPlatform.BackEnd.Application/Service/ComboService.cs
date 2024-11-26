@@ -178,9 +178,41 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public Task<AppActionResult> UpdateCombo(ComboUpdateResponseDto voucherResponse)
+        public async Task<AppActionResult> UpdateCombo( ComboUpdateResponseDto comboResponse)
         {
-            throw new NotImplementedException();
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var comboRepository = Resolve<IRepository<Combo>>();
+                Combo comboExist = await _comboRepository.GetById(Guid.Parse(comboResponse.ComboId));
+
+                if (comboExist == null)
+                {
+                    result = BuildAppActionResultError(result, "Không tìm thấy combo");
+                    result.IsSuccess = false;
+                    return result;
+                }
+
+                comboExist.ComboName = comboResponse.ComboName;
+                comboExist.ComboPrice = comboResponse.ComboPrice;
+                comboExist.DurationCombo = comboResponse.DurationCombo;
+                comboExist.IsDisable = comboResponse.IsDisable;
+                comboExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+
+                await comboRepository.Update(comboExist);
+                await _unitOfWork.SaveChangesAsync();
+
+                result.Result = comboExist;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+
         }
     }
 }

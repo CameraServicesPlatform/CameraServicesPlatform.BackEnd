@@ -329,76 +329,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             var vnp_Amount = vnpay.GetResponseData("vnp_Amount");
 
-            if (vnp_OrderInfo.Contains("da nap tien"))
-            {
-                return await deposit(vnp_ResponseCode, vnp_orderId, vnp_OrderInfo, vnp_Amount, vnp_TransactionId, vnp_SecureHash);
-            }
-            else
-            {
-                if (vnp_OrderInfo.Contains("da duoc hoan tien"))
-                {
-                    //StaffRefund(vnp_ResponseCode, vnp_orderId, vnp_OrderInfo, vnp_Amount);
-                    var infoParts = vnp_OrderInfo.Split(' ', 3);
-
-                    string staffId = infoParts[0];
-                    string accountId = infoParts[1];
-                    string transactionDescription = infoParts[2];
-
-                    // Validate vnp_Amount and convert to integer
-                    if (!int.TryParse(vnp_Amount, out int refundAmount))
-                    {
-                        throw new FormatException("vnp_Amount is not a valid integer.");
-                    }
-
-                    var pagedResult = await _accountRepository.GetAllDataByExpression(
-                            a => a.Id == accountId,
-                            1,
-                            10,
-                            null,
-                            isAscending: true,
-                            null
-                        );
-                    if (pagedResult == null)
-                    {
-                        throw new InvalidOperationException($"Account with ID {accountId} not found.");
-                    }
-                    if (pagedResult.Items[0].AccountBalance == null)
-                        pagedResult.Items[0].AccountBalance = 0;
-
-                    pagedResult.Items[0].AccountBalance = pagedResult.Items[0].AccountBalance + Int32.Parse(vnp_Amount);
-                    _accountRepository.Update(pagedResult.Items[0]);
-                    await _unitOfWork.SaveChangesAsync();
-
-                    TransactionStatus status = vnp_ResponseCode == "00"
-                        ? TransactionStatus.Success
-                        : TransactionStatus.Unsuccess;
-
-                    var historyTransaction = new HistoryTransaction
-                    {
-                        HistoryTransactionId = Guid.Parse(vnp_orderId),
-                        AccountID = accountId,
-                        Price = Int32.Parse(vnp_Amount),
-                        TransactionDescription = transactionDescription,
-                        Status = status,
-                        CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                        StaffID = Guid.Parse(staffId)
-                    };
-
-                    await _historyTransaction.Insert(historyTransaction);
-                    await _unitOfWork.SaveChangesAsync();
-                    return new VNPayResponseDto
-                    {
-                        Success = true,
-                        PaymentMethod = "VnPay",
-                        OrderDescription = transactionDescription,
-                        OrderId = vnp_orderId.ToString(),
-                        TransactionId = vnp_TransactionId.ToString(),
-                        Token = vnp_SecureHash,
-                        VnPayResponseCode = vnp_ResponseCode,
-                    };
-
-                }
-                else if (vnp_OrderInfo.Contains("thanh toan combo"))
+            
+                 if (vnp_OrderInfo.Contains("thanh toan combo"))
                 {
                     var infoParts = vnp_OrderInfo.Split(' ', 3);
 
@@ -574,7 +506,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         await _unitOfWork.SaveChangesAsync();
                     }
                 }
-            }
+            
             
           
             return new VNPayResponseDto

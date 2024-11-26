@@ -46,23 +46,6 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _transactionService.GetTransactionBySupplierId(id, pageIndex, pageSize);
         }
 
-        [HttpPost("create-supplier-or-member-payment")]
-        public async Task<IActionResult> CreateSupplierOrMemberPayment(SupplierPaymentAgainDto supplierResponse)
-        {
-            return Ok(await _transactionService.CreateSupplierOrMemberPayment(supplierResponse, HttpContext));
-        }
-        
-        [HttpPost("create-staff-refund-return-detail")]
-        public async Task<IActionResult> CreateStaffRefundReturnDetail(StaffRefundDto supplierResponse)
-        {
-            return Ok(await _transactionService.CreateStaffRefundReturnDetail(supplierResponse, HttpContext));
-        }
-
-        [HttpPost("create-staff-refund-deposit")]
-        public async Task<IActionResult> CreateStaffRefundDeposit(StaffRefundDto supplierResponse)
-        {
-            return Ok(await _transactionService.CreateStaffRefundDeposit(supplierResponse, HttpContext));
-        }
         [HttpPost("create-staff-refund-supplier")]
         public async Task<IActionResult> CreateStaffRefundSupplier(StaffRefundDto supplierResponse)
         {
@@ -81,23 +64,6 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return Ok(await _transactionService.AddImagePayment(dto));
         }
 
-        [HttpPost("create-staff-refund-member-purchuse")]
-        public async Task<IActionResult> CreateStaffRefundMemberPurchuse(string orderId)
-        {
-            return Ok(await _transactionService.CreateStaffRefundPurchuse(orderId, HttpContext));
-        }
-
-        /*[HttpPost("create-member-refund")]//member rút tìn từ ví ra tìn mặt
-        public async Task<IActionResult> CreateMemberRefund(string orderId)
-        {
-            return Ok(await _transactionService.CreateMemberRefund(orderId, HttpContext));
-        }
-*/
-        [HttpPost("create-supplier-payment-purchuse/{orderId}")]
-        public async Task<IActionResult> CreateSupplierPaymentPurchuse(string orderId)
-        {
-            return Ok(await _transactionService.CreateSupplierPaymentPurchuse(orderId, HttpContext));
-        }
 
         [HttpGet("payment-callback")]
         public async Task<IActionResult> PaymentCallBack()

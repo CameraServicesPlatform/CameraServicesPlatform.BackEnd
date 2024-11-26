@@ -131,7 +131,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        // Parse CategoryID and validate it
+
         if (!Guid.TryParse(productResponse.CategoryID, out var categoryGuid))
         {
             result = BuildAppActionResultError(result, $"CategoryID không hợp lệ!");
@@ -256,6 +256,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 if (productNameExist != null)
                 {
                     result = BuildAppActionResultError(result, $"Tên sản phẩm đã tồn tại trong shop!");
+                    return result;
+                }
+                if (productResponse.DepositProduct > 1000000)
+                {
+                    result = BuildAppActionResultError(result, $"Tiền giư chỗ phải bé hơn 1000000 VNĐ");
                     return result;
                 }
 

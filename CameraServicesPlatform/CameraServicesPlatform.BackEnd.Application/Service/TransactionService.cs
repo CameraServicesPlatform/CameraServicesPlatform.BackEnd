@@ -535,6 +535,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
+                if(pagedResult.Items[0].OrderStatus != OrderStatus.Completed)
+                {
+                    result = BuildAppActionResultError(result, "Đơn hàng chưa hoàn thành nên không thể hoàn trả tiền giữ chỗ");
+                    return result;
+                }
                 var supplierExist = await _supplierRepository.GetAllDataByExpression(
                     a => a.SupplierID == pagedResult.Items[0].SupplierID,
                     1,
@@ -543,6 +548,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
+
                 var accountExist = await _accountRepository.GetAllDataByExpression(
                     a => a.Id == supplierExist.Items[0].AccountID,
                     1,

@@ -64,6 +64,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _transactionRepository = transactionRepository;
         }
 
+        public static class DateTimeHelper
+        {
+            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+            // Convert UTC DateTime to Vietnam Time
+            public static DateTime ToVietnamTime(DateTime utcDateTime)
+            {
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
+            }
+        }
+
         public async Task<string> CreatePaymentUrlVnpay(PaymentInformationRequest requestDto, HttpContext httpContext)
         {
             var paymentUrl = "";
@@ -369,7 +380,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         Price = Int32.Parse(vnp_Amount),
                         TransactionDescription = transactionDescription,
                         Status = status,
-                        CreatedAt = DateTime.UtcNow,
+                        CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                         StaffID = Guid.Parse(staffId)
                     };
 
@@ -406,7 +417,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         Price = Int32.Parse(vnp_Amount),
                         TransactionDescription = transactionDescription,
                         Status = status,
-                        CreatedAt = DateTime.UtcNow,
+                        CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                         StaffID = Guid.Parse(staffId)
                     };
 
@@ -485,13 +496,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             OrderID = Guid.Parse(vnp_orderId),
                             SupplierID = pagedResult.Items[0].SupplierID,
                             AccountID = pagedResult.Items[0].Id,
-                            PaymentDate = DateTime.UtcNow,
+                            PaymentDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                             PaymentAmount = Int32.Parse(vnp_Amount),
                             PaymentStatus = PaymentStatus.Completed,
                             PaymentType = PaymentType.Refund,
                             PaymentMethod = PaymentMethod.VNPAY,
                             PaymentDetails = $"Payment for Order {vnp_orderId}",
-                            CreatedAt = DateTime.UtcNow,
+                            CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                             Image = "a",
                             IsDisable = true
                         };
@@ -503,7 +514,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         {
                             TransactionID = Guid.NewGuid(),
                             OrderID = Guid.Parse(vnp_orderId),
-                            TransactionDate = DateTime.UtcNow,
+                            TransactionDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                             Order = null,
                             Amount = Int32.Parse(vnp_Amount),
                             TransactionType = transactionType,
@@ -511,7 +522,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             PaymentMethod = PaymentMethod.VNPAY,
                             VNPAYTransactionID = vnp_TransactionId,
                             VNPAYTransactionStatus = VNPAYTransactionStatus.Success,
-                            VNPAYTransactionTime = DateTime.UtcNow,
+                            VNPAYTransactionTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                         };
                         await _transactionRepository.Insert(transaction);
                         await _unitOfWork.SaveChangesAsync();
@@ -526,13 +537,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             OrderID = Guid.Parse(vnp_orderId),
                             SupplierID = pagedResult.Items[0].SupplierID,
                             AccountID = pagedResult.Items[0].Id,
-                            PaymentDate = DateTime.UtcNow,
+                            PaymentDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                             PaymentAmount = Int32.Parse(vnp_Amount),
                             PaymentStatus = PaymentStatus.Failed,
                             PaymentType = PaymentType.Refund,
                             PaymentMethod = PaymentMethod.VNPAY,
                             PaymentDetails = $"Payment for Order {vnp_orderId}",
-                            CreatedAt = DateTime.UtcNow,
+                            CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                             Image = "a",
                             IsDisable = true
                         };
@@ -549,7 +560,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         {
                             TransactionID = Guid.NewGuid(),
                             OrderID = Guid.Parse(vnp_orderId),
-                            TransactionDate = DateTime.UtcNow,
+                            TransactionDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                             Order = null,
                             Amount = Int32.Parse(vnp_Amount),
                             TransactionType = transactionType,
@@ -557,7 +568,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             PaymentMethod = PaymentMethod.VNPAY,
                             VNPAYTransactionID = vnp_TransactionId,
                             VNPAYTransactionStatus = VNPAYTransactionStatus.Failed,
-                            VNPAYTransactionTime = DateTime.UtcNow,
+                            VNPAYTransactionTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                         };
                         await _transactionRepository.Insert(transaction);
                         await _unitOfWork.SaveChangesAsync();

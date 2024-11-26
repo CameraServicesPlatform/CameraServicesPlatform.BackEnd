@@ -3,13 +3,17 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using Microsoft.AspNetCore.Http;
 using PdfSharp;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using static CameraServicesPlatform.BackEnd.Application.Service.OrderService;
@@ -20,28 +24,34 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IMapper _mapper;
         private IRepository<ComboOfSupplier> _comboSupplierRepository;
+        private readonly IRepository<Payment> _paymentRepository;
         private IUnitOfWork _unitOfWork;
 
 
         public ComboOfSupplierService(
             IRepository<ComboOfSupplier> comboSupplierRepository,
             IUnitOfWork unitOfWork,
+            IRepository<Payment> paymentRepository,
             IMapper mapper,
             IServiceProvider serviceProvider,
             IDbContext context
         ) : base(serviceProvider)
         {
+            _paymentRepository = paymentRepository;
             _comboSupplierRepository = comboSupplierRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto Response)
+        public async Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto Response, HttpContext context)
         {
             AppActionResult result = new AppActionResult();
 
             try
             {
+                var utility = Resolve<Utility>();
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+
                 var comboOfSupplier = Resolve<IRepository<ComboOfSupplier>>();
                 if(Response.StartTime < DateTime.UtcNow)
                 {
@@ -76,10 +86,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 };
 
+                var paymentCombo = new CreateComboPaymentDTO
+                {
+                    //AccountId = getAccount.Id,
+                    //Amount = (double)order.TotalAmount,
+                };
+                
+                var payMethod = await paymentGatewayService.CreateComboPayment(paymentCombo, context);
+
                 await comboOfSupplier.Insert(comboNew);
                 await _unitOfWork.SaveChangesAsync();
 
-                result.Result = comboNew;
+                result.Result = payMethod;
                 result.IsSuccess = true;
             }
             catch (Exception ex)

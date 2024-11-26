@@ -31,7 +31,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         [HttpPost("create-combo")]
         public async Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto comboResponse)
         {
-            return await _comboOfSupplierService.CreateComboOfSupplier(comboResponse);
+            return await _comboOfSupplierService.CreateComboOfSupplier(comboResponse, HttpContext);
         }
 
         [HttpPut("update-combo")]

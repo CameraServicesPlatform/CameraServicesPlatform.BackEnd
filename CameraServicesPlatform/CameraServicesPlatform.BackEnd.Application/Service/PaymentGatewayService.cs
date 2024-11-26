@@ -163,6 +163,36 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return paymentUrl;
         }
+
+        public async Task<string> CreateComboPayment(CreateComboPaymentDTO requestDto, HttpContext httpContext)
+        {
+            var paymentUrl = "";
+
+            var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
+            var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
+            var pay = new VNPayLibrary();
+            //var urlCallBack = $"{_configuration["Vnpay:ReturnUrl"]}/{requestDto.OrderID}";
+            var urlCallBack = $"{_configuration["Vnpay:ReturnUrl"]}";
+            pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
+            pay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"]);
+            pay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"]);
+            pay.AddRequestData("vnp_Amount", ((int)requestDto.Amount * 100).ToString());
+            pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
+            pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
+            pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(httpContext));
+            pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
+            pay.AddRequestData("vnp_OrderInfo", $"{requestDto.AccountId} thanh toan combo {requestDto.Amount} VND");
+            pay.AddRequestData("vnp_OrderType", "other");
+            //pay.AddRequestData("vnp_Account", requestDto.AccountID);
+            pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
+
+            pay.AddRequestData("vnp_TxnRef", requestDto.OrderID);
+            paymentUrl = pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
+
+            //await SavePaymentInfoAsync(requestDto, PaymentStatus.Pending, PaymentType.Refund);
+
+            return paymentUrl;
+        }
         public async Task<VNPayResponseDto> deposit(string vnp_ResponseCode, string vnp_orderId, string vnp_OrderInfo, string vnp_Amount, string vnp_TransactionId, string vnp_SecureHash)
         { 
             int spaceIndex = vnp_OrderInfo.IndexOf(' ');
@@ -356,6 +386,42 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         VnPayResponseCode = vnp_ResponseCode,
                     };
 
+                }
+                else if (vnp_OrderInfo.Contains("thanh toan combo"))
+                {
+                    var infoParts = vnp_OrderInfo.Split(' ', 3);
+
+                    string staffId = infoParts[0];
+                    string accountId = infoParts[1];
+                    string transactionDescription = infoParts[2];
+
+                    TransactionStatus status = vnp_ResponseCode == "00"
+                       ? TransactionStatus.Success
+                       : TransactionStatus.Unsuccess;
+
+                    var historyTransaction = new HistoryTransaction
+                    {
+                        HistoryTransactionId = Guid.Parse(vnp_orderId),
+                        AccountID = accountId,
+                        Price = Int32.Parse(vnp_Amount),
+                        TransactionDescription = transactionDescription,
+                        Status = status,
+                        CreatedAt = DateTime.UtcNow,
+                        StaffID = Guid.Parse(staffId)
+                    };
+
+                    await _historyTransaction.Insert(historyTransaction);
+                    await _unitOfWork.SaveChangesAsync();
+                    return new VNPayResponseDto
+                    {
+                        Success = true,
+                        PaymentMethod = "VnPay",
+                        OrderDescription = transactionDescription,
+                        OrderId = vnp_orderId.ToString(),
+                        TransactionId = vnp_TransactionId.ToString(),
+                        Token = vnp_SecureHash,
+                        VnPayResponseCode = vnp_ResponseCode,
+                    };
                 }
                 else
                 {

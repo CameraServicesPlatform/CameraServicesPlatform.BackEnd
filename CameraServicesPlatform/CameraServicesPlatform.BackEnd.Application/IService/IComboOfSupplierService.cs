@@ -12,7 +12,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
     {
         Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto Response);
         Task<AppActionResult> GetAllComboOfSupplier(int pageIndex, int pageSize);
-        Task<AppActionResult> GetComboOfSupplierById(string id, int pageIndex, int pageSize);
+        Task<AppActionResult> GetComboOfSupplierByComboId(string id, int pageIndex, int pageSize);
         Task<AppActionResult> UpdateComboOfSupplier(ComboOfSupplierUpdateDto Response);
     }
 }

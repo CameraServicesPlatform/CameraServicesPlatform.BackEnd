@@ -22,10 +22,10 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _comboOfSupplierService.GetAllComboOfSupplier(pageIndex, pageSize);
         }
 
-        [HttpGet("get-combo-by-id")]
-        public async Task<AppActionResult> GetComboOfSupplierById(string id, int pageIndex = 1, int pageSize = 10)
+        [HttpGet("get-combo-by-combo-id")]
+        public async Task<AppActionResult> GetComboOfSupplierByComboId(string id, int pageIndex = 1, int pageSize = 10)
         {
-            return await _comboOfSupplierService.GetComboOfSupplierById(id, pageIndex, pageSize);
+            return await _comboOfSupplierService.GetComboOfSupplierByComboId(id, pageIndex, pageSize);
         }
 
         [HttpPost("create-combo")]

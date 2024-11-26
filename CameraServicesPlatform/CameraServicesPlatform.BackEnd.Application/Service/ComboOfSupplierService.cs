@@ -5,6 +5,7 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Domain.Models;
+using PdfSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -42,7 +43,29 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 var comboOfSupplier = Resolve<IRepository<ComboOfSupplier>>();
-
+                if(Response.StartTime < DateTime.UtcNow)
+                {
+                    result = BuildAppActionResultError(result, "Start time must be larger than now");
+                    result.IsSuccess = false;
+                    return result;
+                }
+                var check = await _comboSupplierRepository.GetAllDataByExpression(
+                    a => a.ComboId == Guid.Parse(Response.ComboId) && a.IsDisable == true && a.SupplierID == Guid.Parse(Response.SupplierID),
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                if (check.Items.Count() > 0)
+                {
+                    if (Response.StartTime < DateTime.UtcNow)
+                    {
+                        result = BuildAppActionResultError(result, "Combo of supplier has not expired yet so a new combo cannot be purchased");
+                        result.IsSuccess = false;
+                        return result;
+                    }
+                }
                 ComboOfSupplier comboNew = new ComboOfSupplier
                 {
                     ComboId = Guid.Parse(Response.ComboId),
@@ -82,8 +105,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     null
                 );
                 List<ComboOfSupplierResponse> listComboOfSupplier = new List<ComboOfSupplierResponse>();
-
-
                 foreach (var item in pagedResult.Items)
                 {
 
@@ -111,7 +132,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetComboOfSupplierById(string id, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetComboOfSupplierByComboId(string id, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static CameraServicesPlatform.BackEnd.Application.Service.OrderService;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -34,9 +35,35 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
-        public Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto Response)
+        public async Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto Response)
         {
-            throw new NotImplementedException();
+            AppActionResult result = new AppActionResult();
+
+            try
+            {
+                var comboOfSupplier = Resolve<IRepository<ComboOfSupplier>>();
+
+                ComboOfSupplier comboNew = new ComboOfSupplier
+                {
+                    ComboId = Guid.Parse(Response.ComboId),
+                    SupplierID = Guid.Parse(Response.SupplierID),
+                    IsDisable = true,
+                    StartTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    EndTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
+
+                };
+
+                await comboOfSupplier.Insert(comboNew);
+                await _unitOfWork.SaveChangesAsync();
+
+                result.Result = comboNew;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
         }
 
         public async Task<AppActionResult> GetAllComboOfSupplier(int pageIndex, int pageSize)

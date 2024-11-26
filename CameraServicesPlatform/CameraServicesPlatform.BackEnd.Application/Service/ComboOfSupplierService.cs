@@ -25,20 +25,29 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IMapper _mapper;
         private IRepository<ComboOfSupplier> _comboSupplierRepository;
         private readonly IRepository<Payment> _paymentRepository;
+        private readonly IRepository<Combo> _comboRepository;
+        private readonly IRepository<Account> _accountRepository;
+        private readonly IRepository<Supplier> _supplierRepository;
         private IUnitOfWork _unitOfWork;
 
 
         public ComboOfSupplierService(
             IRepository<ComboOfSupplier> comboSupplierRepository,
+            IRepository<Combo> comboRepository,
             IUnitOfWork unitOfWork,
             IRepository<Payment> paymentRepository,
             IMapper mapper,
+            IRepository<Supplier> supplierRepository,
+            IRepository<Account> accountRepository,
             IServiceProvider serviceProvider,
             IDbContext context
         ) : base(serviceProvider)
         {
             _paymentRepository = paymentRepository;
             _comboSupplierRepository = comboSupplierRepository;
+            _comboRepository = comboRepository;
+            _supplierRepository = supplierRepository;
+            _accountRepository = accountRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -86,10 +95,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 };
 
+                var combo = await _comboRepository.GetByExpression(x => x.ComboId == Guid.Parse(Response.ComboId));
+
+                var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == Guid.Parse(Response.SupplierID));
+                var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
+
                 var paymentCombo = new CreateComboPaymentDTO
                 {
-                    //AccountId = getAccount.Id,
-                    //Amount = (double)order.TotalAmount,
+                    AccountId = supplier.AccountID,
+                    Amount = (double)combo.ComboPrice,
                 };
                 
                 var payMethod = await paymentGatewayService.CreateComboPayment(paymentCombo, context);

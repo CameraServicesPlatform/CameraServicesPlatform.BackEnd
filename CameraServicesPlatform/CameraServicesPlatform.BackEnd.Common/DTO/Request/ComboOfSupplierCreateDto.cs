@@ -12,6 +12,5 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public string ComboId { get; set; }
 
         public string? SupplierID { get; set; }
-        public DateTime StartTime { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Data;
+using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.AspNetCore.Http;
 using PdfSharp;
@@ -52,7 +53,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
-        public async Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto Response, HttpContext context)
+        public async Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto request, HttpContext context)
         {
             AppActionResult result = new AppActionResult();
 
@@ -60,44 +61,70 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
-
+                DateTime newStartTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                DateTime newEndTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                DateTime dateNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 var comboOfSupplier = Resolve<IRepository<ComboOfSupplier>>();
-                if(Response.StartTime < DateTime.UtcNow)
-                {
-                    result = BuildAppActionResultError(result, "Start time must be larger than now");
-                    result.IsSuccess = false;
-                    return result;
-                }
+                
                 var check = await _comboSupplierRepository.GetAllDataByExpression(
-                    a => a.ComboId == Guid.Parse(Response.ComboId) && a.IsDisable == true && a.SupplierID == Guid.Parse(Response.SupplierID),
+                    a => a.ComboId == Guid.Parse(request.ComboId) && a.IsDisable == true && a.SupplierID == Guid.Parse(request.SupplierID),
                     1,
-                    10,
+                    int.MaxValue,
                     null,
                     isAscending: true,
                     null
                 );
-                if (check.Items.Count() > 0)
+
+                var getCombo = await _comboRepository.GetByExpression(x => x.ComboId == Guid.Parse(request.ComboId));
+
+                var activeCombos = await _comboSupplierRepository.GetAllDataByExpression(
+                    a => a.ComboId == Guid.Parse(request.ComboId) && a.SupplierID == Guid.Parse(request.SupplierID) && a.IsDisable == false, 
+                    1,
+                    int.MaxValue,null,
+                    isAscending: true,
+                    null);
+
+                if (activeCombos.Items.Any())
                 {
-                    if (Response.StartTime < DateTime.UtcNow)
+                    var latestActiveCombo = activeCombos.Items.OrderByDescending(c => c.EndTime).FirstOrDefault();
+
+                    if (latestActiveCombo.EndTime > dateNow)
                     {
-                        result = BuildAppActionResultError(result, "Combo of supplier has not expired yet so a new combo cannot be purchased");
-                        result.IsSuccess = false;
-                        return result;
+                        newStartTime = latestActiveCombo.EndTime.AddDays(1);
+
+                        switch (getCombo.DurationCombo)
+                        {
+                            case DurationCombo.oneMonth:
+                                newEndTime = newStartTime.AddMonths(1);
+                                break;
+                            case DurationCombo.twoMonth:
+                                newEndTime = newStartTime.AddMonths(2);
+                                break;
+                            case DurationCombo.threeMonth:
+                                newEndTime = newStartTime.AddMonths(3);
+                                break;
+                            case DurationCombo.fiveMonth:
+                                newEndTime = newStartTime.AddMonths(5);
+                                break;
+                            default:
+                                throw new InvalidOperationException("DurationUnit is not supported.");
+                        }
                     }
                 }
+
                 ComboOfSupplier comboNew = new ComboOfSupplier
                 {
-                    ComboId = Guid.Parse(Response.ComboId),
-                    SupplierID = Guid.Parse(Response.SupplierID),
-                    IsDisable = true,
-                    StartTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                    EndTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
+                    ComboId = Guid.Parse(request.ComboId),
+                    SupplierID = Guid.Parse(request.SupplierID),
+                    IsDisable = false,
+                    StartTime = newStartTime,
+                    EndTime = newEndTime
 
                 };
 
-                var combo = await _comboRepository.GetByExpression(x => x.ComboId == Guid.Parse(Response.ComboId));
+                var combo = await _comboRepository.GetByExpression(x => x.ComboId == Guid.Parse(request.ComboId));
 
-                var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == Guid.Parse(Response.SupplierID));
+                var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == Guid.Parse(request.SupplierID));
                 var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
 
                 var paymentCombo = new CreateComboPaymentDTO
@@ -110,6 +137,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await comboOfSupplier.Insert(comboNew);
                 await _unitOfWork.SaveChangesAsync();
+
+                await SendComboPurchaseConfirmationEmail(supplierAccount, comboNew, combo);
 
                 result.Result = payMethod;
                 result.IsSuccess = true;
@@ -127,7 +156,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             try
             {
-                Expression<Func<ComboOfSupplier, bool>>? filter = a => a.IsDisable == false;
+                Expression<Func<ComboOfSupplier, bool>>? filter = null;
                 var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
@@ -147,7 +176,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         SupplierID = item.SupplierID.ToString(),
                         StartTime = item.StartTime,
                         EndTime = item.EndTime,
-                        IsDisable = true
+                        IsDisable = false
 
                     };
                     listComboOfSupplier.Add(comboResponse);
@@ -259,6 +288,51 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public Task<AppActionResult> UpdateComboOfSupplier(ComboOfSupplierUpdateDto Response)
         {
             throw new NotImplementedException();
+        }
+
+        private async Task SendComboPurchaseConfirmationEmail(Account supplierAccount, ComboOfSupplier combo, Combo comboDetails)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            // Nội dung chi tiết hóa đơn combo
+            var comboDetailsString =
+                $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
+                $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
+                $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
+                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy}<br />" +
+                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy}<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN XÁC NHẬN MUA COMBO<br /><br />" +
+                $"Mã hóa đơn: #{Guid.NewGuid()}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                "Thông tin nhà cung cấp:<br />" +
+                $"<b>Tên:</b> {supplierAccount.FirstName} {supplierAccount.LastName}<br />" +
+                $"<b>Email:</b> {supplierAccount.Email}<br />" +
+                $"<b>Số điện thoại:</b> {supplierAccount.PhoneNumber ?? "N/A"}<br />" +
+                $"<b>Địa chỉ:</b> {supplierAccount.Address ?? "N/A"}<br /><br />";
+
+            // Tổng hợp email
+            var emailMessage =
+                $"Kính chào {supplierAccount.FirstName},<br /><br />" +
+                $"Bạn vừa mua thành công một combo từ hệ thống. Dưới đây là thông tin chi tiết về combo của bạn:<br /><br />" +
+                invoiceInfo +
+                "=====================================<br />" +
+                "         CHI TIẾT COMBO<br />" +
+                "=====================================<br />" +
+                comboDetailsString +
+                "=====================================<br />" +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Gửi email xác nhận
+            emailService.SendEmail(
+                supplierAccount.Email,
+                SD.SubjectMail.COMBO_PURCHASE_CONFIRMATION,
+                emailMessage
+            );
         }
     }
 }

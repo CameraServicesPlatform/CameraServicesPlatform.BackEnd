@@ -11,7 +11,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
 {
     public interface IComboOfSupplierService
     {
-        Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto Response, HttpContext context);
+        Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto request, HttpContext context);
         Task<AppActionResult> GetAllComboOfSupplier(int pageIndex, int pageSize);
         Task<AppActionResult> GetComboOfSupplierByComboId(string id, int pageIndex, int pageSize);
         Task<AppActionResult> UpdateComboOfSupplier(ComboOfSupplierUpdateDto Response);

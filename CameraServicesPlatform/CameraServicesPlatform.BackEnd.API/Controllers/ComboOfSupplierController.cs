@@ -33,6 +33,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _comboOfSupplierService.CreateComboOfSupplier(comboResponse, HttpContext);
         }
+        
+
+        [HttpPost("get-combo-expired")]
+        public async Task<AppActionResult> GetComboOfSupplierExpired (ComboOfSupplierCreateDto comboResponse)
+        {
+            return await _comboOfSupplierService.CreateComboOfSupplier(comboResponse, HttpContext);
+        }
 
         [HttpPut("update-combo")]
         public async Task<AppActionResult> UpdateComboOfSupplier(ComboOfSupplierUpdateDto comboResponse)

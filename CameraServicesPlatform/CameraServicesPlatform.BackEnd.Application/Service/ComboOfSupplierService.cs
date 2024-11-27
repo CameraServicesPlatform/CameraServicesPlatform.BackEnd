@@ -127,7 +127,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             try
             {
-                Expression<Func<ComboOfSupplier, bool>>? filter = a => a.IsDisable == true;
+                Expression<Func<ComboOfSupplier, bool>>? filter = a => a.IsDisable == false;
                 var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
@@ -140,6 +140,51 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 foreach (var item in pagedResult.Items)
                 {
 
+                    ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
+                    {
+                        ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
+                        ComboId = item.ComboId.ToString(),
+                        SupplierID = item.SupplierID.ToString(),
+                        StartTime = item.StartTime,
+                        EndTime = item.EndTime,
+                        IsDisable = true
+
+                    };
+                    listComboOfSupplier.Add(comboResponse);
+                }
+
+                result.Result = listComboOfSupplier;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+        public async Task<AppActionResult> GetComboOfSupplierExpired(int pageIndex, int pageSize)
+        {
+            var result = new AppActionResult();
+
+            try
+            {
+                Expression<Func<ComboOfSupplier, bool>>? filter = a => a.IsDisable == false && a.EndTime == DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                List<ComboOfSupplierResponse> listComboOfSupplier = new List<ComboOfSupplierResponse>();
+                foreach (var item in pagedResult.Items)
+                {
+                    var comboExist = await _comboSupplierRepository.GetById(item.ComboOfSupplierId);
+                    comboExist.IsDisable = false;
+                    _comboSupplierRepository.Update(comboExist);
                     ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
                     {
                         ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
@@ -178,7 +223,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
-                    a => a.ComboId == comboSupplierId && a.IsDisable == true,
+                    a => a.ComboId == comboSupplierId && a.IsDisable == false,
                     pageIndex,
                     pageSize,
                     null,

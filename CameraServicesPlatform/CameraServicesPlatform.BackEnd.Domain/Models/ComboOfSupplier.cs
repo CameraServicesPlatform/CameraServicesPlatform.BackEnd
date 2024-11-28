@@ -20,6 +20,10 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public Supplier? Supplier { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
+        public bool? IsMailNearExpired { get; set; }
+        public bool? IsSendMailExpired { get; set; }
+
+
         public bool IsDisable { get; set; }
     }
 }

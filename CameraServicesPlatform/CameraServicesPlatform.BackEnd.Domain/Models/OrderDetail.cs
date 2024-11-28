@@ -30,5 +30,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public double ProductPriceTotal { get; set; }
 
         public DateTime? PeriodRental { get; set; }
+
     }
 }

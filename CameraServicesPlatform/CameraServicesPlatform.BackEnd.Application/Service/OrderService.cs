@@ -631,7 +631,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     PeriodRental = order.ReturnDate,
                 };
 
-
+                order.IsExtend = false;
                 order.Deposit = product.DepositProduct;
                 order.TotalAmount = request.TotalAmount;
                 double TotalPrice = (double)order.TotalAmount;
@@ -820,7 +820,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     PeriodRental = order.ReturnDate,
                 };
 
-
+                order.IsExtend = false;
                 order.Deposit = product.DepositProduct;
                 order.TotalAmount = request.TotalAmount;
                 double TotalPrice = (double)order.TotalAmount;

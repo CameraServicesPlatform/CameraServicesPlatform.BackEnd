@@ -127,6 +127,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 hasOrder.OrderStatus = OrderStatus.Extend;
+                hasOrder.IsExtend = true;
                 await _orderRepository.Update(hasOrder);
                 await _unitOfWork.SaveChangesAsync();
 

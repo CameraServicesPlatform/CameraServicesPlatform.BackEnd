@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    partial class CameraServicesPlatformDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241128143137_[delete-order-detail-is-extend]")]
+    partial class deleteorderdetailisextend
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

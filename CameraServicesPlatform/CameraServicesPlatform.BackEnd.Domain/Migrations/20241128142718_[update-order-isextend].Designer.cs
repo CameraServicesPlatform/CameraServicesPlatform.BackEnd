@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    partial class CameraServicesPlatformDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241128142718_[update-order-isextend]")]
+    partial class updateorderisextend
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -447,6 +450,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<double>("Discount")
                         .HasColumnType("float");
+
+                    b.Property<bool?>("IsExtend")
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("OrderID")
                         .HasColumnType("uniqueidentifier");

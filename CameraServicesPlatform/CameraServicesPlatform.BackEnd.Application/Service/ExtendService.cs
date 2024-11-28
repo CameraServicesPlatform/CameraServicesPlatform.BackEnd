@@ -5,6 +5,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Models;
@@ -126,6 +127,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         throw new InvalidOperationException("DurationUnit is not supported.");
                 }
 
+                var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == hasOrder.SupplierID);
+                var supplierAccount = await _accountRepository.GetByExpression(x => x.Id == supplier.AccountID);
+                var customerAccount = await _accountRepository.GetByExpression(x => x.Id == hasOrder.Id);
+
                 hasOrder.OrderStatus = OrderStatus.Extend;
                 hasOrder.IsExtend = true;
                 await _orderRepository.Update(hasOrder);
@@ -135,6 +140,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await _extendRepository.Insert(extend);
                 await _unitOfWork.SaveChangesAsync();
+
+                await SendExtendConfirmationEmail(supplierAccount, customerAccount, extend, hasOrder);
 
                 result.IsSuccess = true;
                 result.Result = extend;
@@ -253,6 +260,68 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
 
             return result;
+        }
+
+        private async Task SendExtendConfirmationEmail(Account supplierAccount, Account customerAccount, Extend extendDetails, Order orderDetails)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            // Nội dung chi tiết gia hạn
+            var extendDetailsString =
+                $"<b>Mã Gia Hạn:</b> {extendDetails.ExtendId}<br />" +
+                $"<b>Thời gian bắt đầu:</b> {extendDetails.RentalExtendStartDate:dd/MM/yyyy HH:mm}<br />" +
+                $"<b>Thời gian kết thúc:</b> {extendDetails.RentalExtendEndDate:dd/MM/yyyy HH:mm}<br />" +
+                $"<b>Số tiền:</b> {extendDetails.TotalAmount:N0} ₫<br />";
+               
+
+            // Thông tin đơn hàng
+            var orderInfo =
+                $"<b>Mã Đơn Hàng:</b> {orderDetails.OrderID}<br />" +
+                $"<b>Tên khách hàng:</b> {customerAccount.FirstName} {customerAccount.LastName}<br />" +
+                $"<b>Email:</b> {customerAccount.Email}<br />" +
+                $"<b>Số điện thoại:</b> {customerAccount.PhoneNumber ?? "N/A"}<br />" +
+                $"<b>Địa chỉ:</b> {customerAccount.Address ?? "N/A"}<br />";
+
+            // Tổng hợp email cho nhà cung cấp
+            var emailMessageSupplier =
+                $"Kính chào {supplierAccount.FirstName},<br /><br />" +
+                $"Một đơn hàng đã được gia hạn thành công trên hệ thống. Dưới đây là thông tin chi tiết:<br /><br />" +
+                orderInfo +
+                "=====================================<br />" +
+                "         CHI TIẾT GIA HẠN<br />" +
+                "=====================================<br />" +
+                extendDetailsString +
+                "=====================================<br />" +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Tổng hợp email cho khách hàng
+            var emailMessageCustomer =
+                $"Kính chào {customerAccount.FirstName},<br /><br />" +
+                $"Bạn đã gia hạn thành công một đơn hàng trên hệ thống. Dưới đây là thông tin chi tiết:<br /><br />" +
+                orderInfo +
+                "=====================================<br />" +
+                "         CHI TIẾT GIA HẠN<br />" +
+                "=====================================<br />" +
+                extendDetailsString +
+                "=====================================<br />" +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Gửi email
+            emailService.SendEmail(
+                supplierAccount.Email,
+                SD.SubjectMail.EXTEND_SUPPLIER_CONFIRMATION,
+                emailMessageSupplier
+            );
+
+            emailService.SendEmail(
+                customerAccount.Email,
+                SD.SubjectMail.EXTEND_CONFIRMATION,
+                emailMessageCustomer
+            );
         }
     }
 }

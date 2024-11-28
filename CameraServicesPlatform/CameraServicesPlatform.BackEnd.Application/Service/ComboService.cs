@@ -64,7 +64,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ComboName = comboResponse.ComboName.ToString(),
                     ComboPrice = comboResponse.ComboPrice,
                     DurationCombo = comboResponse.DurationCombo,
-                    IsDisable = true,
+                    IsDisable = false,
                     CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                     UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
 
@@ -143,7 +143,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var pagedResult = await _comboRepository.GetAllDataByExpression(
-                    a => a.ComboId == comboId && a.IsDisable == true,
+                    a => a.ComboId == comboId && a.IsDisable == false,
                     pageIndex,
                     pageSize,
                     null,

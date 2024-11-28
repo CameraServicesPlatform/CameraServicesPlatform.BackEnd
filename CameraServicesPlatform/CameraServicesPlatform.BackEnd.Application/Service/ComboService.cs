@@ -89,7 +89,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             try
             {
-                Expression<Func<Combo, bool>>? filter = a => a.IsDisable == true;
+                Expression<Func<Combo, bool>>? filter = a => a.IsDisable == false;
                 var pagedResult = await _comboRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,

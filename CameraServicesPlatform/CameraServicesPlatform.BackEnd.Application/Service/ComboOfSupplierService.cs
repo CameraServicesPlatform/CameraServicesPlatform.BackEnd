@@ -255,6 +255,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                     );
+                    var combo = await _comboRepository.GetById(item.ComboId);
                     foreach (var items in listProduct.Items)
                     {
                         items.IsDisable = true;
@@ -287,7 +288,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
 
                     await _unitOfWork.SaveChangesAsync();
-
+                    await SendComboPurchaseConfirmationEmail(supplierAccount, item, combo);
                 }
 
 
@@ -397,6 +398,41 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             emailService.SendEmail(
                 supplierAccount.Email,
                 SD.SubjectMail.COMBO_PURCHASE_CONFIRMATION,
+                emailMessage
+            );
+        }
+
+        private async Task SendMailComboExpired(Account supplierAccount, ComboOfSupplier combo, Combo comboDetails)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            // Nội dung chi tiết hóa đơn combo
+            var comboDetailsString =
+                $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
+                $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
+                $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
+                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy}<br />" +
+                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy}<br />";
+
+            
+            // Tổng hợp email
+            var emailMessage =
+                $"Kính chào {supplierAccount.FirstName},<br /><br />" +
+                $"Combo quý khách đăng kí đã hết hạn. Dưới đây là thông tin chi tiết về combo của bạn:<br /><br />" +
+                "=====================================<br />" +
+                "         CHI TIẾT COMBO<br />" +
+                "=====================================<br />" +
+                comboDetailsString +
+                "=====================================<br />" +
+                "<br />Nếu quý khách muốn tiếp tục sử dụng dịch vụ trên nền tảng của chúng tôi vui lòng mua gói Combo mới. có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Gửi email xác nhận
+            emailService.SendEmail(
+                supplierAccount.Email,
+                SD.SubjectMail.COMBO_EXPIRED_CONFIRMATION,
                 emailMessage
             );
         }

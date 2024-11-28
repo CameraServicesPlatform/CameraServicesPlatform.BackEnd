@@ -309,6 +309,62 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> GetComboOfSupplierNearExpired(int pageIndex, int pageSize)
+        {
+            var result = new AppActionResult();
+
+            try
+            {
+
+                var vietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow).AddDays(-3);
+                Expression<Func<ComboOfSupplier, bool>> filter = a =>
+                    a.EndTime < vietnamTime;
+
+                var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
+                    filter,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+
+                var listComboOfSupplier = new List<ComboOfSupplierResponse>();
+
+                foreach (var item in pagedResult.Items)
+                {
+                    if (item.IsMailNearExpired == false)
+                    {
+                        item.IsMailNearExpired = true;
+                        _comboSupplierRepository.Update(item);
+                        var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == item.SupplierID);
+                        var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
+                        var combo = await _comboRepository.GetById(item.ComboId);
+                        await SendComboPurchaseConfirmationEmail(supplierAccount, item, combo);
+                        await _unitOfWork.SaveChangesAsync();
+                        ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
+                        {
+                            ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
+                            ComboId = item.ComboId.ToString(),
+                            SupplierID = item.SupplierID.ToString(),
+                            StartTime = item.StartTime,
+                            EndTime = item.EndTime,
+                            IsDisable = item.IsDisable
+                        };
+                        listComboOfSupplier.Add(comboResponse);
+                    }
+
+                }
+                result.Result = listComboOfSupplier;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
 
         public async Task<AppActionResult> GetComboOfSupplierByComboId(string id, int pageIndex, int pageSize)
         {
@@ -423,6 +479,41 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var emailMessage =
                 $"Kính chào {supplierAccount.FirstName},<br /><br />" +
                 $"Combo quý khách đăng kí đã hết hạn. Dưới đây là thông tin chi tiết về combo của bạn:<br /><br />" +
+                "=====================================<br />" +
+                "         CHI TIẾT COMBO<br />" +
+                "=====================================<br />" +
+                comboDetailsString +
+                "=====================================<br />" +
+                "<br />Nếu quý khách muốn tiếp tục sử dụng dịch vụ trên nền tảng của chúng tôi vui lòng mua gói Combo mới. có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Gửi email xác nhận
+            emailService.SendEmail(
+                supplierAccount.Email,
+                SD.SubjectMail.COMBO_EXPIRED_CONFIRMATION,
+                emailMessage
+            );
+        }
+
+        private async Task SendMailComboNearExpired(Account supplierAccount, ComboOfSupplier combo, Combo comboDetails)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            // Nội dung chi tiết hóa đơn combo
+            var comboDetailsString =
+                $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
+                $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
+                $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
+                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy}<br />" +
+                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy}<br />";
+
+
+            // Tổng hợp email
+            var emailMessage =
+                $"Kính chào {supplierAccount.FirstName},<br /><br />" +
+                $"Combo quý khách đăng kí gần hết hạn. Dưới đây là thông tin chi tiết về combo của bạn:<br /><br />" +
                 "=====================================<br />" +
                 "         CHI TIẾT COMBO<br />" +
                 "=====================================<br />" +

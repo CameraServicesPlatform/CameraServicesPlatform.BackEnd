@@ -289,12 +289,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         await _productRepository.Update(product);
                     }
 
+                    if(item.IsSendMailExpired == false)
+                    {
+                        await SendComboPurchaseConfirmationEmail(supplierAccount, item, combo);
+                        item.IsSendMailExpired = true;
+                        _comboSupplierRepository.Update(item);
+                    }
                     await _unitOfWork.SaveChangesAsync();
-                    await SendComboPurchaseConfirmationEmail(supplierAccount, item, combo);
+
                 }
-
-
-
                 result.Result = listComboOfSupplier;
                 result.IsSuccess = true;
             }

@@ -55,12 +55,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpGet("get-extend-by-order-id")]
-        public async Task<IActionResult> GetExtendByOrderId(string orderID, int pageIndex, int pageSize)
+        [HttpGet("get-all-extend-by-order-id")]
+        public async Task<IActionResult> GetAllExtendByOrderId(string orderID, int pageIndex, int pageSize)
         {
             try
             {
-                var response = await _extendService.GetExtendByOrderId(orderID, pageIndex, pageSize);
+                var response = await _extendService.GetAllExtendByOrderId(orderID, pageIndex, pageSize);
                 if (!response.IsSuccess)
                 {
                     return NotFound(response);

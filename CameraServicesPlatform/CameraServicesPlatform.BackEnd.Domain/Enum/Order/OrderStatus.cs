@@ -12,6 +12,7 @@ public enum OrderStatus
     Payment,
     PendingRefund,
     Refund,
-    DepositReturn
+    DepositReturn,
+    Extend
 }
 

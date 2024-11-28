@@ -129,9 +129,25 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var combo = await _comboRepository.GetByExpression(x => x.ComboId == Guid.Parse(request.ComboId));
 
                 var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == Guid.Parse(request.SupplierID));
-                var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
+                var supplierAccount = await _accountRepository.GetByExpression(x => x.Id == supplier.AccountID);
                 supplier.IsDisable = false;
                 await _supplierRepository.Update(supplier);
+                await _unitOfWork.SaveChangesAsync();
+
+                var products = await _productRepository.GetAllDataByExpression(
+                    p => p.SupplierID == supplier.SupplierID,
+                    1, 
+                    int.MaxValue,
+                    null,
+                    isAscending: true,
+                    null);
+
+                foreach (var product in products.Items)
+                {
+                    product.IsDisable = false; 
+                    await _productRepository.Update(product);
+                }
+
                 await _unitOfWork.SaveChangesAsync();
 
                 var paymentCombo = new CreateComboPaymentDTO
@@ -255,7 +271,26 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         IsDisable = true
                     };
                     listComboOfSupplier.Add(comboResponse);
+
+                    var products = await _productRepository.GetAllDataByExpression(
+                        p => p.SupplierID == supplier.SupplierID,
+                        1,
+                        int.MaxValue,
+                        null,
+                        isAscending: true,
+                        null);
+
+                    foreach (var product in products.Items)
+                    {
+                        product.IsDisable = true;
+                        await _productRepository.Update(product);
+                    }
+
+                    await _unitOfWork.SaveChangesAsync();
+
                 }
+
+
 
                 result.Result = listComboOfSupplier;
                 result.IsSuccess = true;

@@ -13,7 +13,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> CreateExtend(CreateExtendRequest request);
         Task<AppActionResult> GetAllExtend(int pageIndex, int pageSize);
         Task<AppActionResult> GetExtendById(string ExtendID);
-        Task<AppActionResult> GetExtendByOrderId(string OrderID, int pageIndex, int pageSize);
+        Task<AppActionResult> GetAllExtendByOrderId(string OrderID, int pageIndex, int pageSize);
 
 
 

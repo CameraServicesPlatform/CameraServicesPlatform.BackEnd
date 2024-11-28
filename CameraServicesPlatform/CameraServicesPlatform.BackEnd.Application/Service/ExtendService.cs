@@ -6,6 +6,7 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Enum;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models;
 using PdfSharp;
@@ -125,6 +126,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         throw new InvalidOperationException("DurationUnit is not supported.");
                 }
 
+                hasOrder.OrderStatus = OrderStatus.Extend;
+                await _orderRepository.Update(hasOrder);
+                await _unitOfWork.SaveChangesAsync();
+
+                await Task.Delay(100);
 
                 await _extendRepository.Insert(extend);
                 await _unitOfWork.SaveChangesAsync();
@@ -208,7 +214,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetExtendByOrderId(string OrderID, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetAllExtendByOrderId(string OrderID, int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
             try

@@ -40,7 +40,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public ProductStatusEnum Status { get; set; }
         public DateTime DateOfManufacture { get; set; }
         public double? OriginalPrice { get; set; }
-
+        public Boolean IsDisable { get; set; }
         public IFormFile? File { get; set; }
         public List<string> listProductSpecification { get; set; } = new List<string>();
     }

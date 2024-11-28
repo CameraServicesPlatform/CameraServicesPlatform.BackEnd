@@ -44,5 +44,7 @@ public class Product
     public DateTime CreatedAt { get; set; } 
 
     public DateTime UpdatedAt { get; set; } 
+    
+    public Boolean IsDisable { get; set; }
 
 }

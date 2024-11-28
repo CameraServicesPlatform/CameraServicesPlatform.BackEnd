@@ -46,7 +46,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var pagedResult = await _comboRepository.GetAllDataByExpression(
                     a => a.ComboName.Equals(comboResponse.ComboName),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null

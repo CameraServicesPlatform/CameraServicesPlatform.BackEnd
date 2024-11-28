@@ -17,13 +17,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             _comboOfSupplierService = comboOfSupplierService;
         }
         [HttpGet("get-all-combo")]
-        public async Task<AppActionResult> GetAllComboOfSupplier(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllComboOfSupplier(int pageIndex = 1, int pageSize = 100)
         {
             return await _comboOfSupplierService.GetAllComboOfSupplier(pageIndex, pageSize);
         }
 
         [HttpGet("get-combo-by-combo-id")]
-        public async Task<AppActionResult> GetComboOfSupplierByComboId(string id, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetComboOfSupplierByComboId(string id, int pageIndex = 1, int pageSize = 100)
         {
             return await _comboOfSupplierService.GetComboOfSupplierByComboId(id, pageIndex, pageSize);
         }
@@ -36,9 +36,9 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         
 
         [HttpPost("get-combo-expired")]
-        public async Task<AppActionResult> GetComboOfSupplierExpired (ComboOfSupplierCreateDto comboResponse)
+        public async Task<AppActionResult> GetComboOfSupplierExpired (int pageIndex = 1, int pageSize = 100)
         {
-            return await _comboOfSupplierService.CreateComboOfSupplier(comboResponse, HttpContext);
+            return await _comboOfSupplierService.GetComboOfSupplierExpired(pageIndex, pageSize);
         }
 
         [HttpPut("update-combo")]

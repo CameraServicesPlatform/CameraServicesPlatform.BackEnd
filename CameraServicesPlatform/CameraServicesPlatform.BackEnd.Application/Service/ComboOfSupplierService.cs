@@ -17,15 +17,17 @@ using System.Linq.Expressions;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using static Azure.Core.HttpHeader;
 using static CameraServicesPlatform.BackEnd.Application.Service.OrderService;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
     public class ComboOfSupplierService : GenericBackendService, IComboOfSupplierService
     {
-        private readonly IMapper _mapper;
+        private readonly IMapper _mapper; 
         private IRepository<ComboOfSupplier> _comboSupplierRepository;
         private readonly IRepository<Payment> _paymentRepository;
+        private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Combo> _comboRepository;
         private readonly IRepository<Account> _accountRepository;
         private readonly IRepository<Supplier> _supplierRepository;
@@ -39,6 +41,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Payment> paymentRepository,
             IMapper mapper,
             IRepository<Supplier> supplierRepository,
+            IRepository<Product> productRepository,
             IRepository<Account> accountRepository,
             IServiceProvider serviceProvider,
             IDbContext context
@@ -48,6 +51,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _comboSupplierRepository = comboSupplierRepository;
             _comboRepository = comboRepository;
             _supplierRepository = supplierRepository;
+            _productRepository = productRepository;
             _accountRepository = accountRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -62,7 +66,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 DateTime newStartTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
-                DateTime newEndTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                DateTime newEndTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow).AddMinutes(3);
                 DateTime dateNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 var comboOfSupplier = Resolve<IRepository<ComboOfSupplier>>();
                 
@@ -126,6 +130,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == Guid.Parse(request.SupplierID));
                 var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
+                supplier.IsDisable = false;
+                await _supplierRepository.Update(supplier);
+                await _unitOfWork.SaveChangesAsync();
 
                 var paymentCombo = new CreateComboPaymentDTO
                 {
@@ -199,7 +206,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             try
             {
-                Expression<Func<ComboOfSupplier, bool>>? filter = a => a.IsDisable == false && a.EndTime == DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+               
+                var vietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                Expression<Func<ComboOfSupplier, bool>> filter = a => 
+                    a.EndTime < vietnamTime;
+
                 var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
@@ -208,12 +219,32 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-                List<ComboOfSupplierResponse> listComboOfSupplier = new List<ComboOfSupplierResponse>();
+
+                var listComboOfSupplier = new List<ComboOfSupplierResponse>();
+                
                 foreach (var item in pagedResult.Items)
                 {
-                    var comboExist = await _comboSupplierRepository.GetById(item.ComboOfSupplierId);
-                    comboExist.IsDisable = false;
-                    _comboSupplierRepository.Update(comboExist);
+                    item.IsDisable = true;
+                    _comboSupplierRepository.Update(item);
+                    var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == item.SupplierID);
+                    var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
+                    supplier.IsDisable = true;
+                    await _supplierRepository.Update(supplier);
+                    await _unitOfWork.SaveChangesAsync();
+                    var listProduct = await _productRepository.GetAllDataByExpression(
+                    x => x.SupplierID == item.SupplierID,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                    );
+                    foreach (var items in listProduct.Items)
+                    {
+                        items.IsDisable = true;
+                        _productRepository.Update(items);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
                     ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
                     {
                         ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
@@ -222,7 +253,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         StartTime = item.StartTime,
                         EndTime = item.EndTime,
                         IsDisable = true
-
                     };
                     listComboOfSupplier.Add(comboResponse);
                 }
@@ -232,12 +262,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-
+                
                 result = BuildAppActionResultError(result, ex.Message);
             }
 
             return result;
         }
+
 
         public async Task<AppActionResult> GetComboOfSupplierByComboId(string id, int pageIndex, int pageSize)
         {

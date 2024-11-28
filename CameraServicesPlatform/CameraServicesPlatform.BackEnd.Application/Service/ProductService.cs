@@ -82,7 +82,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     try
     {
         var listProduct = Resolve<IRepository<Product>>();
-
+        
         // Validate SupplierID
         if (!Guid.TryParse(productResponse.SupplierID, out var supplierGuid))
         {
@@ -94,11 +94,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         var supplierExist = await _supplierRepository.GetAllDataByExpression(
             a => a.SupplierID == supplierGuid,
             1,
-            10,
+            100,
             orderBy: a => a.SupplierName,
             isAscending: true,
             null
         );
+        if (supplierExist.Items[0].IsDisable == true)
+        {
+             result = BuildAppActionResultError(result, $"Vui lòng mua gói trước khi đăng sản phẩm");
+             return result;
+        }
         if (supplierExist == null || supplierExist.Items.Count == 0)
         {
             result = BuildAppActionResultError(result, $"SupplierID không tồn tại!");
@@ -120,7 +125,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         var productSerialExist = await _productRepository.GetAllDataByExpression(
             a => a.SerialNumber.Equals(productResponse.SerialNumber),
             1,
-            10,
+            100,
             orderBy: a => a.Supplier!.SupplierName,
             isAscending: true,
             null
@@ -237,11 +242,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var supplierExist = await _supplierRepository.GetAllDataByExpression(
                     a => a.SupplierID == supplierGuid,
                     1,
-                    10,
+                    100,
                     orderBy: a => a.SupplierName,
                     isAscending: true,
                     null
                 );
+                if (supplierExist.Items[0].IsDisable == true)
+                {
+                    result = BuildAppActionResultError(result, $"Vui lòng mua gói trước khi đăng sản phẩm");
+                    return result;
+                }
                 if (supplierExist == null || supplierExist.Items.Count == 0)
                 {
                     result = BuildAppActionResultError(result, $"SupplierID không tồn tại!");
@@ -268,7 +278,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var productSerialExist = await _productRepository.GetAllDataByExpression(
                     a => a.SerialNumber.Equals(productResponse.SerialNumber),
                     1,
-                    10,
+                    100,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
                     null
@@ -396,12 +406,24 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var productNameExist = await _productRepository.GetAllDataByExpression(
                     a => a.ProductName.Equals(productResponse.ProductName),
                     1,
-                    10,
+                    100,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
                     null
                 );
-
+                var supplierExist = await _supplierRepository.GetAllDataByExpression(
+                    a => a.SupplierID == productExist.SupplierID,
+                    1,
+                    100,
+                    orderBy: a => a.SupplierName,
+                    isAscending: true,
+                    null
+                );
+                if (supplierExist.Items[0].IsDisable == true)
+                {
+                    result = BuildAppActionResultError(result, $"Vui lòng mua gói trước khi đăng sản phẩm");
+                    return result;
+                }
                 if (productNameExist.Items.Count > 1 )
                 {
                     result = BuildAppActionResultError(result, $"Tên Sản phẩm đã tồn tại shop");
@@ -420,14 +442,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 productExist.DateOfManufacture = DateTimeHelper.ToVietnamTime(productResponse.DateOfManufacture);
                 productExist.OriginalPrice = productResponse.OriginalPrice;
                 productExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
-
+                productExist.IsDisable = productResponse.IsDisable;
                 await productRepository.Update(productExist);
 
                 var firebaseService = Resolve<IFirebaseService>();
                 var productImageExist = await _productImageRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null
@@ -476,7 +498,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var productSpecificationExist = await _productSpecificationRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null
@@ -523,7 +545,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = null;
+                Expression<Func<Product, bool>>? filter = a => a.IsDisable == false;
                 List<ProductGetAllResponse> listProduct = new List<ProductGetAllResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
@@ -563,7 +585,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     int totalRentals = 0;
                     if (item.PriceBuy == null)
                     {
-                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                         if(countRent.IsSuccess == true)
                         {
                             var rentalData = countRent.Result as dynamic;
@@ -741,7 +763,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 int totalRentals = 0;
                 if (product.PriceBuy == null)
                 {
-                    var countRent = await _orderService.CountProductRentals(product.ProductID.ToString(), 1, 10);
+                    var countRent = await _orderService.CountProductRentals(product.ProductID.ToString(), 1, 100);
                     if (countRent.IsSuccess == true)
                     {
                         var rentalData = countRent.Result as dynamic;
@@ -834,7 +856,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 if (!string.IsNullOrEmpty(productNameFilter))
                 {
-                    filter = a => a.ProductName.Contains(productNameFilter);
+                    filter = a => a.ProductName.Contains(productNameFilter) && a.IsDisable == false;
                 }
 
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -926,7 +948,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     int totalRentals = 0;
                     if (item.PriceBuy == null)
                     {
-                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                         if (countRent.IsSuccess == true)
                         {
                             var rentalData = countRent.Result as dynamic;
@@ -1018,7 +1040,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 if (!string.IsNullOrEmpty(categoryFilter))
                 {
-                    filter = a => a.Category.CategoryName == categoryFilter;
+                    filter = a => a.Category.CategoryName == categoryFilter && a.IsDisable == false;
                 }
 
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1110,7 +1132,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     int totalRentals = 0;
                     if (item.PriceBuy == null)
                     {
-                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                         if (countRent.IsSuccess == true)
                         {
                             var rentalData = countRent.Result as dynamic;
@@ -1201,7 +1223,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 if (!string.IsNullOrEmpty(categoryFilter))
                 {
-                    filter = a => a.CategoryID == categoryNameFilter;
+                    filter = a => a.CategoryID == categoryNameFilter && a.IsDisable == false;
                 }
 
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1292,7 +1314,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     int totalRentals = 0;
                     if (item.PriceBuy == null)
                     {
-                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                         if (countRent.IsSuccess == true)
                         {
                             var rentalData = countRent.Result as dynamic;
@@ -1422,7 +1444,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     if (Guid.TryParse(filter, out Guid supplierId))
                     {
-                        filterExpression = a => a.SupplierID == supplierId;
+                        filterExpression = a => a.SupplierID == supplierId && a.IsDisable == false;
                     }
                     else
                     {
@@ -1520,7 +1542,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     int totalRentals = 0;
                     if (item.PriceBuy == null)
                     {
-                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                         if (countRent.IsSuccess == true)
                         {
                             var rentalData = countRent.Result as dynamic;
@@ -1607,7 +1629,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Rented;
+                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Rented && a.IsDisable == false;
 
                 List<ProductResponseRent> listProduct = new List<ProductResponseRent>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1698,7 +1720,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     int totalRentals = 0;
                     if (item.PriceBuy == null)
                     {
-                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                         if (countRent.IsSuccess == true)
                         {
                             var rentalData = countRent.Result as dynamic;
@@ -1751,7 +1773,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Sold;
+                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Sold && a.IsDisable == false;
 
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1834,7 +1856,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     int totalRentals = 0;
                     if (item.PriceBuy == null)
                     {
-                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                         if (countRent.IsSuccess == true)
                         {
                             var rentalData = countRent.Result as dynamic;
@@ -1885,8 +1907,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 // Update the filter to include both AvailableSell and AvailableRent statuses
                 Expression<Func<Product, bool>>? filter = a =>
-                    a.Status == ProductStatusEnum.AvailableSell ||
-                    a.Status == ProductStatusEnum.AvailableRent;
+                    (a.Status == ProductStatusEnum.AvailableSell ||
+                    a.Status == ProductStatusEnum.AvailableRent) && a.IsDisable == false;
 
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1979,7 +2001,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     int totalRentals = 0;
                     if (item.PriceBuy == null)
                     {
-                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                         if (countRent.IsSuccess == true)
                         {
                             var rentalData = countRent.Result as dynamic;
@@ -2034,8 +2056,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 // Update the filter to include both AvailableSell and AvailableRent statuses
                 Expression<Func<Product, bool>>? filter = a =>
-                    a.Status == ProductStatusEnum.AvailableSell ||
-                    a.Status == ProductStatusEnum.AvailableRent;
+                    (a.Status == ProductStatusEnum.AvailableSell ||
+                    a.Status == ProductStatusEnum.AvailableRent) && a.IsDisable == false; ;
 
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -2129,7 +2151,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     int totalRentals = 0;
                     if (item.PriceBuy == null)
                     {
-                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                         if (countRent.IsSuccess == true)
                         {
                             var rentalData = countRent.Result as dynamic;
@@ -2227,12 +2249,24 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var productNameExist = await _productRepository.GetAllDataByExpression(
                     a => a.ProductName.Equals(productResponse.ProductName),
                     1,
-                    10,
+                    100,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
                     null
                 );
-
+                var supplierExist = await _supplierRepository.GetAllDataByExpression(
+                    a => a.SupplierID == productExist.SupplierID,
+                    1,
+                    100,
+                    orderBy: a => a.SupplierName,
+                    isAscending: true,
+                    null
+                );
+                if (supplierExist.Items[0].IsDisable == true)
+                {
+                    result = BuildAppActionResultError(result, $"Vui lòng mua gói trước khi đăng sản phẩm");
+                    return result;
+                }
                 if (productNameExist.Items.Count > 1)
                 {
                     result = BuildAppActionResultError(result, $"Tên Sản phẩm đã tồn tại shop");
@@ -2250,11 +2284,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 productExist.Quality = productResponse.Quality;
                 productExist.Status = productResponse.Status;
                 productExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
-                productExist.DepositProduct = productExist.DepositProduct;
+                productExist.DepositProduct = productResponse.DepositProduct;
+                productExist.IsDisable =  productResponse.IsDisable;
                 var rentalPriceExist = await _rentalPriceRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null
@@ -2270,7 +2305,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var productImageExist = await _productImageRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null
@@ -2321,7 +2356,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var productSpecificationExist = await _productSpecificationRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null
@@ -2367,9 +2402,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
 
             var vourcher = await _voucherRepository.GetAllDataByExpression(
-                 v => v.IsActive && v.ValidFrom <= DateTime.Now && v.ExpirationDate >= DateTime.Now ,
+                 v => v.IsActive && v.ValidFrom <= DateTime.Now && v.ExpirationDate >= DateTime.Now  ,
                  1,
-                 10,
+                 100,
                  orderBy: a => a.DiscountAmount,
                  isAscending: true,
                  null
@@ -2381,7 +2416,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var productVour = await _productVoucherRepository.GetAllDataByExpression(
                  v => v.VourcherID.Equals(item.VourcherID) && v.IsDisable == true,
                  1,
-                 10,
+                 100,
                  null,
                  isAscending: true,
                  null
@@ -2394,57 +2429,61 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             for (int i= listProVou.Count-1; i >= 0; i--)
             {
                 var product = await _productRepository.GetAllDataByExpression(
-                 v => v.ProductID.Equals(listProVou[i].ProductID),
+                 v => v.ProductID.Equals(listProVou[i].ProductID) && v.IsDisable == false,
                  1,
-                 10,
+                 100,
                  null,
                  isAscending: true,
                  null
                 );
-                foreach (var itemPro in product.Items)
+                if (product.Items.Count() > 0)
                 {
-                    var listImage = await _productImageRepository.GetAllDataByExpression(
-                        v => v.ProductID.Equals(itemPro.ProductID),
-                        1,
-                        10,
-                        null,
-                        isAscending: true,
-                        null
-                        );
-                    int totalRentals = 0;
-                    if (itemPro.PriceBuy == null)
+                    foreach (var itemPro in product.Items)
                     {
-                        var countRent = await _orderService.CountProductRentals(itemPro.ProductID.ToString(), 1, 10);
-                        if (countRent.IsSuccess == true)
+                        var listImage = await _productImageRepository.GetAllDataByExpression(
+                            v => v.ProductID.Equals(itemPro.ProductID),
+                            1,
+                            100,
+                            null,
+                            isAscending: true,
+                            null
+                            );
+                        int totalRentals = 0;
+                        if (itemPro.PriceBuy == null)
                         {
-                            var rentalData = countRent.Result as dynamic;
-                            totalRentals = rentalData.TotalRentals;
+                            var countRent = await _orderService.CountProductRentals(itemPro.ProductID.ToString(), 1, 100);
+                            if (countRent.IsSuccess == true)
+                            {
+                                var rentalData = countRent.Result as dynamic;
+                                totalRentals = rentalData.TotalRentals;
+                            }
+
                         }
 
+                        ProductResponse productResponse = new ProductResponse
+                        {
+                            DateOfManufacture = itemPro.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = itemPro.OriginalPrice,
+                            ProductID = itemPro.ProductID.ToString(),
+                            SerialNumber = itemPro.SerialNumber,
+                            SupplierID = itemPro.SupplierID?.ToString(),
+                            CategoryID = itemPro.CategoryID?.ToString(),
+                            ProductName = itemPro.ProductName,
+                            ProductDescription = itemPro.ProductDescription,
+                            PriceBuy = itemPro.PriceBuy,
+                            Brand = itemPro.Brand,
+                            Quality = itemPro.Quality,
+                            Status = itemPro.Status,
+                            Rating = itemPro.Rating,
+                            CreatedAt = itemPro.CreatedAt,
+                            UpdatedAt = itemPro.UpdatedAt,
+                            listImage = listImage.Items
+                        };
+                        listPro.Add(productResponse);
                     }
-
-                    ProductResponse productResponse = new ProductResponse
-                    {
-                        DateOfManufacture = itemPro.DateOfManufacture,
-                        CountRent = totalRentals,
-                        OriginalPrice = itemPro.OriginalPrice,
-                        ProductID = itemPro.ProductID.ToString(),
-                        SerialNumber = itemPro.SerialNumber,
-                        SupplierID = itemPro.SupplierID?.ToString(),
-                        CategoryID = itemPro.CategoryID?.ToString(),
-                        ProductName = itemPro.ProductName,
-                        ProductDescription = itemPro.ProductDescription,
-                        PriceBuy = itemPro.PriceBuy,
-                        Brand = itemPro.Brand,
-                        Quality = itemPro.Quality,
-                        Status = itemPro.Status,
-                        Rating = itemPro.Rating,
-                        CreatedAt = itemPro.CreatedAt,
-                        UpdatedAt = itemPro.UpdatedAt,
-                        listImage = listImage.Items
-                    };
-                    listPro.Add(productResponse);
                 }
+                
             }
             result.Result = listPro;
             result.IsSuccess = true;
@@ -2461,33 +2500,33 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             switch (accountExist.Job)
             {
                 case JobStatus.Student:
-                    filter = a => a.PriceBuy <= 1000000;
+                    filter = a => a.PriceBuy <= 1000000 && a.IsDisable == false;
                     break;
 
                 case JobStatus.CasualUser:
-                    filter = a => a.PriceBuy >= 1000000 && a.PriceBuy <= 3000000;
+                    filter = a => a.PriceBuy >= 1000000 && a.PriceBuy <= 3000000 && a.IsDisable == false;
                     break;
 
                 case JobStatus.Beginner:
-                    filter = a => a.PriceBuy >= 1000000 && a.PriceBuy <= 2000000;
+                    filter = a => a.PriceBuy >= 1000000 && a.PriceBuy <= 2000000 && a.IsDisable == false;
                     break;
 
                 case JobStatus.ContentCreator:
-                    filter = a => a.PriceBuy >= 6000000 && a.PriceBuy <= 10000000;
+                    filter = a => a.PriceBuy >= 6000000 && a.PriceBuy <= 10000000 && a.IsDisable == false;
                     break;
 
                 case JobStatus.TravelEnthusiast:
-                    filter = a => a.PriceBuy >= 3000000 && a.PriceBuy <= 60000000;
+                    filter = a => a.PriceBuy >= 3000000 && a.PriceBuy <= 60000000 && a.IsDisable == false;
                     break;
 
                 default:
-                    filter = a => a.PriceBuy >= 60000000; 
+                    filter = a => a.PriceBuy >= 60000000 && a.IsDisable == false;
                     break;
             }
             var product = await _productRepository.GetAllDataByExpression(
                  filter,
                  1,
-                 10,
+                 100,
                  null,
                  isAscending: true,
                  null
@@ -2495,9 +2534,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             foreach (var item in product.Items)
             {
                 var listImage = await _productImageRepository.GetAllDataByExpression(
-                        v => v.ProductID.Equals(item.ProductID),
+                        v => v.ProductID.Equals(item.ProductID) ,
                         1,
-                        10,
+                        100,
                         null,
                         isAscending: true,
                         null
@@ -2505,7 +2544,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 int totalRentals = 0;
                 if (item.PriceBuy == null)
                 {
-                    var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                    var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                     if (countRent.IsSuccess == true)
                     {
                         var rentalData = countRent.Result as dynamic;
@@ -2564,7 +2603,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var product = await _productRepository.GetAllDataByExpression(
                  filter,
                  1,
-                 10,
+                 100,
                  null,
                  isAscending: true,
                  null
@@ -2574,7 +2613,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var listImage = await _productImageRepository.GetAllDataByExpression(
                         v => v.ProductID.Equals(item.ProductID),
                         1,
-                        10,
+                        100,
                         null,
                         isAscending: true,
                         null
@@ -2582,7 +2621,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 int totalRentals = 0;
                 if (item.PriceBuy == null)
                 {
-                    var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 10);
+                    var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
                     if (countRent.IsSuccess == true)
                     {
                         var rentalData = countRent.Result as dynamic;

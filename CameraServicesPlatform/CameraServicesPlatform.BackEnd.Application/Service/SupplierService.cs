@@ -42,7 +42,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Supplier, bool>>? filter = null;
+                Expression<Func<Supplier, bool>>? filter = a => a.IsDisable == false;
 
                 var pagedResult = await _repository.GetAllDataByExpression(
                     filter,
@@ -81,7 +81,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var pagedResult = await _repository.GetAllDataByExpression(
-                    a => a.SupplierID == supplierId,
+                    a => a.SupplierID == supplierId ,
                     pageIndex,
                     pageSize,
                     orderBy: a => a.SupplierName,
@@ -112,7 +112,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 if (!string.IsNullOrEmpty(supplierNamefilter))
                 {
-                    filter = a => a.SupplierName.Contains(supplierNamefilter);
+                    filter = a => a.SupplierName.Contains(supplierNamefilter) && a.IsDisable == false;
                 }
 
                 var pagedResult = await _repository.GetAllDataByExpression(
@@ -165,7 +165,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 supplierExist.SupplierLogo = imgUrl;
                 supplierExist.BlockReason = supplierResponse.BlockReason;
                 supplierExist.BlockedAt = supplierResponse.BlockedAt;
-                if(supplierResponse.BlockedAt != null)
+                supplierExist.IsDisable = supplierResponse.IsDisable;
+                if (supplierResponse.BlockedAt != null)
                 {
                     supplierExist.UpdatedAt = DateTime.UtcNow;
                 }
@@ -210,9 +211,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     SupplierLogo = imgUrl,
                     BlockReason = null,
                     BlockedAt = null,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt =  DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow,
-                    //AccountBalance = supplierResponse.AccountBalance,
+                    IsDisable = true
                 };
 
                 await listSupplier.Insert(supplier);

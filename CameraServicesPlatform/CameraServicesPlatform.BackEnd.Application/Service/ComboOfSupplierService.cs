@@ -316,7 +316,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
 
-                var vietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow).AddDays(-3);
+                var vietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow).AddDays(3);
                 Expression<Func<ComboOfSupplier, bool>> filter = a =>
                     a.EndTime < vietnamTime;
 

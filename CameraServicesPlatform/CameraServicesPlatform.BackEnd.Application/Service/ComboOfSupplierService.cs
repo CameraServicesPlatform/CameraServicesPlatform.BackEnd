@@ -120,6 +120,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     ComboId = Guid.Parse(request.ComboId),
                     SupplierID = Guid.Parse(request.SupplierID),
+                    IsMailNearExpired = false,
+                    IsSendMailExpired = false,
                     IsDisable = false,
                     StartTime = newStartTime,
                     EndTime = newEndTime

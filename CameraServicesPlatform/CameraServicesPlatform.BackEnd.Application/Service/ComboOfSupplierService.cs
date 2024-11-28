@@ -242,61 +242,60 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 
                 foreach (var item in pagedResult.Items)
                 {
-                    item.IsDisable = true;
-                    _comboSupplierRepository.Update(item);
-                    var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == item.SupplierID);
-                    var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
-                    supplier.IsDisable = true;
-                    await _supplierRepository.Update(supplier);
-                    await _unitOfWork.SaveChangesAsync();
-                    var listProduct = await _productRepository.GetAllDataByExpression(
-                    x => x.SupplierID == item.SupplierID,
-                    pageIndex,
-                    pageSize,
-                    null,
-                    isAscending: true,
-                    null
-                    );
-                    var combo = await _comboRepository.GetById(item.ComboId);
-                    foreach (var items in listProduct.Items)
+                    if (item.IsSendMailExpired == false)
                     {
-                        items.IsDisable = true;
-                        _productRepository.Update(items);
+                        item.IsSendMailExpired = true;
+                        item.IsDisable = true;
+                        _comboSupplierRepository.Update(item);
+                        var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == item.SupplierID);
+                        var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
+                        supplier.IsDisable = true;
+                        await _supplierRepository.Update(supplier);
                         await _unitOfWork.SaveChangesAsync();
-                    }
-                    ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
-                    {
-                        ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
-                        ComboId = item.ComboId.ToString(),
-                        SupplierID = item.SupplierID.ToString(),
-                        StartTime = item.StartTime,
-                        EndTime = item.EndTime,
-                        IsDisable = true
-                    };
-                    listComboOfSupplier.Add(comboResponse);
-
-                    var products = await _productRepository.GetAllDataByExpression(
-                        p => p.SupplierID == supplier.SupplierID,
-                        1,
-                        int.MaxValue,
+                        var listProduct = await _productRepository.GetAllDataByExpression(
+                        x => x.SupplierID == item.SupplierID,
+                        pageIndex,
+                        pageSize,
                         null,
                         isAscending: true,
-                        null);
+                        null
+                        );
+                        var combo = await _comboRepository.GetById(item.ComboId);
+                        foreach (var items in listProduct.Items)
+                        {
+                            items.IsDisable = true;
+                            _productRepository.Update(items);
+                            await _unitOfWork.SaveChangesAsync();
+                        }
+                        ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
+                        {
+                            ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
+                            ComboId = item.ComboId.ToString(),
+                            SupplierID = item.SupplierID.ToString(),
+                            StartTime = item.StartTime,
+                            EndTime = item.EndTime,
+                            IsDisable = true
+                        };
+                        listComboOfSupplier.Add(comboResponse);
 
-                    foreach (var product in products.Items)
-                    {
-                        product.IsDisable = true;
-                        await _productRepository.Update(product);
+                        var products = await _productRepository.GetAllDataByExpression(
+                            p => p.SupplierID == supplier.SupplierID,
+                            1,
+                            int.MaxValue,
+                            null,
+                            isAscending: true,
+                            null);
+
+                        foreach (var product in products.Items)
+                        {
+                            product.IsDisable = true;
+                            await _productRepository.Update(product);
+                        }
+
+                        await SendComboPurchaseConfirmationEmail(supplierAccount, item, combo);                        
+                        await _unitOfWork.SaveChangesAsync();
                     }
-
-                    if(item.IsSendMailExpired == false)
-                    {
-                        await SendComboPurchaseConfirmationEmail(supplierAccount, item, combo);
-                        item.IsSendMailExpired = true;
-                        _comboSupplierRepository.Update(item);
-                    }
-                    await _unitOfWork.SaveChangesAsync();
-
+                    
                 }
                 result.Result = listComboOfSupplier;
                 result.IsSuccess = true;

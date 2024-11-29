@@ -335,7 +335,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     var infoParts = vnp_OrderInfo.Split(' ', 3);
 
                     string staffId = infoParts[0];
-                    string accountId = infoParts[1];
+                    string accountId = infoParts[0];
                     string transactionDescription = infoParts[2];
 
                     TransactionStatus status = vnp_ResponseCode == "00"

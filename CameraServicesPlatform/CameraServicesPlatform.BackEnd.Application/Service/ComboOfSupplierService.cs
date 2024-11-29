@@ -154,7 +154,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var paymentCombo = new CreateComboPaymentDTO
                 {
-                    AccountId = supplier.AccountID,
+                    AccountId = supplierAccount.Id,
                     Amount = (double)combo.ComboPrice,
                 };
                 

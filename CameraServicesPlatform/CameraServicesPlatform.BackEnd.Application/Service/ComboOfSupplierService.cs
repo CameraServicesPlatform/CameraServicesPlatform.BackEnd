@@ -263,9 +263,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         var combo = await _comboRepository.GetById(item.ComboId);
                         foreach (var items in listProduct.Items)
                         {
-                            items.IsDisable = true;
-                            _productRepository.Update(items);
-                            await _unitOfWork.SaveChangesAsync();
+                            if(items.IsDisable == false)
+                            {
+                                items.IsDisable = true;
+                                _productRepository.Update(items);
+                                await _unitOfWork.SaveChangesAsync();
+                            }
+                            
                         }
                         ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
                         {

@@ -290,7 +290,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-                throw new Exception("Order creation failed. Error: " + ex.Message);
+                throw new Exception("Refund creation failed. Error: " + ex.Message);
             }
 
             return result;
@@ -385,7 +385,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-                throw new Exception("Order creation failed. Error: " + ex.Message);
+                throw new Exception("Refund creation failed. Error: " + ex.Message);
             }
             return result;
         }
@@ -517,7 +517,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-                throw new Exception("Order creation failed. Error: " + ex.Message);
+                throw new Exception("Refund creation failed. Error: " + ex.Message);
             }
             return result;
         }
@@ -577,7 +577,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-                throw new Exception("Order creation failed. Error: " + ex.Message);
+                throw new Exception("Refund creation failed. Error: " + ex.Message);
             }
             return result;
         }
@@ -643,7 +643,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-                throw new Exception("Order creation failed. Error: " + ex.Message);
+                throw new Exception("Refund creation failed. Error: " + ex.Message);
             }
             return result;
         }
@@ -707,7 +707,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-                throw new Exception("Order creation failed. Error: " + ex.Message);
+                throw new Exception("Refund creation failed. Error: " + ex.Message);
             }
             return result;
         }

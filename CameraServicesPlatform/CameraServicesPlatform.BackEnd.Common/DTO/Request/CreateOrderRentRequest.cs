@@ -33,6 +33,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public bool? IsExtend { get; set; }
+        public bool? IsPayment { get; set; }
         public double? ReservationMoney { get; set; }
 
     }

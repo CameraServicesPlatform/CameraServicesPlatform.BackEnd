@@ -412,10 +412,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public Task<AppActionResult> UpdateComboOfSupplier(ComboOfSupplierUpdateDto Response)
-        {
-            throw new NotImplementedException();
-        }
+        
 
         private async Task SendComboPurchaseConfirmationEmail(Account supplierAccount, ComboOfSupplier combo, Combo comboDetails)
         {

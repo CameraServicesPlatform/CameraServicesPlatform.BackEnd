@@ -46,11 +46,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _comboOfSupplierService.GetComboOfSupplierNearExpired(pageIndex, pageSize);
         }
 
-        [HttpPut("update-combo")]
-        public async Task<AppActionResult> UpdateComboOfSupplier(ComboOfSupplierUpdateDto comboResponse)
-        {
-            return await _comboOfSupplierService.UpdateComboOfSupplier(comboResponse);
-        }
+        
 
     }
 }

@@ -738,6 +738,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 order.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 order.SupplierID = Guid.Parse(request.SupplierID);
+                order.ReservationMoney = 300000;
                 order.Id = request.AccountID;
                 order.OrderStatus = OrderStatus.Pending;
                 order.ShippingAddress = request.ShippingAddress;
@@ -892,7 +893,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var payment = new PaymentInformationRequest
                 {
                     AccountID = getAccount.Id,
-                    Amount = (double)order.Deposit,
+                    Amount = (double)order.ReservationMoney,
                     MemberName = $"{getAccount.FirstName} {getAccount.LastName}",
                     OrderID = order.OrderID.ToString(),
                     SupplierID = request.SupplierID,
@@ -1724,6 +1725,43 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 var pagedResult1 = await _orderRepository.GetAllDataByExpression(
                         x => x.SupplierID == OrderSupplierID,
+                        pageIndex,
+                        pageSize,
+                        includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
+
+                    );
+                var convertedResult1 = pagedResult1.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+
+                result.Result = convertedResult1;
+                result.IsSuccess = true;
+
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+
+        public async Task<AppActionResult> GetOrderStatusOfSupplier(string? SupplierID, OrderStatus status, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(SupplierID, out Guid OrderSupplierID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                if (OrderSupplierID == null)
+                {
+                    result = BuildAppActionResultError(result, "ID không được để tróng!");
+                    return result;
+                }
+                var pagedResult1 = await _orderRepository.GetAllDataByExpression(
+                        x => x.SupplierID == OrderSupplierID && x.OrderStatus == status,
                         pageIndex,
                         pageSize,
                         includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }

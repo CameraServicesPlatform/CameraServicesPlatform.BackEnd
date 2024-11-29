@@ -42,8 +42,12 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public virtual ICollection<OrderDetail>? OrderDetail { get; set; }
 
         public Transaction? Transaction { get; set; }
+        public Payment? Payment { get; set; }
 
         public bool? IsExtend { get; set; }
+        public bool? IsPayment { get; set; }
+        // Tiền giữ chỗ
+        public double? ReservationMoney { get; set; }   
 
     }
 }

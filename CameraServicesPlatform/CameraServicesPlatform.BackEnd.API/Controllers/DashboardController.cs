@@ -2,6 +2,7 @@
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace CameraServicesPlatform.BackEnd.API.Controllers
 {
@@ -30,7 +31,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpGet("best-selling-categories-by-supplier/{supplierId}")]
+        [HttpGet("best-selling-categories-by-supplier-id/{supplierId}")]
         public async Task<ActionResult<List<BestSellingCategoryDto>>> GetBestSellingCategoriesForSupplier(string supplierId, DateTime startDate, DateTime endDate)
         {
             try
@@ -59,7 +60,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpGet("get-month-order-cost-statistics/{supplierId}")]
+        [HttpGet("get-month-order-cost-statistics-by-supplier-id/{supplierId}")]
         public async Task<ActionResult<List<MonthlyOrderCostDto>>> GetMonthlyOrderCostStatisticsAsync(DateTime startDate, DateTime endDate)
         {
             try
@@ -73,7 +74,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpGet("get-account-order-statistics/{accountId}")]
+        [HttpGet("get-account-order-statistics-by-account-id/{accountId}")]
         public async Task<ActionResult<StaffOrderStatisticsDto>> GetStaffOrderStatisticsAsync(string accountId, DateTime startDate, DateTime endDate)
         {
             try
@@ -147,7 +148,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
 
         // payment
         [HttpGet("supplier-payment-statistics/{supplierId}")]
-        public async Task<IActionResult> GetSupplierPaymentStatistics(Guid supplierId, DateTime startDate, DateTime endDate)
+        public async Task<IActionResult> GetSupplierPaymentStatistics(string supplierId, DateTime startDate, DateTime endDate)
         {
             var result = await _dashboardService.GetSupplierPaymentStatisticsAsync(supplierId, startDate, endDate);
             return Ok(result);
@@ -162,7 +163,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
 
         // transaction
         [HttpGet("supplier-transaction-statistics/{supplierId}")]
-        public async Task<IActionResult> GetSupplierTransactionStatistics(Guid supplierId, DateTime startDate, DateTime endDate)
+        public async Task<IActionResult> GetSupplierTransactionStatistics(string supplierId, DateTime startDate, DateTime endDate)
         {
             var result = await _dashboardService.GetSupplierTransactionStatisticsAsync(supplierId, startDate, endDate);
             return Ok(result);
@@ -172,6 +173,46 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         public async Task<IActionResult> GetSystemTransactionStatistics(DateTime startDate, DateTime endDate)
         {
             var result = await _dashboardService.GetSystemTransactionStatisticsAsync(startDate, endDate);
+            return Ok(result);
+        }
+
+        [HttpGet("get-month-order-purchase-statistics")]
+        public async Task<IActionResult> GetMonthlyPurchaseOrderCostStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashboardService.GetMonthlyPurchaseOrderCostStatisticsAsync(startDate, endDate);
+            return Ok(result);
+        }
+        [HttpGet("get-month-order-rent-statistics")]
+        public async Task<IActionResult> GetMonthlyRentalOrderCostStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashboardService.GetMonthlyRentalOrderCostStatisticsAsync(startDate, endDate);
+            return Ok(result);
+        }
+        [HttpGet("get-all-month-order-cost-statistics")]
+        public async Task<IActionResult> GetAllMonthlyOrderCostStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashboardService.GetAllMonthlyOrderCostStatisticsAsync(startDate, endDate);
+            return Ok(result);
+        }
+        
+        [HttpGet("get-order-status-statistics-by-supplier-id/{supplierId}")]
+        public async Task<IActionResult> GetOrderStatusStatisticsBySupplierAsync(string supplierId)
+        {
+            var result = await _dashboardService.GetOrderStatusStatisticsBySupplierAsync(supplierId);
+            return Ok(result);
+        }
+
+        [HttpGet("get-order-status-statistics")]
+        public async Task<IActionResult> GetOrderStatusStatisticsAsync( )
+        {
+            var result = await _dashboardService.GetOrderStatusStatisticsAsync();
+            return Ok(result);
+        }
+
+        [HttpGet("get-system-total-money-statistics")]
+        public async Task<IActionResult> GetSystemTotalMoneyAsync()
+        {
+            var result = await _dashboardService.GetSystemTotalMoneyAsync();
             return Ok(result);
         }
     }

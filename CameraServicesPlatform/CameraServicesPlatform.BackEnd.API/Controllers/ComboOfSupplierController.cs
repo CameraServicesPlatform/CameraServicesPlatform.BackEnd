@@ -16,26 +16,26 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             _comboOfSupplierService = comboOfSupplierService;
         }
-        [HttpGet("get-all-combo")]
+        [HttpGet("get-all-combo-of-supplier")]
         public async Task<AppActionResult> GetAllComboOfSupplier(int pageIndex = 1, int pageSize = 100)
         {
             return await _comboOfSupplierService.GetAllComboOfSupplier(pageIndex, pageSize);
         }
 
-        [HttpGet("get-combo-by-combo-id")]
-        public async Task<AppActionResult> GetComboOfSupplierByComboId(string id, int pageIndex = 1, int pageSize = 100)
+        [HttpGet("get-combo-of-supplier-by-combo-supplier-id")]
+        public async Task<AppActionResult> GetComboOfSupplierByComboId(string comboSupplierId, int pageIndex = 1, int pageSize = 100)
         {
-            return await _comboOfSupplierService.GetComboOfSupplierByComboId(id, pageIndex, pageSize);
+            return await _comboOfSupplierService.GetComboOfSupplierByComboId(comboSupplierId, pageIndex, pageSize);
         }
 
-        [HttpPost("create-combo")]
+        [HttpPost("create-combo-of-supplier")]
         public async Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto request)
         {
             return await _comboOfSupplierService.CreateComboOfSupplier(request, HttpContext);
         }
         
 
-        [HttpPost("get-combo-expired")]
+        [HttpPost("get-combo-of-supplier-expired")]
         public async Task<AppActionResult> GetComboOfSupplierExpired (int pageIndex = 1, int pageSize = 100)
         {
             return await _comboOfSupplierService.GetComboOfSupplierExpired(pageIndex, pageSize);
@@ -46,7 +46,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _comboOfSupplierService.GetComboOfSupplierNearExpired(pageIndex, pageSize);
         }
 
-        [HttpPut("update-combo")]
+        [HttpPut("update-combo-of-supplier")]
         public async Task<AppActionResult> UpdateComboOfSupplier(ComboOfSupplierUpdateDto comboResponse)
         {
             return await _comboOfSupplierService.UpdateComboOfSupplier(comboResponse);

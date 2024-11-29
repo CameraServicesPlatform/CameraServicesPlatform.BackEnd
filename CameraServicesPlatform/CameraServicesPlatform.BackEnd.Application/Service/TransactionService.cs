@@ -24,6 +24,7 @@ using System.Linq.Expressions;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
+using static CameraServicesPlatform.BackEnd.Application.Service.OrderService;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -371,7 +372,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         AccountNumber = accountExist.Items[0].AccountNumber,
                         AccountHolder = accountExist.Items[0].AccountHolder,
                         OrderId = pagedResult.Items[0].OrderID.ToString(),
-                        TotalAmount = pagedResult.Items[0].TotalAmount
+                        RefundAmount = pagedResult.Items[0].TotalAmount
                     };
                     pagedResult.Items[0].OrderStatus = OrderStatus.Refund;
                     _orderRepository.Update(pagedResult.Items[0]);
@@ -503,7 +504,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         AccountNumber = accountExist.Items[0].AccountNumber,
                         AccountHolder = accountExist.Items[0].AccountHolder,
                         OrderId = pagedResult.Items[0].OrderID.ToString(),
-                        TotalAmount = pagedResult.Items[0].Deposit
+                        RefundAmount = pagedResult.Items[0].Deposit
                     };
                     pagedResult.Items[0].OrderStatus = OrderStatus.Completed;
                     _orderRepository.Update(pagedResult.Items[0]);
@@ -521,13 +522,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> CreateStaffRefundSupplier(StaffRefundDto response, HttpContext context)
+        public async Task<AppActionResult> CreateStaffRefundMember(StaffRefundDto response, HttpContext context)
         {
             var result = new AppActionResult();
             try
             {
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
-                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                var OrderExist = await _orderRepository.GetAllDataByExpression(
                     a => a.OrderID == Guid.Parse(response.OrderID),
                     1,
                     10,
@@ -535,41 +536,42 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-                if(pagedResult.Items[0].OrderStatus != OrderStatus.Completed)
+                if(OrderExist.Items[0].OrderStatus != OrderStatus.Completed)
                 {
                     result = BuildAppActionResultError(result, "Đơn hàng chưa hoàn thành nên không thể hoàn trả tiền giữ chỗ");
                     return result;
                 }
-                var supplierExist = await _supplierRepository.GetAllDataByExpression(
-                    a => a.SupplierID == pagedResult.Items[0].SupplierID,
-                    1,
-                    10,
-                    null,
-                    isAscending: true,
-                    null
-                );
-
+                
+                
                 var accountExist = await _accountRepository.GetAllDataByExpression(
-                    a => a.Id == supplierExist.Items[0].AccountID,
+                    a => a.Id == OrderExist.Items[0].Id,
                     1,
                     10,
                     null,
                     isAscending: true,
                     null
                 );
-                
-                    StaffRefundMemberDto staffRefundMemberDto = new StaffRefundMemberDto
-                    {
-                        BankName = accountExist.Items[0].BankName,
-                        AccountNumber = accountExist.Items[0].AccountNumber,
-                        AccountHolder = accountExist.Items[0].AccountHolder,
-                        OrderId = pagedResult.Items[0].OrderID.ToString(),
-                        TotalAmount = pagedResult.Items[0].Deposit
-                    };
-                    
-                    result.Result = staffRefundMemberDto;
-                
 
+                StaffRefundMemberDto staffRefundMemberDto = new StaffRefundMemberDto
+                {
+                    BankName = accountExist.Items[0].BankName,
+                    AccountNumber = accountExist.Items[0].AccountNumber,
+                    AccountHolder = accountExist.Items[0].AccountHolder,
+                    OrderId = OrderExist.Items[0].OrderID.ToString(),
+                    RefundAmount = 300000
+                };
+                HistoryTransaction historyTransaction = new HistoryTransaction
+                {
+                    HistoryTransactionId = Guid.NewGuid(),
+                    AccountID = OrderExist.Items[0].Id,
+                    StaffID = Guid.Parse(response.StaffId),
+                    Price = 300000,
+                    TransactionDescription = OrderExist.Items[0].OrderID.ToString(),
+                    Status = TransactionStatus.Success,
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
+                };
+                result.Result = staffRefundMemberDto;
+                
                 await Task.Delay(100);
                 await Task.Delay(100);
             }

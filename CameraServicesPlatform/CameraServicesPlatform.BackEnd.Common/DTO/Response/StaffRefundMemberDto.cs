@@ -13,6 +13,5 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string? AccountHolder { get; set; }
         public string OrderId { get; set; }
         public double? RefundAmount { get; set; }
-
     }
 }

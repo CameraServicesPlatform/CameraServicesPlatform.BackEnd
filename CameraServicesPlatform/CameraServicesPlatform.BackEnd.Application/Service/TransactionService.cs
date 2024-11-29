@@ -522,7 +522,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> CreateStaffRefundMember(StaffRefundDto response, HttpContext context)
+        public async Task<AppActionResult> CreateStaffRefundMemberRent(StaffRefundDto response, HttpContext context)
         {
             var result = new AppActionResult();
             try
@@ -536,9 +536,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-                if(OrderExist.Items[0].OrderStatus != OrderStatus.Completed)
+                if(OrderExist.Items[0].OrderStatus != OrderStatus.Completed || OrderExist.Items[0].OrderStatus != OrderStatus.Cancelled)
                 {
-                    result = BuildAppActionResultError(result, "Đơn hàng chưa hoàn thành nên không thể hoàn trả tiền giữ chỗ");
+                    result = BuildAppActionResultError(result, "Đơn hàng Không thể hoàn trả tiền giữ chỗ");
                     return result;
                 }
                 
@@ -551,7 +551,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-
+                
                 StaffRefundMemberDto staffRefundMemberDto = new StaffRefundMemberDto
                 {
                     BankName = accountExist.Items[0].BankName,
@@ -581,7 +581,136 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             return result;
         }
+        public async Task<AppActionResult> CreateStaffRefundSupplier(StaffRefundDto response, HttpContext context)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var OrderExist = await _orderRepository.GetAllDataByExpression(
+                    a => a.OrderID == Guid.Parse(response.OrderID),
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                if (OrderExist.Items[0].OrderStatus != OrderStatus.Completed || OrderExist.Items[0].OrderStatus != OrderStatus.Cancelled)
+                {
+                    result = BuildAppActionResultError(result, "Đơn hàng Không thể hoàn trả tiền giữ chỗ");
+                    return result;
+                }
 
+                var supplierExist = await _supplierRepository.GetAllDataByExpression(
+                    a => a.SupplierID == OrderExist.Items[0].SupplierID,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                var accountExist = await _accountRepository.GetAllDataByExpression(
+                    a => a.Id == supplierExist.Items[0].AccountID,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+
+                StaffRefundMemberDto staffRefundMemberDto = new StaffRefundMemberDto
+                {
+                    BankName = accountExist.Items[0].BankName,
+                    AccountNumber = accountExist.Items[0].AccountNumber,
+                    AccountHolder = accountExist.Items[0].AccountHolder,
+                    OrderId = OrderExist.Items[0].OrderID.ToString(),
+                    RefundAmount = OrderExist.Items[0].TotalAmount
+                };
+                HistoryTransaction historyTransaction = new HistoryTransaction
+                {
+                    HistoryTransactionId = Guid.NewGuid(),
+                    AccountID = supplierExist.Items[0].AccountID,
+                    StaffID = Guid.Parse(response.StaffId),
+                    Price = OrderExist.Items[0].TotalAmount,
+                    TransactionDescription = OrderExist.Items[0].OrderID.ToString(),
+                    Status = TransactionStatus.Success,
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
+                };
+                result.Result = staffRefundMemberDto;
+
+                await Task.Delay(100);
+                await Task.Delay(100);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Order creation failed. Error: " + ex.Message);
+            }
+            return result;
+        }
+        public async Task<AppActionResult> CreateStaffRefundMemberBuy(StaffRefundDto response, HttpContext context)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var paymentGatewayService = Resolve<IPaymentGatewayService>();
+                var OrderExist = await _orderRepository.GetAllDataByExpression(
+                    a => a.OrderID == Guid.Parse(response.OrderID) && a.IsPayment == true,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                if (OrderExist.Items[0].IsPayment == false)
+                {
+                    result = BuildAppActionResultError(result, "Đơn hàng chưa thanh toán trên nền tảng nên Không thể hoàn trả tiền mua");
+                    return result;
+                }
+                if ( OrderExist.Items[0].OrderStatus != OrderStatus.Cancelled)
+                {
+                    result = BuildAppActionResultError(result, "Đơn hàng đang trong thời gian xác nhận hoàn trả nên không thể hoàn tiền");
+                    return result;
+                }
+
+                
+                var accountExist = await _accountRepository.GetAllDataByExpression(
+                    a => a.Id == OrderExist.Items[0].Id,
+                    1,
+                    10,
+                    null,
+                    isAscending: true,
+                    null
+                );
+
+                StaffRefundMemberDto staffRefundMemberDto = new StaffRefundMemberDto
+                {
+                    BankName = accountExist.Items[0].BankName,
+                    AccountNumber = accountExist.Items[0].AccountNumber,
+                    AccountHolder = accountExist.Items[0].AccountHolder,
+                    OrderId = OrderExist.Items[0].OrderID.ToString(),
+                    RefundAmount = OrderExist.Items[0].TotalAmount
+                };
+                HistoryTransaction historyTransaction = new HistoryTransaction
+                {
+                    HistoryTransactionId = Guid.NewGuid(),
+                    AccountID = OrderExist.Items[0].Id,
+                    StaffID = Guid.Parse(response.StaffId),
+                    Price = OrderExist.Items[0].TotalAmount,
+                    TransactionDescription = OrderExist.Items[0].OrderID.ToString(),
+                    Status = TransactionStatus.Success,
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
+                };
+                result.Result = staffRefundMemberDto;
+
+                await Task.Delay(100);
+                await Task.Delay(100);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Order creation failed. Error: " + ex.Message);
+            }
+            return result;
+        }
         public async Task<AppActionResult> AddImagePayment(ImageProductAfterDTO dto)
         {
             IFirebaseService? firebaseService = Resolve<IFirebaseService>();
@@ -661,5 +790,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+
+        
     }
 }

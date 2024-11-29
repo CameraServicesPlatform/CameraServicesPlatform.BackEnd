@@ -436,7 +436,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid>("SupplierID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double?>("TotalAmount")
+                    b.Property<double>("TotalAmount")
                         .HasColumnType("float");
 
                     b.Property<DateTime>("UpdatedAt")

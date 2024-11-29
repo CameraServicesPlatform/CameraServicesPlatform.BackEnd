@@ -18,7 +18,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public DateTime OrderDate { get; set; }
         public OrderStatus OrderStatus { get; set; }
-        public double? TotalAmount { get; set; }
+        public double TotalAmount { get; set; }
         public OrderType OrderType { get; set; }
 
         // Rental properties

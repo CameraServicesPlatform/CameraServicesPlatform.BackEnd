@@ -16,7 +16,9 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetTransactionBySupplierId(string id, int pageIndex, int pageSize); 
         Task<AppActionResult> CreateSupplierOrMemberPayment(SupplierPaymentAgainDto supplierResponse, HttpContext context);
         Task<AppActionResult> CreateStaffRefundReturnDetail(StaffRefundDto supplierResponse, HttpContext context);
-        Task<AppActionResult> CreateStaffRefundMember(StaffRefundDto supplierResponse, HttpContext context);
+        Task<AppActionResult> CreateStaffRefundMemberRent(StaffRefundDto supplierResponse, HttpContext context); 
+        Task<AppActionResult> CreateStaffRefundMemberBuy(StaffRefundDto supplierResponse, HttpContext context);
+        Task<AppActionResult> CreateStaffRefundSupplier(StaffRefundDto supplierResponse, HttpContext context);
         Task<AppActionResult> CreateStaffRefundDeposit(StaffRefundDto supplierResponse, HttpContext context);
         Task<AppActionResult> CreateStaffRefundPurchuse(string historyTransaction, HttpContext context);
         Task<AppActionResult> CreateSupplierPaymentPurchuse(string historyTransaction, HttpContext context);

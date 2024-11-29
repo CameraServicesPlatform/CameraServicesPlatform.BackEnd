@@ -4,6 +4,7 @@ using CameraServicesPlatform.BackEnd.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    partial class CameraServicesPlatformDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241129090319_[Add-order-is-payment-payment]")]
+    partial class Addorderispaymentpayment
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -246,12 +249,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<bool>("IsDisable")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsMailNearExpired")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsSendMailExpired")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
@@ -423,9 +420,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<DateTime?>("RentalStartDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<double?>("ReservationMoney")
-                        .HasColumnType("float");
 
                     b.Property<DateTime?>("ReturnDate")
                         .HasColumnType("datetime2");

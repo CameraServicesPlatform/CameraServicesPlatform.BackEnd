@@ -53,7 +53,11 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.GetOrderOfSupplier(SupplierId, pageIndex, pageSize);
         }
-
+        [HttpGet("get-order-status-of-supplierId")]
+        public async Task<AppActionResult> GetOrderStatusByOfSupplier(string SupplierId, OrderStatus orderStatus, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetOrderStatusOfSupplier(SupplierId, orderStatus, pageIndex, pageSize);
+        }
         [HttpGet("get-count-of-product-rent")]
         public async Task<AppActionResult> CountProductRentals(string productId, int pageIndex = 1, int pageSize = 10)
         {

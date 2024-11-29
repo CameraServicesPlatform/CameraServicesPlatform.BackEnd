@@ -27,5 +27,9 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public RentalDurationUnit DurationUnit { get; set; }
         public int DurationValue { get; set; }
         public DateTime? ReturnDate { get; set; }
+        public bool? IsExtend { get; set; }
+        public bool? IsPayment { get; set; }
+        // Tiền giữ chỗ
+        public double? ReservationMoney { get; set; }
     }
 }

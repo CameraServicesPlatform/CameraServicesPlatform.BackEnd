@@ -389,6 +389,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                     if (vnp_ResponseCode == "00")
                     {
+
+                        orderDb.IsPayment = true;
                         orderDb.OrderStatus = OrderStatus.Payment;
                         _orderRepository.Update(orderDb);
                         await _unitOfWork.SaveChangesAsync();
@@ -485,6 +487,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         await _unitOfWork.SaveChangesAsync();
 
                         orderDb.OrderStatus = OrderStatus.PaymentFail;
+                        orderDb.IsPayment = true;
                         _orderRepository.Update(orderDb);
                         await _unitOfWork.SaveChangesAsync();
 

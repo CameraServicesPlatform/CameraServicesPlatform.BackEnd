@@ -19,5 +19,9 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public List<OrderDetailResponse> OrderDetails { get; set; }
         public double? Deposit { get; set; }
 
+        public bool? IsPayment { get; set; }
+        public double? ReservationMoney { get; set; }
+
+
     }
 }

@@ -23,9 +23,9 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-combo-of-supplier-by-combo-supplier-id")]
-        public async Task<AppActionResult> GetComboOfSupplierByComboId(string comboSupplierId, int pageIndex = 1, int pageSize = 100)
+        public async Task<AppActionResult> GetComboOfSupplierByComboSupplierId(string comboSupplierId, int pageIndex = 1, int pageSize = 100)
         {
-            return await _comboOfSupplierService.GetComboOfSupplierByComboId(comboSupplierId, pageIndex, pageSize);
+            return await _comboOfSupplierService.GetComboOfSupplierByComboSupplierId(comboSupplierId, pageIndex, pageSize);
         }
 
         [HttpPost("create-combo-of-supplier")]

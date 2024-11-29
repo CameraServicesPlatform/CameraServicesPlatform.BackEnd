@@ -366,7 +366,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         }
 
 
-        public async Task<AppActionResult> GetComboOfSupplierByComboId(string id, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetComboOfSupplierByComboSupplierId(string id, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -379,7 +379,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
-                    a => a.ComboId == comboSupplierId && a.IsDisable == false,
+                    a => a.ComboOfSupplierId == comboSupplierId && a.IsDisable == false,
                     pageIndex,
                     pageSize,
                     null,
@@ -394,6 +394,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
                 {
+                    ComboOfSupplierId = pagedResult.Items[0].ComboOfSupplierId.ToString(),
                     ComboId = pagedResult.Items[0].ComboId.ToString(),
                     SupplierID = pagedResult.Items[0].SupplierID.ToString(),
                     StartTime = pagedResult.Items[0].StartTime,

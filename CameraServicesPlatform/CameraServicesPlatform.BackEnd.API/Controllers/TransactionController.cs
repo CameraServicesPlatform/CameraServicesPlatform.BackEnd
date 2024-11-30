@@ -52,6 +52,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return Ok(await _transactionService.CreateStaffRefundMemberRent(supplierResponse, HttpContext));
         }
 
+        [HttpPost("create-staff-refund-return-detail")]
+        public async Task<IActionResult> CreateStaffRefundReturnDetail(StaffRefundDto supplierResponse)
+        {
+            return Ok(await _transactionService.CreateStaffRefundReturnDetail(supplierResponse, HttpContext));
+        }
+
         [HttpPost("create-staff-refund-member-buy")]
         public async Task<IActionResult> CreateStaffRefundMemberBuy(StaffRefundDto supplierResponse)
         {

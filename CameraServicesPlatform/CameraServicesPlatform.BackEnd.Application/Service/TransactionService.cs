@@ -595,12 +595,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-                if (OrderExist.Items[0].OrderStatus != OrderStatus.Completed || OrderExist.Items[0].OrderStatus != OrderStatus.Cancelled)
-                {
-                    result = BuildAppActionResultError(result, "");
-                    return result;
-                }
-
+                
                 var supplierExist = await _supplierRepository.GetAllDataByExpression(
                     a => a.SupplierID == OrderExist.Items[0].SupplierID,
                     1,

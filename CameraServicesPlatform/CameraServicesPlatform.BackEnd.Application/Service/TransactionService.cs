@@ -385,7 +385,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             catch (Exception ex)
             {
-                throw new Exception("Refund creation failed. Error: " + ex.Message);
+                throw new Exception();
             }
             return result;
         }
@@ -437,7 +437,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var historyTransactionExist = await _historyTransactionRepository.GetByExpression(p => p.HistoryTransactionId == Guid.Parse(historyTransaction));
                 if (historyTransactionExist == null)
                 {
-                    result = BuildAppActionResultError(result, $"Không tìm thấy giao dịch với id {historyTransaction}");
+                    result = BuildAppActionResultError(result, "");
                 }
                 else
                 {
@@ -538,7 +538,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 );
                 if(OrderExist.Items[0].OrderStatus != OrderStatus.Completed || OrderExist.Items[0].OrderStatus != OrderStatus.Cancelled)
                 {
-                    result = BuildAppActionResultError(result, "Đơn hàng Không thể hoàn trả tiền giữ chỗ");
+                    result = BuildAppActionResultError(result, "");
                     return result;
                 }
                 
@@ -597,7 +597,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 );
                 if (OrderExist.Items[0].OrderStatus != OrderStatus.Completed || OrderExist.Items[0].OrderStatus != OrderStatus.Cancelled)
                 {
-                    result = BuildAppActionResultError(result, "Đơn hàng Không thể hoàn trả tiền giữ chỗ");
+                    result = BuildAppActionResultError(result, "");
                     return result;
                 }
 
@@ -661,17 +661,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-                if (OrderExist.Items[0].IsPayment == false)
-                {
-                    result = BuildAppActionResultError(result, "Đơn hàng chưa thanh toán trên nền tảng nên Không thể hoàn trả tiền mua");
-                    return result;
-                }
-                if ( OrderExist.Items[0].OrderStatus != OrderStatus.Cancelled)
-                {
-                    result = BuildAppActionResultError(result, "Đơn hàng đang trong thời gian xác nhận hoàn trả nên không thể hoàn tiền");
-                    return result;
-                }
-
                 
                 var accountExist = await _accountRepository.GetAllDataByExpression(
                     a => a.Id == OrderExist.Items[0].Id,

@@ -241,7 +241,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var responses = Result.Items.Select(RD =>
                 {
-                    var response = _mapper.Map<ExtendResponse>(Result);
+                    var response = _mapper.Map<ExtendResponse>(RD);
                     response.ExtendId = RD.ExtendId.ToString();
                     response.OrderID = RD.OrderID.ToString();
                     return response;

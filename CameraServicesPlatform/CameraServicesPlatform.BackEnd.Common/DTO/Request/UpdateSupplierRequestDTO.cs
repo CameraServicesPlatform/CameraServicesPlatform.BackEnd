@@ -1,16 +1,14 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Models;
+﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
-namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
+namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 {
-    public class SupplierUpdateResponseDto
+    public class UpdateSupplierRequestDTO
     {
         public Guid SupplierID { get; set; }
 
@@ -25,11 +23,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string? ContactNumber { get; set; }
 
 
-        public IFormFile ? SupplierLogo { get; set; }
-
-        public string? BlockReason { get; set; }
-        public Boolean IsDisable { get; set; }
-
+        public IFormFile? SupplierLogo { get; set; }
 
     }
 }

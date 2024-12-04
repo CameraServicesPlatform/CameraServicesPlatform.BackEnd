@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
-    public class DashboardService: GenericBackendService, IDashboardService
+    public class DashboardService : GenericBackendService, IDashboardService
     {
         private readonly IRepository<Order> _orderRepository;
         private readonly IRepository<OrderDetail> _orderDetailRepository;
@@ -56,7 +56,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<SupplierOrderStatisticsDto> GetSupplierOrderStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(
-                x => x.SupplierID == Guid.Parse(supplierId) && x.OrderDate >= startDate && x.OrderDate <= endDate,
+                x => x.SupplierID == Guid.Parse(supplierId) || x.OrderDate >= startDate || x.OrderDate <= endDate,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -84,7 +84,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<StaffOrderStatisticsDto> GetStaffOrderStatisticsAsync(string accountId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(
-                x => x.Id == accountId && x.OrderDate >= startDate && x.OrderDate <= endDate,
+                x => x.Id == accountId || x.OrderDate >= startDate || x.OrderDate <= endDate,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -114,7 +114,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var orders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate && x.OrderDate <= endDate,
+                x => x.OrderDate >= startDate || x.OrderDate <= endDate,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -164,7 +164,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<List<BestSellingCategoryDto>> GetBestSellingCategoriesAsync(DateTime startDate, DateTime endDate)
         {
             var orders = await _orderRepository.GetAllDataByExpression(
-                o => o.OrderDate >= startDate && o.OrderDate <= endDate,
+                o => o.OrderDate >= startDate || o.OrderDate <= endDate,
                 1, int.MaxValue,
                  includes: new Expression<Func<Order, object>>[]
                     {
@@ -206,7 +206,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<List<BestSellingCategoryDto>> GetBestSellingCategoriesForSupplierAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             var orders = await _orderRepository.GetAllDataByExpression(
-                o => o.OrderDate >= startDate && o.OrderDate <= endDate && o.SupplierID == Guid.Parse(supplierId),
+                o => o.OrderDate >= startDate || o.OrderDate <= endDate || o.SupplierID == Guid.Parse(supplierId),
                 1, int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
                 {
@@ -373,7 +373,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy tất cả thanh toán thuộc về supplier trong khoảng thời gian xác định
             var payments = await _paymentRepository.GetAllDataByExpression(
-                filter: p => p.SupplierID == Guid.Parse(supplierId) && p.PaymentDate >= startDate && p.PaymentDate <= endDate && !p.IsDisable,
+                filter: p => p.SupplierID == Guid.Parse(supplierId) || p.PaymentDate >= startDate || p.PaymentDate <= endDate && !p.IsDisable,
                 pageNumber: 0,
                 pageSize: 0
             );
@@ -425,7 +425,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy tất cả các thanh toán trong hệ thống trong khoảng thời gian xác định
             var payments = await _paymentRepository.GetAllDataByExpression(
-                filter: p => p.PaymentDate >= startDate && p.PaymentDate <= endDate && !p.IsDisable,
+                filter: p => p.PaymentDate >= startDate || p.PaymentDate <= endDate || !p.IsDisable,
                 pageNumber: 0,
                 pageSize: 0
             );
@@ -489,7 +489,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy các giao dịch của supplier trong khoảng thời gian
             var transactions = await _transactionRepository.GetAllDataByExpression(
-                filter: t => t.Order.SupplierID == Guid.Parse(supplierId) && t.TransactionDate >= startDate && t.TransactionDate <= endDate,
+                filter: t => t.Order.SupplierID == Guid.Parse(supplierId) || t.TransactionDate >= startDate || t.TransactionDate <= endDate,
                 pageNumber: 0,
                 pageSize: 0,
                 includes: t => t.Order
@@ -553,7 +553,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy tất cả giao dịch trong hệ thống trong khoảng thời gian
             var transactions = await _transactionRepository.GetAllDataByExpression(
-                filter: t => t.TransactionDate >= startDate && t.TransactionDate <= endDate,
+                filter: t => t.TransactionDate >= startDate || t.TransactionDate <= endDate,
                 pageNumber: 0,
                 pageSize: 0,
                 includes: t => t.Order
@@ -630,7 +630,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var purchaseOrders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate && x.OrderDate <= endDate && x.OrderType == OrderType.Purchase,
+                x => x.OrderDate >= startDate || x.OrderDate <= endDate || x.OrderType == OrderType.Purchase,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -657,7 +657,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var rentalOrders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate && x.OrderDate <= endDate && x.OrderType == OrderType.Rental,
+                x => x.OrderDate >= startDate || x.OrderDate <= endDate || x.OrderType == OrderType.Rental,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -684,7 +684,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var rentalOrders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate && x.OrderDate <= endDate,
+                x => x.OrderDate >= startDate || x.OrderDate <= endDate,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]

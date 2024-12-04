@@ -28,6 +28,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _comboOfSupplierService.GetComboOfSupplierByComboSupplierId(comboSupplierId, pageIndex, pageSize);
         }
 
+        [HttpGet("get-combo-of-supplier-by-supplier-id")]
+        public async Task<AppActionResult> GetComboOfSupplierBySupplierId(string supplierId, int pageIndex , int pageSize)
+        {
+            return await _comboOfSupplierService.GetComboOfSupplierBySupplierId(supplierId, pageIndex, pageSize);
+        }
+
         [HttpPost("create-combo-of-supplier")]
         public async Task<AppActionResult> CreateComboOfSupplier(ComboOfSupplierCreateDto request)
         {

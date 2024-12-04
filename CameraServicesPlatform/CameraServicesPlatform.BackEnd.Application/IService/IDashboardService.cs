@@ -24,7 +24,7 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<SupplierTransactionStatisticsDto> GetSupplierTransactionStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate);
         Task<SystemTransactionStatisticsDto> GetSystemTransactionStatisticsAsync(DateTime startDate, DateTime endDate);
 
-        Task<List<OrderStatusStatisticsDto>> GetOrderStatusStatisticsBySupplierAsync(string supplierId);
+        Task<SupplierOrderStatisticsDto> GetOrderStatusStatisticsBySupplierAsync(string supplierId);
         Task<List<MonthlyOrderCostDto>> GetAllMonthlyOrderCostStatisticsAsync(DateTime startDate, DateTime endDate);
         Task<List<MonthlyOrderCostDto>> GetMonthlyRentalOrderCostStatisticsAsync(DateTime startDate, DateTime endDate);
         Task<List<MonthlyOrderCostDto>> GetMonthlyPurchaseOrderCostStatisticsAsync(DateTime startDate, DateTime endDate);

@@ -369,8 +369,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-
-        public async Task<AppActionResult> GetComboOfSupplierById(string id, int pageIndex, int pageSize)
+        
+        public async Task<AppActionResult> GetComboOfSupplierByComboSupplierId(string id, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -580,6 +580,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 SD.SubjectMail.COMBO_EXPIRED_CONFIRMATION,
                 emailMessage
             );
+        }
+
+        public Task<AppActionResult> GetComboBySupplierId(string supplierId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

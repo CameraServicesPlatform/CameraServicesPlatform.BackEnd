@@ -22,10 +22,10 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _comboOfSupplierService.GetAllComboOfSupplier(pageIndex, pageSize);
         }
 
-        [HttpGet("get-combo-of-supplier-by-combo-supplier-id")]
-        public async Task<AppActionResult> GetComboOfSupplierByComboSupplierId(string comboSupplierId, int pageIndex = 1, int pageSize = 100)
+        [HttpGet("get-combo-of-supplier-by-id")]
+        public async Task<AppActionResult> GetComboOfSupplierById(string comboSupplierId, int pageIndex = 1, int pageSize = 100)
         {
-            return await _comboOfSupplierService.GetComboOfSupplierByComboSupplierId(comboSupplierId, pageIndex, pageSize);
+            return await _comboOfSupplierService.GetComboOfSupplierById(comboSupplierId, pageIndex, pageSize);
         }
 
         [HttpPost("create-combo-of-supplier")]
@@ -35,18 +35,23 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
         
 
-        [HttpPost("get-combo-of-supplier-expired")]
+        [HttpGet("get-combo-of-supplier-expired")]
         public async Task<AppActionResult> GetComboOfSupplierExpired (int pageIndex = 1, int pageSize = 100)
         {
             return await _comboOfSupplierService.GetComboOfSupplierExpired(pageIndex, pageSize);
         }
-        [HttpPost("get-combo-near-expired")]
+        [HttpGet("get-combo-near-expired")]
         public async Task<AppActionResult> GetComboOfSupplierNearExpired(int pageIndex = 1, int pageSize = 100)
         {
             return await _comboOfSupplierService.GetComboOfSupplierNearExpired(pageIndex, pageSize);
         }
 
-        
+
+        [HttpGet("get-combo-by-supplier-id")]
+        public async Task<AppActionResult> GetComboBySupplierId(string supplierId)
+        {
+            return await _comboOfSupplierService.GetComboBySupplierId(supplierId);
+        }
 
     }
 }

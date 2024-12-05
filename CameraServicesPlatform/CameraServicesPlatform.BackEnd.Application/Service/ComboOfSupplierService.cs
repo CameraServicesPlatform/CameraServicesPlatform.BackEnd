@@ -370,7 +370,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         }
 
 
-        public async Task<AppActionResult> GetComboOfSupplierByComboSupplierId(string id, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetComboOfSupplierById(string id, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -416,8 +416,50 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+        public async Task<AppActionResult> GetComboBySupplierId(string supplierId)
+        {
+            var result = new AppActionResult();
 
-        
+            try
+            {
+                Expression<Func<ComboOfSupplier, bool>>? filter = a => a.SupplierID == Guid.Parse(supplierId);
+                var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
+                    filter,
+                    1,
+                    int.MaxValue,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                List<ComboOfSupplierResponse> listComboOfSupplier = new List<ComboOfSupplierResponse>();
+                foreach (var item in pagedResult.Items)
+                {
+
+                    ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
+                    {
+                        ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
+                        ComboId = item.ComboId.ToString(),
+                        SupplierID = item.SupplierID.ToString(),
+                        StartTime = item.StartTime,
+                        EndTime = item.EndTime,
+                        IsDisable = false
+
+                    };
+                    listComboOfSupplier.Add(comboResponse);
+                }
+
+                result.Result = listComboOfSupplier;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
 
         private async Task SendComboPurchaseConfirmationEmail(Account supplierAccount, ComboOfSupplier combo, Combo comboDetails)
         {

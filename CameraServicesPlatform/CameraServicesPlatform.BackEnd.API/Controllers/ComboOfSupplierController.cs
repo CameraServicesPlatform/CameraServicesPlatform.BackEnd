@@ -22,8 +22,8 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _comboOfSupplierService.GetAllComboOfSupplier(pageIndex, pageSize);
         }
 
-        [HttpGet("get-combo-of-supplier-by-id")]
-        public async Task<AppActionResult> GetComboOfSupplierById(string comboSupplierId, int pageIndex = 1, int pageSize = 100)
+        [HttpGet("get-combo-of-supplier-by-combo-supplier-id")]
+        public async Task<AppActionResult> GetComboOfSupplierByComboSupplierId(string comboSupplierId, int pageIndex = 1, int pageSize = 100)
         {
             return await _comboOfSupplierService.GetComboOfSupplierByComboSupplierId(comboSupplierId, pageIndex, pageSize);
         }

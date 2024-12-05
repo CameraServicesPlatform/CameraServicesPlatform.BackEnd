@@ -443,17 +443,24 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "Combo not exist");
                     return result;
                 }
-                ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
-                {
-                    ComboOfSupplierId = pagedResult.Items[0].ComboOfSupplierId.ToString(),
-                    ComboId = pagedResult.Items[0].ComboId.ToString(),
-                    SupplierID = pagedResult.Items[0].SupplierID.ToString(),
-                    StartTime = pagedResult.Items[0].StartTime,
-                    EndTime = pagedResult.Items[0].EndTime,
-                    IsDisable = pagedResult.Items[0].IsDisable
+                var listComboOfSupplier = new List<ComboOfSupplierResponse>();
 
-                };
-                result.Result = comboResponse;
+                foreach ( var item in pagedResult.Items)
+                {
+                    ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
+                    {
+                        ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
+                        ComboId = item.ComboId.ToString(),
+                        SupplierID = item.SupplierID.ToString(),
+                        StartTime = item.StartTime,
+                        EndTime = item.EndTime,
+                        IsDisable = item.IsDisable
+
+                    };
+                    listComboOfSupplier.Add(comboResponse);
+                }
+                
+                result.Result = listComboOfSupplier;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -582,9 +589,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             );
         }
 
-        public Task<AppActionResult> GetComboBySupplierId(string supplierId)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

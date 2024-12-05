@@ -53,11 +53,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
 
-        [HttpGet("get-combo-by-supplier-id")]
-        public async Task<AppActionResult> GetComboBySupplierId(string supplierId)
-        {
-            return await _comboOfSupplierService.GetComboBySupplierId(supplierId);
-        }
+        
 
     }
 }

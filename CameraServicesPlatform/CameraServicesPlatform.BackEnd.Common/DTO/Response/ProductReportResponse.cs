@@ -17,7 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 
         public string ProductID { get; set; }
 
-        public StatusType StatusType { get; set; }
+        public string StatusType { get; set; }
 
         public DateTime StartDate { get; set; } = DateTime.UtcNow;
 

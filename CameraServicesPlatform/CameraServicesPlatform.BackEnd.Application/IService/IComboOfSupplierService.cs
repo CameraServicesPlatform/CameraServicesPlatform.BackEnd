@@ -17,6 +17,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetComboBySupplierId(string supplierId);
 
         Task<AppActionResult> GetComboOfSupplierNearExpired(int pageIndex, int pageSize);
-        Task<AppActionResult> GetComboOfSupplierById(string id, int pageIndex, int pageSize);
+        Task<AppActionResult> GetComboOfSupplierByComboSupplierId(string id, int pageIndex, int pageSize);
+        Task<AppActionResult> GetComboOfSupplierBySupplierId(string id, int pageIndex, int pageSize);
+
     }
 }

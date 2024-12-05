@@ -15,7 +15,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetAllSupplier(int pageIndex, int pageSize);
         Task<AppActionResult> GetSupplierById(string id, int pageIndex, int pageSize);
         Task<AppActionResult> GetSupplierByName([FromQuery] string? filter, int pageIndex, int pageSize);
-        Task<AppActionResult> UpdateSupplier(SupplierUpdateResponseDto productResponse);
+        Task<AppActionResult> UpdateSupplier(UpdateSupplierRequestDTO supplierRequest);
+        Task<AppActionResult> BlockSupplier(SupplierUpdateResponseDto supplierResponse);
         Task<AppActionResult> CreateSupplier(SupplierResponseDto supplierResponse);
         Task<AppActionResult> DeleteSupplier(string supplierId);
     }

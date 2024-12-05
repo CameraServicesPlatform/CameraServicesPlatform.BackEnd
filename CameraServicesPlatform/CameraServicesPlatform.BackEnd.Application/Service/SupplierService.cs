@@ -35,8 +35,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+        public static class DateTimeHelper
+        {
+            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
-        
+            // Convert UTC DateTime to Vietnam Time
+            public static DateTime ToVietnamTime(DateTime utcDateTime)
+            {
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
+            }
+        }
+
+
         public async Task<AppActionResult> GetAllSupplier(int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
@@ -138,7 +148,65 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> UpdateSupplier(SupplierUpdateResponseDto supplierResponse)
+        public async Task<AppActionResult> UpdateSupplier(UpdateSupplierRequestDTO supplierRequest)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var supplierRepository = Resolve<IRepository<Supplier>>();
+
+                Supplier supplierExist = await supplierRepository.GetById(supplierRequest.SupplierID);
+
+                if (supplierExist == null)
+                {
+                    result.IsSuccess = false;
+                    return result;
+                }
+
+                var firebaseService = Resolve<IFirebaseService>();
+                string imageUrlLogo = null;
+                if (supplierRequest.SupplierLogo != null)
+                {
+
+                    if (supplierRequest.SupplierLogo != null && supplierRequest.SupplierLogo.ToString() != supplierExist.SupplierLogo)
+                    {
+                        if (!string.IsNullOrEmpty(supplierExist.SupplierLogo))
+                        {
+                            await firebaseService.DeleteFileFromFirebase(supplierExist.SupplierLogo);
+                        }
+
+                        var imgPathName = SD.FirebasePathName.SUPPLIER_PREFIX + $"{supplierExist.AccountID}{Guid.NewGuid()}.jpg";
+                        var imgUpload = await firebaseService.UploadFileToFirebase(supplierRequest.SupplierLogo, imgPathName);
+                        imageUrlLogo = imgUpload?.Result?.ToString();
+                    }
+                    supplierExist.SupplierLogo = imageUrlLogo;
+
+                }
+
+                supplierExist.SupplierName = supplierRequest.SupplierName;
+                supplierExist.SupplierDescription = supplierRequest.SupplierDescription;
+                supplierExist.SupplierAddress = supplierRequest.SupplierAddress;
+                supplierExist.ContactNumber = supplierRequest.ContactNumber;
+                supplierExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+
+
+                await supplierRepository.Update(supplierExist);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                result.Result = supplierExist;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> BlockSupplier(SupplierUpdateResponseDto supplierResponse)
         {
             AppActionResult result = new AppActionResult();
             try
@@ -154,24 +222,35 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 var firebaseService = Resolve<IFirebaseService>();
-                var pathName = SD.FirebasePathName.SUPPLIER_PREFIX + $"{supplierExist.AccountID}{Guid.NewGuid()}.jpg";
-                var upload = await firebaseService.UploadFileToFirebase(supplierResponse.SupplierLogo, pathName);
-                var imgUrl = upload.Result.ToString();
+                string imageUrlLogo = null;
+                if (supplierResponse.SupplierLogo != null)
+                {
+
+                    if (supplierResponse.SupplierLogo != null && supplierResponse.SupplierLogo.ToString() != supplierExist.SupplierLogo)
+                    {
+                        if (!string.IsNullOrEmpty(supplierExist.SupplierLogo))
+                        {
+                            await firebaseService.DeleteFileFromFirebase(supplierExist.SupplierLogo);
+                        }
+
+                        var imgPathName = SD.FirebasePathName.SUPPLIER_PREFIX + $"{supplierExist.AccountID}{Guid.NewGuid()}.jpg";
+                        var imgUpload = await firebaseService.UploadFileToFirebase(supplierResponse.SupplierLogo, imgPathName);
+                        imageUrlLogo = imgUpload?.Result?.ToString();
+                    }
+                    supplierExist.SupplierLogo = imageUrlLogo;
+
+                }
 
                 supplierExist.SupplierName = supplierResponse.SupplierName;
                 supplierExist.SupplierDescription = supplierResponse.SupplierDescription;
                 supplierExist.SupplierAddress = supplierResponse.SupplierAddress;
                 supplierExist.ContactNumber = supplierResponse.ContactNumber;
-                supplierExist.SupplierLogo = imgUrl;
                 supplierExist.BlockReason = supplierResponse.BlockReason;
-                supplierExist.BlockedAt = supplierResponse.BlockedAt;
+                supplierExist.BlockedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 supplierExist.IsDisable = supplierResponse.IsDisable;
-                if (supplierResponse.BlockedAt != null)
-                {
-                    supplierExist.UpdatedAt = DateTime.UtcNow;
-                }
-                
-                
+                supplierExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+
+
                 await supplierRepository.Update(supplierExist);
 
                 await _unitOfWork.SaveChangesAsync();
@@ -211,8 +290,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     SupplierLogo = imgUrl,
                     BlockReason = null,
                     BlockedAt = null,
-                    CreatedAt =  DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                     IsDisable = true
                 };
 

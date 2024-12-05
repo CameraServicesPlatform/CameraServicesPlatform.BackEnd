@@ -46,9 +46,15 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         
 
         [HttpPut("update-supplier")]
-        public async Task<AppActionResult> UpdateSupplier(SupplierUpdateResponseDto supplierResponse)
+        public async Task<AppActionResult> UpdateSupplier(UpdateSupplierRequestDTO supplierRequest)
         {
-            return await _supplierService.UpdateSupplier(supplierResponse);
+            return await _supplierService.UpdateSupplier(supplierRequest);
+        }
+
+        [HttpPut("block-supplier")]
+        public async Task<AppActionResult> BlockSupplier(SupplierUpdateResponseDto supplierResponse)
+        {
+            return await _supplierService.BlockSupplier(supplierResponse);
         }
 
         [HttpDelete("delete-supplier")]

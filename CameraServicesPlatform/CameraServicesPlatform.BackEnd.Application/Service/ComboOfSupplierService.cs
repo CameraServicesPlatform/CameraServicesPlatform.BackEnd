@@ -201,7 +201,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         SupplierID = item.SupplierID.ToString(),
                         StartTime = item.StartTime,
                         EndTime = item.EndTime,
-                        IsDisable = false
+                        IsDisable = item.IsDisable,
 
                     };
                     listComboOfSupplier.Add(comboResponse);
@@ -416,49 +416,55 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
-        public async Task<AppActionResult> GetComboBySupplierId(string supplierId)
-        {
-            var result = new AppActionResult();
 
+        public async Task<AppActionResult> GetComboOfSupplierBySupplierId(string id, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<ComboOfSupplier, bool>>? filter = a => a.SupplierID == Guid.Parse(supplierId);
+                if (!Guid.TryParse(id, out Guid SupplierId))
+                {
+                    result = BuildAppActionResultError(result, "Invalid Combo Supplier ID format.");
+                    result.IsSuccess = false;
+                    return result;
+                }
+
                 var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
-                    filter,
-                    1,
-                    int.MaxValue,
+                    a => a.SupplierID == SupplierId ,
+                    pageIndex,
+                    pageSize,
                     null,
                     isAscending: true,
                     null
                 );
-                List<ComboOfSupplierResponse> listComboOfSupplier = new List<ComboOfSupplierResponse>();
-                foreach (var item in pagedResult.Items)
+
+                if (pagedResult.Items.Count() == 0)
                 {
-
-                    ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
-                    {
-                        ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
-                        ComboId = item.ComboId.ToString(),
-                        SupplierID = item.SupplierID.ToString(),
-                        StartTime = item.StartTime,
-                        EndTime = item.EndTime,
-                        IsDisable = false
-
-                    };
-                    listComboOfSupplier.Add(comboResponse);
+                    result = BuildAppActionResultError(result, "Combo not exist");
+                    return result;
                 }
+                ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
+                {
+                    ComboOfSupplierId = pagedResult.Items[0].ComboOfSupplierId.ToString(),
+                    ComboId = pagedResult.Items[0].ComboId.ToString(),
+                    SupplierID = pagedResult.Items[0].SupplierID.ToString(),
+                    StartTime = pagedResult.Items[0].StartTime,
+                    EndTime = pagedResult.Items[0].EndTime,
+                    IsDisable = pagedResult.Items[0].IsDisable
 
-                result.Result = listComboOfSupplier;
+                };
+                result.Result = comboResponse;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
             {
-
                 result = BuildAppActionResultError(result, ex.Message);
             }
 
             return result;
         }
+
+
 
 
         private async Task SendComboPurchaseConfirmationEmail(Account supplierAccount, ComboOfSupplier combo, Combo comboDetails)

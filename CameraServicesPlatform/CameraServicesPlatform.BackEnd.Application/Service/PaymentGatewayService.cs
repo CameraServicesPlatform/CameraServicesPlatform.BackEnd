@@ -465,7 +465,40 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
                     if (vnp_ResponseCode != "00")
                     {
-                        var payment = new Payment
+
+                    orderDb.OrderStatus = OrderStatus.PaymentFail;
+                    _orderRepository.Update(orderDb);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    var productEntity = await _orderRepository.GetByExpression(
+                    x => x.OrderID == Guid.Parse(vnp_orderId),
+                    a => a.OrderDetail
+                    );
+
+                    if (productEntity != null && productEntity.OrderDetail != null)
+                    {
+                        foreach (var detail in productEntity.OrderDetail)
+                        {
+                            var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID);
+
+                            if (product != null)
+                            {
+                                if (orderDb.OrderType == OrderType.Purchase)
+                                {
+                                    product.Status = ProductStatusEnum.AvailableSell;
+                                    _productRepository.Update(product);
+                                }
+                                else
+                                {
+                                    product.Status = ProductStatusEnum.AvailableRent;
+                                    _productRepository.Update(product);
+                                }
+
+                            }
+                        }
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                    var payment = new Payment
                         {
                             PaymentID = Guid.NewGuid(),
                             OrderID = Guid.Parse(vnp_orderId),

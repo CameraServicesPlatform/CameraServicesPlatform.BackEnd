@@ -1859,6 +1859,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         OrderID = od.OrderID.ToString(),
                         ProductID = od.ProductID.ToString(),
                         ProductName = products.ProductName, 
+                        SerialNumber = products.SerialNumber,
                         ProductPrice = od.ProductPrice,
                         ProductQuality = od.ProductQuality,
                         Discount = od.Discount,

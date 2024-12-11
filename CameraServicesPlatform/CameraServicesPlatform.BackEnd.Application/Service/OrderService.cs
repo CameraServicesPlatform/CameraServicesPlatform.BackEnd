@@ -1781,16 +1781,43 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> GetOrderByAccountID(string AccountID, int pageIndex, int pageSize)
+        public async Task<AppActionResult> GetOrderOrderStatusByAccountID(string AccountID, OrderStatus orderStatus, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
                
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
-                    x => x.Id == AccountID,
+                    x => x.Id == AccountID && x.OrderStatus == orderStatus,
                     pageIndex,
                     pageSize, 
+                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
+
+                );
+
+                var convertedResult = pagedResult.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+
+                result.Result = convertedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetOrderByAccountID(string AccountID, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    x => x.Id == AccountID,
+                    pageIndex,
+                    pageSize,
                     includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
 
                 );

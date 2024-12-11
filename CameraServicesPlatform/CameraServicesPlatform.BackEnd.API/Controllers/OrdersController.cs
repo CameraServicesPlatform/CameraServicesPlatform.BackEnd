@@ -85,6 +85,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _orderService.GetOrderByAccountID(AccountID, pageIndex, pageSize);
         }
 
+        [HttpGet("get-order-order-status-of-account")]
+        public async Task<AppActionResult> GetOrderOrderStatusByAccountID(string AccountID, OrderStatus orderStatus, int pageIndex, int pageSize)
+        {
+            return await _orderService.GetOrderOrderStatusByAccountID(AccountID, orderStatus, pageIndex, pageSize);
+        }
+
         [HttpPost("create-order-buy")]
         public async Task<IActionResult> CreateOrder(CreateOrderBuyRequest request)
         {

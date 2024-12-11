@@ -6,6 +6,7 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Enum;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Delivery;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
@@ -162,7 +163,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
-                order.DeliveriesMethod = request.DeliveryMethod;
+                order.DeliveriesMethod = request.DeliveriesMethod;
 
                 // Retrieve product price and apply any voucher discount if applicable
                 var product = await _productRepository.GetById(productID);
@@ -279,7 +280,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
-                order.DeliveriesMethod = request.DeliveryMethod;
+                order.DeliveriesMethod = request.DeliveriesMethod;
 
                 // Retrieve product price and apply any voucher discount if applicable
 
@@ -553,7 +554,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.OrderStatus = OrderStatus.Pending;
                 order.ShippingAddress = request.ShippingAddress;
                 order.OrderType = OrderType.Rental;
-                order.DeliveriesMethod = request.DeliveryMethod;
+                order.DeliveriesMethod = request.DeliveriesMethod;
                 order.DurationValue = request.DurationValue;
                 order.DurationUnit = request.DurationUnit;
                 order.ShippingAddress = request.ShippingAddress;
@@ -743,7 +744,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.OrderStatus = OrderStatus.Pending;
                 order.ShippingAddress = request.ShippingAddress;
                 order.OrderType = OrderType.Rental;
-                order.DeliveriesMethod = request.DeliveryMethod;
+                order.DeliveriesMethod = request.DeliveriesMethod;
                 order.DurationValue = request.DurationValue;
                 order.DurationUnit = request.DurationUnit;
                 order.ShippingAddress = request.ShippingAddress;
@@ -1813,16 +1814,60 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-
+                // Step 1: Get the orders with OrderDetail included
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     x => x.OrderID == Guid.Parse(OrderId),
                     pageIndex,
                     pageSize,
-                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
-
+                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail } // Just include OrderDetail (without Product)
                 );
 
-                var convertedResult = pagedResult.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+                // Step 2: Get distinct ProductIds from OrderDetails
+                var productIds = pagedResult.Items
+                    .SelectMany(order => order.OrderDetail)
+                    .Select(od => od.ProductID)
+                    .Distinct()
+                    .ToList();
+
+                // Step 3: Load all Products associated with those ProductIds
+                var products = await _productRepository.GetByExpression(p => p.ProductID == productIds.FirstOrDefault());
+
+                // Step 4: Map the result, including ProductName into OrderDetailResponse
+                var convertedResult = pagedResult.Items.Select(order => new OrderResponse
+                {
+                    OrderID = order.OrderID.ToString(),
+                    AccountID = order.Id.ToString(),
+                    SupplierID = order.SupplierID.ToString(),
+                    OrderDate = order.OrderDate,
+                    OrderStatus = order.OrderStatus,
+                    TotalAmount = order.TotalAmount,
+                    OrderType = order.OrderType,
+                    ShippingAddress = order.ShippingAddress,
+                    DeliveriesMethod = order.DeliveriesMethod,
+                    Deposit = order.Deposit,
+                    RentalStartDate = order.RentalStartDate,
+                    RentalEndDate = order.RentalEndDate,
+                    DurationUnit = order.DurationUnit,
+                    DurationValue = order.DurationValue,
+                    ReturnDate = order.ReturnDate,
+                    IsPayment = order.IsPayment,
+                    ReservationMoney = order.ReservationMoney,
+
+                    OrderDetails = order.OrderDetail.Select(od => new OrderDetailResponse
+                    {
+                        OrderDetailsID = od.OrderDetailsID.ToString(),
+                        OrderID = od.OrderID.ToString(),
+                        ProductID = od.ProductID.ToString(),
+                        ProductName = products.ProductName, 
+                        ProductPrice = od.ProductPrice,
+                        ProductQuality = od.ProductQuality,
+                        Discount = od.Discount,
+                        ProductPriceTotal = od.ProductPriceTotal,
+                        PeriodRental = od.PeriodRental,
+                        CreatedAt = order.CreatedAt,
+                        UpdatedAt = order.UpdatedAt,
+                    }).ToList()
+                }).ToList();
 
                 result.Result = convertedResult;
                 result.IsSuccess = true;
@@ -1830,10 +1875,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             catch (Exception ex)
             {
                 result = BuildAppActionResultError(result, ex.Message);
+                // Optionally log the exception for debugging purposes
+                Console.WriteLine(ex.Message);
             }
 
             return result;
         }
+
 
         public async Task<AppActionResult> GetOrderByAccountID(string AccountID, int pageIndex, int pageSize)
         {

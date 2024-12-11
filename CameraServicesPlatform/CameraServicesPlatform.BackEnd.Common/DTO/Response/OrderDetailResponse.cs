@@ -17,7 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public double Discount { get; set; }
         public double ProductPriceTotal { get; set; } 
         public DateTime? PeriodRental { get; set; } 
-        public DateTime CreatedAt { get; set; } 
-        public DateTime UpdatedAt { get; set; } 
+        public DateTime? CreatedAt { get; set; } 
+        public DateTime? UpdatedAt { get; set; } 
     }
 }

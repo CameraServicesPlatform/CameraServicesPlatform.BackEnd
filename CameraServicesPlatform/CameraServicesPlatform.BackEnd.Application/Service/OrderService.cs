@@ -163,7 +163,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
-                order.DeliveriesMethod = request.DeliveriesMethod;
+                order.DeliveriesMethod = request.DeliveryMethod;
 
                 // Retrieve product price and apply any voucher discount if applicable
                 var product = await _productRepository.GetById(productID);
@@ -280,7 +280,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.SupplierID = Guid.Parse(request.SupplierID);
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
-                order.DeliveriesMethod = request.DeliveriesMethod;
+                order.DeliveriesMethod = request.DeliveryMethod;
 
                 // Retrieve product price and apply any voucher discount if applicable
 
@@ -554,7 +554,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.OrderStatus = OrderStatus.Pending;
                 order.ShippingAddress = request.ShippingAddress;
                 order.OrderType = OrderType.Rental;
-                order.DeliveriesMethod = request.DeliveriesMethod;
+                order.DeliveriesMethod = request.DeliveryMethod;
                 order.DurationValue = request.DurationValue;
                 order.DurationUnit = request.DurationUnit;
                 order.ShippingAddress = request.ShippingAddress;
@@ -744,7 +744,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.OrderStatus = OrderStatus.Pending;
                 order.ShippingAddress = request.ShippingAddress;
                 order.OrderType = OrderType.Rental;
-                order.DeliveriesMethod = request.DeliveriesMethod;
+                order.DeliveriesMethod = request.DeliveryMethod;
                 order.DurationValue = request.DurationValue;
                 order.DurationUnit = request.DurationUnit;
                 order.ShippingAddress = request.ShippingAddress;

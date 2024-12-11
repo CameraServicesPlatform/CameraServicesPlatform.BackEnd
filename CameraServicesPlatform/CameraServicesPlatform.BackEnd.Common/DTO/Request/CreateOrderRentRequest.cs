@@ -29,7 +29,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public int DurationValue { get; set; }
         public DateTime? ReturnDate { get; set; }
         //public List<OrderDetailRequest> OrderDetailRequests { get; set; } 
-        public DeliveryStatus? DeliveriesMethod { get; set; }
+        public DeliveryStatus? DeliveryMethod { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
         public bool? IsExtend { get; set; }

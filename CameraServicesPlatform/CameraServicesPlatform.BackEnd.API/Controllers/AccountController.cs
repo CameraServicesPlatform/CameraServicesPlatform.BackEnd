@@ -44,7 +44,7 @@ public class AccountController : ControllerBase
         return await _accountService.AddStaff(request);
     }
 
-    [HttpPost("get-account-by-userId/{id}")]
+    [HttpGet("get-account-by-userId/{id}")]
     public async Task<AppActionResult> GetAccountByUserId(string id)
     {
         return await _accountService.GetAccountByUserId(id);

@@ -241,10 +241,10 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _orderService.UpdateOrderStatusPaymentBySupplier(orderId);
         }
 
-        [HttpPut("cancel-order/{orderId}")]
-        public async Task<AppActionResult> CancelOrder(string orderId)
+        [HttpPut("cancel-order")]
+        public async Task<AppActionResult> CancelOrder(CancelOrderRequest cancelOrderRequest)
         {
-            return await _orderService.CancelOrder(orderId);
+            return await _orderService.CancelOrder(cancelOrderRequest);
         }
 
         [HttpPut("accept-cancel-order/{orderId}")]

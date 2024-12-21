@@ -43,7 +43,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public Transaction? Transaction { get; set; }
         public Payment? Payment { get; set; }
-
+        public string? CancelMessage { get; set; }
         public bool? IsExtend { get; set; }
         public bool? IsPayment { get; set; }
         // Tiền giữ chỗ

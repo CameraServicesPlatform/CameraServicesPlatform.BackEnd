@@ -358,129 +358,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        private async Task SendOrderConfirmationEmail(Account account, Account supplierAccount, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice)
-        {
-            IEmailService? emailService = Resolve<IEmailService>();
-
-            // Generate a string representation of the order detail with HTML line breaks
-            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
-                "   Hình thức đơn hàng: Mua<br />" +
-                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
-                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
-                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
-                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
-
-            // Invoice information template
-            var invoiceInfo =
-                "HÓA ĐƠN<br /><br />" +
-                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
-                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
-                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
-                "Khách hàng<br />" +
-                $"{account.FirstName}<br />" +
-                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
-                $"Email: {account.Email}<br />" +
-                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến tiệm lấy"}<br /><br />" +
-                "Nhà cung cấp<br />" +
-                $"Tên: {supplierAccount.FirstName}<br />" +
-                $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
-                $"Email: {supplierAccount.Email}<br />" +
-                $"Địa chỉ: {supplierAccount.Address}<br /><br />";
-
-            // Order summary and total
-            var orderSummary =
-                "=====================================<br />" +
-                "         CHI TIẾT HÓA ĐƠN<br />" +
-                "=====================================<br />" +
-                $"{orderDetailsString}<br />" +
-                "-------------------------------------<br />" +
-                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
-                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
-                "=====================================<br />";
-
-            var emailMessage =
-                $"Kính chào {firstName},<br /><br />" +
-                "Bạn vừa có đơn đặt hàng. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
-                invoiceInfo +
-                orderSummary +
-                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
-                "Trân trọng,<br />" +
-                "Đội ngũ Camera service platform";
-
-            // Send the email asynchronously and wait for completion
-             emailService.SendEmail(
-                email,
-                SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
-                emailMessage
-            );
-        }
-        public static class DateTimeHelper
-        {
-            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-
-            // Convert UTC DateTime to Vietnam Time
-            public static DateTime ToVietnamTime(DateTime utcDateTime)
-            {
-                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
-            }
-        }
-        private async Task SendOrderConfirmationEmailToSupplier(Account account, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice)
-        {
-            IEmailService? emailService = Resolve<IEmailService>();
-
-            // Generate a string representation of the order detail with HTML line breaks
-            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
-                "   Hình thức đơn hàng: Mua<br />" +
-                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
-                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
-                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
-                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
-
-            // Invoice information template
-            var invoiceInfo =
-                "HÓA ĐƠN<br /><br />" +
-                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
-                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
-                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
-                "Khách hàng<br />" +
-                $"{firstName}<br />" +
-                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
-                $"Email: {email}<br />" +
-                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến tiệm lấy."}<br /><br />" +
-                "Thông báo từ<br />" +
-                "Camera service platform Company<br />" +
-                "Điện thoại: 0862448677<br />" +
-                "Email: dan1314705@gmail.com<br />" +
-                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
-
-            // Order summary and total
-            var orderSummary =
-                "=====================================<br />" +
-                "         CHI TIẾT HÓA ĐƠN<br />" +
-                "=====================================<br />" +
-                $"{orderDetailsString}<br />" +
-                "-------------------------------------<br />" +
-                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
-                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
-                "=====================================<br />";
-
-            var emailMessage =
-                $"Kính chào {firstName},<br /><br />" +
-                "Cảm ơn quý khách đã tin tưởng sử dụng dịch vụ của chúng tôi. Dưới đây là thông tin hóa đơn chi tiết của quý khách:<br /><br />" +
-                invoiceInfo +
-                orderSummary +
-                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
-                "Trân trọng,<br />" +
-                "Đội ngũ Camera service platform";
-
-            // Send the email asynchronously and wait for completion
-            emailService.SendEmail(
-               email,
-               SD.SubjectMail.ORDER_CONFIRMATION,
-               emailMessage
-           );
-        }
-
+      
         public async Task<AppActionResult> PurchaseOrder(string orderId, HttpContext context)
         {
             var result = new AppActionResult();
@@ -1408,19 +1286,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
 
 
-        public async Task<AppActionResult> CancelOrder(string OrderID)
+        public async Task<AppActionResult> CancelOrder(CancelOrderRequest cancelOrderRequest)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                // Validate OrderID format
-                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                if (!Guid.TryParse(cancelOrderRequest.OrderID, out Guid OrderUpdateId))
                 {
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
 
-                // Retrieve the order from the repository
                 var order = await _orderRepository.GetById(OrderUpdateId);
                 if (order == null)
                 {
@@ -1436,20 +1312,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                // Update order status to Cancelled
                 order.OrderStatus = OrderStatus.Canceling;
+                order.CancelMessage = cancelOrderRequest.CancelMessage;
                 _orderRepository.Update(order);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Notify the supplier about the cancelled order
                 var supplier = await _supplierRepository.GetById(order.SupplierID);
                 var account = await _accountRepository.GetById(supplier.AccountID);
                 var orderDetail = await _orderDetailRepository.GetByExpression(x => x.OrderID == OrderUpdateId);
                 double totalOrderPrice = (double)order.TotalAmount;
 
-                await SendOrderCancelNotificationToSupplier(account, account.Email, account.FirstName, orderDetail, totalOrderPrice);
+                await SendOrderCancelNotificationToSupplier(account, account.Email, account.FirstName,order, orderDetail, totalOrderPrice);
 
-                // Prepare response data
                 var orderResponse = _mapper.Map<OrderResponse>(order);
                 orderResponse.AccountID = order.Id.ToString();
                 orderResponse.SupplierID = order.SupplierID.ToString();
@@ -1469,14 +1343,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                // Validate OrderID format
+                int TimeCancel = 24;
                 if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
                 {
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
 
-                // Retrieve the order from the repository
                 var order = await _orderRepository.GetById(OrderUpdateId);
                 if (order == null)
                 {
@@ -1484,20 +1357,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                // Check if the cancellation is within the allowed time frame (24 hours)
                 TimeSpan timeSinceOrderCreated = DateTime.UtcNow - order.CreatedAt;
-                if (timeSinceOrderCreated.TotalHours > 24)
+                if (timeSinceOrderCreated.TotalHours > TimeCancel)
                 {
                     result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau 24 giờ kể từ khi tạo!");
                     return result;
                 }
 
-                // Update order status to Cancelled
                 order.OrderStatus = OrderStatus.Cancelled;
                 _orderRepository.Update(order);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Notify the supplier about the cancelled order
                 var supplier = await _supplierRepository.GetById(order.SupplierID);
                 var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
                 var account = await _accountRepository.GetById(order.Id);
@@ -1531,7 +1401,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(100);
                 await SendOrderCancelConfirmationEmailForSupplierToSystem(account, account.Email, supplierAccount.Email, supplierAccount.FirstName, account.FirstName, orderDetail, totalOrderPrice);
 
-                // Prepare response data
                 var orderResponse = _mapper.Map<OrderResponse>(order);
                 orderResponse.AccountID = order.Id.ToString();
                 orderResponse.SupplierID = order.SupplierID.ToString();
@@ -1546,29 +1415,27 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        private async Task SendOrderCancelNotificationToSupplier(Account account, string supplierEmail, string customerFirstName, OrderDetail orderDetail, double totalOrderPrice)
+        private async Task SendOrderCancelNotificationToSupplier(Account account, string supplierEmail, string customerFirstName,Order order, OrderDetail orderDetail, double totalOrderPrice)
         {
             IEmailService? emailService = Resolve<IEmailService>();
 
-            // Generate a string representation of the order detail with HTML line breaks
             var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
                 $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
                 $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
                 $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
                 $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
 
-            // Invoice information for the cancellation notification
             var invoiceInfo =
                 "THÔNG BÁO HỦY ĐƠN HÀNG<br /><br />" +
                 $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
                 $"Ngày hủy: {DateTime.Now:dd/MM/yyyy}<br /><br />" +
+                $"Lý do hủy: {order.CancelMessage}<br />" +
                 "Thông tin khách hàng<br />" +
                 $"{customerFirstName}<br />" +
                 $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
                 $"Email: {account.Email}<br />" +
                 $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />";
 
-            // Order summary and total
             var orderSummary =
                 "=====================================<br />" +
                 "         CHI TIẾT ĐƠN HÀNG ĐÃ HỦY<br />" +
@@ -1814,25 +1681,21 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                // Step 1: Get the orders with OrderDetail included
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     x => x.OrderID == Guid.Parse(OrderId),
                     pageIndex,
                     pageSize,
-                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail } // Just include OrderDetail (without Product)
+                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail } 
                 );
 
-                // Step 2: Get distinct ProductIds from OrderDetails
                 var productIds = pagedResult.Items
                     .SelectMany(order => order.OrderDetail)
                     .Select(od => od.ProductID)
                     .Distinct()
                     .ToList();
 
-                // Step 3: Load all Products associated with those ProductIds
                 var products = await _productRepository.GetByExpression(p => p.ProductID == productIds.FirstOrDefault());
 
-                // Step 4: Map the result, including ProductName into OrderDetailResponse
                 var convertedResult = pagedResult.Items.Select(order => new OrderResponse
                 {
                     OrderID = order.OrderID.ToString(),
@@ -1933,146 +1796,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return totalPrice; 
         }
 
-        private async Task SendOrderRentConfirmationEmail(Account account, Account supplierAccount, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
-        {
-            IEmailService? emailService = Resolve<IEmailService>();
-            // Generate a string representation of the order detail with HTML line breaks
-            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
-                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
-                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
-                $"   Ngày thuê: {order.OrderDate}<br />" +
-                $"   Ngày nhận dự kiến: {order.RentalStartDate}<br />" +
-                $"   Ngày trả: {order.RentalEndDate}<br />" +
-                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
-                $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
-                $"   Thành tiền: {order.TotalAmount:N0} ₫<br />";
-
-            // Invoice information template
-            var invoiceInfo =
-                "HÓA ĐƠN<br /><br />" +
-                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
-                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
-                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
-                "Khách hàng<br />" +
-                $"{account.FirstName}<br />" +
-                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
-                $"Email: {account.Email}<br />" +
-                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến lấy"}<br /><br />" +
-                "Nhà cung cấp<br />" +
-                 $"Tên: {supplierAccount.FirstName}<br />" +
-                $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
-                $"Email: {supplierAccount.Email}<br />" +
-                $"Địa chỉ: {supplierAccount.Address}<br /><br />";
-
-            // Order summary and total
-            var orderSummary =
-                "=====================================<br />" +
-                "         CHI TIẾT HÓA ĐƠN<br />" +
-                "=====================================<br />" +
-                $"{orderDetailsString}<br />" +
-                "-------------------------------------<br />" +
-                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
-                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
-                "=====================================<br />";
-            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
-            for (int i = 0; i < contractTemplates.Count; i++)
-            {
-                var template = contractTemplates[i];
-                contractTemplatesString += $"<b>{i + 1}. {template.TemplateName}</b><br />";
-                contractTemplatesString += $"<i>Điều khoản hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
-                contractTemplatesString += $"<i>Chi tiết hợp đồng:</i> {template.TemplateDetails ?? "N/A"}<br />";
-                contractTemplatesString += $"<i>Chính sách phạt:</i> {template.PenaltyPolicy ?? "N/A"}<br /><br />";
-            }
-            var emailMessage =
-                $"Kính chào {account.FirstName},<br /><br />" +
-                $"Bạn vừa đặt hàng từ {firstName}. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
-                invoiceInfo +
-                orderSummary +
-                contractTemplatesString +
-                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
-                "Trân trọng,<br />" +
-                "Đội ngũ Camera service platform";
-
-            // Send email with contract templates attached
-            emailService.SendEmail(
-               email,
-               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
-               emailMessage
-               );
-        }
-
-        private async Task SendOrderRentConfirmationEmailSupplier(Account account, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
-        {
-            IEmailService? emailService = Resolve<IEmailService>();
-            // Generate a string representation of the order detail with HTML line breaks
-            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
-                 "   Hình thức: thuê<br />" +
-                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
-                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
-                $"   Ngày thuê: {order.OrderDate}<br />" +
-                $"   Ngày nhận dự kiến: {order.RentalStartDate}<br />" +
-                $"   Ngày trả: {order.RentalEndDate}<br />" +
-                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
-                $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
-                $"   Thành tiền: {order.TotalAmount:N0} ₫<br />";
-
-            // Invoice information template
-            var invoiceInfo =
-                "HÓA ĐƠN<br /><br />" +
-                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
-                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
-                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
-                "Khách hàng<br />" +
-                $"{account.FirstName}<br />" +
-                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
-                $"Email: {account.Email}<br />" +
-                $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
-                "Nhà cung cấp<br />" +
-                "Camera service platform Company<br />" +
-                "Điện thoại: 0862448677<br />" +
-                "Email: dan1314705@gmail.com<br />" +
-                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
-
-            // Order summary and total
-            var orderSummary =
-                "=====================================<br />" +
-                "         CHI TIẾT HÓA ĐƠN<br />" +
-                "=====================================<br />" +
-                $"{orderDetailsString}<br />" +
-                "-------------------------------------<br />" +
-                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
-                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
-                "=====================================<br />";
-            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
-            for (int i = 0; i < contractTemplates.Count; i++)
-            {
-                var template = contractTemplates[i];
-                contractTemplatesString += $"<b>{i + 1}. {template.TemplateName}</b><br />";
-                contractTemplatesString += $"<i>Nội dung hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
-                contractTemplatesString += $"<i>Chi tiết hợp đồng:</i> {template.TemplateDetails ?? "N/A"}<br />";
-                contractTemplatesString += $"<i>Chính sách phạt:</i> {template.PenaltyPolicy ?? "N/A"}<br /><br />";
-            }
-            var emailMessage =
-                $"Kính chào {firstName},<br /><br />" +
-                "Bạn vừa có đơn đặt hàng. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
-                invoiceInfo +
-                orderSummary +
-                contractTemplatesString +
-                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
-                "Trân trọng,<br />" +
-                "Đội ngũ Camera service platform";
-
-            // Prepare the list of attachment file paths
-          
-
-            // Send email with contract templates attached
-            emailService.SendEmail(
-               email,
-               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
-               emailMessage
-           );
-        }
-
+     
         private async Task<string> GenerateContractPdf(ContractTemplate template)
         {
 
@@ -2308,6 +2032,266 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
 
             return result;
+        }
+        private async Task SendOrderConfirmationEmail(Account account, Account supplierAccount, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                "   Hình thức đơn hàng: Mua<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{account.FirstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {account.Email}<br />" +
+                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến tiệm lấy"}<br /><br />" +
+                "Nhà cung cấp<br />" +
+                $"Tên: {supplierAccount.FirstName}<br />" +
+                $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
+                $"Email: {supplierAccount.Email}<br />" +
+                $"Địa chỉ: {supplierAccount.Address}<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+
+            var emailMessage =
+                $"Kính chào {firstName},<br /><br />" +
+                "Bạn vừa có đơn đặt hàng. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Send the email asynchronously and wait for completion
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
+               emailMessage
+           );
+        }
+        public static class DateTimeHelper
+        {
+            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+            // Convert UTC DateTime to Vietnam Time
+            public static DateTime ToVietnamTime(DateTime utcDateTime)
+            {
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
+            }
+        }
+        private async Task SendOrderConfirmationEmailToSupplier(Account account, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                "   Hình thức đơn hàng: Mua<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{firstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {email}<br />" +
+                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến tiệm lấy."}<br /><br />" +
+                "Thông báo từ<br />" +
+                "Camera service platform Company<br />" +
+                "Điện thoại: 0862448677<br />" +
+                "Email: dan1314705@gmail.com<br />" +
+                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+
+            var emailMessage =
+                $"Kính chào {firstName},<br /><br />" +
+                "Cảm ơn quý khách đã tin tưởng sử dụng dịch vụ của chúng tôi. Dưới đây là thông tin hóa đơn chi tiết của quý khách:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Send the email asynchronously and wait for completion
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION,
+               emailMessage
+           );
+        }
+        private async Task SendOrderRentConfirmationEmail(Account account, Account supplierAccount, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Ngày thuê: {order.OrderDate}<br />" +
+                $"   Ngày nhận dự kiến: {order.RentalStartDate}<br />" +
+                $"   Ngày trả: {order.RentalEndDate}<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
+                $"   Thành tiền: {order.TotalAmount:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{account.FirstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {account.Email}<br />" +
+                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến lấy"}<br /><br />" +
+                "Nhà cung cấp<br />" +
+                 $"Tên: {supplierAccount.FirstName}<br />" +
+                $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
+                $"Email: {supplierAccount.Email}<br />" +
+                $"Địa chỉ: {supplierAccount.Address}<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
+            for (int i = 0; i < contractTemplates.Count; i++)
+            {
+                var template = contractTemplates[i];
+                contractTemplatesString += $"<b>{i + 1}. {template.TemplateName}</b><br />";
+                contractTemplatesString += $"<i>Điều khoản hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
+                contractTemplatesString += $"<i>Chi tiết hợp đồng:</i> {template.TemplateDetails ?? "N/A"}<br />";
+                contractTemplatesString += $"<i>Chính sách phạt:</i> {template.PenaltyPolicy ?? "N/A"}<br /><br />";
+            }
+            var emailMessage =
+                $"Kính chào {account.FirstName},<br /><br />" +
+                $"Bạn vừa đặt hàng từ {firstName}. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                contractTemplatesString +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Send email with contract templates attached
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
+               emailMessage
+               );
+        }
+        private async Task SendOrderRentConfirmationEmailSupplier(Account account, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                 "   Hình thức: thuê<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Ngày thuê: {order.OrderDate}<br />" +
+                $"   Ngày nhận dự kiến: {order.RentalStartDate}<br />" +
+                $"   Ngày trả: {order.RentalEndDate}<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
+                $"   Thành tiền: {order.TotalAmount:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{account.FirstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {account.Email}<br />" +
+                $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
+                "Nhà cung cấp<br />" +
+                "Camera service platform Company<br />" +
+                "Điện thoại: 0862448677<br />" +
+                "Email: dan1314705@gmail.com<br />" +
+                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
+            for (int i = 0; i < contractTemplates.Count; i++)
+            {
+                var template = contractTemplates[i];
+                contractTemplatesString += $"<b>{i + 1}. {template.TemplateName}</b><br />";
+                contractTemplatesString += $"<i>Nội dung hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
+                contractTemplatesString += $"<i>Chi tiết hợp đồng:</i> {template.TemplateDetails ?? "N/A"}<br />";
+                contractTemplatesString += $"<i>Chính sách phạt:</i> {template.PenaltyPolicy ?? "N/A"}<br /><br />";
+            }
+            var emailMessage =
+                $"Kính chào {firstName},<br /><br />" +
+                "Bạn vừa có đơn đặt hàng. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                contractTemplatesString +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Prepare the list of attachment file paths
+
+
+            // Send email with contract templates attached
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
+               emailMessage
+           );
         }
 
         public async Task<AppActionResult> GetAllOrderBuy(int pageIndex, int pageSize)

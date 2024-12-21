@@ -50,7 +50,6 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetOrderOrderStatusByAccountID(string AccountID, OrderStatus orderStatus, int pageIndex, int pageSize);
 
         Task<AppActionResult> GetOrderOfAccountByOrderID(string OrderId, int pageIndex, int pageSize);
-        Task<AppActionResult> UpdateTimeCancel(CancelTimeUpdateRequest cancelTimeUpdateRequest);
 
     }
 }

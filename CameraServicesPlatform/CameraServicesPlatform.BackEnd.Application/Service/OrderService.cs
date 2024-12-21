@@ -11,6 +11,7 @@ using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models;
+using DinkToPdf;
 using Firebase.Auth;
 using Google.Apis.Util;
 using MailKit.Search;
@@ -46,6 +47,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Contract> _contractRepository;
         private readonly IRepository<Account> _accountRepository;
         private readonly IRepository<Supplier> _supplierRepository;
+        private readonly IRepository<SystemAdmin> _systemAdminRepository;
         private readonly IRepository<ContractTemplate> _contractTemplateRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -60,6 +62,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<OrderDetail> orderDetailRepository,
             IRepository<Product> productRepository,
             IRepository<Contract> contractRepository,
+            IRepository<SystemAdmin> systemAdminReposirory,
             IRepository<ContractTemplate> contractTemplateRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -76,6 +79,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _orderDetailRepository = orderDetailRepository;
             _productRepository = productRepository;
             _contractTemplateRepository = contractTemplateRepository;
+            _systemAdminRepository = systemAdminReposirory;
             _contractRepository = contractRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -1306,23 +1310,36 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                switch (order.CancelDurationUnit)
+                
+
+                DateTime timeNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+
+                var resultTimeCancel = await _systemAdminRepository.GetAllDataByExpression(
+                    filter: r => r.CancelVauleCreatedAt <= timeNow,
+                    pageNumber: 1,
+                    pageSize: 1,
+                    orderBy: r => r.CancelVauleCreatedAt,
+                    isAscending: false
+                );
+                string unit;
+                var latestSystemAdmin = resultTimeCancel.Items?.FirstOrDefault();
+                switch (latestSystemAdmin.CancelDurationUnit)
                 {
                     case CancelDurationUnit.Hour:
-                        TimeCancel = order.CancelVaule.Value;
+                        TimeCancel = latestSystemAdmin.CancelVaule.Value;
+                        unit = "giờ";
                         break;
                     case CancelDurationUnit.Day:
-                        TimeCancel = order.CancelVaule.Value * 24;
+                        TimeCancel = latestSystemAdmin.CancelVaule.Value * 24;
+                        unit = "ngày";
                         break;
                     default:
                         throw new InvalidOperationException("DurationUnit không hỗ trợ.");
                 }
-
-                DateTime timeNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 TimeSpan timeSinceOrderCreated = timeNow - order.CreatedAt;
                 if (timeSinceOrderCreated.TotalHours > TimeCancel)
                 {
-                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau "+ TimeCancel + order.CancelDurationUnit + " kể từ khi tạo!");
+                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau "+ TimeCancel +" "+ unit + " kể từ khi tạo!");
                     return result;
                 }
 
@@ -1352,67 +1369,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        public async Task<AppActionResult> UpdateTimeCancel(CancelTimeUpdateRequest cancelTimeUpdateRequest)
-        {
-            var result = new AppActionResult();
-
-            try
-            {
-                if (cancelTimeUpdateRequest.CancelVaule <= 0)
-                {
-                    return BuildAppActionResultError(result, "Giá trị thời gian hủy phải lớn hơn 0!");
-                }
-
-                Expression<Func<Order, bool>>? filter = null;
-
-                int pageNumber = 1;
-                int pageSize = int.MaxValue; 
-                PagedResult<Order> pagedOrders;
-
-                var allUpdateTasks = new List<Task>();
-
-                do
-                {
-                    pagedOrders = await _orderRepository.GetAllDataByExpression(
-                        filter: filter,
-                        pageNumber: pageNumber,
-                        pageSize: pageSize
-                    );
-
-                    if (pagedOrders?.Items == null || !pagedOrders.Items.Any())
-                    {
-                        break;
-                    }
-
-                    foreach (var order in pagedOrders.Items)
-                    {
-                        order.CancelDurationUnit = cancelTimeUpdateRequest.CancelDurationUnit;
-                        order.CancelVaule = cancelTimeUpdateRequest.CancelVaule;
-
-                        var updateTask = _orderRepository.Update(order); 
-                        allUpdateTasks.Add(updateTask);
-                    }
-
-                    pageNumber++; 
-                }
-                while (pagedOrders.Items.Count == pageSize); 
-
-                await Task.WhenAll(allUpdateTasks);
-
-                await _unitOfWork.SaveChangesAsync();
-
-                result.IsSuccess = true;
-                result.Result = "Cập nhật thời gian hủy thành công cho tất cả các đơn hàng!";
-            }
-            catch (Exception ex)
-            {
-                string errorMessage = $"Đã xảy ra lỗi khi cập nhật thời gian hủy: {ex.Message}";
-                result = BuildAppActionResultError(result, errorMessage);
-            }
-
-            return result;
-        }
-
+       
         public async Task<AppActionResult> AcceptCancelOrder(string OrderID)
         {
             AppActionResult result = new AppActionResult();
@@ -1431,11 +1388,35 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "Đơn hàng không tồn tại!");
                     return result;
                 }
+                DateTime timeNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
 
-                TimeSpan timeSinceOrderCreated = DateTime.UtcNow - order.CreatedAt;
+                var resultAcceptCancel = await _systemAdminRepository.GetAllDataByExpression(
+                   filter: r => r.CancelAcceptVauleCreatedAt <= timeNow,
+                   pageNumber: 1,
+                   pageSize: 1,
+                   orderBy: r => r.CancelAcceptVauleCreatedAt,
+                   isAscending: false
+               );
+
+                var latestSystemAdmin = resultAcceptCancel.Items?.FirstOrDefault();
+                string unit;
+                switch (latestSystemAdmin.CancelAcceptDurationUnit)
+                {
+                    case CancelDurationUnit.Hour:
+                        TimeCancel = latestSystemAdmin.CancelAcceptVaule.Value;
+                        unit = "giờ";
+                        break;
+                    case CancelDurationUnit.Day:
+                        TimeCancel = latestSystemAdmin.CancelAcceptVaule.Value * 24;
+                        unit = "ngày";
+                        break;
+                    default:
+                        throw new InvalidOperationException("DurationUnit không hỗ trợ.");
+                }
+                TimeSpan timeSinceOrderCreated = timeNow - order.CreatedAt;
                 if (timeSinceOrderCreated.TotalHours > TimeCancel)
                 {
-                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau 24 giờ kể từ khi tạo!");
+                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau "+ TimeCancel + " " + unit +" kể từ khi tạo!");
                     return result;
                 }
 
@@ -1661,23 +1642,82 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
-                if (OrderSupplierID == null)
+                if (OrderSupplierID == Guid.Empty)
                 {
-                    result = BuildAppActionResultError(result, "ID không được để tróng!");
+                    result = BuildAppActionResultError(result, "ID không được để trống!");
                     return result;
                 }
-                var pagedResult1 = await _orderRepository.GetAllDataByExpression(
-                        x => x.SupplierID == OrderSupplierID,
-                        pageIndex,
-                        pageSize,
-                        includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
 
-                    );
-                var convertedResult1 = pagedResult1.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+                // Lấy dữ liệu đơn hàng của nhà cung cấp
+                var pagedResult1 = await _orderRepository.GetAllDataByExpression(
+                    x => x.SupplierID == OrderSupplierID,
+                    pageIndex,
+                    pageSize,
+                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
+                );
+
+                var orders = pagedResult1.Items;
+
+                if (orders == null || !orders.Any())
+                {
+                    result = BuildAppActionResultError(result, "Không có đơn hàng nào cho nhà cung cấp này!");
+                    return result;
+                }
+
+                DateTime timeNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+
+                var resultAcceptCancel = await _systemAdminRepository.GetAllDataByExpression(
+                    filter: r => r.CancelAcceptVauleCreatedAt <= timeNow,
+                    pageNumber: 1,
+                    pageSize: 1,
+                    orderBy: r => r.CancelAcceptVauleCreatedAt,
+                    isAscending: false
+                );
+
+                var latestSystemAdmin = resultAcceptCancel.Items?.FirstOrDefault();
+                if (latestSystemAdmin == null || latestSystemAdmin.CancelAcceptVaule == null)
+                {
+                    result = BuildAppActionResultError(result, "Không tìm thấy quy định hủy đơn hàng!");
+                    return result;
+                }
+
+                int TimeCancel;
+                string unit;
+                switch (latestSystemAdmin.CancelAcceptDurationUnit)
+                {
+                    case CancelDurationUnit.Hour:
+                        TimeCancel = latestSystemAdmin.CancelAcceptVaule.Value;
+                        unit = "giờ";
+                        break;
+                    case CancelDurationUnit.Day:
+                        TimeCancel = latestSystemAdmin.CancelAcceptVaule.Value * 24;
+                        unit = "ngày";
+                        break;
+                    default:
+                        throw new InvalidOperationException("DurationUnit không hỗ trợ.");
+                }
+
+                foreach (var order in orders)
+                {
+                    if (order.OrderStatus == OrderStatus.Canceling)
+                    {
+                        TimeSpan timeSinceOrderCreated = timeNow - order.CreatedAt;
+                        if (timeSinceOrderCreated.TotalHours > TimeCancel)
+                        {
+                            order.OrderStatus = OrderStatus.Cancelled;
+                            await _orderRepository.Update(order);
+                            await _unitOfWork.SaveChangesAsync();
+
+                            result = BuildAppActionResultError(result,
+                                $"Không thể hủy đơn hàng sau {TimeCancel} {unit} kể từ khi tạo!");
+                        }
+                    }
+                }
+
+                var convertedResult1 = orders.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
 
                 result.Result = convertedResult1;
                 result.IsSuccess = true;
-
             }
             catch (Exception ex)
             {
@@ -1686,6 +1726,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+
 
 
         public async Task<AppActionResult> GetOrderStatusOfSupplier(string? SupplierID, OrderStatus status, int pageIndex, int pageSize)

@@ -9,7 +9,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 {
     public class CancelTimeUpdateRequest
     {
-        public CancelDurationUnit CancelDurationUnit { get; set; }
-        public int CancelVaule { get; set; }
+        public CancelDurationUnit? CancelDurationUnit { get; set; }
+        public int? CancelVaule { get; set; }
     }
 }

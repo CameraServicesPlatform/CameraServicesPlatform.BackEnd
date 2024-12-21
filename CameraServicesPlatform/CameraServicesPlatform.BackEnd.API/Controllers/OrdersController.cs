@@ -193,6 +193,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _orderService.UpdateOrderStatusCompletedBySupplier(orderId);
         }
 
+        [HttpPut("system-update-time-cancel")]
+        public async Task<AppActionResult> UpdateTimeCancel(CancelTimeUpdateRequest cancelTimeUpdateRequest)
+        {
+            return await _orderService.UpdateTimeCancel(cancelTimeUpdateRequest);
+        }
+
         [HttpPut("update-order-status-Shipped/{orderId}")]
         public async Task<AppActionResult> UpdateOrderStatusShippedBySupplier(string orderId)
         {

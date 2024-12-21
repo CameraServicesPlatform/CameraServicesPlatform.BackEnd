@@ -47,6 +47,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Data
         public DbSet<ComboOfSupplier> ComboOfSuppliers { get; set; }
         public DbSet<Extend> Extends { get; set; }
 
+        public DbSet<SystemAdmin> SystemAdmins { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

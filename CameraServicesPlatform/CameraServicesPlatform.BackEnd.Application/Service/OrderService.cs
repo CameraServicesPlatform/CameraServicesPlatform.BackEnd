@@ -618,7 +618,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 order.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 order.SupplierID = Guid.Parse(request.SupplierID);
-                order.ReservationMoney = 300000;
+                order.ReservationMoney = request.ReservationMoney;
                 order.Id = request.AccountID;
                 order.OrderStatus = OrderStatus.Pending;
                 order.ShippingAddress = request.ShippingAddress;

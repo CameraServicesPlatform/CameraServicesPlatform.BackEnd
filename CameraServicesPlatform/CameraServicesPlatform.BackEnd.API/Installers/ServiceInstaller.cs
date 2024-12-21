@@ -57,6 +57,8 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IExtendService, ExtendService>();
         services.AddScoped<IComboService, ComboService>();
         services.AddScoped<IComboOfSupplierService, ComboOfSupplierService>();
+        services.AddScoped<ISystemAdminService, SystemAdminService>();
+
     }
 
 }

@@ -117,7 +117,10 @@ public class MappingConfig
             // map Extend
             config.CreateMap<CreateExtendRequest, Extend>();
             config.CreateMap<Extend, ExtendResponse>();
+            // map SystemAdmin
 
+            config.CreateMap<SystemAdminRequestDTO, SystemAdmin>();
+            config.CreateMap<SystemAdmin, SystemAdminResponseDTO>();
 
 
 

@@ -239,8 +239,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 foreach (var detail in order.OrderDetail)
                 {
-                    var product = await _productRepository.GetById(detail.ProductID);
-                    if (product != null && product.Category != null) // Add null check for product.Category
+                    var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID, x => x.Category);
+                    if (product != null && product.CategoryID != null) // Add null check for product.Category
                     {
                         var categoryId = product.CategoryID.ToString();
 

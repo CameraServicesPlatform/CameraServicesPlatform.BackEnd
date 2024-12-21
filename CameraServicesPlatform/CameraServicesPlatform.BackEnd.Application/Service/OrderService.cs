@@ -16,6 +16,7 @@ using Google.Apis.Util;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Identity.Client;
+using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using System;
@@ -1291,6 +1292,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
+                int TimeCancel;
                 if (!Guid.TryParse(cancelOrderRequest.OrderID, out Guid OrderUpdateId))
                 {
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
@@ -1304,11 +1306,23 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                // Check if the cancellation is within the allowed time frame (24 hours)
-                TimeSpan timeSinceOrderCreated = DateTime.UtcNow - order.CreatedAt;
-                if (timeSinceOrderCreated.TotalHours > 24)
+                switch (order.CancelDurationUnit)
                 {
-                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau 24 giờ kể từ khi tạo!");
+                    case CancelDurationUnit.Hour:
+                        TimeCancel = order.CancelVaule.Value;
+                        break;
+                    case CancelDurationUnit.Day:
+                        TimeCancel = order.CancelVaule.Value * 24;
+                        break;
+                    default:
+                        throw new InvalidOperationException("DurationUnit không hỗ trợ.");
+                }
+
+                DateTime timeNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                TimeSpan timeSinceOrderCreated = timeNow - order.CreatedAt;
+                if (timeSinceOrderCreated.TotalHours > TimeCancel)
+                {
+                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau "+ TimeCancel + order.CancelDurationUnit + " kể từ khi tạo!");
                     return result;
                 }
 
@@ -1335,6 +1349,67 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateTimeCancel(CancelTimeUpdateRequest cancelTimeUpdateRequest)
+        {
+            var result = new AppActionResult();
+
+            try
+            {
+                if (cancelTimeUpdateRequest.CancelVaule <= 0)
+                {
+                    return BuildAppActionResultError(result, "Giá trị thời gian hủy phải lớn hơn 0!");
+                }
+
+                Expression<Func<Order, bool>>? filter = null;
+
+                int pageNumber = 1;
+                int pageSize = int.MaxValue; 
+                PagedResult<Order> pagedOrders;
+
+                var allUpdateTasks = new List<Task>();
+
+                do
+                {
+                    pagedOrders = await _orderRepository.GetAllDataByExpression(
+                        filter: filter,
+                        pageNumber: pageNumber,
+                        pageSize: pageSize
+                    );
+
+                    if (pagedOrders?.Items == null || !pagedOrders.Items.Any())
+                    {
+                        break;
+                    }
+
+                    foreach (var order in pagedOrders.Items)
+                    {
+                        order.CancelDurationUnit = cancelTimeUpdateRequest.CancelDurationUnit;
+                        order.CancelVaule = cancelTimeUpdateRequest.CancelVaule;
+
+                        var updateTask = _orderRepository.Update(order); 
+                        allUpdateTasks.Add(updateTask);
+                    }
+
+                    pageNumber++; 
+                }
+                while (pagedOrders.Items.Count == pageSize); 
+
+                await Task.WhenAll(allUpdateTasks);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                result.IsSuccess = true;
+                result.Result = "Cập nhật thời gian hủy thành công cho tất cả các đơn hàng!";
+            }
+            catch (Exception ex)
+            {
+                string errorMessage = $"Đã xảy ra lỗi khi cập nhật thời gian hủy: {ex.Message}";
+                result = BuildAppActionResultError(result, errorMessage);
+            }
+
             return result;
         }
 

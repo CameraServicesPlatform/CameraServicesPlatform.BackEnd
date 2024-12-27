@@ -289,13 +289,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             null,
                             isAscending: true,
                             null);
-
-                        foreach (var product in products.Items)
+                        if (products != null)
                         {
-                            product.IsDisable = true;
-                            await _productRepository.Update(product);
+                            foreach (var product in products.Items)
+                            {
+                                product.IsDisable = true;
+                                await _productRepository.Update(product);
+                            }
                         }
-
                         await SendComboPurchaseConfirmationEmail(supplierAccount, item, combo);                        
                         await _unitOfWork.SaveChangesAsync();
                     }
@@ -483,19 +484,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
                 $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
                 $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
-                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy}<br />" +
-                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy}<br />";
+                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy HH:mm}<br />" +
+                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy HH:mm}<br />";
 
             // Invoice information template
             var invoiceInfo =
                 "HÓA ĐƠN XÁC NHẬN MUA COMBO<br /><br />" +
-                $"Mã hóa đơn: #{Guid.NewGuid()}<br />" +
-                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Mã hóa đơn: #{combo.ComboOfSupplierId}<br />" +
                 "Thông tin nhà cung cấp:<br />" +
                 $"<b>Tên:</b> {supplierAccount.FirstName} {supplierAccount.LastName}<br />" +
                 $"<b>Email:</b> {supplierAccount.Email}<br />" +
                 $"<b>Số điện thoại:</b> {supplierAccount.PhoneNumber ?? "N/A"}<br />" +
-                $"<b>Địa chỉ:</b> {supplierAccount.Address ?? "N/A"}<br /><br />";
+                $"<b>Địa chỉ:</b> {supplierAccount.Address ?? "Không có"}<br /><br />";
 
             // Tổng hợp email
             var emailMessage =
@@ -528,8 +528,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
                 $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
                 $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
-                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy}<br />" +
-                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy}<br />";
+                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy HH:mm}<br />" +
+                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy HH:mm}<br />";
 
             
             // Tổng hợp email
@@ -563,8 +563,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
                 $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
                 $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
-                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy}<br />" +
-                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy}<br />";
+                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy HH:mm}<br />" +
+                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy HH:mm}<br />";
 
 
             // Tổng hợp email

@@ -17,13 +17,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             _comboOfSupplierService = comboOfSupplierService;
         }
         [HttpGet("get-all-combo-of-supplier")]
-        public async Task<AppActionResult> GetAllComboOfSupplier(int pageIndex = 1, int pageSize = 100)
+        public async Task<AppActionResult> GetAllComboOfSupplier(int pageIndex, int pageSize)
         {
             return await _comboOfSupplierService.GetAllComboOfSupplier(pageIndex, pageSize);
         }
 
         [HttpGet("get-combo-of-supplier-by-combo-supplier-id")]
-        public async Task<AppActionResult> GetComboOfSupplierByComboSupplierId(string comboSupplierId, int pageIndex = 1, int pageSize = 100)
+        public async Task<AppActionResult> GetComboOfSupplierByComboSupplierId(string comboSupplierId, int pageIndex, int pageSize)
         {
             return await _comboOfSupplierService.GetComboOfSupplierByComboSupplierId(comboSupplierId, pageIndex, pageSize);
         }
@@ -42,12 +42,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         
 
         [HttpGet("get-combo-of-supplier-expired")]
-        public async Task<AppActionResult> GetComboOfSupplierExpired (int pageIndex = 1, int pageSize = 100)
+        public async Task<AppActionResult> GetComboOfSupplierExpired (int pageIndex, int pageSize)
         {
             return await _comboOfSupplierService.GetComboOfSupplierExpired(pageIndex, pageSize);
         }
         [HttpGet("get-combo-near-expired")]
-        public async Task<AppActionResult> GetComboOfSupplierNearExpired(int pageIndex = 1, int pageSize = 100)
+        public async Task<AppActionResult> GetComboOfSupplierNearExpired(int pageIndex, int pageSize)
         {
             return await _comboOfSupplierService.GetComboOfSupplierNearExpired(pageIndex, pageSize);
         }

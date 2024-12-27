@@ -19,7 +19,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-product-report")]
-        public async Task<AppActionResult> GetAllProductReport(int pageIndex = 1, int pageSize = int.MaxValue)
+        public async Task<AppActionResult> GetAllProductReport(int pageIndex, int pageSize)
         {
             return await _productReportService.GetAllProductReport(pageIndex, pageSize);
         }

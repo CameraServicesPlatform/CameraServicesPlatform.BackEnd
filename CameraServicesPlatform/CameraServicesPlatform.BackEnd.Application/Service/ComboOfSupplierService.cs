@@ -187,7 +187,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await comboOfSupplier.Insert(comboNew);
                 await _unitOfWork.SaveChangesAsync();
 
-                await SendComboPurchaseConfirmationEmail(supplierAccount, comboNew, combo);
+                //await SendComboPurchaseConfirmationEmail(supplierAccount, comboNew, combo);
 
                 result.Result = payMethod;
                 result.IsSuccess = true;

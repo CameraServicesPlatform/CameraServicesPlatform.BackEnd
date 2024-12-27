@@ -184,9 +184,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 
                 var payMethod = await paymentGatewayService.CreateComboPayment(paymentCombo, context);
                 
-                await SendComboPurchaseConfirmationEmail(supplierAccount, comboNew, combo);
-
-                
                 await comboOfSupplier.Insert(comboNew);
                 await _unitOfWork.SaveChangesAsync();
                 result.Result = payMethod;

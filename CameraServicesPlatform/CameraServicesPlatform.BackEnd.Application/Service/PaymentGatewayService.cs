@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.PaymentLibrary;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
@@ -35,9 +36,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Account> _accountRepository;
         private readonly IRepository<Supplier> _supplierRepository;
-
+        private readonly IRepository<ComboOfSupplier> _comboSupplierRepository;
+        private readonly IRepository<Combo> _comboRepository;
         private readonly IRepository<Transaction> _transactionRepository;
         private readonly IRepository<HistoryTransaction> _historyTransaction;
+        private readonly IEmailService _emailService;
+
 
         private readonly IUnitOfWork _unitOfWork;
 
@@ -50,7 +54,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Staff> staffRepository,
             IRepository<HistoryTransaction> historyTransaction,
             IRepository<Account> accountRepository,
-            IUnitOfWork unitOfWork)
+            IRepository<ComboOfSupplier> comboSupplierRepository,
+            IRepository<Combo> comboRepository,
+            IUnitOfWork unitOfWork,
+            IEmailService emailService)
         {
             _configuration = configuration;
             _paymentRepository = paymentRepository;
@@ -61,7 +68,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _unitOfWork = unitOfWork;
             _historyTransaction = historyTransaction;
             _accountRepository = accountRepository;
+            _comboSupplierRepository = comboSupplierRepository;
+            _comboRepository = comboRepository;
             _transactionRepository = transactionRepository;
+            _emailService = emailService;
         }
 
         public static class DateTimeHelper
@@ -192,7 +202,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(httpContext));
             pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
-            pay.AddRequestData("vnp_OrderInfo", $"{requestDto.AccountId} thanh toan combo {requestDto.Amount} VND");
+            pay.AddRequestData("vnp_OrderInfo", $"{requestDto.AccountId} thanh toan combo {requestDto.ComboOfSupplierId} {requestDto.Amount} VND");
             pay.AddRequestData("vnp_OrderType", "other");
             //pay.AddRequestData("vnp_Account", requestDto.AccountID);
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
@@ -332,13 +342,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             
                  if (vnp_OrderInfo.Contains("thanh toan combo"))
                 {
-                    var infoParts = vnp_OrderInfo.Split(' ', 3);
+                    var infoParts = vnp_OrderInfo.Split(' ', 6);
 
                     string staffId = infoParts[0];
                     string accountId = infoParts[0];
-                    string transactionDescription = infoParts[2];
+                    string transactionDescription = infoParts[1]+" "+infoParts[2]+" "+infoParts[3];
+                    string comboOfSupplierId = infoParts[4];
+                var supplierAccount = await _accountRepository.GetByExpression(x => x.Id == accountId);
+                var comboNew = await _comboSupplierRepository.GetByExpression(x => x.ComboOfSupplierId == Guid.Parse(comboOfSupplierId));
+                var combo = await _comboRepository.GetByExpression(x => x.ComboId == comboNew.ComboId);
 
-                    TransactionStatus status = vnp_ResponseCode == "00"
+
+
+                TransactionStatus status = vnp_ResponseCode == "00"
                        ? TransactionStatus.Success
                        : TransactionStatus.Unsuccess;
 
@@ -355,7 +371,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                     await _historyTransaction.Insert(historyTransaction);
                     await _unitOfWork.SaveChangesAsync();
-                    return new VNPayResponseDto
+                if (vnp_ResponseCode == "00")
+                {
+                    await SendComboPurchaseConfirmationEmail(supplierAccount, comboNew, combo);
+
+                }
+
+                return new VNPayResponseDto
                     {
                         Success = true,
                         PaymentMethod = "VnPay",
@@ -556,5 +578,51 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 VnPayResponseCode = vnp_ResponseCode,
             };
         }
+
+        private async System.Threading.Tasks.Task SendComboPurchaseConfirmationEmail(
+    Account supplierAccount,
+    ComboOfSupplier combo,
+    Combo comboDetails)
+        {
+            // Nội dung chi tiết hóa đơn combo
+            var comboDetailsString =
+                $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
+                $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
+                $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
+                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy HH:mm}<br />" +
+                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy HH:mm}<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN XÁC NHẬN MUA COMBO<br /><br />" +
+                $"Mã hóa đơn: #{combo.ComboOfSupplierId}<br />" +
+                "Thông tin nhà cung cấp:<br />" +
+                $"<b>Tên:</b> {supplierAccount.FirstName} {supplierAccount.LastName}<br />" +
+                $"<b>Email:</b> {supplierAccount.Email}<br />" +
+                $"<b>Số điện thoại:</b> {supplierAccount.PhoneNumber ?? "N/A"}<br />" +
+                $"<b>Địa chỉ:</b> {supplierAccount.Address ?? "Không có"}<br /><br />";
+
+            // Tổng hợp email
+            var emailMessage =
+                $"Kính chào {supplierAccount.FirstName},<br /><br />" +
+                $"Bạn vừa mua thành công một combo từ hệ thống. Dưới đây là thông tin chi tiết về combo của bạn:<br /><br />" +
+                invoiceInfo +
+                "=====================================<br />" +
+                "         CHI TIẾT COMBO<br />" +
+                "=====================================<br />" +
+                comboDetailsString +
+                "=====================================<br />" +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Gửi email xác nhận
+            await _emailService.SendEmailAsync(
+                supplierAccount.Email,
+                SD.SubjectMail.COMBO_PURCHASE_CONFIRMATION,
+                emailMessage
+            );
+        }
+
     }
 }

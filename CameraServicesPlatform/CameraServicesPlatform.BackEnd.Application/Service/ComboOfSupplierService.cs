@@ -66,7 +66,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var utility = Resolve<Utility>();
                 var paymentGatewayService = Resolve<IPaymentGatewayService>();
                 DateTime newStartTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
-                DateTime newEndTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow).AddMinutes(3);
+                DateTime newEndTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 DateTime dateNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 var comboOfSupplier = Resolve<IRepository<ComboOfSupplier>>();
                 
@@ -91,33 +91,56 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 if (activeCombos.Items.Any())
                 {
                     var latestActiveCombo = activeCombos.Items.OrderByDescending(c => c.EndTime).FirstOrDefault();
-
-                    if (latestActiveCombo.EndTime > dateNow)
+                    if (latestActiveCombo != null)
                     {
-                        newStartTime = latestActiveCombo.EndTime.AddDays(1);
-
-                        switch (getCombo.DurationCombo)
+                        if (latestActiveCombo.EndTime > dateNow)
                         {
-                            case DurationCombo.oneMonth:
-                                newEndTime = newStartTime.AddMonths(1);
-                                break;
-                            case DurationCombo.twoMonth:
-                                newEndTime = newStartTime.AddMonths(2);
-                                break;
-                            case DurationCombo.threeMonth:
-                                newEndTime = newStartTime.AddMonths(3);
-                                break;
-                            case DurationCombo.fiveMonth:
-                                newEndTime = newStartTime.AddMonths(5);
-                                break;
-                            default:
-                                throw new InvalidOperationException("DurationUnit is not supported.");
+                            newStartTime = latestActiveCombo.EndTime.AddDays(1);
+
+                            switch (getCombo.DurationCombo)
+                            {
+                                case DurationCombo.oneMonth:
+                                    newEndTime = newStartTime.AddMonths(1);
+                                    break;
+                                case DurationCombo.twoMonth:
+                                    newEndTime = newStartTime.AddMonths(2);
+                                    break;
+                                case DurationCombo.threeMonth:
+                                    newEndTime = newStartTime.AddMonths(3);
+                                    break;
+                                case DurationCombo.fiveMonth:
+                                    newEndTime = newStartTime.AddMonths(5);
+                                    break;
+                                default:
+                                    throw new InvalidOperationException("DurationUnit is not supported.");
+                            }
                         }
+                    }
+                }
+                else
+                {
+                    switch (getCombo.DurationCombo)
+                    {
+                        case DurationCombo.oneMonth:
+                            newEndTime = newStartTime.AddMonths(1);
+                            break;
+                        case DurationCombo.twoMonth:
+                            newEndTime = newStartTime.AddMonths(2);
+                            break;
+                        case DurationCombo.threeMonth:
+                            newEndTime = newStartTime.AddMonths(3);
+                            break;
+                        case DurationCombo.fiveMonth:
+                            newEndTime = newStartTime.AddMonths(5);
+                            break;
+                        default:
+                            throw new InvalidOperationException("DurationUnit is not supported.");
                     }
                 }
 
                 ComboOfSupplier comboNew = new ComboOfSupplier
                 {
+                    ComboOfSupplierId = Guid.NewGuid(),
                     ComboId = Guid.Parse(request.ComboId),
                     SupplierID = Guid.Parse(request.SupplierID),
                     IsMailNearExpired = false,
@@ -156,6 +179,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     AccountId = supplierAccount.Id,
                     Amount = (double)combo.ComboPrice,
+                    ComboOfSupplierId = comboNew.ComboOfSupplierId.ToString(),
                 };
                 
                 var payMethod = await paymentGatewayService.CreateComboPayment(paymentCombo, context);

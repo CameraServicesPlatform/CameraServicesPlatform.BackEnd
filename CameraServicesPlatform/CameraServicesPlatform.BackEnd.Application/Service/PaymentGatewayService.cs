@@ -373,7 +373,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     await _unitOfWork.SaveChangesAsync();
                 if (vnp_ResponseCode == "00")
                 {
-                    await SendComboPurchaseConfirmationEmail(supplierAccount, comboNew, combo);
+                    await SendComboPurchaseConfirmationEmailForSupplier(supplierAccount, comboNew, combo);
 
                 }
 
@@ -579,7 +579,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             };
         }
 
-        private async System.Threading.Tasks.Task SendComboPurchaseConfirmationEmail(
+        private async System.Threading.Tasks.Task SendComboPurchaseConfirmationEmailForSupplier(
     Account supplierAccount,
     ComboOfSupplier combo,
     Combo comboDetails)

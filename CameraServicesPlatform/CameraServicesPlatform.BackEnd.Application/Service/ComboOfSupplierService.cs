@@ -493,52 +493,49 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        //private async Task SendComboPurchaseConfirmationEmail(Account supplierAccount, ComboOfSupplier combo, Combo comboDetails)
+        //{
+        //    IEmailService? emailService = Resolve<IEmailService>();
 
+        //    // Nội dung chi tiết hóa đơn combo
+        //    var comboDetailsString =
+        //        $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
+        //        $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
+        //        $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
+        //        $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy HH:mm}<br />" +
+        //        $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy HH:mm}<br />";
 
+        //    // Invoice information template
+        //    var invoiceInfo =
+        //        "HÓA ĐƠN XÁC NHẬN MUA COMBO<br /><br />" +
+        //        $"Mã hóa đơn: #{combo.ComboOfSupplierId}<br />" +
+        //        "Thông tin nhà cung cấp:<br />" +
+        //        $"<b>Tên:</b> {supplierAccount.FirstName} {supplierAccount.LastName}<br />" +
+        //        $"<b>Email:</b> {supplierAccount.Email}<br />" +
+        //        $"<b>Số điện thoại:</b> {supplierAccount.PhoneNumber ?? "N/A"}<br />" +
+        //        $"<b>Địa chỉ:</b> {supplierAccount.Address ?? "Không có"}<br /><br />";
 
-        private async Task SendComboPurchaseConfirmationEmail(Account supplierAccount, ComboOfSupplier combo, Combo comboDetails)
-        {
-            IEmailService? emailService = Resolve<IEmailService>();
+        //    // Tổng hợp email
+        //    var emailMessage =
+        //        $"Kính chào {supplierAccount.FirstName},<br /><br />" +
+        //        $"Bạn vừa mua thành công một combo từ hệ thống. Dưới đây là thông tin chi tiết về combo của bạn:<br /><br />" +
+        //        invoiceInfo +
+        //        "=====================================<br />" +
+        //        "         CHI TIẾT COMBO<br />" +
+        //        "=====================================<br />" +
+        //        comboDetailsString +
+        //        "=====================================<br />" +
+        //        "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+        //        "Trân trọng,<br />" +
+        //        "Đội ngũ Camera service platform";
 
-            // Nội dung chi tiết hóa đơn combo
-            var comboDetailsString =
-                $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
-                $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
-                $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
-                $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy HH:mm}<br />" +
-                $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy HH:mm}<br />";
-
-            // Invoice information template
-            var invoiceInfo =
-                "HÓA ĐƠN XÁC NHẬN MUA COMBO<br /><br />" +
-                $"Mã hóa đơn: #{combo.ComboOfSupplierId}<br />" +
-                "Thông tin nhà cung cấp:<br />" +
-                $"<b>Tên:</b> {supplierAccount.FirstName} {supplierAccount.LastName}<br />" +
-                $"<b>Email:</b> {supplierAccount.Email}<br />" +
-                $"<b>Số điện thoại:</b> {supplierAccount.PhoneNumber ?? "N/A"}<br />" +
-                $"<b>Địa chỉ:</b> {supplierAccount.Address ?? "Không có"}<br /><br />";
-
-            // Tổng hợp email
-            var emailMessage =
-                $"Kính chào {supplierAccount.FirstName},<br /><br />" +
-                $"Bạn vừa mua thành công một combo từ hệ thống. Dưới đây là thông tin chi tiết về combo của bạn:<br /><br />" +
-                invoiceInfo +
-                "=====================================<br />" +
-                "         CHI TIẾT COMBO<br />" +
-                "=====================================<br />" +
-                comboDetailsString +
-                "=====================================<br />" +
-                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
-                "Trân trọng,<br />" +
-                "Đội ngũ Camera service platform";
-
-            // Gửi email xác nhận
-            emailService.SendEmail(
-                supplierAccount.Email,
-                SD.SubjectMail.COMBO_PURCHASE_CONFIRMATION,
-                emailMessage
-            );
-        }
+        //    // Gửi email xác nhận
+        //    emailService.SendEmail(
+        //        supplierAccount.Email,
+        //        SD.SubjectMail.COMBO_PURCHASE_CONFIRMATION,
+        //        emailMessage
+        //    );
+        //}
 
         private async Task SendMailComboExpired(Account supplierAccount, ComboOfSupplier combo, Combo comboDetails)
         {

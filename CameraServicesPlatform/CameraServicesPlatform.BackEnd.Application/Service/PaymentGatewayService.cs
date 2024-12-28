@@ -3,27 +3,14 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Application.PaymentLibrary;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
-using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Enum;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Transaction;
 using CameraServicesPlatform.BackEnd.Domain.Models;
-using DinkToPdf;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Printing;
-using System.Linq;
-using System.Security.Policy;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
-using Twilio.TwiML.Voice;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -154,7 +141,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<string> CreateSupplierOrMemberPayment(SupplierPaymentAgainDto requestDto, HttpContext httpContext)
         {
             var paymentUrl = "";
-            
+
             var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
             var pay = new VNPayLibrary();
@@ -212,7 +199,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return paymentUrl;
         }
         public async Task<VNPayResponseDto> deposit(string vnp_ResponseCode, string vnp_orderId, string vnp_OrderInfo, string vnp_Amount, string vnp_TransactionId, string vnp_SecureHash)
-        { 
+        {
             int spaceIndex = vnp_OrderInfo.IndexOf(' ');
             string accountId = vnp_OrderInfo.Substring(0, spaceIndex);
             vnp_OrderInfo = vnp_OrderInfo.Substring(spaceIndex + 1);
@@ -257,9 +244,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             try
             {
-                
+
                 var infoParts = vnp_OrderInfo.Split(' ', 3);
-                
+
                 string staffId = infoParts[0];
                 string accountId = infoParts[1];
                 string transactionDescription = infoParts[2];
@@ -283,7 +270,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new InvalidOperationException($"Account with ID {accountId} not found.");
                 }
                 if (pagedResult.Items[0].AccountBalance == null)
-                pagedResult.Items[0].AccountBalance = 0;
+                    pagedResult.Items[0].AccountBalance = 0;
 
                 pagedResult.Items[0].AccountBalance = pagedResult.Items[0].AccountBalance + Int32.Parse(vnp_Amount);
                 _accountRepository.Update(pagedResult.Items[0]);
@@ -296,10 +283,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     HistoryTransactionId = Guid.Parse(vnp_orderId),
                     AccountID = accountId,
-                    Price = Int32.Parse(vnp_Amount)  ,
+                    Price = Int32.Parse(vnp_Amount),
                     TransactionDescription = transactionDescription,
                     Status = status,
-                    CreatedAt = DateTime.UtcNow ,
+                    CreatedAt = DateTime.UtcNow,
                     StaffID = Guid.Parse(staffId)
                 };
 
@@ -336,15 +323,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             var vnp_Amount = vnpay.GetResponseData("vnp_Amount");
 
-            
-                 if (vnp_OrderInfo.Contains("thanh toan combo"))
-                {
-                    var infoParts = vnp_OrderInfo.Split(' ', 6);
 
-                    string staffId = infoParts[0];
-                    string accountId = infoParts[0];
-                    string transactionDescription = infoParts[1]+" "+infoParts[2]+" "+infoParts[3];
-                    string comboOfSupplierId = infoParts[4];
+            if (vnp_OrderInfo.Contains("thanh toan combo"))
+            {
+                var infoParts = vnp_OrderInfo.Split(' ', 6);
+
+                string staffId = infoParts[0];
+                string accountId = infoParts[0];
+                string transactionDescription = infoParts[1] + " " + infoParts[2] + " " + infoParts[3] + " " + infoParts[5];
+                string comboOfSupplierId = infoParts[4];
                 var supplierAccount = await _accountRepository.GetByExpression(x => x.Id == accountId);
                 var comboNew = await _comboSupplierRepository.GetByExpression(x => x.ComboOfSupplierId == Guid.Parse(comboOfSupplierId));
                 var combo = await _comboRepository.GetByExpression(x => x.ComboId == comboNew.ComboId);
@@ -355,19 +342,19 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                        ? TransactionStatus.Success
                        : TransactionStatus.Unsuccess;
 
-                    var historyTransaction = new HistoryTransaction
-                    {
-                        HistoryTransactionId = Guid.Parse(vnp_orderId),
-                        AccountID = accountId,
-                        Price = Int32.Parse(vnp_Amount),
-                        TransactionDescription = transactionDescription,
-                        Status = status,
-                        CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                        StaffID = Guid.Parse(staffId)
-                    };
+                var historyTransaction = new HistoryTransaction
+                {
+                    HistoryTransactionId = Guid.Parse(vnp_orderId),
+                    AccountID = accountId,
+                    Price = Int32.Parse(vnp_Amount),
+                    TransactionDescription = transactionDescription,
+                    Status = status,
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    StaffID = Guid.Parse(staffId)
+                };
 
-                    await _historyTransaction.Insert(historyTransaction);
-                    await _unitOfWork.SaveChangesAsync();
+                await _historyTransaction.Insert(historyTransaction);
+                await _unitOfWork.SaveChangesAsync();
                 //if (vnp_ResponseCode == "00")
                 //{
                 //    await SendComboPurchaseConfirmationEmailForSupplier(supplierAccount, comboNew, combo);
@@ -375,115 +362,115 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 //}
 
                 return new VNPayResponseDto
-                    {
-                        Success = true,
-                        PaymentMethod = "VnPay",
-                        OrderDescription = transactionDescription,
-                        OrderId = vnp_orderId.ToString(),
-                        TransactionId = vnp_TransactionId.ToString(),
-                        Token = vnp_SecureHash,
-                        VnPayResponseCode = vnp_ResponseCode,
-                    };
-                }
-                else
                 {
-                    var pagedResult = await _orderRepository.GetAllDataByExpression(
-                         a => a.OrderID == Guid.Parse(vnp_orderId),
-                         1,
-                         10,
-                         null,
-                         isAscending: true,
-                         null
-                     );
-                    var staffExist = await _staffRepository.GetAllDataByExpression(
-                            a => a.AccountID == pagedResult.Items[0].Id,
-                            1,
-                            10,
-                            null,
-                            isAscending: true,
-                            null
-                        );
+                    Success = true,
+                    PaymentMethod = "VnPay",
+                    OrderDescription = transactionDescription,
+                    OrderId = vnp_orderId.ToString(),
+                    TransactionId = vnp_TransactionId.ToString(),
+                    Token = vnp_SecureHash,
+                    VnPayResponseCode = vnp_ResponseCode,
+                };
+            }
+            else
+            {
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                     a => a.OrderID == Guid.Parse(vnp_orderId),
+                     1,
+                     10,
+                     null,
+                     isAscending: true,
+                     null
+                 );
+                var staffExist = await _staffRepository.GetAllDataByExpression(
+                        a => a.AccountID == pagedResult.Items[0].Id,
+                        1,
+                        10,
+                        null,
+                        isAscending: true,
+                        null
+                    );
 
-                    var orderDb = await _orderRepository.GetByExpression(a => a.OrderID == Guid.Parse(vnp_orderId));
+                var orderDb = await _orderRepository.GetByExpression(a => a.OrderID == Guid.Parse(vnp_orderId));
 
-                    if (vnp_ResponseCode == "00")
+                if (vnp_ResponseCode == "00")
+                {
+
+                    orderDb.IsPayment = true;
+                    orderDb.OrderStatus = OrderStatus.Payment;
+                    _orderRepository.Update(orderDb);
+                    await _unitOfWork.SaveChangesAsync();
+
+                    var productEntity = await _orderRepository.GetByExpression(
+                    x => x.OrderID == Guid.Parse(vnp_orderId),
+                    a => a.OrderDetail
+                    );
+
+                    if (productEntity != null && productEntity.OrderDetail != null)
                     {
-
-                        orderDb.IsPayment = true;
-                        orderDb.OrderStatus = OrderStatus.Payment;
-                        _orderRepository.Update(orderDb);
-                        await _unitOfWork.SaveChangesAsync();
-
-                        var productEntity = await _orderRepository.GetByExpression(
-                        x => x.OrderID == Guid.Parse(vnp_orderId),
-                        a => a.OrderDetail
-                        );
-
-                        if (productEntity != null && productEntity.OrderDetail != null)
+                        foreach (var detail in productEntity.OrderDetail)
                         {
-                            foreach (var detail in productEntity.OrderDetail)
+                            var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID);
+
+                            if (product != null)
                             {
-                                var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID);
-
-                                if (product != null)
+                                if (orderDb.OrderType == OrderType.Purchase)
                                 {
-                                    if (orderDb.OrderType == OrderType.Purchase)
-                                    {
-                                        product.Status = ProductStatusEnum.Sold;
-                                        _productRepository.Update(product);
-                                    }
-                                    else
-                                    {
-                                        product.Status = ProductStatusEnum.Rented;
-                                        _productRepository.Update(product);
-                                    }
-
+                                    product.Status = ProductStatusEnum.Sold;
+                                    _productRepository.Update(product);
                                 }
+                                else
+                                {
+                                    product.Status = ProductStatusEnum.Rented;
+                                    _productRepository.Update(product);
+                                }
+
                             }
-                            await _unitOfWork.SaveChangesAsync();
                         }
-
-                        var payment = new Payment
-                        {
-                            PaymentID = Guid.NewGuid(),
-                            OrderID = Guid.Parse(vnp_orderId),
-                            SupplierID = pagedResult.Items[0].SupplierID,
-                            AccountID = pagedResult.Items[0].Id,
-                            PaymentDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                            PaymentAmount = Int32.Parse(vnp_Amount),
-                            PaymentStatus = PaymentStatus.Completed,
-                            PaymentType = PaymentType.Refund,
-                            PaymentMethod = PaymentMethod.VNPAY,
-                            PaymentDetails = $"Payment for Order {vnp_orderId}",
-                            CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                            Image = "a",
-                            IsDisable = true
-                        };
-                        TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
-                        ;
-                        await _paymentRepository.Insert(payment);
-
-                        Transaction transaction = new Transaction
-                        {
-                            TransactionID = Guid.NewGuid(),
-                            OrderID = Guid.Parse(vnp_orderId),
-                            TransactionDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                            Order = null,
-                            Amount = Int32.Parse(vnp_Amount),
-                            TransactionType = transactionType,
-                            PaymentStatus = PaymentStatus.Completed,
-                            PaymentMethod = PaymentMethod.VNPAY,
-                            VNPAYTransactionID = vnp_TransactionId,
-                            VNPAYTransactionStatus = VNPAYTransactionStatus.Success,
-                            VNPAYTransactionTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                        };
-                        await _transactionRepository.Insert(transaction);
                         await _unitOfWork.SaveChangesAsync();
-
-
                     }
-                    if (vnp_ResponseCode != "00")
+
+                    var payment = new Payment
                     {
+                        PaymentID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        SupplierID = pagedResult.Items[0].SupplierID,
+                        AccountID = pagedResult.Items[0].Id,
+                        PaymentDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        PaymentAmount = Int32.Parse(vnp_Amount),
+                        PaymentStatus = PaymentStatus.Completed,
+                        PaymentType = PaymentType.Refund,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        PaymentDetails = $"Payment for Order {vnp_orderId}",
+                        CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        Image = "a",
+                        IsDisable = true
+                    };
+                    TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
+                    ;
+                    await _paymentRepository.Insert(payment);
+
+                    Transaction transaction = new Transaction
+                    {
+                        TransactionID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        TransactionDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        Order = null,
+                        Amount = Int32.Parse(vnp_Amount),
+                        TransactionType = transactionType,
+                        PaymentStatus = PaymentStatus.Completed,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        VNPAYTransactionID = vnp_TransactionId,
+                        VNPAYTransactionStatus = VNPAYTransactionStatus.Success,
+                        VNPAYTransactionTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    };
+                    await _transactionRepository.Insert(transaction);
+                    await _unitOfWork.SaveChangesAsync();
+
+
+                }
+                if (vnp_ResponseCode != "00")
+                {
 
                     orderDb.OrderStatus = OrderStatus.PaymentFail;
                     _orderRepository.Update(orderDb);
@@ -518,52 +505,52 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         await _unitOfWork.SaveChangesAsync();
                     }
                     var payment = new Payment
-                        {
-                            PaymentID = Guid.NewGuid(),
-                            OrderID = Guid.Parse(vnp_orderId),
-                            SupplierID = pagedResult.Items[0].SupplierID,
-                            AccountID = pagedResult.Items[0].Id,
-                            PaymentDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                            PaymentAmount = Int32.Parse(vnp_Amount),
-                            PaymentStatus = PaymentStatus.Failed,
-                            PaymentType = PaymentType.Refund,
-                            PaymentMethod = PaymentMethod.VNPAY,
-                            PaymentDetails = $"Payment for Order {vnp_orderId}",
-                            CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                            Image = "a",
-                            IsDisable = true
-                        };
-                        TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
-                        ;
-                        await _paymentRepository.Insert(payment);
-                        await _unitOfWork.SaveChangesAsync();
+                    {
+                        PaymentID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        SupplierID = pagedResult.Items[0].SupplierID,
+                        AccountID = pagedResult.Items[0].Id,
+                        PaymentDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        PaymentAmount = Int32.Parse(vnp_Amount),
+                        PaymentStatus = PaymentStatus.Failed,
+                        PaymentType = PaymentType.Refund,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        PaymentDetails = $"Payment for Order {vnp_orderId}",
+                        CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        Image = "a",
+                        IsDisable = true
+                    };
+                    TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
+                    ;
+                    await _paymentRepository.Insert(payment);
+                    await _unitOfWork.SaveChangesAsync();
 
-                        orderDb.OrderStatus = OrderStatus.PaymentFail;
-                        orderDb.IsPayment = true;
-                        _orderRepository.Update(orderDb);
-                        await _unitOfWork.SaveChangesAsync();
+                    orderDb.OrderStatus = OrderStatus.PaymentFail;
+                    orderDb.IsPayment = true;
+                    _orderRepository.Update(orderDb);
+                    await _unitOfWork.SaveChangesAsync();
 
-                        Transaction transaction = new Transaction
-                        {
-                            TransactionID = Guid.NewGuid(),
-                            OrderID = Guid.Parse(vnp_orderId),
-                            TransactionDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                            Order = null,
-                            Amount = Int32.Parse(vnp_Amount),
-                            TransactionType = transactionType,
-                            PaymentStatus = PaymentStatus.Failed,
-                            PaymentMethod = PaymentMethod.VNPAY,
-                            VNPAYTransactionID = vnp_TransactionId,
-                            VNPAYTransactionStatus = VNPAYTransactionStatus.Failed,
-                            VNPAYTransactionTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
-                        };
-                        await _transactionRepository.Insert(transaction);
-                        await _unitOfWork.SaveChangesAsync();
-                    }
+                    Transaction transaction = new Transaction
+                    {
+                        TransactionID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        TransactionDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        Order = null,
+                        Amount = Int32.Parse(vnp_Amount),
+                        TransactionType = transactionType,
+                        PaymentStatus = PaymentStatus.Failed,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        VNPAYTransactionID = vnp_TransactionId,
+                        VNPAYTransactionStatus = VNPAYTransactionStatus.Failed,
+                        VNPAYTransactionTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    };
+                    await _transactionRepository.Insert(transaction);
+                    await _unitOfWork.SaveChangesAsync();
                 }
-            
-            
-          
+            }
+
+
+
             return new VNPayResponseDto
             {
                 Success = true,
@@ -576,50 +563,50 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             };
         }
 
-    //    private async System.Threading.Tasks.Task SendComboPurchaseConfirmationEmailForSupplier(
-    //Account supplierAccount,
-    //ComboOfSupplier combo,
-    //Combo comboDetails)
-    //    {
-    //        // Nội dung chi tiết hóa đơn combo
-    //        var comboDetailsString =
-    //            $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
-    //            $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
-    //            $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
-    //            $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy HH:mm}<br />" +
-    //            $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy HH:mm}<br />";
+        //    private async System.Threading.Tasks.Task SendComboPurchaseConfirmationEmailForSupplier(
+        //Account supplierAccount,
+        //ComboOfSupplier combo,
+        //Combo comboDetails)
+        //    {
+        //        // Nội dung chi tiết hóa đơn combo
+        //        var comboDetailsString =
+        //            $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
+        //            $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
+        //            $"<b>Giá Combo:</b> {comboDetails.ComboPrice:N0} ₫<br />" +
+        //            $"<b>Thời gian kích hoạt:</b> {combo.StartTime:dd/MM/yyyy HH:mm}<br />" +
+        //            $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy HH:mm}<br />";
 
-    //        // Invoice information template
-    //        var invoiceInfo =
-    //            "HÓA ĐƠN XÁC NHẬN MUA COMBO<br /><br />" +
-    //            $"Mã hóa đơn: #{combo.ComboOfSupplierId}<br />" +
-    //            "Thông tin nhà cung cấp:<br />" +
-    //            $"<b>Tên:</b> {supplierAccount.FirstName} {supplierAccount.LastName}<br />" +
-    //            $"<b>Email:</b> {supplierAccount.Email}<br />" +
-    //            $"<b>Số điện thoại:</b> {supplierAccount.PhoneNumber ?? "N/A"}<br />" +
-    //            $"<b>Địa chỉ:</b> {supplierAccount.Address ?? "Không có"}<br /><br />";
+        //        // Invoice information template
+        //        var invoiceInfo =
+        //            "HÓA ĐƠN XÁC NHẬN MUA COMBO<br /><br />" +
+        //            $"Mã hóa đơn: #{combo.ComboOfSupplierId}<br />" +
+        //            "Thông tin nhà cung cấp:<br />" +
+        //            $"<b>Tên:</b> {supplierAccount.FirstName} {supplierAccount.LastName}<br />" +
+        //            $"<b>Email:</b> {supplierAccount.Email}<br />" +
+        //            $"<b>Số điện thoại:</b> {supplierAccount.PhoneNumber ?? "N/A"}<br />" +
+        //            $"<b>Địa chỉ:</b> {supplierAccount.Address ?? "Không có"}<br /><br />";
 
-    //        // Tổng hợp email
-    //        var emailMessage =
-    //            $"Kính chào {supplierAccount.FirstName},<br /><br />" +
-    //            $"Bạn vừa mua thành công một combo từ hệ thống. Dưới đây là thông tin chi tiết về combo của bạn:<br /><br />" +
-    //            invoiceInfo +
-    //            "=====================================<br />" +
-    //            "         CHI TIẾT COMBO<br />" +
-    //            "=====================================<br />" +
-    //            comboDetailsString +
-    //            "=====================================<br />" +
-    //            "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
-    //            "Trân trọng,<br />" +
-    //            "Đội ngũ Camera service platform";
+        //        // Tổng hợp email
+        //        var emailMessage =
+        //            $"Kính chào {supplierAccount.FirstName},<br /><br />" +
+        //            $"Bạn vừa mua thành công một combo từ hệ thống. Dưới đây là thông tin chi tiết về combo của bạn:<br /><br />" +
+        //            invoiceInfo +
+        //            "=====================================<br />" +
+        //            "         CHI TIẾT COMBO<br />" +
+        //            "=====================================<br />" +
+        //            comboDetailsString +
+        //            "=====================================<br />" +
+        //            "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+        //            "Trân trọng,<br />" +
+        //            "Đội ngũ Camera service platform";
 
-    //        // Gửi email xác nhận
-    //        await _emailService.SendEmailAsync(
-    //            supplierAccount.Email,
-    //            SD.SubjectMail.COMBO_PURCHASE_CONFIRMATION,
-    //            emailMessage
-    //        );
-    //    }
+        //        // Gửi email xác nhận
+        //        await _emailService.SendEmailAsync(
+        //            supplierAccount.Email,
+        //            SD.SubjectMail.COMBO_PURCHASE_CONFIRMATION,
+        //            emailMessage
+        //        );
+        //    }
 
     }
 }

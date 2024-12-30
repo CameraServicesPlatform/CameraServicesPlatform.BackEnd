@@ -240,8 +240,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
 
                 var vietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
-                Expression<Func<ComboOfSupplier, bool>> filter = a =>
-                    a.EndTime < vietnamTime;
+                Expression<Func<ComboOfSupplier, bool>> filter = a => vietnamTime > a.EndTime;
 
                 var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
                     filter,
@@ -323,7 +322,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var vietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow).AddDays(3);
                 Expression<Func<ComboOfSupplier, bool>> filter = a =>
-                    a.EndTime < vietnamTime;
+                    a.EndTime < vietnamTime && a.IsDisable == false;
 
                 var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
                     filter,

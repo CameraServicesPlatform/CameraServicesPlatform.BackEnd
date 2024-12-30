@@ -179,6 +179,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
                     {
                         ProductVoucherID = item.ProductVoucherID.ToString(),
+                        ProductID = item.ProductID.ToString(),
                         VourcherID = item.VourcherID.ToString(),
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt,

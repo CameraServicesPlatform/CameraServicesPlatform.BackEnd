@@ -73,7 +73,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var getCombo = await _comboRepository.GetByExpression(x => x.ComboId == Guid.Parse(request.ComboId));
 
                 var activeCombos = await _comboSupplierRepository.GetAllDataByExpression(
-                    a => a.ComboId == Guid.Parse(request.ComboId) && a.SupplierID == Guid.Parse(request.SupplierID) && a.IsDisable == false,
+                    a => a.SupplierID == Guid.Parse(request.SupplierID) && a.IsDisable == false,
                     1,
                     int.MaxValue, null,
                     isAscending: true,

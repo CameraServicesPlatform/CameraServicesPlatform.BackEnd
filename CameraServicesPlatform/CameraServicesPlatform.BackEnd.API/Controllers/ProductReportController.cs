@@ -50,13 +50,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _productReportService.UpdateProductReport(productReportResponse);
         }
 
-        [HttpPut("Reject-product-report")]
+        [HttpPut("reject-product-report")]
         public async Task<AppActionResult> RejectProductReport(ProductReportRequest productReportRequest)
         {
             return await _productReportService.RejectProductReport(productReportRequest);
         }
 
-        [HttpPut("Approved-product-report")]
+        [HttpPut("approved-product-report")]
         public async Task<AppActionResult> ApprovedProductReport(ProductReportRequest productReportRequest)
         {
             return await _productReportService.ApprovedProductReport(productReportRequest);

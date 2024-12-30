@@ -38,7 +38,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpPut("Reject-report-by-id")]
+        [HttpPut("reject-report-by-id")]
         public async Task<IActionResult> RejectReport(ReportUpdateRequest request)
         {
             try
@@ -57,7 +57,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpPut("Approved-report-by-id")]
+        [HttpPut("approved-report-by-id")]
         public async Task<IActionResult> ApprovedReport(ReportUpdateRequest request)
         {
             try

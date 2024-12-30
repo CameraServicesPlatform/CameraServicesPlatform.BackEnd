@@ -45,10 +45,13 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 
         public double Rating { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } 
 
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } 
 
+        public DateTime DateOfManufacture { get; set; }
+        public double? OriginalPrice { get; set; }
+        public int? CountRent { get; set; }
 
         public List<ProductImage> listImage { get; set; } = null!;
 

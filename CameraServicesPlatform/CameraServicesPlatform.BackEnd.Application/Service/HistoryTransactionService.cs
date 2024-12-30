@@ -57,6 +57,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     {
                         HistoryTransactionId = item.HistoryTransactionId.ToString(),
                         AccountID = item.AccountID,
+                        TransactionDescription = item.TransactionDescription,
                         StaffID = staffId,
                         Price = item.Price,
                         CreatedAt = item.CreatedAt

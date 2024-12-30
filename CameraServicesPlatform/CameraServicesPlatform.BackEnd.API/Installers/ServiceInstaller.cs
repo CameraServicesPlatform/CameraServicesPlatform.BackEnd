@@ -53,6 +53,12 @@ public class ServiceInstaller : IInstaller
         services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IHistoryTransactionService, HistoryTransactionService>();
+
+        services.AddScoped<IExtendService, ExtendService>();
+        services.AddScoped<IComboService, ComboService>();
+        services.AddScoped<IComboOfSupplierService, ComboOfSupplierService>();
+        services.AddScoped<ISystemAdminService, SystemAdminService>();
+
     }
 
 }

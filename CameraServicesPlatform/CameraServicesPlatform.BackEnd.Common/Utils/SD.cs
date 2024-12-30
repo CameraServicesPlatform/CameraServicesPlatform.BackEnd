@@ -87,12 +87,21 @@ public class SD
     {
         public static string VERIFY_ACCOUNT = "[CAMERASERVICEPLATFORM]  CHÀO MỪNG BẠN ĐẾN VỚI CAMERASERVICEPLATFORM. VUI LÒNG XÁC MINH TÀI KHOẢN";
         public static string WELCOME = "[CAMERASERVICEPLATFORM] CHÀO MỪNG BẠN ĐẾN VỚI CAMERASERVICEPLATFORM";
+        public static string UPDATE_BANK_INFORMATION = "[CAMERASERVICEPLATFORM] THÔNG BÁO CẬP NHẬT THÔNG TIN TÀI KHOẢN";
         public static string REMIND_PAYMENT = "[CAMERASERVICEPLATFORM] NHẮC NHỞ THANH TOÁN";
         public static string PASSCODE_FORGOT_PASSWORD = "[CAMERASERVICEPLATFORM] MÃ XÁC THỰC QUÊN MẬT KHẨU";
         public static string ORDER_CONFIRMATION = "[CAMERASERVICEPLATFORM] BẠN VỪA ĐẶT ĐƠN HÀNG";
         public static string ORDER_CONFIRMATION_SUPPLIER = "[CAMERASERVICEPLATFORM] BẠN VỪA CÓ ĐƠN HÀNG";
         public static string ORDER_CONFIRMATION_CANCEL_SUPPLIER = "[CAMERASERVICEPLATFORM] CÓ ĐƠN ĐẶT ĐƠN HÀNG VỪA HỦY";
         public static string ORDER_CONFIRMATION_CANCEL_SUPPLIER_TO_MEMBER = "[CAMERASERVICEPLATFORM] ĐƠN HÀNG CỦA BẠN ĐÃ HỦY";
+        public static string WELLCOME_STAFF = "[CAMERASERVICEPLATFORM] CHÀO MỪNG BẠN ĐẾN VỚI CAMERASERVICEPLATFORM";
+        public static string COMBO_PURCHASE_CONFIRMATION = "[CAMERASERVICEPLATFORM] BẠN VỪA MUA COMBO THÀNH CÔNG";
+        public static string COMBO_EXPIRED_CONFIRMATION = "[CAMERASERVICEPLATFORM] THÔNG BÁO GÓI COMBO SUPPLIER ĐANG KÍ SỬ DỤNG ĐÃ HẾT HẠN";
+        public static string EXTEND_CONFIRMATION = "[CAMERASERVICEPLATFORM] BẠN VỪA GIA HẠN THÀNH CÔNG";
+        public static string EXTEND_SUPPLIER_CONFIRMATION = "[CAMERASERVICEPLATFORM] BẠN VỪA CÓ ĐƠN GIA HẠN";
+
+
+
 
         public static string SIGN_CONTRACT_VERIFICATION_CODE =
             "[CAMERASERVICEPLATFORM] You are in the process of completing contract procedures".ToUpper();
@@ -145,7 +154,9 @@ public class SD
     public class FirebasePathName
     {
         public static string SUPPLIER_PREFIX = "supplier/";
+        public static string ACCOUNT_PREFIX = "account/";
         public static string AFTER_IMAGE = "img-after/";
+        public static string RETURN_DETAIL_IMAGE = "return-detail-img/";
         public static string BEFORE_IMAGE = "img-before/";
         public static string ACCOUNT_CARD = "cards/";
         public static string ACCOUNT_CITIZEN_IDENTIFICATION_CARD = "account-citizen-identification-cards/";

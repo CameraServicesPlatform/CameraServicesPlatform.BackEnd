@@ -46,35 +46,42 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _transactionService.GetTransactionBySupplierId(id, pageIndex, pageSize);
         }
 
-        [HttpPost("create-supplier-or-member-payment")]
-        public async Task<IActionResult> CreateSupplierOrMemberPayment(SupplierPaymentAgainDto supplierResponse)
+        [HttpPost("create-staff-refund-member-rent")]
+        public async Task<IActionResult> CreateStaffRefundMemberRent(StaffRefundDto supplierResponse)
         {
-            return Ok(await _transactionService.CreateSupplierOrMemberPayment(supplierResponse, HttpContext));
+            return Ok(await _transactionService.CreateStaffRefundMemberRent(supplierResponse, HttpContext));
         }
 
-        [HttpPost("create-staff-refund-member")]
-        public async Task<IActionResult> CreateStaffRefundMember(StaffRefundDto supplierResponse)
+        [HttpPost("create-staff-refund-return-detail")]
+        public async Task<IActionResult> CreateStaffRefundReturnDetail(StaffRefundDto supplierResponse)
         {
-            return Ok(await _transactionService.CreateStaffRefund(supplierResponse, HttpContext));
+            return Ok(await _transactionService.CreateStaffRefundReturnDetail(supplierResponse, HttpContext));
         }
 
-        [HttpPost("create-staff-refund-member-purchuse")]
-        public async Task<IActionResult> CreateStaffRefundMemberPurchuse(string orderId)
+        [HttpPost("create-staff-refund-member-buy")]
+        public async Task<IActionResult> CreateStaffRefundMemberBuy(StaffRefundDto supplierResponse)
         {
-            return Ok(await _transactionService.CreateStaffRefundPurchuse(orderId, HttpContext));
+            return Ok(await _transactionService.CreateStaffRefundMemberBuy(supplierResponse, HttpContext));
         }
 
-        /*[HttpPost("create-member-refund")]//member rút tìn từ ví ra tìn mặt
-        public async Task<IActionResult> CreateMemberRefund(string orderId)
+        [HttpPost("create-staff-refund-supplier")]
+        public async Task<IActionResult> CreateStaffRefundSupplier(StaffRefundDto supplierResponse)
         {
-            return Ok(await _transactionService.CreateMemberRefund(orderId, HttpContext));
+            return Ok(await _transactionService.CreateStaffRefundSupplier(supplierResponse, HttpContext));
         }
-*/
-        [HttpPost("create-supplier-payment-purchuse/{orderId}")]
-        public async Task<IActionResult> CreateSupplierPaymentPurchuse(string orderId)
+
+        [HttpPost("get-image")]
+        public async Task<IActionResult> GetImage(string orderId)
         {
-            return Ok(await _transactionService.CreateSupplierPaymentPurchuse(orderId, HttpContext));
+            return Ok(await _transactionService.GetImagePayment(orderId));
         }
+
+        [HttpPost("add-image-payment")]
+        public async Task<IActionResult> AddImagePayment(ImageProductAfterDTO dto)
+        {
+            return Ok(await _transactionService.AddImagePayment(dto));
+        }
+
 
         [HttpGet("payment-callback")]
         public async Task<IActionResult> PaymentCallBack()
@@ -113,13 +120,16 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             IQueryCollection queryParams = new QueryCollection(dictionary);
             VNPayResponseDto response = await _paymentGatewayService.PaymentExcute(queryParams);
 
-            if(responseCode == "00") 
+            if (responseCode == "00")
             {
-                return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={response.OrderDescription}&vnp_TxnRef={txnRef}");
-
+                var encodedOrderDescription = Uri.EscapeDataString(response.OrderDescription);
+                return Redirect($"http://14.225.212.43/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={encodedOrderDescription}&vnp_TxnRef={txnRef}");
             }
-            return Redirect($"http://localhost:5173/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={orderInfo}&vnp_TxnRef={txnRef}");
-        
+            else
+            {
+                var encodedOrderInfo = Uri.EscapeDataString(orderInfo);
+                return Redirect($"http://14.225.212.43/verify-payment?vnp_ResponseCode={responseCode}&vnp_OrderInfo={encodedOrderInfo}&vnp_TxnRef={txnRef}");
+            }
         }
 
 

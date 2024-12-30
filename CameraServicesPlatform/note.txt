@@ -45,7 +45,7 @@ remote:      Visit the repository settings page, https://github.com/CameraServic
  ------------------
  update model - database
   cd CameraServicesPlatform.BackEnd.Domain
-  dotnet ef migrations add [update-agianvourcher] --startup-project ../CameraServicesPlatform.BackEnd.API
+  dotnet ef migrations add [add-table-SystemAdmin] --startup-project ../CameraServicesPlatform.BackEnd.API
  dotnet ef database update --startup-project ../CameraServicesPlatform.BackEnd.API
 
  dotnet ef migrations add [updateDeliverMethod] --startup-project ../CameraServicesPlatform.BackEnd.API

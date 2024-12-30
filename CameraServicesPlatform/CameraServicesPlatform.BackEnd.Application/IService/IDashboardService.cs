@@ -20,8 +20,15 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<SupplierRatingStatisticsDto> GetSupplierRatingStatisticsAsync(string supplierId);
         Task<SystemRatingStatisticsDto> GetSystemRatingStatisticsAsync();
         Task<SystemPaymentStatisticsDto> GetSystemPaymentStatisticsAsync(DateTime startDate, DateTime endDate);
-        Task<SupplierPaymentStatisticsDto> GetSupplierPaymentStatisticsAsync(Guid supplierId, DateTime startDate, DateTime endDate);
-        Task<SupplierTransactionStatisticsDto> GetSupplierTransactionStatisticsAsync(Guid supplierId, DateTime startDate, DateTime endDate);
+        Task<SupplierPaymentStatisticsDto> GetSupplierPaymentStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate);
+        Task<SupplierTransactionStatisticsDto> GetSupplierTransactionStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate);
         Task<SystemTransactionStatisticsDto> GetSystemTransactionStatisticsAsync(DateTime startDate, DateTime endDate);
+
+        Task<SupplierOrderStatisticsDto> GetOrderStatusStatisticsBySupplierAsync(string supplierId);
+        Task<List<MonthlyOrderCostDto>> GetAllMonthlyOrderCostStatisticsAsync(DateTime startDate, DateTime endDate);
+        Task<List<MonthlyOrderCostDto>> GetMonthlyRentalOrderCostStatisticsAsync(DateTime startDate, DateTime endDate);
+        Task<List<MonthlyOrderCostDto>> GetMonthlyPurchaseOrderCostStatisticsAsync(DateTime startDate, DateTime endDate);
+        Task<double> GetSystemTotalMoneyAsync();
+        Task<List<OrderStatusStatisticsDto>> GetOrderStatusStatisticsAsync();
     }
 }

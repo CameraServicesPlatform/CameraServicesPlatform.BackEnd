@@ -43,7 +43,11 @@ namespace CameraServicesPlatform.BackEnd.Domain.Data
         public DbSet<Payment> Payments { get; set; }
 
         public DbSet<Request> Requests { get; set; }
+        public DbSet<Combo> Combos { get; set; }
+        public DbSet<ComboOfSupplier> ComboOfSuppliers { get; set; }
+        public DbSet<Extend> Extends { get; set; }
 
+        public DbSet<SystemAdmin> SystemAdmins { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

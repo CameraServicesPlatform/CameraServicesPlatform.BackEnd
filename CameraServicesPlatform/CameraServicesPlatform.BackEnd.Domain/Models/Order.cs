@@ -18,7 +18,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
 
         public DateTime OrderDate { get; set; }
         public OrderStatus OrderStatus { get; set; }
-        public double? TotalAmount { get; set; }
+        public double TotalAmount { get; set; }
         public OrderType OrderType { get; set; }
 
         // Rental properties
@@ -27,7 +27,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public RentalDurationUnit DurationUnit { get; set; }
         public int DurationValue { get; set; }
         public DateTime? ReturnDate { get; set; }
-
         public string? ShippingAddress { get; set; }
         public DeliveryStatus? DeliveriesMethod { get; set; }
 
@@ -42,5 +41,14 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public virtual ICollection<OrderDetail>? OrderDetail { get; set; }
 
         public Transaction? Transaction { get; set; }
+        public Payment? Payment { get; set; }
+        public string? CancelMessage { get; set; }
+        public bool? IsExtend { get; set; }
+        public bool? IsPayment { get; set; }
+        // Tiền giữ chỗ
+        public double? ReservationMoney { get; set; }
+        public CancelDurationUnit? CancelDurationUnit { get; set; }
+        public int? CancelVaule { get; set; }
+
     }
 }

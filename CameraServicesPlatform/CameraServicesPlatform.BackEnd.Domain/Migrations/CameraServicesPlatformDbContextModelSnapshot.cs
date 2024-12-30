@@ -201,6 +201,72 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Combo", b =>
+                {
+                    b.Property<Guid>("ComboId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ComboName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("ComboPrice")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("DurationCombo")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDisable")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ComboId");
+
+                    b.ToTable("Combos");
+                });
+
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ComboOfSupplier", b =>
+                {
+                    b.Property<Guid>("ComboOfSupplierId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ComboId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDisable")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsMailNearExpired")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsSendMailExpired")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("SupplierID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ComboOfSupplierId");
+
+                    b.HasIndex("ComboId");
+
+                    b.HasIndex("SupplierID");
+
+                    b.ToTable("ComboOfSuppliers");
+                });
+
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ContractTemplate", b =>
                 {
                     b.Property<Guid>("ContractTemplateId")
@@ -270,6 +336,43 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.ToTable("DeliveriesMethod");
                 });
 
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Extend", b =>
+                {
+                    b.Property<Guid>("ExtendId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("DurationUnit")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DurationValue")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ExtendReturnDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDisable")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("OrderID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("RentalExtendEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RentalExtendStartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("TotalAmount")
+                        .HasColumnType("float");
+
+                    b.HasKey("ExtendId");
+
+                    b.HasIndex("OrderID");
+
+                    b.ToTable("Extends");
+                });
+
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Order", b =>
                 {
                     b.Property<Guid>("OrderID")
@@ -278,6 +381,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<string>("AccountId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<int?>("CancelDurationUnit")
+                        .HasColumnType("int");
+
+                    b.Property<string>("CancelMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("CancelVaule")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -297,6 +409,12 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool?>("IsExtend")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("IsPayment")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
@@ -315,6 +433,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime?>("RentalStartDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<double?>("ReservationMoney")
+                        .HasColumnType("float");
+
                     b.Property<DateTime?>("ReturnDate")
                         .HasColumnType("datetime2");
 
@@ -324,7 +445,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<Guid>("SupplierID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double?>("TotalAmount")
+                    b.Property<double>("TotalAmount")
                         .HasColumnType("float");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -724,6 +845,41 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.ToTable("SupplierReports");
                 });
 
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.SystemAdmin", b =>
+                {
+                    b.Property<Guid>("SystemAdminID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("CancelAcceptDurationUnit")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CancelAcceptVaule")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CancelAcceptVauleCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CancelDurationUnit")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CancelVaule")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CancelVauleCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("ReservationMoney")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("ReservationMoneyCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SystemAdminID");
+
+                    b.ToTable("SystemAdmins");
+                });
+
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Vourcher", b =>
                 {
                     b.Property<Guid>("VourcherID")
@@ -1047,7 +1203,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.HasIndex("AccountID");
 
-                    b.HasIndex("OrderID");
+                    b.HasIndex("OrderID")
+                        .IsUnique()
+                        .HasFilter("[OrderID] IS NOT NULL");
 
                     b.HasIndex("SupplierID");
 
@@ -1069,7 +1227,16 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("DateOfManufacture")
+                        .HasColumnType("datetime2");
+
                     b.Property<double?>("DepositProduct")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("IsDisable")
+                        .HasColumnType("bit");
+
+                    b.Property<double?>("OriginalPrice")
                         .HasColumnType("float");
 
                     b.Property<double?>("PriceBuy")
@@ -1320,6 +1487,23 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Navigation("Vourcher");
                 });
 
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ComboOfSupplier", b =>
+                {
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Combo", "Combo")
+                        .WithMany()
+                        .HasForeignKey("ComboId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierID");
+
+                    b.Navigation("Combo");
+
+                    b.Navigation("Supplier");
+                });
+
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.ContractTemplate", b =>
                 {
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Account", "Account")
@@ -1337,6 +1521,17 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Extend", b =>
+                {
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Order", b =>
@@ -1585,8 +1780,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .IsRequired();
 
                     b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderID");
+                        .WithOne("Payment")
+                        .HasForeignKey("Payment", "OrderID");
 
                     b.HasOne("Supplier", "Supplier")
                         .WithMany()
@@ -1687,6 +1882,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Order", b =>
                 {
                     b.Navigation("OrderDetail");
+
+                    b.Navigation("Payment");
 
                     b.Navigation("Transaction");
                 });

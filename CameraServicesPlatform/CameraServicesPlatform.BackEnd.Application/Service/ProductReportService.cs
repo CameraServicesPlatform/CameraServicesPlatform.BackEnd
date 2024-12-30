@@ -2,6 +2,7 @@
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
@@ -144,16 +145,28 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                 );
-
+                string status = null;
                 foreach (var item in pagedResult.Items)
                 {
-
+                    
+                    if(item.StatusType == StatusType.Suspended)
+                    {
+                        status = "Suspended";
+                    }
+                    else
+                    {
+                        if (item.StatusType == StatusType.Blocked)
+                        {
+                            status = "Suspended";
+                        }
+                        else status = "Reject";
+                    }
                     ProductReportResponse productReportResponse = new ProductReportResponse
                     {
                         ProductReportID = item.ProductReportID.ToString(),
                         SupplierID = item.SupplierID.ToString(),
                         ProductID = item.ProductID.ToString(),
-                        StatusType = item.StatusType,
+                        StatusType = status,
                         StartDate = item.StartDate,
                         EndDate = item.EndDate,
                         Reason = item.Reason,
@@ -191,12 +204,26 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     a => a.ProductReportID == productReportId,
                     null
                 );
+                string status = null;
+
+                if (productReportExist.StatusType == StatusType.Suspended)
+                {
+                    status = "Suspended";
+                }
+                else
+                {
+                    if (productReportExist.StatusType == StatusType.Blocked)
+                    {
+                        status = "Suspended";
+                    }
+                    else status = "Reject";
+                }
                 ProductReportResponse productReportResponse = new ProductReportResponse
                 {
                     ProductReportID = productReportExist.ProductReportID.ToString(),
                     SupplierID = productReportExist.SupplierID.ToString(),
                     ProductID = productReportExist.ProductID.ToString(),
-                    StatusType = productReportExist.StatusType,
+                    StatusType = status,
                     StartDate = productReportExist.StartDate,
                     EndDate = productReportExist.EndDate,
                     Reason = productReportExist.Reason,
@@ -236,16 +263,29 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     null
                 );
                 List<ProductReportResponse> listProductReport = new List<ProductReportResponse>();
+                string status = null;
 
                 foreach (var item in pagedResult.Items)
                 {
 
+                    if (item.StatusType == StatusType.Suspended)
+                    {
+                        status = "Suspended";
+                    }
+                    else
+                    {
+                        if (item.StatusType == StatusType.Blocked)
+                        {
+                            status = "Suspended";
+                        }
+                        else status = "Reject";
+                    }
                     ProductReportResponse productReportResponse = new ProductReportResponse
                     {
                         ProductReportID = item.ProductReportID.ToString(),
                         SupplierID = item.SupplierID.ToString(),
                         ProductID = item.ProductID.ToString(),
-                        StatusType = item.StatusType,
+                        StatusType = status,
                         StartDate = item.StartDate,
                         EndDate = item.EndDate,
                         Reason = item.Reason,

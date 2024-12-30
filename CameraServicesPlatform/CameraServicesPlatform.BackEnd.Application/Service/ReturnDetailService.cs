@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions.Internal;
 using System;
@@ -48,12 +49,68 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "Không tìm thấy có đơn hàng nào!");
                     return result;
                 }
+                hasOrder.OrderStatus = OrderStatus.DepositReturn;
+                await _orderRepository.Update(hasOrder);
+                await _unitOfWork.SaveChangesAsync();
+
 
                 var returnDetail = _mapper.Map<ReturnDetail>(request);
                 returnDetail.PenaltyApplied = request.PenaltyApplied;
                 returnDetail.OrderID = request.OrderID;
                 returnDetail.Condition = request.Condition;
-                returnDetail.ReturnDate = DateTime.UtcNow;
+                returnDetail.ReturnDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                returnDetail.IsDisable = false;
+                
+
+                await _returnDetailRepository.Insert(returnDetail);
+                await _unitOfWork.SaveChangesAsync();
+
+                result.IsSuccess = true;
+                result.Result = returnDetail;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+
+        public static class DateTimeHelper
+        {
+            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+            // Convert UTC DateTime to Vietnam Time
+            public static DateTime ToVietnamTime(DateTime utcDateTime)
+            {
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
+            }
+        }
+        public async Task<AppActionResult> CreateReturnDetailForMember(ReturnDetailMemberRequest request)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var hasOrder = await _orderRepository.GetByExpression(x => x.OrderID == request.OrderID);
+
+                if (hasOrder == null)
+                {
+                    result = BuildAppActionResultError(result, "Không tìm thấy có đơn hàng nào!");
+                    return result;
+                }
+                hasOrder.OrderStatus = OrderStatus.DepositReturn;
+                await _orderRepository.Update(hasOrder);
+                await _unitOfWork.SaveChangesAsync();
+
+
+                var returnDetail = _mapper.Map<ReturnDetail>(request);
+                returnDetail.PenaltyApplied = 0;
+                returnDetail.OrderID = request.OrderID;
+                returnDetail.Condition = request.Condition;
+                returnDetail.ReturnDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                returnDetail.IsDisable = true;
+
 
                 await _returnDetailRepository.Insert(returnDetail);
                 await _unitOfWork.SaveChangesAsync();
@@ -235,7 +292,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 existingRT.ReturnDate = request.ReturnDate;
                 existingRT.Condition = request.Condition;
                 existingRT.PenaltyApplied = request.PenaltyApplied;
-                existingRT.CreatedAt = DateTime.UtcNow;
+                existingRT.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
 
 
                 await _returnDetailRepository.Update(existingRT);

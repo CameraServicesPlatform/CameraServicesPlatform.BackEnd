@@ -37,6 +37,25 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
+        [HttpPost("create-return-for-member")]
+        public async Task<IActionResult> CreateReturnDetailForMember([FromBody] ReturnDetailMemberRequest request)
+        {
+            try
+            {
+                var response = await _returnDetailService.CreateReturnDetailForMember(request);
+                if (!response.IsSuccess)
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPut("update-return-detail-by-id")]
         public async Task<IActionResult> UpdateReturnDetail(string ReturnId, [FromBody] ReturnDetailRequest request)
         {

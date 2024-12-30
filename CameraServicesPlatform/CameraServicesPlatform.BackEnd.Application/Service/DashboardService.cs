@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
-    public class DashboardService: GenericBackendService, IDashboardService
+    public class DashboardService : GenericBackendService, IDashboardService
     {
         private readonly IRepository<Order> _orderRepository;
         private readonly IRepository<OrderDetail> _orderDetailRepository;
@@ -55,7 +56,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<SupplierOrderStatisticsDto> GetSupplierOrderStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(
-                x => x.SupplierID == Guid.Parse(supplierId) && x.OrderDate >= startDate && x.OrderDate <= endDate,
+                x => x.SupplierID == Guid.Parse(supplierId) || x.OrderDate >= startDate || x.OrderDate <= endDate,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -69,6 +70,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var pendingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Pending);
             var completedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Completed);
             var canceledOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Cancelled);
+            var approvedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Approved);
+            var placedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Placed);
+            var shippedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Shipped);
+            var paymentFailOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.PaymentFail);
+            var cancelingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Canceling);
+            var paymentOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Payment);
+            var pendingRefundOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.PendingRefund);
+            var refundOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Refund);
+            var depositReturnOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.DepositReturn);
+            var extendOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Extend);
 
             return new SupplierOrderStatisticsDto
             {
@@ -76,14 +87,24 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 TotalOrders = totalOrders,
                 PendingOrders = pendingOrders,
                 CompletedOrders = completedOrders,
-                CanceledOrders = canceledOrders
+                CanceledOrders = canceledOrders,
+                ApprovedOrders = approvedOrders,
+                PlacedOrders = placedOrders,
+                ShippedOrders = shippedOrders,
+                PaymentFailOrders = paymentFailOrders,
+                CancelingOrders = cancelingOrders,
+                PaymentOrders = paymentOrders,
+                PendingRefundOrders = pendingRefundOrders,
+                RefundOrders = refundOrders,
+                DepositReturnOrders = depositReturnOrders,
+                ExtendOrders = extendOrders
             };
         }
 
         public async Task<StaffOrderStatisticsDto> GetStaffOrderStatisticsAsync(string accountId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(
-                x => x.Id == accountId && x.OrderDate >= startDate && x.OrderDate <= endDate,
+                x => x.Id == accountId || x.OrderDate >= startDate || x.OrderDate <= endDate,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -113,7 +134,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var orders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate && x.OrderDate <= endDate,
+                x => x.OrderDate >= startDate || x.OrderDate <= endDate,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -163,7 +184,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<List<BestSellingCategoryDto>> GetBestSellingCategoriesAsync(DateTime startDate, DateTime endDate)
         {
             var orders = await _orderRepository.GetAllDataByExpression(
-                o => o.OrderDate >= startDate && o.OrderDate <= endDate,
+                o => o.OrderDate >= startDate || o.OrderDate <= endDate,
                 1, int.MaxValue,
                  includes: new Expression<Func<Order, object>>[]
                     {
@@ -205,7 +226,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<List<BestSellingCategoryDto>> GetBestSellingCategoriesForSupplierAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             var orders = await _orderRepository.GetAllDataByExpression(
-                o => o.OrderDate >= startDate && o.OrderDate <= endDate && o.SupplierID == Guid.Parse(supplierId),
+                o => o.OrderDate >= startDate || o.OrderDate <= endDate || o.SupplierID == Guid.Parse(supplierId),
                 1, int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
                 {
@@ -218,8 +239,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 foreach (var detail in order.OrderDetail)
                 {
-                    var product = await _productRepository.GetById(detail.ProductID);
-                    if (product != null && product.Category != null) // Add null check for product.Category
+                    var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID, x => x.Category);
+                    if (product != null && product.CategoryID != null) // Add null check for product.Category
                     {
                         var categoryId = product.CategoryID.ToString();
 
@@ -243,15 +264,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
         public async Task<double> CalculateTotalRevenueBySupplierAsync(string supplierId)
         {
-            var orders = await _orderRepository.GetAllDataByExpression(
-                filter: o => o.SupplierID == Guid.Parse(supplierId) && o.OrderStatus == OrderStatus.Completed,
-                pageNumber: 0,
-                pageSize: 0
+            double totalMoney = 0;
+
+            // Tiền từ các đơn hàng hoàn thành
+            var completedOrders = await _orderRepository.GetAllDataByExpression(
+                x => x.OrderStatus != OrderStatus.Cancelled && x.SupplierID == Guid.Parse(supplierId),
+                1,
+                int.MaxValue
             );
+            totalMoney += (double)completedOrders.Items.Sum(order => order.TotalAmount);
 
-            var totalRevenue = orders.Items.Sum(o => o.TotalAmount);
-
-            return (double)totalRevenue;
+            return totalMoney;
         }
 
         public async Task<List<MonthlyRevenueDto>> CalculateMonthlyRevenueBySupplierAsync(string supplierId, DateTime startDate, DateTime endDate)
@@ -366,11 +389,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             };
         }
         //Payment
-        public async Task<SupplierPaymentStatisticsDto> GetSupplierPaymentStatisticsAsync(Guid supplierId, DateTime startDate, DateTime endDate)
+        public async Task<SupplierPaymentStatisticsDto> GetSupplierPaymentStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             // Lấy tất cả thanh toán thuộc về supplier trong khoảng thời gian xác định
             var payments = await _paymentRepository.GetAllDataByExpression(
-                filter: p => p.SupplierID == supplierId && p.PaymentDate >= startDate && p.PaymentDate <= endDate && !p.IsDisable,
+                filter: p => p.SupplierID == Guid.Parse(supplierId) || p.PaymentDate >= startDate || p.PaymentDate <= endDate && !p.IsDisable,
                 pageNumber: 0,
                 pageSize: 0
             );
@@ -422,7 +445,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy tất cả các thanh toán trong hệ thống trong khoảng thời gian xác định
             var payments = await _paymentRepository.GetAllDataByExpression(
-                filter: p => p.PaymentDate >= startDate && p.PaymentDate <= endDate && !p.IsDisable,
+                filter: p => p.PaymentDate >= startDate || p.PaymentDate <= endDate || !p.IsDisable,
                 pageNumber: 0,
                 pageSize: 0
             );
@@ -482,11 +505,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         }
 
         // transaction
-        public async Task<SupplierTransactionStatisticsDto> GetSupplierTransactionStatisticsAsync(Guid supplierId, DateTime startDate, DateTime endDate)
+        public async Task<SupplierTransactionStatisticsDto> GetSupplierTransactionStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             // Lấy các giao dịch của supplier trong khoảng thời gian
             var transactions = await _transactionRepository.GetAllDataByExpression(
-                filter: t => t.Order.SupplierID == supplierId && t.TransactionDate >= startDate && t.TransactionDate <= endDate,
+                filter: t => t.Order.SupplierID == Guid.Parse(supplierId) || t.TransactionDate >= startDate || t.TransactionDate <= endDate,
                 pageNumber: 0,
                 pageSize: 0,
                 includes: t => t.Order
@@ -550,7 +573,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy tất cả giao dịch trong hệ thống trong khoảng thời gian
             var transactions = await _transactionRepository.GetAllDataByExpression(
-                filter: t => t.TransactionDate >= startDate && t.TransactionDate <= endDate,
+                filter: t => t.TransactionDate >= startDate || t.TransactionDate <= endDate,
                 pageNumber: 0,
                 pageSize: 0,
                 includes: t => t.Order
@@ -619,6 +642,173 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 MonthlyRevenue = monthlyRevenue,
                 RevenueBySupplier = revenueBySupplier
             };
+        }
+
+        // Tổng đơn mua
+        public async Task<List<MonthlyOrderCostDto>> GetMonthlyPurchaseOrderCostStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            var monthlyCosts = new List<MonthlyOrderCostDto>();
+
+            var purchaseOrders = await _orderRepository.GetAllDataByExpression(
+                x => x.OrderDate >= startDate || x.OrderDate <= endDate || x.OrderType == OrderType.Purchase,
+                1,
+                int.MaxValue,
+                includes: new Expression<Func<Order, object>>[]
+                {
+                    o => o.OrderDetail,
+                }
+            );
+
+            var groupedData = purchaseOrders.Items
+                .GroupBy(order => new { order.OrderDate.Year, order.OrderDate.Month })
+                .Select(g => new MonthlyOrderCostDto
+                {
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1),
+                    TotalCost = (double)g.Sum(order => order.TotalAmount)
+                });
+
+            monthlyCosts.AddRange(groupedData);
+            return monthlyCosts;
+        }
+
+        // Tổng đơn thuê
+        public async Task<List<MonthlyOrderCostDto>> GetMonthlyRentalOrderCostStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            var monthlyCosts = new List<MonthlyOrderCostDto>();
+
+            var rentalOrders = await _orderRepository.GetAllDataByExpression(
+                x => x.OrderDate >= startDate || x.OrderDate <= endDate || x.OrderType == OrderType.Rental,
+                1,
+                int.MaxValue,
+                includes: new Expression<Func<Order, object>>[]
+                {
+                    o => o.OrderDetail,
+                }
+            );
+
+            var groupedData = rentalOrders.Items
+                .GroupBy(order => new { order.OrderDate.Year, order.OrderDate.Month })
+                .Select(g => new MonthlyOrderCostDto
+                {
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1),
+                    TotalCost = (double)g.Sum(order => order.TotalAmount)
+                });
+
+            monthlyCosts.AddRange(groupedData);
+            return monthlyCosts;
+        }
+
+        // Tổng đơn
+        public async Task<List<MonthlyOrderCostDto>> GetAllMonthlyOrderCostStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            var monthlyCosts = new List<MonthlyOrderCostDto>();
+
+            var rentalOrders = await _orderRepository.GetAllDataByExpression(
+                x => x.OrderDate >= startDate || x.OrderDate <= endDate,
+                1,
+                int.MaxValue,
+                includes: new Expression<Func<Order, object>>[]
+                {
+                    o => o.OrderDetail,
+                }
+            );
+
+            var groupedData = rentalOrders.Items
+                .GroupBy(order => new { order.OrderDate.Year, order.OrderDate.Month })
+                .Select(g => new MonthlyOrderCostDto
+                {
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1),
+                    TotalCost = (double)g.Sum(order => order.TotalAmount)
+                });
+
+            monthlyCosts.AddRange(groupedData);
+            return monthlyCosts;
+        }
+
+        //thống kê trạng thái đơn hàng
+        public async Task<SupplierOrderStatisticsDto> GetOrderStatusStatisticsBySupplierAsync(string supplierId)
+        {
+            var ordersResult = await _orderRepository.GetAllDataByExpression(
+                x => x.SupplierID == Guid.Parse(supplierId),
+                1,
+                int.MaxValue,
+                includes: new Expression<Func<Order, object>>[]
+                    {
+                o => o.OrderDetail,
+                    }
+            );
+
+            var totalSales = ordersResult.Items.Sum(order => order.TotalAmount);
+            var totalOrders = ordersResult.Items.Count;
+            var pendingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Pending);
+            var completedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Completed);
+            var canceledOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Cancelled);
+            var approvedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Approved);
+            var placedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Placed);
+            var shippedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Shipped);
+            var paymentFailOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.PaymentFail);
+            var cancelingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Canceling);
+            var paymentOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Payment);
+            var pendingRefundOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.PendingRefund);
+            var refundOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Refund);
+            var depositReturnOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.DepositReturn);
+            var extendOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Extend);
+
+            return new SupplierOrderStatisticsDto
+            {
+                TotalSales = (double)totalSales,
+                TotalOrders = totalOrders,
+                PendingOrders = pendingOrders,
+                CompletedOrders = completedOrders,
+                CanceledOrders = canceledOrders,
+                ApprovedOrders = approvedOrders,
+                PlacedOrders = placedOrders,
+                ShippedOrders = shippedOrders,
+                PaymentFailOrders = paymentFailOrders,
+                CancelingOrders = cancelingOrders,
+                PaymentOrders = paymentOrders,
+                PendingRefundOrders = pendingRefundOrders,
+                RefundOrders = refundOrders,
+                DepositReturnOrders = depositReturnOrders,
+                ExtendOrders = extendOrders
+            };
+        }
+
+        public async Task<List<OrderStatusStatisticsDto>> GetOrderStatusStatisticsAsync()
+        {
+            var orders = await _orderRepository.GetAllDataByExpression(
+                null,
+                1,
+                int.MaxValue
+            );
+
+            var statistics = orders.Items
+                .GroupBy(order => order.OrderStatus)
+                .Select(group => new OrderStatusStatisticsDto
+                {
+                    Status = group.Key,
+                    Count = group.Count()
+                })
+                .ToList();
+
+            return statistics;
+        }
+
+
+        //
+        public async Task<double> GetSystemTotalMoneyAsync()
+        {
+            double totalMoney = 0;
+
+            // Tiền từ các đơn hàng hoàn thành
+            var completedOrders = await _orderRepository.GetAllDataByExpression(
+                x => x.OrderStatus != OrderStatus.Cancelled,
+                1,
+                int.MaxValue
+            );
+            totalMoney +=(double) completedOrders.Items.Sum(order => order.TotalAmount);
+
+            return totalMoney;
         }
 
     }

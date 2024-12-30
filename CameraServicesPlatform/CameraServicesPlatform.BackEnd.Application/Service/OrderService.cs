@@ -6,15 +6,18 @@ using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Common.Utils;
 using CameraServicesPlatform.BackEnd.Domain.Enum;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Delivery;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models;
+using DinkToPdf;
 using Firebase.Auth;
 using Google.Apis.Util;
 using MailKit.Search;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Identity.Client;
+using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Pdf;
 using System;
@@ -44,6 +47,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Contract> _contractRepository;
         private readonly IRepository<Account> _accountRepository;
         private readonly IRepository<Supplier> _supplierRepository;
+        private readonly IRepository<SystemAdmin> _systemAdminRepository;
         private readonly IRepository<ContractTemplate> _contractTemplateRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -58,6 +62,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<OrderDetail> orderDetailRepository,
             IRepository<Product> productRepository,
             IRepository<Contract> contractRepository,
+            IRepository<SystemAdmin> systemAdminReposirory,
             IRepository<ContractTemplate> contractTemplateRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
@@ -74,6 +79,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _orderDetailRepository = orderDetailRepository;
             _productRepository = productRepository;
             _contractTemplateRepository = contractTemplateRepository;
+            _systemAdminRepository = systemAdminReposirory;
             _contractRepository = contractRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -357,129 +363,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        private async Task SendOrderConfirmationEmail(Account account, Account supplierAccount, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice)
-        {
-            IEmailService? emailService = Resolve<IEmailService>();
-
-            // Generate a string representation of the order detail with HTML line breaks
-            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
-                "   Hình thức đơn hàng: Mua<br />" +
-                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
-                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
-                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
-                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
-
-            // Invoice information template
-            var invoiceInfo =
-                "HÓA ĐƠN<br /><br />" +
-                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
-                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
-                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
-                "Khách hàng<br />" +
-                $"{account.FirstName}<br />" +
-                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
-                $"Email: {account.Email}<br />" +
-                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến tiệm lấy"}<br /><br />" +
-                "Nhà cung cấp<br />" +
-                $"Tên: {supplierAccount.FirstName}<br />" +
-                $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
-                $"Email: {supplierAccount.Email}<br />" +
-                $"Địa chỉ: {supplierAccount.Address}<br /><br />";
-
-            // Order summary and total
-            var orderSummary =
-                "=====================================<br />" +
-                "         CHI TIẾT HÓA ĐƠN<br />" +
-                "=====================================<br />" +
-                $"{orderDetailsString}<br />" +
-                "-------------------------------------<br />" +
-                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
-                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
-                "=====================================<br />";
-
-            var emailMessage =
-                $"Kính chào {firstName},<br /><br />" +
-                "Bạn vừa có đơn đặt hàng. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
-                invoiceInfo +
-                orderSummary +
-                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
-                "Trân trọng,<br />" +
-                "Đội ngũ Camera service platform";
-
-            // Send the email asynchronously and wait for completion
-             emailService.SendEmail(
-                email,
-                SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
-                emailMessage
-            );
-        }
-        public static class DateTimeHelper
-        {
-            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-
-            // Convert UTC DateTime to Vietnam Time
-            public static DateTime ToVietnamTime(DateTime utcDateTime)
-            {
-                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
-            }
-        }
-        private async Task SendOrderConfirmationEmailToSupplier(Account account, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice)
-        {
-            IEmailService? emailService = Resolve<IEmailService>();
-
-            // Generate a string representation of the order detail with HTML line breaks
-            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
-                "   Hình thức đơn hàng: Mua<br />" +
-                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
-                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
-                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
-                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
-
-            // Invoice information template
-            var invoiceInfo =
-                "HÓA ĐƠN<br /><br />" +
-                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
-                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
-                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
-                "Khách hàng<br />" +
-                $"{firstName}<br />" +
-                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
-                $"Email: {email}<br />" +
-                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến tiệm lấy."}<br /><br />" +
-                "Thông báo từ<br />" +
-                "Camera service platform Company<br />" +
-                "Điện thoại: 0862448677<br />" +
-                "Email: dan1314705@gmail.com<br />" +
-                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
-
-            // Order summary and total
-            var orderSummary =
-                "=====================================<br />" +
-                "         CHI TIẾT HÓA ĐƠN<br />" +
-                "=====================================<br />" +
-                $"{orderDetailsString}<br />" +
-                "-------------------------------------<br />" +
-                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
-                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
-                "=====================================<br />";
-
-            var emailMessage =
-                $"Kính chào {firstName},<br /><br />" +
-                "Cảm ơn quý khách đã tin tưởng sử dụng dịch vụ của chúng tôi. Dưới đây là thông tin hóa đơn chi tiết của quý khách:<br /><br />" +
-                invoiceInfo +
-                orderSummary +
-                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
-                "Trân trọng,<br />" +
-                "Đội ngũ Camera service platform";
-
-            // Send the email asynchronously and wait for completion
-            emailService.SendEmail(
-               email,
-               SD.SubjectMail.ORDER_CONFIRMATION,
-               emailMessage
-           );
-        }
-
+      
         public async Task<AppActionResult> PurchaseOrder(string orderId, HttpContext context)
         {
             var result = new AppActionResult();
@@ -556,7 +440,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.DeliveriesMethod = request.DeliveryMethod;
                 order.DurationValue = request.DurationValue;
                 order.DurationUnit = request.DurationUnit;
-                order.ReturnDate = request.ReturnDate;
                 order.ShippingAddress = request.ShippingAddress;
                 order.RentalStartDate = DateTimeHelper.ToVietnamTime(request.RentalStartDate ?? DateTime.UtcNow);
 
@@ -578,6 +461,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         throw new InvalidOperationException("DurationUnit is not supported.");
                 }
 
+
                 switch (order.DurationUnit)
                 {
                     case RentalDurationUnit.Hour:
@@ -595,21 +479,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     default:
                         throw new InvalidOperationException("DurationUnit is not supported.");
                 }
-                order.Deposit = request.Deposit;
-                order.TotalAmount = request.TotalAmount;
 
-                order.TotalAmount = request.TotalAmount;
-
-                var product = await _productRepository.GetById(productID);
+                var product = await _productRepository.GetByExpression(x => x.ProductID == productID);
                 if (product == null)
                 {
-                    throw new Exception("Không tìm thấy sản phẩm thuê.");
+                    throw new Exception("Không tìm thấy sản phẩm.");
                 }
 
                 if (product.Status == ProductStatusEnum.Rented)
                 {
                     throw new Exception("Sản phẫm đã được thuê");
                 }
+
                 double discount = 0;
                 if (!string.IsNullOrEmpty(request.VoucherID))
                 {
@@ -629,11 +510,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductID = productID,
                     ProductPrice = request.ProductPriceRent,
                     Discount = discount,
-                    ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
+                    ProductQuality = product.Quality,
                     ProductPriceTotal = request.TotalAmount,
                     PeriodRental = order.ReturnDate,
                 };
 
+                order.IsExtend = false;
                 order.Deposit = product.DepositProduct;
                 order.TotalAmount = request.TotalAmount;
                 double TotalPrice = (double)order.TotalAmount;
@@ -648,7 +530,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(200);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Cập nhật trạng thái sản phẩm thành `Rented`
                 if (Guid.TryParse(request.ProductID, out var productGuid))
                 {
                     var productEntity = await _productRepository.GetById(productGuid);
@@ -660,12 +541,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
                 await _unitOfWork.SaveChangesAsync();
 
-                var pagedContractTemplates = await _contractTemplateRepository.GetAllDataByExpression( 
-                    x => x.ProductID == Guid.Parse(request.ProductID), 
+                var pagedContractTemplates = await _contractTemplateRepository.GetAllDataByExpression(
+                    x => x.ProductID == Guid.Parse(request.ProductID),
                     pageNumber: 1,
-                    pageSize: int.MaxValue );
+                    pageSize: int.MaxValue);
 
-                // Kiểm tra nếu có item trong kết quả phân trang
                 if (pagedContractTemplates != null && pagedContractTemplates.Items.Any())
                 {
                     var contractOfProductContract = pagedContractTemplates.Items;
@@ -694,7 +574,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 }
 
                 // Xác nhận hợp đồng đã được tạo
-                var checkContract = await _contractRepository.GetAllDataByExpression(x => x.CreatedAt == request.CreatedAt && x.OrderID == order.OrderID, 
+                var checkContract = await _contractRepository.GetAllDataByExpression(x => x.CreatedAt == request.CreatedAt && x.OrderID == order.OrderID,
                     pageNumber: 1,
                     pageSize: int.MaxValue);
                 if (checkContract == null)
@@ -702,13 +582,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new Exception("Không có hợp đồng!");
                 }
 
-                // Ánh xạ thông tin đơn hàng sang response               
                 var contractOfProduct = pagedContractTemplates.Items;
                 // Send confirmation email to the customer
                 await SendOrderRentConfirmationEmail(getAccount, supplierAccount, getAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
                 await Task.Delay(100);
                 // Send confirmation email to the supplier
                 await SendOrderRentConfirmationEmailSupplier(getAccount, supplierAccount.Email, supplierAccount.FirstName, order, orderDetail, TotalPrice, contractOfProduct);
+                await Task.Delay(100);
 
                 result.Result = order;
             }
@@ -742,6 +622,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 order.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 order.SupplierID = Guid.Parse(request.SupplierID);
+                order.ReservationMoney = request.ReservationMoney;
                 order.Id = request.AccountID;
                 order.OrderStatus = OrderStatus.Pending;
                 order.ShippingAddress = request.ShippingAddress;
@@ -824,7 +705,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     PeriodRental = order.ReturnDate,
                 };
 
-
+                order.IsExtend = false;
                 order.Deposit = product.DepositProduct;
                 order.TotalAmount = request.TotalAmount;
                 double TotalPrice = (double)order.TotalAmount;
@@ -896,7 +777,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var payment = new PaymentInformationRequest
                 {
                     AccountID = getAccount.Id,
-                    Amount = (double)order.TotalAmount,
+                    Amount = (double)order.ReservationMoney,
                     MemberName = $"{getAccount.FirstName} {getAccount.LastName}",
                     OrderID = order.OrderID.ToString(),
                     SupplierID = request.SupplierID,
@@ -1120,6 +1001,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
                 }
+                if (order.OrderType == OrderType.Rental) {
+                    var orderDetail = await _orderDetailRepository.GetByExpression(x => x.OrderID == OrderUpdateId);
+                    if (orderDetail != null)
+                    {
+                        var product = await _productRepository.GetByExpression(x => x.ProductID == orderDetail.ProductID);
+                        product.Status = ProductStatusEnum.AvailableRent;
+                        _productRepository.Update(product);
+                        await Task.Delay(100);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                }
                 var orderResponse = _mapper.Map<OrderResponse>(order);
                 orderResponse.AccountID = order.Id.ToString();
                 orderResponse.SupplierID = order.SupplierID.ToString();
@@ -1168,6 +1060,137 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> UpdateOrderPendingRefund(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.PendingRefund;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateOrderRefund(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.Refund;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateOrderDepositReturn(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.DepositReturn;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> UpdateOrderFinalCompleted(string OrderID)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var order = await _orderRepository.GetById(OrderUpdateId);
+                if (order != null)
+                {
+                    order.OrderStatus = OrderStatus.Completed;
+                    _orderRepository.Update(order);
+                    await Task.Delay(100);
+                    await _unitOfWork.SaveChangesAsync();
+                }
+                var orderResponse = _mapper.Map<OrderResponse>(order);
+                orderResponse.AccountID = order.Id.ToString();
+                orderResponse.SupplierID = order.SupplierID.ToString();
+
+                result.Result = orderResponse;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
         public async Task<AppActionResult> UpdateOrderStatusPaymentBySupplier(string OrderID)
         {
             AppActionResult result = new AppActionResult();
@@ -1268,19 +1291,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
 
 
-        public async Task<AppActionResult> CancelOrder(string OrderID)
+        public async Task<AppActionResult> CancelOrder(CancelOrderRequest cancelOrderRequest)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                // Validate OrderID format
-                if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
+                int TimeCancel;
+                if (!Guid.TryParse(cancelOrderRequest.OrderID, out Guid OrderUpdateId))
                 {
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
 
-                // Retrieve the order from the repository
                 var order = await _orderRepository.GetById(OrderUpdateId);
                 if (order == null)
                 {
@@ -1288,28 +1310,51 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                // Check if the cancellation is within the allowed time frame (24 hours)
-                TimeSpan timeSinceOrderCreated = DateTime.UtcNow - order.CreatedAt;
-                if (timeSinceOrderCreated.TotalHours > 24)
+                
+
+                DateTime timeNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+
+                var resultTimeCancel = await _systemAdminRepository.GetAllDataByExpression(
+                    filter: r => r.CancelVauleCreatedAt <= timeNow,
+                    pageNumber: 1,
+                    pageSize: 1,
+                    orderBy: r => r.CancelVauleCreatedAt,
+                    isAscending: false
+                );
+                string unit;
+                var latestSystemAdmin = resultTimeCancel.Items?.FirstOrDefault();
+                switch (latestSystemAdmin.CancelDurationUnit)
                 {
-                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau 24 giờ kể từ khi tạo!");
+                    case CancelDurationUnit.Hour:
+                        TimeCancel = latestSystemAdmin.CancelVaule.Value;
+                        unit = "giờ";
+                        break;
+                    case CancelDurationUnit.Day:
+                        TimeCancel = latestSystemAdmin.CancelVaule.Value * 24;
+                        unit = "ngày";
+                        break;
+                    default:
+                        throw new InvalidOperationException("DurationUnit không hỗ trợ.");
+                }
+                TimeSpan timeSinceOrderCreated = timeNow - order.CreatedAt;
+                if (timeSinceOrderCreated.TotalHours > TimeCancel)
+                {
+                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau "+ TimeCancel +" "+ unit + " kể từ khi tạo!");
                     return result;
                 }
 
-                // Update order status to Cancelled
                 order.OrderStatus = OrderStatus.Canceling;
+                order.CancelMessage = cancelOrderRequest.CancelMessage;
                 _orderRepository.Update(order);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Notify the supplier about the cancelled order
                 var supplier = await _supplierRepository.GetById(order.SupplierID);
                 var account = await _accountRepository.GetById(supplier.AccountID);
                 var orderDetail = await _orderDetailRepository.GetByExpression(x => x.OrderID == OrderUpdateId);
                 double totalOrderPrice = (double)order.TotalAmount;
 
-                await SendOrderCancelNotificationToSupplier(account, account.Email, account.FirstName, orderDetail, totalOrderPrice);
+                await SendOrderCancelNotificationToSupplier(account, account.Email, account.FirstName,order, orderDetail, totalOrderPrice);
 
-                // Prepare response data
                 var orderResponse = _mapper.Map<OrderResponse>(order);
                 orderResponse.AccountID = order.Id.ToString();
                 orderResponse.SupplierID = order.SupplierID.ToString();
@@ -1324,51 +1369,94 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+       
         public async Task<AppActionResult> AcceptCancelOrder(string OrderID)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-                // Validate OrderID format
+                int TimeCancel = 24;
                 if (!Guid.TryParse(OrderID, out Guid OrderUpdateId))
                 {
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
 
-                // Retrieve the order from the repository
                 var order = await _orderRepository.GetById(OrderUpdateId);
                 if (order == null)
                 {
                     result = BuildAppActionResultError(result, "Đơn hàng không tồn tại!");
                     return result;
                 }
+                DateTime timeNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
 
-                // Check if the cancellation is within the allowed time frame (24 hours)
-                TimeSpan timeSinceOrderCreated = DateTime.UtcNow - order.CreatedAt;
-                if (timeSinceOrderCreated.TotalHours > 24)
+                var resultAcceptCancel = await _systemAdminRepository.GetAllDataByExpression(
+                   filter: r => r.CancelAcceptVauleCreatedAt <= timeNow,
+                   pageNumber: 1,
+                   pageSize: 1,
+                   orderBy: r => r.CancelAcceptVauleCreatedAt,
+                   isAscending: false
+               );
+
+                var latestSystemAdmin = resultAcceptCancel.Items?.FirstOrDefault();
+                string unit;
+                switch (latestSystemAdmin.CancelAcceptDurationUnit)
                 {
-                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau 24 giờ kể từ khi tạo!");
+                    case CancelDurationUnit.Hour:
+                        TimeCancel = latestSystemAdmin.CancelAcceptVaule.Value;
+                        unit = "giờ";
+                        break;
+                    case CancelDurationUnit.Day:
+                        TimeCancel = latestSystemAdmin.CancelAcceptVaule.Value * 24;
+                        unit = "ngày";
+                        break;
+                    default:
+                        throw new InvalidOperationException("DurationUnit không hỗ trợ.");
+                }
+                TimeSpan timeSinceOrderCreated = timeNow - order.CreatedAt;
+                if (timeSinceOrderCreated.TotalHours > TimeCancel)
+                {
+                    result = BuildAppActionResultError(result, "Không thể hủy đơn hàng sau "+ TimeCancel + " " + unit +" kể từ khi tạo!");
                     return result;
                 }
 
-                // Update order status to Cancelled
                 order.OrderStatus = OrderStatus.Cancelled;
                 _orderRepository.Update(order);
                 await _unitOfWork.SaveChangesAsync();
 
-                // Notify the supplier about the cancelled order
                 var supplier = await _supplierRepository.GetById(order.SupplierID);
                 var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
                 var account = await _accountRepository.GetById(order.Id);
                 var orderDetail = await _orderDetailRepository.GetByExpression(x => x.OrderID == OrderUpdateId);
                 double totalOrderPrice = (double)order.TotalAmount;
 
+                if (order.OrderType == OrderType.Rental)
+                {
+                    if (orderDetail != null)
+                    {
+                        var product = await _productRepository.GetByExpression(x => x.ProductID == orderDetail.ProductID);
+                        product.Status = ProductStatusEnum.AvailableRent;
+                        _productRepository.Update(product);
+                        await Task.Delay(100);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                }
+                else
+                {
+                    if (orderDetail != null)
+                    {
+                        var product = await _productRepository.GetByExpression(x => x.ProductID == orderDetail.ProductID);
+                        product.Status = ProductStatusEnum.AvailableSell;
+                        _productRepository.Update(product);
+                        await Task.Delay(100);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+                }
+
                 await SendOrderCancelConfirmationEmailForSupplierToMember(account, account.Email, supplierAccount.Email, account.FirstName, orderDetail, totalOrderPrice);
                 await Task.Delay(100);
                 await SendOrderCancelConfirmationEmailForSupplierToSystem(account, account.Email, supplierAccount.Email, supplierAccount.FirstName, account.FirstName, orderDetail, totalOrderPrice);
 
-                // Prepare response data
                 var orderResponse = _mapper.Map<OrderResponse>(order);
                 orderResponse.AccountID = order.Id.ToString();
                 orderResponse.SupplierID = order.SupplierID.ToString();
@@ -1383,29 +1471,27 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
-        private async Task SendOrderCancelNotificationToSupplier(Account account, string supplierEmail, string customerFirstName, OrderDetail orderDetail, double totalOrderPrice)
+        private async Task SendOrderCancelNotificationToSupplier(Account account, string supplierEmail, string customerFirstName,Order order, OrderDetail orderDetail, double totalOrderPrice)
         {
             IEmailService? emailService = Resolve<IEmailService>();
 
-            // Generate a string representation of the order detail with HTML line breaks
             var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
                 $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
                 $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
                 $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
                 $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
 
-            // Invoice information for the cancellation notification
             var invoiceInfo =
                 "THÔNG BÁO HỦY ĐƠN HÀNG<br /><br />" +
                 $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
                 $"Ngày hủy: {DateTime.Now:dd/MM/yyyy}<br /><br />" +
+                $"Lý do hủy: {order.CancelMessage}<br />" +
                 "Thông tin khách hàng<br />" +
                 $"{customerFirstName}<br />" +
                 $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
                 $"Email: {account.Email}<br />" +
                 $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />";
 
-            // Order summary and total
             var orderSummary =
                 "=====================================<br />" +
                 "         CHI TIẾT ĐƠN HÀNG ĐÃ HỦY<br />" +
@@ -1556,27 +1642,139 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
-                if (OrderSupplierID != null)
+                if (OrderSupplierID == Guid.Empty)
                 {
-                    var pagedResult1 = await _orderRepository.GetAllDataByExpression(
-                        x => x.SupplierID == OrderSupplierID,
+                    result = BuildAppActionResultError(result, "ID không được để trống!");
+                    return result;
+                }
+
+                // Lấy dữ liệu đơn hàng của nhà cung cấp
+                var pagedResult1 = await _orderRepository.GetAllDataByExpression(
+                    x => x.SupplierID == OrderSupplierID,
+                    pageIndex,
+                    pageSize,
+                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
+                );
+
+                var orders = pagedResult1.Items;
+
+                if (orders == null || !orders.Any())
+                {
+                    result = BuildAppActionResultError(result, "Không có đơn hàng nào cho nhà cung cấp này!");
+                    return result;
+                }
+
+                DateTime timeNow = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+
+                var resultAcceptCancel = await _systemAdminRepository.GetAllDataByExpression(
+                    filter: r => r.CancelAcceptVauleCreatedAt <= timeNow,
+                    pageNumber: 1,
+                    pageSize: 1,
+                    orderBy: r => r.CancelAcceptVauleCreatedAt,
+                    isAscending: false
+                );
+
+                var latestSystemAdmin = resultAcceptCancel.Items?.FirstOrDefault();
+                if (latestSystemAdmin == null || latestSystemAdmin.CancelAcceptVaule == null)
+                {
+                    result = BuildAppActionResultError(result, "Không tìm thấy quy định hủy đơn hàng!");
+                    return result;
+                }
+
+                int TimeCancel;
+                string unit;
+                switch (latestSystemAdmin.CancelAcceptDurationUnit)
+                {
+                    case CancelDurationUnit.Hour:
+                        TimeCancel = latestSystemAdmin.CancelAcceptVaule.Value;
+                        unit = "giờ";
+                        break;
+                    case CancelDurationUnit.Day:
+                        TimeCancel = latestSystemAdmin.CancelAcceptVaule.Value * 24;
+                        unit = "ngày";
+                        break;
+                    default:
+                        throw new InvalidOperationException("DurationUnit không hỗ trợ.");
+                }
+
+                foreach (var order in orders)
+                {
+                    if (order.OrderStatus == OrderStatus.Canceling)
+                    {
+                        TimeSpan timeSinceOrderCreated = timeNow - order.CreatedAt;
+                        if (timeSinceOrderCreated.TotalHours > TimeCancel)
+                        {
+                            order.OrderStatus = OrderStatus.Cancelled;
+                            await _orderRepository.Update(order);
+                            await _unitOfWork.SaveChangesAsync();
+
+                            result = BuildAppActionResultError(result,
+                                $"Không thể hủy đơn hàng sau {TimeCancel} {unit} kể từ khi tạo!");
+                        }
+                    }
+                }
+
+                var convertedResult1 = orders.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+
+                result.Result = convertedResult1;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+
+
+        public async Task<AppActionResult> GetOrderStatusOfSupplier(string? SupplierID, OrderStatus status, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(SupplierID, out Guid OrderSupplierID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                if (OrderSupplierID == null)
+                {
+                    result = BuildAppActionResultError(result, "ID không được để tróng!");
+                    return result;
+                }
+                var pagedResult1 = await _orderRepository.GetAllDataByExpression(
+                        x => x.SupplierID == OrderSupplierID && x.OrderStatus == status,
                         pageIndex,
                         pageSize,
                         includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
 
                     );
-                    var convertedResult1 = pagedResult1.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
+                var convertedResult1 = pagedResult1.Items.Select(order => _mapper.Map<OrderResponse>(order)).ToList();
 
-                    result.Result = convertedResult1;
-                    result.IsSuccess = true;
-                }
+                result.Result = convertedResult1;
+                result.IsSuccess = true;
 
-                Expression<Func<Order, bool>>? filter = null;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
 
+            return result;
+        }
+
+        public async Task<AppActionResult> GetOrderOrderStatusByAccountID(string AccountID, OrderStatus orderStatus, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+               
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
-                    filter: null,
-                    pageNumber: pageIndex,
-                    pageSize: pageSize,
+                    x => x.Id == AccountID && x.OrderStatus == orderStatus,
+                    pageIndex,
+                    pageSize, 
                     includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
 
                 );
@@ -1594,16 +1792,87 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> GetOrderOfAccountByOrderID(string OrderId, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    x => x.OrderID == Guid.Parse(OrderId),
+                    pageIndex,
+                    pageSize,
+                    includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail } 
+                );
+
+                var productIds = pagedResult.Items
+                    .SelectMany(order => order.OrderDetail)
+                    .Select(od => od.ProductID)
+                    .Distinct()
+                    .ToList();
+
+                var products = await _productRepository.GetByExpression(p => p.ProductID == productIds.FirstOrDefault());
+
+                var convertedResult = pagedResult.Items.Select(order => new OrderResponse
+                {
+                    OrderID = order.OrderID.ToString(),
+                    AccountID = order.Id.ToString(),
+                    SupplierID = order.SupplierID.ToString(),
+                    OrderDate = order.OrderDate,
+                    OrderStatus = order.OrderStatus,
+                    TotalAmount = order.TotalAmount,
+                    OrderType = order.OrderType,
+                    ShippingAddress = order.ShippingAddress,
+                    DeliveriesMethod = order.DeliveriesMethod,
+                    Deposit = order.Deposit,
+                    RentalStartDate = order.RentalStartDate,
+                    RentalEndDate = order.RentalEndDate,
+                    DurationUnit = order.DurationUnit,
+                    DurationValue = order.DurationValue,
+                    ReturnDate = order.ReturnDate,
+                    IsPayment = order.IsPayment,
+                    ReservationMoney = order.ReservationMoney,
+
+                    OrderDetails = order.OrderDetail.Select(od => new OrderDetailResponse
+                    {
+                        OrderDetailsID = od.OrderDetailsID.ToString(),
+                        OrderID = od.OrderID.ToString(),
+                        ProductID = od.ProductID.ToString(),
+                        ProductName = products.ProductName, 
+                        SerialNumber = products.SerialNumber,
+                        ProductPrice = od.ProductPrice,
+                        ProductQuality = od.ProductQuality,
+                        Discount = od.Discount,
+                        ProductPriceTotal = od.ProductPriceTotal,
+                        PeriodRental = od.PeriodRental,
+                        CreatedAt = order.CreatedAt,
+                        UpdatedAt = order.UpdatedAt,
+                    }).ToList()
+                }).ToList();
+
+                result.Result = convertedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+                // Optionally log the exception for debugging purposes
+                Console.WriteLine(ex.Message);
+            }
+
+            return result;
+        }
+
+
         public async Task<AppActionResult> GetOrderByAccountID(string AccountID, int pageIndex, int pageSize)
         {
             AppActionResult result = new AppActionResult();
             try
             {
-               
+
                 var pagedResult = await _orderRepository.GetAllDataByExpression(
                     x => x.Id == AccountID,
                     pageIndex,
-                    pageSize, 
+                    pageSize,
                     includes: new Expression<Func<Order, object>>[] { o => o.OrderDetail }
 
                 );
@@ -1643,146 +1912,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return totalPrice; 
         }
 
-        private async Task SendOrderRentConfirmationEmail(Account account, Account supplierAccount, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
-        {
-            IEmailService? emailService = Resolve<IEmailService>();
-            // Generate a string representation of the order detail with HTML line breaks
-            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
-                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
-                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
-                $"   Ngày thuê: {order.OrderDate}<br />" +
-                $"   Ngày nhận dự kiến: {order.RentalStartDate}<br />" +
-                $"   Ngày trả: {order.RentalEndDate}<br />" +
-                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
-                $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
-                $"   Thành tiền: {order.TotalAmount:N0} ₫<br />";
-
-            // Invoice information template
-            var invoiceInfo =
-                "HÓA ĐƠN<br /><br />" +
-                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
-                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
-                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
-                "Khách hàng<br />" +
-                $"{account.FirstName}<br />" +
-                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
-                $"Email: {account.Email}<br />" +
-                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến lấy"}<br /><br />" +
-                "Nhà cung cấp<br />" +
-                 $"Tên: {supplierAccount.FirstName}<br />" +
-                $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
-                $"Email: {supplierAccount.Email}<br />" +
-                $"Địa chỉ: {supplierAccount.Address}<br /><br />";
-
-            // Order summary and total
-            var orderSummary =
-                "=====================================<br />" +
-                "         CHI TIẾT HÓA ĐƠN<br />" +
-                "=====================================<br />" +
-                $"{orderDetailsString}<br />" +
-                "-------------------------------------<br />" +
-                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
-                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
-                "=====================================<br />";
-            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
-            for (int i = 0; i < contractTemplates.Count; i++)
-            {
-                var template = contractTemplates[i];
-                contractTemplatesString += $"<b>{i + 1}. {template.TemplateName}</b><br />";
-                contractTemplatesString += $"<i>Điều khoản hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
-                contractTemplatesString += $"<i>Chi tiết hợp đồng:</i> {template.TemplateDetails ?? "N/A"}<br />";
-                contractTemplatesString += $"<i>Chính sách phạt:</i> {template.PenaltyPolicy ?? "N/A"}<br /><br />";
-            }
-            var emailMessage =
-                $"Kính chào {account.FirstName},<br /><br />" +
-                $"Bạn vừa đặt hàng từ {firstName}. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
-                invoiceInfo +
-                orderSummary +
-                contractTemplatesString +
-                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
-                "Trân trọng,<br />" +
-                "Đội ngũ Camera service platform";
-
-            // Send email with contract templates attached
-            emailService.SendEmail(
-               email,
-               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
-               emailMessage
-               );
-        }
-
-        private async Task SendOrderRentConfirmationEmailSupplier(Account account, string email, string firstName,Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
-        {
-            IEmailService? emailService = Resolve<IEmailService>();
-            // Generate a string representation of the order detail with HTML line breaks
-            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
-                 "   Hình thức: thuê<br />" +
-                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
-                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
-                $"   Ngày thuê: {order.OrderDate}<br />" +
-                $"   Ngày nhận dự kiến: {order.RentalStartDate}<br />" +
-                $"   Ngày trả: {order.RentalEndDate}<br />" +
-                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
-                $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
-                $"   Thành tiền: {order.TotalAmount:N0} ₫<br />";
-
-            // Invoice information template
-            var invoiceInfo =
-                "HÓA ĐƠN<br /><br />" +
-                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
-                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
-                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
-                "Khách hàng<br />" +
-                $"{account.FirstName}<br />" +
-                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
-                $"Email: {account.Email}<br />" +
-                $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
-                "Nhà cung cấp<br />" +
-                "Camera service platform Company<br />" +
-                "Điện thoại: 0862448677<br />" +
-                "Email: dan1314705@gmail.com<br />" +
-                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
-
-            // Order summary and total
-            var orderSummary =
-                "=====================================<br />" +
-                "         CHI TIẾT HÓA ĐƠN<br />" +
-                "=====================================<br />" +
-                $"{orderDetailsString}<br />" +
-                "-------------------------------------<br />" +
-                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
-                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
-                "=====================================<br />";
-            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
-            for (int i = 0; i < contractTemplates.Count; i++)
-            {
-                var template = contractTemplates[i];
-                contractTemplatesString += $"<b>{i + 1}. {template.TemplateName}</b><br />";
-                contractTemplatesString += $"<i>Nội dung hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
-                contractTemplatesString += $"<i>Chi tiết hợp đồng:</i> {template.TemplateDetails ?? "N/A"}<br />";
-                contractTemplatesString += $"<i>Chính sách phạt:</i> {template.PenaltyPolicy ?? "N/A"}<br /><br />";
-            }
-            var emailMessage =
-                $"Kính chào {firstName},<br /><br />" +
-                "Bạn vừa có đơn đặt hàng. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
-                invoiceInfo +
-                orderSummary +
-                contractTemplatesString +
-                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
-                "Trân trọng,<br />" +
-                "Đội ngũ Camera service platform";
-
-            // Prepare the list of attachment file paths
-          
-
-            // Send email with contract templates attached
-            emailService.SendEmail(
-               email,
-               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
-               emailMessage
-           );
-        }
-
+     
         private async Task<string> GenerateContractPdf(ContractTemplate template)
         {
 
@@ -1878,6 +2008,441 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 result = BuildAppActionResultError(result, ex.Message);
             }
+            return result;
+        }
+
+        public async Task<AppActionResult> GetImageProductAfter(string orderId)
+        {
+            IFirebaseService? firebaseService = Resolve<IFirebaseService>();
+            AppActionResult result = new();
+
+            try
+            {
+                if (!Guid.TryParse(orderId, out Guid orderGuid))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+
+                var order = await _orderRepository.GetById(orderGuid);
+                if (order == null)
+                {
+                    result = BuildAppActionResultError(result, "Đơn hàng không tồn tại!");
+                    return result;
+                }
+
+                string pathName = SD.FirebasePathName.AFTER_IMAGE + $"{orderId}_after.jpg.png";
+
+                string? imageUrl = await firebaseService.GetUrlImageAfterAndBeforeFromFirebase(pathName);
+
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    result = BuildAppActionResultError(result, "Không tìm thấy ảnh!");
+                    return result;
+                }
+
+                result.Result = imageUrl;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetImageProductBefore(string orderId)
+        {
+            IFirebaseService? firebaseService = Resolve<IFirebaseService>();
+            AppActionResult result = new();
+
+            try
+            {
+                if (!Guid.TryParse(orderId, out Guid orderGuid))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+
+                var order = await _orderRepository.GetById(orderGuid);
+                if (order == null)
+                {
+                    result = BuildAppActionResultError(result, "Đơn hàng không tồn tại!");
+                    return result;
+                }
+
+                string pathName = SD.FirebasePathName.BEFORE_IMAGE + $"{orderId}_.jpg.png";
+
+                string? imageUrl = await firebaseService.GetUrlImageAfterAndBeforeFromFirebase(pathName);
+
+                if (string.IsNullOrEmpty(imageUrl))
+                {
+                    result = BuildAppActionResultError(result, "Không tìm thấy ảnh!");
+                    return result;
+                }
+
+                result.Result = imageUrl;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetAllOrderRent(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Order, bool>>? filter = x => x.OrderType == OrderType.Rental;
+
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    filter: filter,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize,
+                    includes: new Expression<Func<Order, object>>[]
+                    {
+                o => o.OrderDetail,
+                    }
+                );
+
+                var currentVietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+
+                foreach (var order in pagedResult.Items)
+                {
+                    if (order.RentalStartDate < currentVietnamTime.AddHours(-24) && order.OrderStatus == OrderStatus.Pending)
+                    {
+                        order.OrderStatus = OrderStatus.Cancelled;
+                        await _orderRepository.Update(order);
+                        var orderDetail = await _orderDetailRepository.GetByExpression(x => x.OrderID == order.OrderID);
+                        if (orderDetail != null)
+                        {
+                            var product = await _productRepository.GetByExpression(x => x.ProductID == orderDetail.ProductID);
+                            product.Status = ProductStatusEnum.AvailableRent;
+                            _productRepository.Update(product);
+                            await Task.Delay(100);
+                            await _unitOfWork.SaveChangesAsync();
+                        }
+
+                    }
+                }
+
+                var convertedResult = pagedResult.Items.Select(order =>
+                {
+                    var orderResponse = _mapper.Map<OrderRentResponse>(order);
+
+                    orderResponse.OrderDetails = _mapper.Map<List<OrderDetailResponse>>(order.OrderDetail.ToList());
+                    return orderResponse;
+                }).ToList();
+
+                result.Result = convertedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+        private async Task SendOrderConfirmationEmail(Account account, Account supplierAccount, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                "   Hình thức đơn hàng: Mua<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{account.FirstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {account.Email}<br />" +
+                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến tiệm lấy"}<br /><br />" +
+                "Nhà cung cấp<br />" +
+                $"Tên: {supplierAccount.FirstName}<br />" +
+                $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
+                $"Email: {supplierAccount.Email}<br />" +
+                $"Địa chỉ: {supplierAccount.Address}<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+
+            var emailMessage =
+                $"Kính chào {firstName},<br /><br />" +
+                "Bạn vừa có đơn đặt hàng. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Send the email asynchronously and wait for completion
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
+               emailMessage
+           );
+        }
+        public static class DateTimeHelper
+        {
+            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+            // Convert UTC DateTime to Vietnam Time
+            public static DateTime ToVietnamTime(DateTime utcDateTime)
+            {
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
+            }
+        }
+        private async Task SendOrderConfirmationEmailToSupplier(Account account, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                "   Hình thức đơn hàng: Mua<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Thành tiền: {orderDetail.ProductPriceTotal:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{firstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {email}<br />" +
+                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến tiệm lấy."}<br /><br />" +
+                "Thông báo từ<br />" +
+                "Camera service platform Company<br />" +
+                "Điện thoại: 0862448677<br />" +
+                "Email: dan1314705@gmail.com<br />" +
+                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+
+            var emailMessage =
+                $"Kính chào {firstName},<br /><br />" +
+                "Cảm ơn quý khách đã tin tưởng sử dụng dịch vụ của chúng tôi. Dưới đây là thông tin hóa đơn chi tiết của quý khách:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Send the email asynchronously and wait for completion
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION,
+               emailMessage
+           );
+        }
+        private async Task SendOrderRentConfirmationEmail(Account account, Account supplierAccount, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Ngày thuê: {order.OrderDate}<br />" +
+                $"   Ngày nhận dự kiến: {order.RentalStartDate}<br />" +
+                $"   Ngày trả: {order.RentalEndDate}<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
+                $"   Thành tiền: {order.TotalAmount:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{account.FirstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {account.Email}<br />" +
+                $"Địa chỉ: {order.ShippingAddress ?? "Khách đến lấy"}<br /><br />" +
+                "Nhà cung cấp<br />" +
+                 $"Tên: {supplierAccount.FirstName}<br />" +
+                $"Điện thoại: {supplierAccount.PhoneNumber}<br />" +
+                $"Email: {supplierAccount.Email}<br />" +
+                $"Địa chỉ: {supplierAccount.Address}<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
+            for (int i = 0; i < contractTemplates.Count; i++)
+            {
+                var template = contractTemplates[i];
+                contractTemplatesString += $"<b>{i + 1}. {template.TemplateName}</b><br />";
+                contractTemplatesString += $"<i>Điều khoản hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
+                contractTemplatesString += $"<i>Chi tiết hợp đồng:</i> {template.TemplateDetails ?? "N/A"}<br />";
+                contractTemplatesString += $"<i>Chính sách phạt:</i> {template.PenaltyPolicy ?? "N/A"}<br /><br />";
+            }
+            var emailMessage =
+                $"Kính chào {account.FirstName},<br /><br />" +
+                $"Bạn vừa đặt hàng từ {firstName}. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                contractTemplatesString +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Send email with contract templates attached
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
+               emailMessage
+               );
+        }
+        private async Task SendOrderRentConfirmationEmailSupplier(Account account, string email, string firstName, Order order, OrderDetail orderDetail, double totalOrderPrice, List<ContractTemplate> contractTemplates)
+        {
+            IEmailService? emailService = Resolve<IEmailService>();
+            // Generate a string representation of the order detail with HTML line breaks
+            var orderDetailsString = $"{1}. Mã sản phẩm: {orderDetail.ProductID}<br />" +
+                 "   Hình thức: thuê<br />" +
+                $"   Tình trạng: {orderDetail.ProductQuality}<br />" +
+                $"   Đơn giá: {orderDetail.ProductPrice:N0} ₫<br />" +
+                $"   Ngày thuê: {order.OrderDate}<br />" +
+                $"   Ngày nhận dự kiến: {order.RentalStartDate}<br />" +
+                $"   Ngày trả: {order.RentalEndDate}<br />" +
+                $"   Giảm giá: {orderDetail.Discount:N0} ₫<br />" +
+                $"   Tiền cọc: {order.Deposit:N0} ₫<br />" +
+                $"   Thành tiền: {order.TotalAmount:N0} ₫<br />";
+
+            // Invoice information template
+            var invoiceInfo =
+                "HÓA ĐƠN<br /><br />" +
+                $"Mã hóa đơn: #{orderDetail.OrderID}<br />" +
+                $"Ngày tạo: {DateTime.Now:dd/MM/yyyy}<br />" +
+                $"Hạn thanh toán: {DateTime.Now.AddDays(3):dd/MM/yyyy}<br /><br />" + // Set payment deadline to 3 days later
+                "Khách hàng<br />" +
+                $"{account.FirstName}<br />" +
+                $"Điện thoại: {account.PhoneNumber ?? "N/A"}<br />" +
+                $"Email: {account.Email}<br />" +
+                $"Địa chỉ: {account.Address ?? "N/A"}<br /><br />" +
+                "Nhà cung cấp<br />" +
+                "Camera service platform Company<br />" +
+                "Điện thoại: 0862448677<br />" +
+                "Email: dan1314705@gmail.com<br />" +
+                "Địa chỉ: 265 Hồng Lạc, Phường 10, Quận Tân Bình, TP.HCM<br /><br />";
+
+            // Order summary and total
+            var orderSummary =
+                "=====================================<br />" +
+                "         CHI TIẾT HÓA ĐƠN<br />" +
+                "=====================================<br />" +
+                $"{orderDetailsString}<br />" +
+                "-------------------------------------<br />" +
+                $"Thành tiền: {totalOrderPrice:N0} ₫<br />" +
+                $"TỔNG CỘNG: {totalOrderPrice:N0} ₫<br />" +
+                "=====================================<br />";
+            var contractTemplatesString = "Điều khoản hợp đồng:<br />";
+            for (int i = 0; i < contractTemplates.Count; i++)
+            {
+                var template = contractTemplates[i];
+                contractTemplatesString += $"<b>{i + 1}. {template.TemplateName}</b><br />";
+                contractTemplatesString += $"<i>Nội dung hợp đồng:</i> {template.ContractTerms ?? "N/A"}<br />";
+                contractTemplatesString += $"<i>Chi tiết hợp đồng:</i> {template.TemplateDetails ?? "N/A"}<br />";
+                contractTemplatesString += $"<i>Chính sách phạt:</i> {template.PenaltyPolicy ?? "N/A"}<br /><br />";
+            }
+            var emailMessage =
+                $"Kính chào {firstName},<br /><br />" +
+                "Bạn vừa có đơn đặt hàng. Dưới đây là thông tin hóa đơn chi tiết của đơn hàng của khách hàng:<br /><br />" +
+                invoiceInfo +
+                orderSummary +
+                contractTemplatesString +
+                "<br />Nếu quý khách có bất kỳ câu hỏi nào hoặc cần hỗ trợ thêm, vui lòng liên hệ với chúng tôi.<br /><br />" +
+                "Trân trọng,<br />" +
+                "Đội ngũ Camera service platform";
+
+            // Prepare the list of attachment file paths
+
+
+            // Send email with contract templates attached
+            emailService.SendEmail(
+               email,
+               SD.SubjectMail.ORDER_CONFIRMATION_SUPPLIER,
+               emailMessage
+           );
+        }
+
+        public async Task<AppActionResult> GetAllOrderBuy(int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                Expression<Func<Order, bool>>? filter = x => x.OrderType == OrderType.Purchase;
+
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                    filter: filter,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize,
+                    includes: new Expression<Func<Order, object>>[]
+                    {
+                o => o.OrderDetail,
+                    }
+                );
+
+                var convertedResult = pagedResult.Items.Select(order =>
+                {
+                    var orderResponse = _mapper.Map<OrderResponse>(order);
+
+                    orderResponse.OrderDetails = _mapper.Map<List<OrderDetailResponse>>(order.OrderDetail.ToList());
+                    return orderResponse;
+                }).ToList();
+
+                result.Result = convertedResult;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
             return result;
         }
     }

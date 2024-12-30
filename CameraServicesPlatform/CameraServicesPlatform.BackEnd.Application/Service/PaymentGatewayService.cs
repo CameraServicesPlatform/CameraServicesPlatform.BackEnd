@@ -9,20 +9,8 @@ using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Transaction;
 using CameraServicesPlatform.BackEnd.Domain.Models;
-using DinkToPdf;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Identity.Client;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Printing;
-using System.Linq;
-using System.Security.Policy;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
-using Twilio.TwiML.Voice;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -35,9 +23,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Account> _accountRepository;
         private readonly IRepository<Supplier> _supplierRepository;
-
+        private readonly IRepository<ComboOfSupplier> _comboSupplierRepository;
+        private readonly IRepository<Combo> _comboRepository;
         private readonly IRepository<Transaction> _transactionRepository;
         private readonly IRepository<HistoryTransaction> _historyTransaction;
+
 
         private readonly IUnitOfWork _unitOfWork;
 
@@ -50,6 +40,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Staff> staffRepository,
             IRepository<HistoryTransaction> historyTransaction,
             IRepository<Account> accountRepository,
+            IRepository<ComboOfSupplier> comboSupplierRepository,
+            IRepository<Combo> comboRepository,
             IUnitOfWork unitOfWork)
         {
             _configuration = configuration;
@@ -61,7 +53,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _unitOfWork = unitOfWork;
             _historyTransaction = historyTransaction;
             _accountRepository = accountRepository;
+            _comboSupplierRepository = comboSupplierRepository;
+            _comboRepository = comboRepository;
             _transactionRepository = transactionRepository;
+        }
+
+        public static class DateTimeHelper
+        {
+            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+            // Convert UTC DateTime to Vietnam Time
+            public static DateTime ToVietnamTime(DateTime utcDateTime)
+            {
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
+            }
         }
 
         public async Task<string> CreatePaymentUrlVnpay(PaymentInformationRequest requestDto, HttpContext httpContext)
@@ -113,18 +118,18 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
             pay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"]);
             pay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"]);
-            pay.AddRequestData("vnp_Amount", ((int)request.Amount * 100).ToString());
+            //pay.AddRequestData("vnp_Amount", ((int)request.Amount * 100).ToString());
             pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
             pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
             pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(httpContext));
             pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
-            
-            
-            pay.AddRequestData("vnp_OrderInfo",
-                $"{request.StaffId} {request.AccountId} don hang {request.OrderID} da duoc hoan tien");
+
+
+            /*pay.AddRequestData("vnp_OrderInfo",
+                $"{request.StaffId} {request.AccountId} don hang {request.OrderID} da duoc hoan tien");*/
             pay.AddRequestData("vnp_OrderType", "other");
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
-              
+
             pay.AddRequestData("vnp_TxnRef", request.OrderID);
             paymentUrl = pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
 
@@ -136,7 +141,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<string> CreateSupplierOrMemberPayment(SupplierPaymentAgainDto requestDto, HttpContext httpContext)
         {
             var paymentUrl = "";
-            
+
             var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
             var pay = new VNPayLibrary();
@@ -163,8 +168,38 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return paymentUrl;
         }
+
+        public async Task<string> CreateComboPayment(CreateComboPaymentDTO requestDto, HttpContext httpContext)
+        {
+            var paymentUrl = "";
+
+            var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"]);
+            var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
+            var pay = new VNPayLibrary();
+            //var urlCallBack = $"{_configuration["Vnpay:ReturnUrl"]}/{requestDto.OrderID}";
+            var urlCallBack = $"{_configuration["Vnpay:ReturnUrl"]}";
+            pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"]);
+            pay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"]);
+            pay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"]);
+            pay.AddRequestData("vnp_Amount", ((int)requestDto.Amount * 100).ToString());
+            pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
+            pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"]);
+            pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(httpContext));
+            pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"]);
+            pay.AddRequestData("vnp_OrderInfo", $"{requestDto.AccountId} thanh toan combo {requestDto.ComboOfSupplierId} {requestDto.Amount} VND");
+            pay.AddRequestData("vnp_OrderType", "other");
+            //pay.AddRequestData("vnp_Account", requestDto.AccountID);
+            pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
+
+            pay.AddRequestData("vnp_TxnRef", requestDto.OrderID);
+            paymentUrl = pay.CreateRequestUrl(_configuration["Vnpay:BaseUrl"], _configuration["Vnpay:HashSecret"]);
+
+            //await SavePaymentInfoAsync(requestDto, PaymentStatus.Pending, PaymentType.Refund);
+
+            return paymentUrl;
+        }
         public async Task<VNPayResponseDto> deposit(string vnp_ResponseCode, string vnp_orderId, string vnp_OrderInfo, string vnp_Amount, string vnp_TransactionId, string vnp_SecureHash)
-        { 
+        {
             int spaceIndex = vnp_OrderInfo.IndexOf(' ');
             string accountId = vnp_OrderInfo.Substring(0, spaceIndex);
             vnp_OrderInfo = vnp_OrderInfo.Substring(spaceIndex + 1);
@@ -209,9 +244,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             try
             {
-                
+
                 var infoParts = vnp_OrderInfo.Split(' ', 3);
-                
+
                 string staffId = infoParts[0];
                 string accountId = infoParts[1];
                 string transactionDescription = infoParts[2];
@@ -235,7 +270,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new InvalidOperationException($"Account with ID {accountId} not found.");
                 }
                 if (pagedResult.Items[0].AccountBalance == null)
-                pagedResult.Items[0].AccountBalance = 0;
+                    pagedResult.Items[0].AccountBalance = 0;
 
                 pagedResult.Items[0].AccountBalance = pagedResult.Items[0].AccountBalance + Int32.Parse(vnp_Amount);
                 _accountRepository.Update(pagedResult.Items[0]);
@@ -248,10 +283,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 {
                     HistoryTransactionId = Guid.Parse(vnp_orderId),
                     AccountID = accountId,
-                    Price = Int32.Parse(vnp_Amount)  ,
+                    Price = Int32.Parse(vnp_Amount),
                     TransactionDescription = transactionDescription,
                     Status = status,
-                    CreatedAt = DateTime.UtcNow ,
+                    CreatedAt = DateTime.UtcNow,
                     StaffID = Guid.Parse(staffId)
                 };
 
@@ -288,218 +323,229 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             var vnp_Amount = vnpay.GetResponseData("vnp_Amount");
 
-            if (vnp_OrderInfo.Contains("da nap tien"))
+
+            if (vnp_OrderInfo.Contains("thanh toan combo"))
             {
-                return await deposit(vnp_ResponseCode, vnp_orderId, vnp_OrderInfo, vnp_Amount, vnp_TransactionId, vnp_SecureHash);
+                var infoParts = vnp_OrderInfo.Split(' ', 6);
+
+                string staffId = infoParts[0];
+                string accountId = infoParts[0];
+                string transactionDescription = infoParts[1] + " " + infoParts[2] + " " + infoParts[3] + " " + infoParts[5];
+                string comboOfSupplierId = infoParts[4];
+                var supplierAccount = await _accountRepository.GetByExpression(x => x.Id == accountId);
+                var comboNew = await _comboSupplierRepository.GetByExpression(x => x.ComboOfSupplierId == Guid.Parse(comboOfSupplierId));
+                var combo = await _comboRepository.GetByExpression(x => x.ComboId == comboNew.ComboId);
+
+
+
+                TransactionStatus status = vnp_ResponseCode == "00"
+                       ? TransactionStatus.Success
+                       : TransactionStatus.Unsuccess;
+
+                var historyTransaction = new HistoryTransaction
+                {
+                    HistoryTransactionId = Guid.Parse(vnp_orderId),
+                    AccountID = accountId,
+                    Price = Int32.Parse(vnp_Amount),
+                    TransactionDescription = transactionDescription,
+                    Status = status,
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    StaffID = Guid.Parse(staffId)
+                };
+
+                await _historyTransaction.Insert(historyTransaction);
+                await _unitOfWork.SaveChangesAsync();
+
+                return new VNPayResponseDto
+                {
+                    Success = true,
+                    PaymentMethod = "VnPay",
+                    OrderDescription = transactionDescription,
+                    OrderId = vnp_orderId.ToString(),
+                    TransactionId = vnp_TransactionId.ToString(),
+                    Token = vnp_SecureHash,
+                    VnPayResponseCode = vnp_ResponseCode,
+                };
             }
             else
             {
-                if (vnp_OrderInfo.Contains("da duoc hoan tien"))
+                var pagedResult = await _orderRepository.GetAllDataByExpression(
+                     a => a.OrderID == Guid.Parse(vnp_orderId),
+                     1,
+                     10,
+                     null,
+                     isAscending: true,
+                     null
+                 );
+                var staffExist = await _staffRepository.GetAllDataByExpression(
+                        a => a.AccountID == pagedResult.Items[0].Id,
+                        1,
+                        10,
+                        null,
+                        isAscending: true,
+                        null
+                    );
+
+                var orderDb = await _orderRepository.GetByExpression(a => a.OrderID == Guid.Parse(vnp_orderId));
+
+                if (vnp_ResponseCode == "00")
                 {
-                    //StaffRefund(vnp_ResponseCode, vnp_orderId, vnp_OrderInfo, vnp_Amount);
-                    var infoParts = vnp_OrderInfo.Split(' ', 3);
 
-                    string staffId = infoParts[0];
-                    string accountId = infoParts[1];
-                    string transactionDescription = infoParts[2];
-
-                    // Validate vnp_Amount and convert to integer
-                    if (!int.TryParse(vnp_Amount, out int refundAmount))
-                    {
-                        throw new FormatException("vnp_Amount is not a valid integer.");
-                    }
-
-                    var pagedResult = await _accountRepository.GetAllDataByExpression(
-                            a => a.Id == accountId,
-                            1,
-                            10,
-                            null,
-                            isAscending: true,
-                            null
-                        );
-                    if (pagedResult == null)
-                    {
-                        throw new InvalidOperationException($"Account with ID {accountId} not found.");
-                    }
-                    if (pagedResult.Items[0].AccountBalance == null)
-                        pagedResult.Items[0].AccountBalance = 0;
-
-                    pagedResult.Items[0].AccountBalance = pagedResult.Items[0].AccountBalance + Int32.Parse(vnp_Amount);
-                    _accountRepository.Update(pagedResult.Items[0]);
+                    orderDb.IsPayment = true;
+                    orderDb.OrderStatus = OrderStatus.Payment;
+                    _orderRepository.Update(orderDb);
                     await _unitOfWork.SaveChangesAsync();
 
-                    TransactionStatus status = vnp_ResponseCode == "00"
-                        ? TransactionStatus.Success
-                        : TransactionStatus.Unsuccess;
+                    var productEntity = await _orderRepository.GetByExpression(
+                    x => x.OrderID == Guid.Parse(vnp_orderId),
+                    a => a.OrderDetail
+                    );
 
-                    var historyTransaction = new HistoryTransaction
+                    if (productEntity != null && productEntity.OrderDetail != null)
                     {
-                        HistoryTransactionId = Guid.Parse(vnp_orderId),
-                        AccountID = accountId,
-                        Price = Int32.Parse(vnp_Amount),
-                        TransactionDescription = transactionDescription,
-                        Status = status,
-                        CreatedAt = DateTime.UtcNow,
-                        StaffID = Guid.Parse(staffId)
-                    };
+                        foreach (var detail in productEntity.OrderDetail)
+                        {
+                            var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID);
 
-                    await _historyTransaction.Insert(historyTransaction);
+                            if (product != null)
+                            {
+                                if (orderDb.OrderType == OrderType.Purchase)
+                                {
+                                    product.Status = ProductStatusEnum.Sold;
+                                    _productRepository.Update(product);
+                                }
+                                else
+                                {
+                                    product.Status = ProductStatusEnum.Rented;
+                                    _productRepository.Update(product);
+                                }
+
+                            }
+                        }
+                        await _unitOfWork.SaveChangesAsync();
+                    }
+
+                    var payment = new Payment
+                    {
+                        PaymentID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        SupplierID = pagedResult.Items[0].SupplierID,
+                        AccountID = pagedResult.Items[0].Id,
+                        PaymentDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        PaymentAmount = Int32.Parse(vnp_Amount),
+                        PaymentStatus = PaymentStatus.Completed,
+                        PaymentType = PaymentType.Refund,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        PaymentDetails = $"Payment for Order {vnp_orderId}",
+                        CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        Image = "a",
+                        IsDisable = true
+                    };
+                    TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
+                    ;
+                    await _paymentRepository.Insert(payment);
+
+                    Transaction transaction = new Transaction
+                    {
+                        TransactionID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        TransactionDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        Order = null,
+                        Amount = Int32.Parse(vnp_Amount),
+                        TransactionType = transactionType,
+                        PaymentStatus = PaymentStatus.Completed,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        VNPAYTransactionID = vnp_TransactionId,
+                        VNPAYTransactionStatus = VNPAYTransactionStatus.Success,
+                        VNPAYTransactionTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    };
+                    await _transactionRepository.Insert(transaction);
                     await _unitOfWork.SaveChangesAsync();
-                    return new VNPayResponseDto
-                    {
-                        Success = true,
-                        PaymentMethod = "VnPay",
-                        OrderDescription = transactionDescription,
-                        OrderId = vnp_orderId.ToString(),
-                        TransactionId = vnp_TransactionId.ToString(),
-                        Token = vnp_SecureHash,
-                        VnPayResponseCode = vnp_ResponseCode,
-                    };
+
 
                 }
-                else
+                if (vnp_ResponseCode != "00")
                 {
-                    var pagedResult = await _orderRepository.GetAllDataByExpression(
-                         a => a.OrderID == Guid.Parse(vnp_orderId),
-                         1,
-                         10,
-                         null,
-                         isAscending: true,
-                         null
-                     );
-                    var staffExist = await _staffRepository.GetAllDataByExpression(
-                            a => a.AccountID == pagedResult.Items[0].Id,
-                            1,
-                            10,
-                            null,
-                            isAscending: true,
-                            null
-                        );
 
-                    var orderDb = await _orderRepository.GetByExpression(a => a.OrderID == Guid.Parse(vnp_orderId));
+                    orderDb.OrderStatus = OrderStatus.PaymentFail;
+                    _orderRepository.Update(orderDb);
+                    await _unitOfWork.SaveChangesAsync();
 
-                    if (vnp_ResponseCode == "00")
+                    var productEntity = await _orderRepository.GetByExpression(
+                    x => x.OrderID == Guid.Parse(vnp_orderId),
+                    a => a.OrderDetail
+                    );
+
+                    if (productEntity != null && productEntity.OrderDetail != null)
                     {
-                        orderDb.OrderStatus = OrderStatus.Payment;
-                        _orderRepository.Update(orderDb);
-                        await _unitOfWork.SaveChangesAsync();
-
-                        var productEntity = await _orderRepository.GetByExpression(
-                        x => x.OrderID == Guid.Parse(vnp_orderId),
-                        a => a.OrderDetail
-                        );
-
-                        if (productEntity != null && productEntity.OrderDetail != null)
+                        foreach (var detail in productEntity.OrderDetail)
                         {
-                            foreach (var detail in productEntity.OrderDetail)
+                            var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID);
+
+                            if (product != null)
                             {
-                                var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID);
-
-                                if (product != null)
+                                if (orderDb.OrderType == OrderType.Purchase)
                                 {
-                                    if (orderDb.OrderType == OrderType.Purchase)
-                                    {
-                                        product.Status = ProductStatusEnum.Sold;
-                                        _productRepository.Update(product);
-                                    }
-                                    else
-                                    {
-                                        product.Status = ProductStatusEnum.Rented;
-                                        _productRepository.Update(product);
-                                    }
-
+                                    product.Status = ProductStatusEnum.AvailableSell;
+                                    _productRepository.Update(product);
                                 }
+                                else
+                                {
+                                    product.Status = ProductStatusEnum.AvailableRent;
+                                    _productRepository.Update(product);
+                                }
+
                             }
-                            await _unitOfWork.SaveChangesAsync();
                         }
-
-                        var payment = new Payment
-                        {
-                            PaymentID = Guid.NewGuid(),
-                            OrderID = Guid.Parse(vnp_orderId),
-                            SupplierID = pagedResult.Items[0].SupplierID,
-                            AccountID = pagedResult.Items[0].Id,
-                            PaymentDate = DateTime.UtcNow,
-                            PaymentAmount = Int32.Parse(vnp_Amount),
-                            PaymentStatus = PaymentStatus.Completed,
-                            PaymentType = PaymentType.Refund,
-                            PaymentMethod = PaymentMethod.VNPAY,
-                            PaymentDetails = $"Payment for Order {vnp_orderId}",
-                            CreatedAt = DateTime.UtcNow,
-                            Image = "a",
-                            IsDisable = true
-                        };
-                        TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
-                        ;
-                        await _paymentRepository.Insert(payment);
-
-                        Transaction transaction = new Transaction
-                        {
-                            TransactionID = Guid.NewGuid(),
-                            OrderID = Guid.Parse(vnp_orderId),
-                            TransactionDate = DateTime.UtcNow,
-                            Order = null,
-                            Amount = Int32.Parse(vnp_Amount),
-                            TransactionType = transactionType,
-                            PaymentStatus = PaymentStatus.Completed,
-                            PaymentMethod = PaymentMethod.VNPAY,
-                            VNPAYTransactionID = vnp_TransactionId,
-                            VNPAYTransactionStatus = VNPAYTransactionStatus.Success,
-                            VNPAYTransactionTime = DateTime.UtcNow,
-                        };
-                        await _transactionRepository.Insert(transaction);
                         await _unitOfWork.SaveChangesAsync();
-
-
                     }
-                    if (vnp_ResponseCode != "00")
+                    var payment = new Payment
                     {
-                        var payment = new Payment
-                        {
-                            PaymentID = Guid.NewGuid(),
-                            OrderID = Guid.Parse(vnp_orderId),
-                            SupplierID = pagedResult.Items[0].SupplierID,
-                            AccountID = pagedResult.Items[0].Id,
-                            PaymentDate = DateTime.UtcNow,
-                            PaymentAmount = Int32.Parse(vnp_Amount),
-                            PaymentStatus = PaymentStatus.Failed,
-                            PaymentType = PaymentType.Refund,
-                            PaymentMethod = PaymentMethod.VNPAY,
-                            PaymentDetails = $"Payment for Order {vnp_orderId}",
-                            CreatedAt = DateTime.UtcNow,
-                            Image = "a",
-                            IsDisable = true
-                        };
-                        TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
-                        ;
-                        await _paymentRepository.Insert(payment);
-                        await _unitOfWork.SaveChangesAsync();
+                        PaymentID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        SupplierID = pagedResult.Items[0].SupplierID,
+                        AccountID = pagedResult.Items[0].Id,
+                        PaymentDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        PaymentAmount = Int32.Parse(vnp_Amount),
+                        PaymentStatus = PaymentStatus.Failed,
+                        PaymentType = PaymentType.Refund,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        PaymentDetails = $"Payment for Order {vnp_orderId}",
+                        CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        Image = "a",
+                        IsDisable = true
+                    };
+                    TransactionType transactionType = (staffExist.Items.Any()) ? TransactionType.Refund : TransactionType.Payment;
+                    ;
+                    await _paymentRepository.Insert(payment);
+                    await _unitOfWork.SaveChangesAsync();
 
-                        orderDb.OrderStatus = OrderStatus.PaymentFail;
-                        _orderRepository.Update(orderDb);
-                        await _unitOfWork.SaveChangesAsync();
+                    orderDb.OrderStatus = OrderStatus.PaymentFail;
+                    orderDb.IsPayment = true;
+                    _orderRepository.Update(orderDb);
+                    await _unitOfWork.SaveChangesAsync();
 
-                        Transaction transaction = new Transaction
-                        {
-                            TransactionID = Guid.NewGuid(),
-                            OrderID = Guid.Parse(vnp_orderId),
-                            TransactionDate = DateTime.UtcNow,
-                            Order = null,
-                            Amount = Int32.Parse(vnp_Amount),
-                            TransactionType = transactionType,
-                            PaymentStatus = PaymentStatus.Failed,
-                            PaymentMethod = PaymentMethod.VNPAY,
-                            VNPAYTransactionID = vnp_TransactionId,
-                            VNPAYTransactionStatus = VNPAYTransactionStatus.Failed,
-                            VNPAYTransactionTime = DateTime.UtcNow,
-                        };
-                        await _transactionRepository.Insert(transaction);
-                        await _unitOfWork.SaveChangesAsync();
-                    }
+                    Transaction transaction = new Transaction
+                    {
+                        TransactionID = Guid.NewGuid(),
+                        OrderID = Guid.Parse(vnp_orderId),
+                        TransactionDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                        Order = null,
+                        Amount = Int32.Parse(vnp_Amount),
+                        TransactionType = transactionType,
+                        PaymentStatus = PaymentStatus.Failed,
+                        PaymentMethod = PaymentMethod.VNPAY,
+                        VNPAYTransactionID = vnp_TransactionId,
+                        VNPAYTransactionStatus = VNPAYTransactionStatus.Failed,
+                        VNPAYTransactionTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    };
+                    await _transactionRepository.Insert(transaction);
+                    await _unitOfWork.SaveChangesAsync();
                 }
             }
-            
-          
+
+
+
             return new VNPayResponseDto
             {
                 Success = true,
@@ -511,5 +557,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 VnPayResponseCode = vnp_ResponseCode,
             };
         }
+
+     
     }
 }

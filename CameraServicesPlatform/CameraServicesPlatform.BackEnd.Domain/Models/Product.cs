@@ -31,7 +31,8 @@ public class Product
 
     public double? DepositProduct { get; set; }
 
-
+    public double? OriginalPrice { get; set; }
+    public DateTime DateOfManufacture {  get; set; }
     public BrandEnum? Brand { get; set; }
 
     public string Quality { get; set; }
@@ -40,8 +41,10 @@ public class Product
 
     public double Rating { get; set; }
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } 
 
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } 
+    
+    public Boolean IsDisable { get; set; }
 
 }

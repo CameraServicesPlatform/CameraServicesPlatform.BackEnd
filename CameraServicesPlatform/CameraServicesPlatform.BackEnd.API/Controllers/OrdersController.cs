@@ -25,6 +25,16 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.GetAllOrder(pageIndex, pageSize);
         }
+        [HttpGet("get-all-order-rent")]
+        public async Task<AppActionResult> GetAllOrderRent(int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetAllOrderRent(pageIndex, pageSize);
+        }
+        [HttpGet("get-all-order-buy")]
+        public async Task<AppActionResult> GetAllOrderBuy(int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetAllOrderBuy(pageIndex, pageSize);
+        }
 
         [HttpGet("get-order-by-order-type")]
         public async Task<AppActionResult> GetOrderByOrderType(OrderType type, int pageIndex = 1, int pageSize = 10)
@@ -43,7 +53,11 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.GetOrderOfSupplier(SupplierId, pageIndex, pageSize);
         }
-
+        [HttpGet("get-order-status-of-supplierId")]
+        public async Task<AppActionResult> GetOrderStatusByOfSupplier(string SupplierId, OrderStatus orderStatus, int pageIndex = 1, int pageSize = 10)
+        {
+            return await _orderService.GetOrderStatusOfSupplier(SupplierId, orderStatus, pageIndex, pageSize);
+        }
         [HttpGet("get-count-of-product-rent")]
         public async Task<AppActionResult> CountProductRentals(string productId, int pageIndex = 1, int pageSize = 10)
         {
@@ -55,11 +69,32 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _orderService.GetOrderByOrderID(orderID);
         }
-
+        [HttpGet("get-image-product-after-by-order-id")]
+        public async Task<AppActionResult> GetImageProductAfter(string orderID)
+        {
+            return await _orderService.GetImageProductAfter(orderID);
+        }
+        [HttpGet("get-image-product-before-by-order-id")]
+        public async Task<AppActionResult> GetImageProductBefore(string orderID)
+        {
+            return await _orderService.GetImageProductBefore(orderID);
+        }
         [HttpGet("get-order-of-account")]
         public async Task<AppActionResult> GetOrderByAccountID(string AccountID, int pageIndex = 1, int pageSize = 10)
         {
             return await _orderService.GetOrderByAccountID(AccountID, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-order-of-account-by-order-id")]
+        public async Task<AppActionResult> GetOrderOfAccountByOrderID(string OrderId, int pageIndex, int pageSize)
+        {
+            return await _orderService.GetOrderOfAccountByOrderID(OrderId, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-order-order-status-of-account")]
+        public async Task<AppActionResult> GetOrderOrderStatusByAccountID(string AccountID, OrderStatus orderStatus, int pageIndex, int pageSize)
+        {
+            return await _orderService.GetOrderOrderStatusByAccountID(AccountID, orderStatus, pageIndex, pageSize);
         }
 
         [HttpPost("create-order-buy")]
@@ -104,7 +139,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
-        [HttpPost("add-img-product-after")]
+        [HttpPost("add-img-product-before")]
         public async Task<IActionResult> AddImageProductBefore(ImageProductBeforeDTO request)
         {
             try
@@ -176,16 +211,40 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _orderService.UpdateOrderStatusPlaced(orderId);
         }
 
+        [HttpPut("update-order-status-pending-refund/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderPendingRefund(string orderId)
+        {
+            return await _orderService.UpdateOrderPendingRefund(orderId);
+        }
+
+        [HttpPut("update-order-status-refund/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderRefund(string orderId)
+        {
+            return await _orderService.UpdateOrderRefund(orderId);
+        }
+
+        [HttpPut("update-order-status-deposit-refund/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderDepositReturn(string orderId)
+        {
+            return await _orderService.UpdateOrderDepositReturn(orderId);
+        }
+
+        [HttpPut("update-order-just-status-completed/{orderId}")]
+        public async Task<AppActionResult> UpdateOrderCompleted(string orderId)
+        {
+            return await _orderService.UpdateOrderFinalCompleted(orderId);
+        }
+
         [HttpPut("update-order-status-payment/{orderId}")]
         public async Task<AppActionResult> UpdateOrderStatusPaymentBySupplier(string orderId)
         {
             return await _orderService.UpdateOrderStatusPaymentBySupplier(orderId);
         }
 
-        [HttpPut("cancel-order/{orderId}")]
-        public async Task<AppActionResult> CancelOrder(string orderId)
+        [HttpPut("cancel-order")]
+        public async Task<AppActionResult> CancelOrder(CancelOrderRequest cancelOrderRequest)
         {
-            return await _orderService.CancelOrder(orderId);
+            return await _orderService.CancelOrder(cancelOrderRequest);
         }
 
         [HttpPut("accept-cancel-order/{orderId}")]

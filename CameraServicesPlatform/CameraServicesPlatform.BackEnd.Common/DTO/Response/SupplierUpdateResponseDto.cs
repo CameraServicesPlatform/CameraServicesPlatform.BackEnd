@@ -28,8 +28,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public IFormFile ? SupplierLogo { get; set; }
 
         public string? BlockReason { get; set; }
+        public Boolean IsDisable { get; set; }
 
-        public DateTime? BlockedAt { get; set; }
 
     }
 }

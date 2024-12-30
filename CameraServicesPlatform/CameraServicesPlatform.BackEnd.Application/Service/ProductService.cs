@@ -20,6 +20,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Transactions;
+using static CameraServicesPlatform.BackEnd.Application.Service.OrderService;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -38,7 +39,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private IRepository<OrderDetail> _orderDetailRepository;
         private IRepository<Order> _orderRepository;
         private IUnitOfWork _unitOfWork;
-
+        private IOrderService _orderService;
 
         public ProductService(
             IRepository<Product> productRepository,
@@ -48,6 +49,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<RentalPrice> rentalPriceRepository,
             IRepository<Vourcher> voucherRepository,
             IRepository<Account> accountRepository,
+            IOrderService orderService,
             IRepository<Rating> ratingRepository,
             IRepository<Order> orderRepository,
             IRepository<ProductVoucher> productVoucherRepository,
@@ -60,6 +62,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             _ratingRepository = ratingRepository;
             _productRepository = productRepository;
+            _orderService = orderService;
             _productImageRepository = productImageRepository;
             _supplierRepository = supplierRepository;
             _rentalPriceRepository = rentalPriceRepository;
@@ -73,13 +76,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
-public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productResponse)
-{
+    public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productResponse)
+    {
     AppActionResult result = new AppActionResult();
     try
     {
         var listProduct = Resolve<IRepository<Product>>();
-
+        
         // Validate SupplierID
         if (!Guid.TryParse(productResponse.SupplierID, out var supplierGuid))
         {
@@ -91,11 +94,16 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
         var supplierExist = await _supplierRepository.GetAllDataByExpression(
             a => a.SupplierID == supplierGuid,
             1,
-            10,
+            100,
             orderBy: a => a.SupplierName,
             isAscending: true,
             null
         );
+        if (supplierExist.Items[0].IsDisable == true)
+        {
+             result = BuildAppActionResultError(result, $"Vui lòng mua gói trước khi đăng sản phẩm");
+             return result;
+        }
         if (supplierExist == null || supplierExist.Items.Count == 0)
         {
             result = BuildAppActionResultError(result, $"SupplierID không tồn tại!");
@@ -117,7 +125,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
         var productSerialExist = await _productRepository.GetAllDataByExpression(
             a => a.SerialNumber.Equals(productResponse.SerialNumber),
             1,
-            10,
+            100,
             orderBy: a => a.Supplier!.SupplierName,
             isAscending: true,
             null
@@ -128,7 +136,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             return result;
         }
 
-        // Parse CategoryID and validate it
+
         if (!Guid.TryParse(productResponse.CategoryID, out var categoryGuid))
         {
             result = BuildAppActionResultError(result, $"CategoryID không hợp lệ!");
@@ -145,14 +153,16 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             ProductName = productResponse.ProductName,
             ProductDescription = productResponse.ProductDescription,
             PriceBuy = productResponse.PriceBuy,
-            PriceRent = productResponse.PriceRent,
+            PriceRent = null,
             Brand = productResponse.Brand,
             Status = productResponse.Status,
             Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
             Rating = 0,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
-        };
+            DateOfManufacture = productResponse.DateOfManufacture,
+            OriginalPrice = productResponse.OriginalPrice,
+            CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+            UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
+            };
 
         // Firebase Image Upload
         var firebaseService = Resolve<IFirebaseService>();
@@ -232,11 +242,16 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 var supplierExist = await _supplierRepository.GetAllDataByExpression(
                     a => a.SupplierID == supplierGuid,
                     1,
-                    10,
+                    100,
                     orderBy: a => a.SupplierName,
                     isAscending: true,
                     null
                 );
+                if (supplierExist.Items[0].IsDisable == true)
+                {
+                    result = BuildAppActionResultError(result, $"Vui lòng mua gói trước khi đăng sản phẩm");
+                    return result;
+                }
                 if (supplierExist == null || supplierExist.Items.Count == 0)
                 {
                     result = BuildAppActionResultError(result, $"SupplierID không tồn tại!");
@@ -253,12 +268,17 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     result = BuildAppActionResultError(result, $"Tên sản phẩm đã tồn tại trong shop!");
                     return result;
                 }
+                if (productResponse.DepositProduct > 1000000)
+                {
+                    result = BuildAppActionResultError(result, $"Tiền giư chỗ phải bé hơn 1000000 VNĐ");
+                    return result;
+                }
 
                 // Check if Serial Number already exists
                 var productSerialExist = await _productRepository.GetAllDataByExpression(
                     a => a.SerialNumber.Equals(productResponse.SerialNumber),
                     1,
-                    10,
+                    100,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
                     null
@@ -290,8 +310,10 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     Status = ProductStatusEnum.AvailableRent,
                     Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
                     Rating = 0,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    DateOfManufacture = productResponse.DateOfManufacture,
+                    OriginalPrice = productResponse.OriginalPrice,
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
                 };
                 RentalPrice newRentalPrice = new RentalPrice
                 {
@@ -301,8 +323,8 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     PricePerDay = productResponse.PricePerDay,
                     PricePerWeek = productResponse.PricePerWeek,
                     PricePerMonth = productResponse.PricePerMonth,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+                    UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow)
                 };
                 await _rentalPriceRepository.Insert(newRentalPrice);
                 // Firebase Image Upload
@@ -382,15 +404,27 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 }
 
                 var productNameExist = await _productRepository.GetAllDataByExpression(
-                    a => a.ProductName.Equals(productResponse.ProductName) && (a.SupplierID ==productExist.SupplierID) &&(!a.ProductName.Equals(productExist.ProductName)),
+                    a => a.ProductName.Equals(productResponse.ProductName),
                     1,
-                    10,
+                    100,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
                     null
                 );
-
-                if (productNameExist.Items.Count > 0 )
+                var supplierExist = await _supplierRepository.GetAllDataByExpression(
+                    a => a.SupplierID == productExist.SupplierID,
+                    1,
+                    100,
+                    orderBy: a => a.SupplierName,
+                    isAscending: true,
+                    null
+                );
+                if (supplierExist.Items[0].IsDisable == true)
+                {
+                    result = BuildAppActionResultError(result, $"Vui lòng mua gói trước khi đăng sản phẩm");
+                    return result;
+                }
+                if (productNameExist.Items.Count > 1 )
                 {
                     result = BuildAppActionResultError(result, $"Tên Sản phẩm đã tồn tại shop");
                     return result;
@@ -405,15 +439,17 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 productExist.Brand = productResponse.Brand;
                 productExist.Quality = productResponse.Quality;
                 productExist.Status = productResponse.Status;
-                productExist.UpdatedAt = DateTime.Now;
-
+                productExist.DateOfManufacture = DateTimeHelper.ToVietnamTime(productResponse.DateOfManufacture);
+                productExist.OriginalPrice = productResponse.OriginalPrice;
+                productExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                productExist.IsDisable = productResponse.IsDisable;
                 await productRepository.Update(productExist);
 
                 var firebaseService = Resolve<IFirebaseService>();
                 var productImageExist = await _productImageRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null
@@ -462,7 +498,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 var productSpecificationExist = await _productSpecificationRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null
@@ -509,8 +545,8 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = null;
-                List<ProductResponse> listProduct = new List<ProductResponse>();
+                Expression<Func<Product, bool>>? filter = a => a.IsDisable == false;
+                List<ProductGetAllResponse> listProduct = new List<ProductGetAllResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
                     pageIndex,
@@ -546,6 +582,18 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         isAscending: true,
                         null
                     );
+                    int totalRentals = 0;
+                    if (item.PriceBuy == null)
+                    {
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                        if(countRent.IsSuccess == true)
+                        {
+                            var rentalData = countRent.Result as dynamic;
+                            totalRentals = rentalData.TotalRentals;
+                        }
+                        
+                    }
+                    
                     Double averageRating = 0;
                     if (rating.Result.Items.Count() > 0)
                     {
@@ -554,15 +602,18 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     }
                     if (rentalPrice.Items.Count() > 0)
                     {
-                        ProductResponse productResponse = new ProductResponse
+                        ProductGetAllResponse productResponse = new ProductGetAllResponse
                         {
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
                             CategoryID = item.CategoryID?.ToString(),
                             ProductName = item.ProductName,
+                            CountRent = totalRentals,
                             ProductDescription = item.ProductDescription,
                             PriceBuy = item.PriceBuy,
+                            OriginalPrice = item.OriginalPrice,
+                            DateOfManufacture = item.DateOfManufacture,
                             DepositProduct = item.DepositProduct,
                             PricePerHour = rentalPrice.Items[0].PricePerHour,
                             PricePerDay = rentalPrice.Items[0].PricePerDay,
@@ -580,8 +631,11 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     }
                     else
                     {
-                        ProductResponse productResponse = new ProductResponse
+                        ProductGetAllResponse productResponse = new ProductGetAllResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -598,13 +652,11 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                             listImage = productImage.Items
                         };
                         listProduct.Add(productResponse);
-
                     }
 
-
-                    result.Result = listProduct;
-                    result.IsSuccess = true;
                 }
+                result.Result = listProduct;
+                result.IsSuccess = true;
             }
 
 
@@ -707,6 +759,20 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     averageRating = rating.Result.Items.Average(r => r.RatingValue);
                     averageRating = Math.Min(averageRating, 5);
                 }
+
+                int totalRentals = 0;
+                if (product.PriceBuy == null)
+                {
+                    var countRent = await _orderService.CountProductRentals(product.ProductID.ToString(), 1, 100);
+                    if (countRent.IsSuccess == true)
+                    {
+                        var rentalData = countRent.Result as dynamic;
+                        totalRentals = rentalData.TotalRentals;
+                    }
+
+                }
+
+
                 if ( rentalPrice.Items.Count()>0 )
                 {
                     ProductByIdResponse productResponse = new ProductByIdResponse
@@ -727,6 +793,9 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         Quality = product.Quality,
                         Status = product.Status,
                         Rating = averageRating,
+                        DateOfManufacture = product.DateOfManufacture,
+                        CountRent = totalRentals,
+                        OriginalPrice = product.OriginalPrice,
                         CreatedAt = product.CreatedAt,
                         UpdatedAt = product.UpdatedAt,
                         listImage = productImage.Items,
@@ -742,6 +811,9 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 {
                     ProductByIdResponse productResponse = new ProductByIdResponse
                     {
+                        DateOfManufacture = product.DateOfManufacture,
+                        CountRent = totalRentals,
+                        OriginalPrice = product.OriginalPrice,
                         ProductID = product.ProductID.ToString(),
                         SerialNumber = product.SerialNumber,
                         SupplierID = product.SupplierID?.ToString(),
@@ -784,7 +856,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
 
                 if (!string.IsNullOrEmpty(productNameFilter))
                 {
-                    filter = a => a.ProductName.Contains(productNameFilter);
+                    filter = a => a.ProductName.Contains(productNameFilter) && a.IsDisable == false;
                 }
 
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -873,10 +945,25 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         averageRating = rating.Result.Items.Average(r => r.RatingValue);
                         averageRating = Math.Min(averageRating, 5);
                     }
+                    int totalRentals = 0;
+                    if (item.PriceBuy == null)
+                    {
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                        if (countRent.IsSuccess == true)
+                        {
+                            var rentalData = countRent.Result as dynamic;
+                            totalRentals = rentalData.TotalRentals;
+                        }
+
+                    }
+
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -907,6 +994,9 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -950,7 +1040,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
 
                 if (!string.IsNullOrEmpty(categoryFilter))
                 {
-                    filter = a => a.Category.CategoryName == categoryFilter;
+                    filter = a => a.Category.CategoryName == categoryFilter && a.IsDisable == false;
                 }
 
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1039,10 +1129,24 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         averageRating = rating.Result.Items.Average(r => r.RatingValue);
                         averageRating = Math.Min(averageRating, 5);
                     }
+                    int totalRentals = 0;
+                    if (item.PriceBuy == null)
+                    {
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                        if (countRent.IsSuccess == true)
+                        {
+                            var rentalData = countRent.Result as dynamic;
+                            totalRentals = rentalData.TotalRentals;
+                        }
+
+                    }
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -1073,6 +1177,9 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -1116,7 +1223,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
 
                 if (!string.IsNullOrEmpty(categoryFilter))
                 {
-                    filter = a => a.CategoryID == categoryNameFilter;
+                    filter = a => a.CategoryID == categoryNameFilter && a.IsDisable == false;
                 }
 
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1204,10 +1311,25 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         averageRating = rating.Result.Items.Average(r => r.RatingValue);
                         averageRating = Math.Min(averageRating, 5);
                     }
+                    int totalRentals = 0;
+                    if (item.PriceBuy == null)
+                    {
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                        if (countRent.IsSuccess == true)
+                        {
+                            var rentalData = countRent.Result as dynamic;
+                            totalRentals = rentalData.TotalRentals;
+                        }
+
+                    }
+
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -1238,6 +1360,9 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -1319,7 +1444,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 {
                     if (Guid.TryParse(filter, out Guid supplierId))
                     {
-                        filterExpression = a => a.SupplierID == supplierId;
+                        filterExpression = a => a.SupplierID == supplierId && a.IsDisable == false;
                     }
                     else
                     {
@@ -1414,10 +1539,25 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         averageRating = rating.Result.Items.Average(r => r.RatingValue);
                         averageRating = Math.Min(averageRating, 5);
                     }
+                    int totalRentals = 0;
+                    if (item.PriceBuy == null)
+                    {
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                        if (countRent.IsSuccess == true)
+                        {
+                            var rentalData = countRent.Result as dynamic;
+                            totalRentals = rentalData.TotalRentals;
+                        }
+
+                    }
+
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -1448,6 +1588,9 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -1486,7 +1629,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Rented;
+                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Rented && a.IsDisable == false;
 
                 List<ProductResponseRent> listProduct = new List<ProductResponseRent>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1574,8 +1717,22 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         averageRating = rating.Result.Items.Average(r => r.RatingValue);
                         averageRating = Math.Min(averageRating, 5);
                     }
+                    int totalRentals = 0;
+                    if (item.PriceBuy == null)
+                    {
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                        if (countRent.IsSuccess == true)
+                        {
+                            var rentalData = countRent.Result as dynamic;
+                            totalRentals = rentalData.TotalRentals;
+                        }
+
+                    }
                     ProductResponseRent productResponse = new ProductResponseRent
                     {
+                        DateOfManufacture = item.DateOfManufacture,
+                        CountRent = totalRentals,
+                        OriginalPrice = item.OriginalPrice,
                         ProductID = item.ProductID.ToString(),
                         SerialNumber = item.SerialNumber,
                         SupplierID = item.SupplierID?.ToString(),
@@ -1616,7 +1773,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Sold;
+                Expression<Func<Product, bool>>? filter = a => a.Status == ProductStatusEnum.Sold && a.IsDisable == false;
 
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1696,8 +1853,23 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         averageRating = rating.Result.Items.Average(r => r.RatingValue);
                         averageRating = Math.Min(averageRating, 5);
                     }
+                    int totalRentals = 0;
+                    if (item.PriceBuy == null)
+                    {
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                        if (countRent.IsSuccess == true)
+                        {
+                            var rentalData = countRent.Result as dynamic;
+                            totalRentals = rentalData.TotalRentals;
+                        }
+
+                    }
+
                     ProductByIdResponse productResponse = new ProductByIdResponse
                     {
+                        DateOfManufacture = item.DateOfManufacture,
+                        CountRent = totalRentals,
+                        OriginalPrice = item.OriginalPrice,
                         ProductID = item.ProductID.ToString(),
                         SerialNumber = item.SerialNumber,
                         SupplierID = item.SupplierID?.ToString(),
@@ -1735,8 +1907,8 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             {
                 // Update the filter to include both AvailableSell and AvailableRent statuses
                 Expression<Func<Product, bool>>? filter = a =>
-                    a.Status == ProductStatusEnum.AvailableSell ||
-                    a.Status == ProductStatusEnum.AvailableRent;
+                    (a.Status == ProductStatusEnum.AvailableSell ||
+                    a.Status == ProductStatusEnum.AvailableRent) && a.IsDisable == false;
 
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1826,8 +1998,23 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         averageRating = rating.Result.Items.Average(r => r.RatingValue);
                         averageRating = Math.Min(averageRating, 5);
                     }
+                    int totalRentals = 0;
+                    if (item.PriceBuy == null)
+                    {
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                        if (countRent.IsSuccess == true)
+                        {
+                            var rentalData = countRent.Result as dynamic;
+                            totalRentals = rentalData.TotalRentals;
+                        }
+
+                    }
+
                     ProductByIdResponse productResponse = new ProductByIdResponse
                     {
+                        DateOfManufacture = item.DateOfManufacture,
+                        CountRent = totalRentals,
+                        OriginalPrice = item.OriginalPrice,
                         ProductID = item.ProductID.ToString(),
                         SerialNumber = item.SerialNumber,
                         SupplierID = item.SupplierID?.ToString(),
@@ -1869,8 +2056,8 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             {
                 // Update the filter to include both AvailableSell and AvailableRent statuses
                 Expression<Func<Product, bool>>? filter = a =>
-                    a.Status == ProductStatusEnum.AvailableSell ||
-                    a.Status == ProductStatusEnum.AvailableRent;
+                    (a.Status == ProductStatusEnum.AvailableSell ||
+                    a.Status == ProductStatusEnum.AvailableRent) && a.IsDisable == false; ;
 
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1961,10 +2148,25 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                         averageRating = rating.Result.Items.Average(r => r.RatingValue);
                         averageRating = Math.Min(averageRating, 5);
                     }
+                    int totalRentals = 0;
+                    if (item.PriceBuy == null)
+                    {
+                        var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                        if (countRent.IsSuccess == true)
+                        {
+                            var rentalData = countRent.Result as dynamic;
+                            totalRentals = rentalData.TotalRentals;
+                        }
+
+                    }
+
                     if (rentalPrice.Items.Count() > 0)
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -1994,6 +2196,9 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                     {
                         ProductByIdResponse productResponse = new ProductByIdResponse
                         {
+                            DateOfManufacture = item.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = item.OriginalPrice,
                             ProductID = item.ProductID.ToString(),
                             SerialNumber = item.SerialNumber,
                             SupplierID = item.SupplierID?.ToString(),
@@ -2042,15 +2247,27 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 }
 
                 var productNameExist = await _productRepository.GetAllDataByExpression(
-                    a => a.ProductName.Equals(productResponse.ProductName) && (a.SupplierID == productExist.SupplierID) && (!a.ProductName.Equals(productExist.ProductName)),
+                    a => a.ProductName.Equals(productResponse.ProductName),
                     1,
-                    10,
+                    100,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
                     null
                 );
-
-                if (productNameExist.Items.Count > 0)
+                var supplierExist = await _supplierRepository.GetAllDataByExpression(
+                    a => a.SupplierID == productExist.SupplierID,
+                    1,
+                    100,
+                    orderBy: a => a.SupplierName,
+                    isAscending: true,
+                    null
+                );
+                if (supplierExist.Items[0].IsDisable == true)
+                {
+                    result = BuildAppActionResultError(result, $"Vui lòng mua gói trước khi đăng sản phẩm");
+                    return result;
+                }
+                if (productNameExist.Items.Count > 1)
                 {
                     result = BuildAppActionResultError(result, $"Tên Sản phẩm đã tồn tại shop");
                     return result;
@@ -2061,16 +2278,18 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 productExist.CategoryID = Guid.Parse(productResponse.CategoryID);
                 productExist.ProductName = productResponse.ProductName;
                 productExist.ProductDescription = productResponse.ProductDescription;
-
+                productExist.DateOfManufacture = productResponse.DateOfManufacture;
+                productExist.OriginalPrice = productResponse.OriginalPrice;
                 productExist.Brand = productResponse.Brand;
                 productExist.Quality = productResponse.Quality;
                 productExist.Status = productResponse.Status;
-                productExist.UpdatedAt = DateTime.UtcNow;
-                productExist.DepositProduct = productExist.DepositProduct;
+                productExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                productExist.DepositProduct = productResponse.DepositProduct;
+                productExist.IsDisable =  productResponse.IsDisable;
                 var rentalPriceExist = await _rentalPriceRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null
@@ -2086,7 +2305,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 var productImageExist = await _productImageRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null
@@ -2137,7 +2356,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 var productSpecificationExist = await _productSpecificationRepository.GetAllDataByExpression(
                     a => a.ProductID.Equals(productExist.ProductID),
                     1,
-                    10,
+                    100,
                     null,
                     isAscending: true,
                     null
@@ -2183,9 +2402,9 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             AppActionResult result = new AppActionResult();
 
             var vourcher = await _voucherRepository.GetAllDataByExpression(
-                 v => v.IsActive && v.ValidFrom <= DateTime.Now && v.ExpirationDate >= DateTime.Now ,
+                 v => v.IsActive && v.ValidFrom <= DateTime.Now && v.ExpirationDate >= DateTime.Now  ,
                  1,
-                 10,
+                 100,
                  orderBy: a => a.DiscountAmount,
                  isAscending: true,
                  null
@@ -2197,7 +2416,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 var productVour = await _productVoucherRepository.GetAllDataByExpression(
                  v => v.VourcherID.Equals(item.VourcherID) && v.IsDisable == true,
                  1,
-                 10,
+                 100,
                  null,
                  isAscending: true,
                  null
@@ -2210,42 +2429,61 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             for (int i= listProVou.Count-1; i >= 0; i--)
             {
                 var product = await _productRepository.GetAllDataByExpression(
-                 v => v.ProductID.Equals(listProVou[i].ProductID),
+                 v => v.ProductID.Equals(listProVou[i].ProductID) && v.IsDisable == false,
                  1,
-                 10,
+                 100,
                  null,
                  isAscending: true,
                  null
                 );
-                foreach (var itemPro in product.Items)
+                if (product.Items.Count() > 0)
                 {
-                    var listImage = await _productImageRepository.GetAllDataByExpression(
-                        v => v.ProductID.Equals(itemPro.ProductID),
-                        1,
-                        10,
-                        null,
-                        isAscending: true,
-                        null
-                        );
-                    ProductResponse productResponse = new ProductResponse
+                    foreach (var itemPro in product.Items)
                     {
-                        ProductID = itemPro.ProductID.ToString(),
-                        SerialNumber = itemPro.SerialNumber,
-                        SupplierID = itemPro.SupplierID?.ToString(),
-                        CategoryID = itemPro.CategoryID?.ToString(),
-                        ProductName = itemPro.ProductName,
-                        ProductDescription = itemPro.ProductDescription,
-                        PriceBuy = itemPro.PriceBuy,
-                        Brand = itemPro.Brand,
-                        Quality = itemPro.Quality,
-                        Status = itemPro.Status,
-                        Rating = itemPro.Rating,
-                        CreatedAt = itemPro.CreatedAt,
-                        UpdatedAt = itemPro.UpdatedAt,
-                        listImage = listImage.Items
-                    };
-                    listPro.Add(productResponse);
+                        var listImage = await _productImageRepository.GetAllDataByExpression(
+                            v => v.ProductID.Equals(itemPro.ProductID),
+                            1,
+                            100,
+                            null,
+                            isAscending: true,
+                            null
+                            );
+                        int totalRentals = 0;
+                        if (itemPro.PriceBuy == null)
+                        {
+                            var countRent = await _orderService.CountProductRentals(itemPro.ProductID.ToString(), 1, 100);
+                            if (countRent.IsSuccess == true)
+                            {
+                                var rentalData = countRent.Result as dynamic;
+                                totalRentals = rentalData.TotalRentals;
+                            }
+
+                        }
+
+                        ProductResponse productResponse = new ProductResponse
+                        {
+                            DateOfManufacture = itemPro.DateOfManufacture,
+                            CountRent = totalRentals,
+                            OriginalPrice = itemPro.OriginalPrice,
+                            ProductID = itemPro.ProductID.ToString(),
+                            SerialNumber = itemPro.SerialNumber,
+                            SupplierID = itemPro.SupplierID?.ToString(),
+                            CategoryID = itemPro.CategoryID?.ToString(),
+                            ProductName = itemPro.ProductName,
+                            ProductDescription = itemPro.ProductDescription,
+                            PriceBuy = itemPro.PriceBuy,
+                            Brand = itemPro.Brand,
+                            Quality = itemPro.Quality,
+                            Status = itemPro.Status,
+                            Rating = itemPro.Rating,
+                            CreatedAt = itemPro.CreatedAt,
+                            UpdatedAt = itemPro.UpdatedAt,
+                            listImage = listImage.Items
+                        };
+                        listPro.Add(productResponse);
+                    }
                 }
+                
             }
             result.Result = listPro;
             result.IsSuccess = true;
@@ -2262,33 +2500,33 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             switch (accountExist.Job)
             {
                 case JobStatus.Student:
-                    filter = a => a.PriceBuy <= 1000000;
+                    filter = a => a.PriceBuy <= 1000000 && a.IsDisable == false;
                     break;
 
                 case JobStatus.CasualUser:
-                    filter = a => a.PriceBuy >= 1000000 && a.PriceBuy <= 3000000;
+                    filter = a => a.PriceBuy >= 1000000 && a.PriceBuy <= 3000000 && a.IsDisable == false;
                     break;
 
                 case JobStatus.Beginner:
-                    filter = a => a.PriceBuy >= 1000000 && a.PriceBuy <= 2000000;
+                    filter = a => a.PriceBuy >= 1000000 && a.PriceBuy <= 2000000 && a.IsDisable == false;
                     break;
 
                 case JobStatus.ContentCreator:
-                    filter = a => a.PriceBuy >= 6000000 && a.PriceBuy <= 10000000;
+                    filter = a => a.PriceBuy >= 6000000 && a.PriceBuy <= 10000000 && a.IsDisable == false;
                     break;
 
                 case JobStatus.TravelEnthusiast:
-                    filter = a => a.PriceBuy >= 3000000 && a.PriceBuy <= 60000000;
+                    filter = a => a.PriceBuy >= 3000000 && a.PriceBuy <= 60000000 && a.IsDisable == false;
                     break;
 
                 default:
-                    filter = a => a.PriceBuy >= 60000000; 
+                    filter = a => a.PriceBuy >= 60000000 && a.IsDisable == false;
                     break;
             }
             var product = await _productRepository.GetAllDataByExpression(
                  filter,
                  1,
-                 10,
+                 100,
                  null,
                  isAscending: true,
                  null
@@ -2296,15 +2534,30 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             foreach (var item in product.Items)
             {
                 var listImage = await _productImageRepository.GetAllDataByExpression(
-                        v => v.ProductID.Equals(item.ProductID),
+                        v => v.ProductID.Equals(item.ProductID) ,
                         1,
-                        10,
+                        100,
                         null,
                         isAscending: true,
                         null
                         );
+                int totalRentals = 0;
+                if (item.PriceBuy == null)
+                {
+                    var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                    if (countRent.IsSuccess == true)
+                    {
+                        var rentalData = countRent.Result as dynamic;
+                        totalRentals = rentalData.TotalRentals;
+                    }
+
+                }
+
                 ProductResponse productResponse = new ProductResponse
                 {
+                    DateOfManufacture = item.DateOfManufacture,
+                    CountRent = totalRentals,
+                    OriginalPrice = item.OriginalPrice,
                     ProductID = item.ProductID.ToString(),
                     SerialNumber = item.SerialNumber,
                     SupplierID = item.SupplierID?.ToString(),
@@ -2350,7 +2603,7 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             var product = await _productRepository.GetAllDataByExpression(
                  filter,
                  1,
-                 10,
+                 100,
                  null,
                  isAscending: true,
                  null
@@ -2360,13 +2613,28 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
                 var listImage = await _productImageRepository.GetAllDataByExpression(
                         v => v.ProductID.Equals(item.ProductID),
                         1,
-                        10,
+                        100,
                         null,
                         isAscending: true,
                         null
                         );
+                int totalRentals = 0;
+                if (item.PriceBuy == null)
+                {
+                    var countRent = await _orderService.CountProductRentals(item.ProductID.ToString(), 1, 100);
+                    if (countRent.IsSuccess == true)
+                    {
+                        var rentalData = countRent.Result as dynamic;
+                        totalRentals = rentalData.TotalRentals;
+                    }
+
+                }
+
                 ProductResponse productResponse = new ProductResponse
                 {
+                    DateOfManufacture = item.DateOfManufacture,
+                    CountRent = totalRentals,
+                    OriginalPrice = item.OriginalPrice,
                     ProductID = item.ProductID.ToString(),
                     SerialNumber = item.SerialNumber,
                     SupplierID = item.SupplierID?.ToString(),
@@ -2387,6 +2655,11 @@ public async Task<AppActionResult> CreateProductBuy(ProductResponseDto productRe
             result.Result = listPro;
             result.IsSuccess = true;
             return result;
+        }
+
+        public Task<AppActionResult> GetProductRentBySupplier(string supplierId)
+        {
+            throw new NotImplementedException();
         }
     }
 

@@ -1049,7 +1049,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    null
+                    includes: new Expression<Func<Product, object>>[]
+                        {o => o.Category,    }
                 );
 
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
@@ -1223,7 +1224,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 if (!string.IsNullOrEmpty(categoryFilter))
                 {
-                    filter = a => a.CategoryID == categoryNameFilter && a.IsDisable == false;
+                    filter = a => a.CategoryID == categoryNameFilter;
                 }
 
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1232,7 +1233,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    null
+                        includes: new Expression<Func<Product, object>>[]
+                        {o => o.Category,    }
                 );
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 foreach (var item in pagedResult.Items)

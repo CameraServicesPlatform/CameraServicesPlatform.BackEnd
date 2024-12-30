@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
@@ -87,7 +88,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductReportID = Guid.NewGuid(),
                     SupplierID = supplierGuid,
                     ProductID = productGuid,
-                    StatusType = productReportResponse.StatusType,
+                    StatusType = StatusType.Pending,
                     EndDate = productReportResponse.EndDate,
                     Reason = productReportResponse.Reason,
                     AccountID = productReportResponse.AccountID
@@ -149,15 +150,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 foreach (var item in pagedResult.Items)
                 {
                     
-                    if(item.StatusType == StatusType.Suspended)
+                    if(item.StatusType == StatusType.Pending)
                     {
-                        status = "Suspended";
+                        status = "Pending";
                     }
                     else
                     {
-                        if (item.StatusType == StatusType.Blocked)
+                        if (item.StatusType == StatusType.Approved)
                         {
-                            status = "Suspended";
+                            status = "Approved";
                         }
                         else status = "Reject";
                     }
@@ -206,15 +207,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 );
                 string status = null;
 
-                if (productReportExist.StatusType == StatusType.Suspended)
+                if (productReportExist.StatusType == StatusType.Pending)
                 {
-                    status = "Suspended";
+                    status = "Pending";
                 }
                 else
                 {
-                    if (productReportExist.StatusType == StatusType.Blocked)
+                    if (productReportExist.StatusType == StatusType.Approved)
                     {
-                        status = "Suspended";
+                        status = "Approved";
                     }
                     else status = "Reject";
                 }
@@ -268,15 +269,15 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 foreach (var item in pagedResult.Items)
                 {
 
-                    if (item.StatusType == StatusType.Suspended)
+                    if (item.StatusType == StatusType.Pending)
                     {
-                        status = "Suspended";
+                        status = "Pending";
                     }
                     else
                     {
-                        if (item.StatusType == StatusType.Blocked)
+                        if (item.StatusType == StatusType.Approved)
                         {
-                            status = "Suspended";
+                            status = "Approved";
                         }
                         else status = "Reject";
                     }
@@ -341,6 +342,87 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
 
             return result;
+        }
+
+        public async Task<AppActionResult> ApprovedProductReport(ProductReportRequest productReportRequest)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var productReportRepository = Resolve<IRepository<ProductReport>>();
+
+                ProductReport productReportExist = await productReportRepository.GetByExpression(x => x.ProductReportID == Guid.Parse(productReportRequest.ProductReportID));
+
+                if (productReportExist == null)
+                {
+                    result.Result = "Product report not exist";
+                    result.IsSuccess = false;
+                    return result;
+                }
+
+                productReportExist.StatusType = StatusType.Approved;
+                productReportExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                productReportExist.Message = productReportRequest.Message;
+
+                await productReportRepository.Update(productReportExist);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                result.Result = productReportExist;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> RejectProductReport(ProductReportRequest productReportRequest)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var productReportRepository = Resolve<IRepository<ProductReport>>();
+
+                ProductReport productReportExist = await productReportRepository.GetByExpression(x => x.ProductReportID == Guid.Parse(productReportRequest.ProductReportID));
+
+                if (productReportExist == null)
+                {
+                    result.Result = "Product report not exist";
+                    result.IsSuccess = false;
+                    return result;
+                }
+
+                productReportExist.StatusType = StatusType.Reject;
+                productReportExist.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                productReportExist.Message = productReportRequest.Message;
+
+                await productReportRepository.Update(productReportExist);
+
+                await _unitOfWork.SaveChangesAsync();
+
+                result.Result = productReportExist;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public static class DateTimeHelper
+        {
+            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            public static DateTime ToVietnamTime(DateTime utcDateTime)
+            {
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
+            }
         }
     }
 }

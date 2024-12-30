@@ -1,4 +1,5 @@
-﻿using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+﻿using CameraServicesPlatform.BackEnd.Common.DTO.Request;
+using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,9 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetProductReportById(string id, int pageIndex, int pageSize);
         Task<AppActionResult> GetProductReportBySupplierId(string id, int pageIndex, int pageSize);
         Task<AppActionResult> UpdateProductReport(ProductReportUpdateDto productReportResponse);
+
+
+        Task<AppActionResult> RejectProductReport(ProductReportRequest productReportRequest);
+        Task<AppActionResult> ApprovedProductReport(ProductReportRequest productReportRequest);
     }
 }

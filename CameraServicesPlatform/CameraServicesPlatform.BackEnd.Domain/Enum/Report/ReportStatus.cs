@@ -2,7 +2,7 @@
 public enum ReportStatus
 {
     Pending,
-    Investigating,
-    Resolved
+    Approved,
+    Reject
 }
 

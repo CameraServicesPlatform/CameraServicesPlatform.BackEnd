@@ -15,9 +15,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public string? AccountId { get; set; }
         public ReportType ReportType { get; set; }
         public string ReportDetails { get; set; }
-
+        public string? Message { get; set; }
         public DateTime ReportDate { get; set; }
-
         public ReportStatus Status { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿
 using CameraServicesPlatform.BackEnd.Application.IService;
+using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,6 +48,18 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         public async Task<AppActionResult> UpdateProductReport(ProductReportUpdateDto productReportResponse)
         {
             return await _productReportService.UpdateProductReport(productReportResponse);
+        }
+
+        [HttpPut("Reject-product-report")]
+        public async Task<AppActionResult> RejectProductReport(ProductReportRequest productReportRequest)
+        {
+            return await _productReportService.RejectProductReport(productReportRequest);
+        }
+
+        [HttpPut("Approved-product-report")]
+        public async Task<AppActionResult> ApprovedProductReport(ProductReportRequest productReportRequest)
+        {
+            return await _productReportService.ApprovedProductReport(productReportRequest);
         }
 
         [HttpDelete("delete-product-report")]

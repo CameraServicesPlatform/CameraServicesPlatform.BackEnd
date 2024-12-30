@@ -38,6 +38,43 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
+        [HttpPut("Reject-report-by-id")]
+        public async Task<IActionResult> RejectReport(ReportUpdateRequest request)
+        {
+            try
+            {
+                var response = await _reportService.RejectReport(request);
+                if (!response.IsSuccess)
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("Approved-report-by-id")]
+        public async Task<IActionResult> ApprovedReport(ReportUpdateRequest request)
+        {
+            try
+            {
+                var response = await _reportService.ApprovedReport(request);
+                if (!response.IsSuccess)
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpPut("update-report-by-id")]
         public async Task<IActionResult> UpdateReport(string reportId, [FromBody] ReportRequest request)
         {

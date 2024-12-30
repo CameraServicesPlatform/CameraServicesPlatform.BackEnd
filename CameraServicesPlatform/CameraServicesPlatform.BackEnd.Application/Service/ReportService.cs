@@ -3,6 +3,7 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Request;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Report;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -158,7 +159,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, "ID không hợp lệ!");
                     return result;
                 }
-                var existingReport = await _reportRepository.GetById(ReportId);
+                var existingReport = await _reportRepository.GetByExpression(x => x.ReportID == ReportId);
                 if (existingReport == null)
                 {
                     result.IsSuccess = false;
@@ -168,6 +169,81 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 existingReport.ReportType = request.ReportType;
                 existingReport.ReportDetails = request.ReportDetails;
+                existingReport.Status = ReportStatus.Pending;
+
+                await _reportRepository.Update(existingReport);
+                await _unitOfWork.SaveChangesAsync();
+
+                var response = _mapper.Map<ReportResponse>(existingReport);
+                response.ReportID = existingReport.ReportID.ToString();
+
+                result.IsSuccess = true;
+                result.Result = response;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> ApprovedReport(ReportUpdateRequest request)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(request.ReportId, out Guid ReportId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var existingReport = await _reportRepository.GetByExpression(x => x.ReportID == ReportId);
+                if (existingReport == null)
+                {
+                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, "Báo cáo không tồn tại!");
+                    return result;
+                }
+
+                existingReport.Status = ReportStatus.Approved;
+                existingReport.Message = request.Message;
+
+                await _reportRepository.Update(existingReport);
+                await _unitOfWork.SaveChangesAsync();
+
+                var response = _mapper.Map<ReportResponse>(existingReport);
+                response.ReportID = existingReport.ReportID.ToString();
+
+                result.IsSuccess = true;
+                result.Result = response;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+        public async Task<AppActionResult> RejectReport(ReportUpdateRequest request)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(request.ReportId, out Guid ReportId))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                var existingReport = await _reportRepository.GetByExpression(x => x.ReportID == ReportId);
+                if (existingReport == null)
+                {
+                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, "Báo cáo không tồn tại!");
+                    return result;
+                }
+
+                existingReport.Status = ReportStatus.Reject;
+                existingReport.Message = request.Message;
 
                 await _reportRepository.Update(existingReport);
                 await _unitOfWork.SaveChangesAsync();

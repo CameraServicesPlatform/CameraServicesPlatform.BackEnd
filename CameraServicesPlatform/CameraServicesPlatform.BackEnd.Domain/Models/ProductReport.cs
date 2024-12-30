@@ -26,8 +26,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime? EndDate { get; set; }
 
         public string? Reason { get; set; }
-
-        
+        public string? Message { get; set; }
         public String? AccountID { get; set; }
 
         [ForeignKey(nameof(Account))]

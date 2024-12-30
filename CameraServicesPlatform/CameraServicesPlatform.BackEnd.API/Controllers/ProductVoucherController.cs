@@ -36,6 +36,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _productVoucherService.GetProductVoucherByProductId(ProductId, pageIndex, pageSize);
         }
 
+        [HttpGet("get-product-voucher-by-supplier-id")]
+        public async Task<AppActionResult> GetProductVoucherBySupplierId(string SupplierId, int pageIndex, int pageSize)
+        {
+            return await _productVoucherService.GetProductVoucherBySupplierId(SupplierId, pageIndex, pageSize);
+        }
+
 
         [HttpPost("create-product-voucher")]
         public async Task<AppActionResult> CreateProductVoucher(ProductVoucherResponseDto voucherResponse)

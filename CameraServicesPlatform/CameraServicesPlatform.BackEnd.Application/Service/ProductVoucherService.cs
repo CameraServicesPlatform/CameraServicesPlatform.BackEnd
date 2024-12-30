@@ -149,7 +149,52 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+        public async Task<AppActionResult> GetProductVoucherBySupplierId(string SupplierId, int pageIndex, int pageSize)
+        {
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(SupplierId, out Guid Id))
+                {
+                    result = BuildAppActionResultError(result, "Invalid Product Voucher ID format.");
+                    return result;
+                }
 
+                var pagedResult = await _repository.GetAllDataByExpression(
+                    a => a.Vourcher.SupplierID == Id,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    includes: new Expression<Func<ProductVoucher, object>>[]
+                    {
+                        a => a.Vourcher
+                    }
+                );
+                List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
+
+                foreach (var item in pagedResult.Items)
+                {
+
+                    ProductVoucherResponse productVoucherResponse = new ProductVoucherResponse
+                    {
+                        ProductVoucherID = item.ProductVoucherID.ToString(),
+                        VourcherID = item.VourcherID.ToString(),
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt,
+                    };
+                    listProductVoucher.Add(productVoucherResponse);
+                }
+                result.Result = listProductVoucher;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
         public async Task<AppActionResult> UpdateProductVoucher(ProductVoucherUpdateDto productVoucherResponse)
         {
             AppActionResult result = new AppActionResult();

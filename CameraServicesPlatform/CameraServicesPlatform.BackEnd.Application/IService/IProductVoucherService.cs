@@ -14,6 +14,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetAllProductVoucher(int pageIndex, int pageSize);
         Task<AppActionResult> GetProductVoucherById(string id, int pageIndex, int pageSize);
         Task<AppActionResult> GetProductVoucherByProductId(string ProductId, int pageIndex, int pageSize);
+        Task<AppActionResult> GetProductVoucherBySupplierId(string SupplierId, int pageIndex, int pageSize);
+
         Task<AppActionResult> UpdateProductVoucher(ProductVoucherUpdateDto voucherResponse);
     }
 }

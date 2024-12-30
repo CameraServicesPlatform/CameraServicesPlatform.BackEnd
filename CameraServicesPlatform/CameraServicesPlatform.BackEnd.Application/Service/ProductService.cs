@@ -545,7 +545,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = a => a.IsDisable == false;
+                Expression<Func<Product, bool>>? filter = null;
                 List<ProductGetAllResponse> listProduct = new List<ProductGetAllResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,

@@ -79,7 +79,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null);
 
-                if (activeCombos.Items.Any())
+                if (activeCombos != null)
                 {
                     var latestActiveCombo = activeCombos.Items.OrderByDescending(c => c.EndTime).FirstOrDefault();
                     if (latestActiveCombo != null)
@@ -255,38 +255,52 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var item in pagedResult.Items)
                 {
-                    if (item.IsSendMailExpired == false)
+                    var relatedEndTimes = await _comboSupplierRepository.GetAllDataByExpression(
+                        x => x.SupplierID == item.SupplierID,
+                        0, 
+                        int.MaxValue, 
+                        null,
+                        isAscending: false,
+                        null
+                    );
+                    var latestEndTime = relatedEndTimes.Items.Max(x => x.EndTime);
+
+                    if (vietnamTime > latestEndTime)
                     {
                         item.IsSendMailExpired = true;
                         item.IsDisable = true;
                         _comboSupplierRepository.Update(item);
+
                         var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == item.SupplierID);
                         var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
                         supplier.IsDisable = true;
                         await _supplierRepository.Update(supplier);
                         await _unitOfWork.SaveChangesAsync();
+
                         var listProduct = await _productRepository.GetAllDataByExpression(
-                        x => x.SupplierID == item.SupplierID,
-                        pageIndex,
-                        pageSize,
-                        null,
-                        isAscending: true,
-                        null
+                            x => x.SupplierID == item.SupplierID,
+                            pageIndex,
+                            pageSize,
+                            null,
+                            isAscending: true,
+                            null
                         );
+
                         var combo = await _comboRepository.GetById(item.ComboId);
+
                         if (listProduct != null)
                         {
-                            foreach (var items in listProduct.Items)
+                            foreach (var product in listProduct.Items)
                             {
-                                if (items.IsDisable == false)
+                                if (!product.IsDisable)
                                 {
-                                    items.IsDisable = false;
-                                    _productRepository.Update(items);
+                                    product.IsDisable = true;
+                                    _productRepository.Update(product);
                                     await _unitOfWork.SaveChangesAsync();
                                 }
-
                             }
                         }
+
                         ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
                         {
                             ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
@@ -296,12 +310,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             EndTime = item.EndTime,
                             IsDisable = true
                         };
+
                         listComboOfSupplier.Add(comboResponse);
                         await SendMailComboExpired(supplierAccount, item, combo);
                     }
-
                 }
-                result.Result = pagedResult;
+
+                result.Result = listComboOfSupplier;
                 result.IsSuccess = true;
             }
             catch (Exception ex)

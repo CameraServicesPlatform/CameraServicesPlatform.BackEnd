@@ -387,7 +387,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         AccountID = orderDb.Id,
                         Amount = (double)orderDb.TotalAmount,
                         MemberName = $"{getAccount!.FirstName} {getAccount.LastName}",
-                        OrderID = orderDb.Id.ToString(),
+                        OrderID = orderDb.OrderID.ToString(),
                     };
                     var createPayment = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
                     
@@ -1831,6 +1831,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ReturnDate = order.ReturnDate,
                     IsPayment = order.IsPayment,
                     ReservationMoney = order.ReservationMoney,
+                    CancelMessage = order.CancelMessage,
 
                     OrderDetails = order.OrderDetail.Select(od => new OrderDetailResponse
                     {

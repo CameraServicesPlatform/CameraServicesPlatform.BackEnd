@@ -740,7 +740,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var purchaseOrders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate || x.OrderDate <= endDate || x.OrderType == OrderType.Purchase,
+                x =>  x.OrderType == OrderType.Purchase,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -767,7 +767,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var rentalOrders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate || x.OrderDate <= endDate || x.OrderType == OrderType.Rental,
+                 x => x.OrderType == OrderType.Rental,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -794,7 +794,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var rentalOrders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate || x.OrderDate <= endDate,
+                null,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]

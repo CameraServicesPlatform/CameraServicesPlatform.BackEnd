@@ -37,6 +37,12 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return await _productReportService.GetProductReportBySupplierId(id, pageIndex, pageSize);
         }
 
+        [HttpGet("get-product-report-by-productId")]
+        public async Task<AppActionResult> GetProductReportByProductId(string id, int pageIndex = 1, int pageSize = int.MaxValue)
+        {
+            return await _productReportService.GetProductReportByProductId(id, pageIndex, pageSize);
+        }
+
 
         [HttpPost("create-product-report")]
         public async Task<AppActionResult> CreateProductReport(ProductReportResponseDto productReportResponse)

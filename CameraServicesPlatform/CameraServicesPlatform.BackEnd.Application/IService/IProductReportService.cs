@@ -15,6 +15,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetAllProductReport(int pageIndex, int pageSize);
         Task<AppActionResult> GetProductReportById(string id, int pageIndex, int pageSize);
         Task<AppActionResult> GetProductReportBySupplierId(string id, int pageIndex, int pageSize);
+        Task<AppActionResult> GetProductReportByProductId(string id, int pageIndex, int pageSize);
+
         Task<AppActionResult> UpdateProductReport(ProductReportUpdateDto productReportResponse);
 
 

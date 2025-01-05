@@ -53,7 +53,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
-        public async Task<SupplierOrderStatisticsDto> GetSupplierOrderStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
+        /*public async Task<SupplierOrderStatisticsDto> GetSupplierOrderStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(
                 x => x.SupplierID == Guid.Parse(supplierId) || x.OrderDate >= startDate && x.OrderDate <= endDate,
@@ -99,8 +99,55 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 DepositReturnOrders = depositReturnOrders,
                 ExtendOrders = extendOrders
             };
-        }
+        }*/
 
+        public async Task<SupplierOrderStatisticsDto> GetSupplierOrderStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
+        {
+            var ordersResult = await _orderRepository.GetAllDataByExpression(
+                x => x.SupplierID == Guid.Parse(supplierId) ,
+                1,
+                int.MaxValue,
+                includes: new Expression<Func<Order, object>>[]
+                    {
+                o => o.OrderDetail,
+                    }
+            );
+
+            var totalSales = ordersResult.Items.Sum(order => order.TotalAmount);
+            var totalOrders = ordersResult.Items.Count;
+            var pendingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Pending);
+            var completedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Completed);
+            var canceledOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Cancelled);
+            var approvedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Approved);
+            var placedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Placed);
+            var shippedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Shipped);
+            var paymentFailOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.PaymentFail);
+            var cancelingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Canceling);
+            var paymentOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Payment);
+            var pendingRefundOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.PendingRefund);
+            var refundOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Refund);
+            var depositReturnOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.DepositReturn);
+            var extendOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Extend);
+
+            return new SupplierOrderStatisticsDto
+            {
+                TotalSales = (double)totalSales,
+                TotalOrders = totalOrders,
+                PendingOrders = pendingOrders,
+                CompletedOrders = completedOrders,
+                CanceledOrders = canceledOrders,
+                ApprovedOrders = approvedOrders,
+                PlacedOrders = placedOrders,
+                ShippedOrders = shippedOrders,
+                PaymentFailOrders = paymentFailOrders,
+                CancelingOrders = cancelingOrders,
+                PaymentOrders = paymentOrders,
+                PendingRefundOrders = pendingRefundOrders,
+                RefundOrders = refundOrders,
+                DepositReturnOrders = depositReturnOrders,
+                ExtendOrders = extendOrders
+            };
+        }
         public async Task<StaffOrderStatisticsDto> GetStaffOrderStatisticsAsync(string accountId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(

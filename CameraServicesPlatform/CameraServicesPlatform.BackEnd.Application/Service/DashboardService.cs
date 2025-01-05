@@ -56,7 +56,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<SupplierOrderStatisticsDto> GetSupplierOrderStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(
-                x => x.SupplierID == Guid.Parse(supplierId) || x.OrderDate >= startDate || x.OrderDate <= endDate,
+                x => x.SupplierID == Guid.Parse(supplierId) || x.OrderDate >= startDate && x.OrderDate <= endDate,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -104,7 +104,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<StaffOrderStatisticsDto> GetStaffOrderStatisticsAsync(string accountId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(
-                x => x.Id == accountId || x.OrderDate >= startDate || x.OrderDate <= endDate,
+                x => x.Id == accountId || x.OrderDate >= startDate && x.OrderDate <= endDate,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -154,28 +154,66 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             monthlyCosts.AddRange(groupedData);
             return monthlyCosts;
         }
-        public async Task<List<ProductStatisticsDto>> GetSupplierProductStatisticsAsync(string supplierId)
+        public async Task<List<MonthlyOrderCostDto>> GetMonthlyOrderCostStatisticsBySupplierIDAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
-            var products = await _productRepository.GetAllDataByExpression(
-                x => x.SupplierID == Guid.Parse(supplierId),
-                1, int.MaxValue
+            var monthlyCosts = new List<MonthlyOrderCostDto>();
 
+            if (!Guid.TryParse(supplierId, out Guid supplierGuid))
+            {
+                throw new ArgumentException("Invalid supplier ID format.", nameof(supplierId));
+            }
+
+            var orders = await _orderRepository.GetAllDataByExpression(
+                x => x.SupplierID == supplierGuid || x.OrderDate >= startDate && x.OrderDate <= endDate,
+                1,
+                int.MaxValue,
+                includes: new Expression<Func<Order, object>>[]
+                {
+            o => o.OrderDetail
+                }
             );
 
-            var productStatistics = new List<ProductStatisticsDto>();
-
-            foreach (var product in products.Items)
-            {
-                var orderDetails = await _orderDetailRepository.GetAllDataByExpression(
-                    od => od.ProductID == product.ProductID,
-                    1, int.MaxValue
-                );
-
-                productStatistics.Add(new ProductStatisticsDto
+            var groupedData = orders.Items
+                .GroupBy(order => new { order.OrderDate.Year, order.OrderDate.Month })
+                .Select(g => new MonthlyOrderCostDto
                 {
-                    ProductId = product.ProductID.ToString(),
-                    ProductName = product.ProductName
-                });
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1),
+                    TotalCost = g.Sum(order => order.TotalAmount)
+                })
+                .ToList();
+
+            monthlyCosts.AddRange(groupedData);
+            return monthlyCosts;
+        }
+
+        public async Task<List<ProductStatisticsDto>> GetSupplierProductStatisticsAsync(string supplierId)
+        {
+            if (!Guid.TryParse(supplierId, out Guid supplierGuid))
+            {
+                throw new ArgumentException("Invalid supplier ID format.", nameof(supplierId));
+            }
+
+            var productStatistics = new List<ProductStatisticsDto>();
+            var orders = await _orderRepository.GetAllDataByExpression(
+                o => o.SupplierID == supplierGuid,
+                1, int.MaxValue,
+                includes: new Expression<Func<Order, object>>[]
+                {
+            o => o.OrderDetail,
+                }
+            );
+
+            foreach (var order in orders.Items)
+            {
+                foreach (var detail in order.OrderDetail)
+                {
+                    var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID, x => x.Category);
+                    productStatistics.Add(new ProductStatisticsDto
+                    {
+                        ProductId = product.ProductID.ToString(),
+                        ProductName = product.ProductName
+                    });
+                }
             }
 
             return productStatistics;
@@ -225,8 +263,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
         public async Task<List<BestSellingCategoryDto>> GetBestSellingCategoriesForSupplierAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
+            if (!Guid.TryParse(supplierId, out Guid supplierGuid))
+            {
+                throw new ArgumentException("Invalid supplier ID format.", nameof(supplierId));
+            }
+
             var orders = await _orderRepository.GetAllDataByExpression(
-                o => o.OrderDate >= startDate || o.OrderDate <= endDate || o.SupplierID == Guid.Parse(supplierId),
+                o => o.SupplierID == supplierGuid || o.OrderDate >= startDate && o.OrderDate <= endDate,
                 1, int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
                 {
@@ -281,9 +324,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             var orders = await _orderRepository.GetAllDataByExpression(
                 filter: o => o.SupplierID == Guid.Parse(supplierId)
-                             && o.OrderDate >= startDate
-                             && o.OrderDate <= endDate
-                             && o.OrderStatus == OrderStatus.Completed,
+                             && o.OrderStatus == OrderStatus.Completed
+                             || o.OrderDate >= startDate
+                             && o.OrderDate <= endDate,
                 pageNumber: 0,
                 pageSize: 0
             );
@@ -393,7 +436,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy tất cả thanh toán thuộc về supplier trong khoảng thời gian xác định
             var payments = await _paymentRepository.GetAllDataByExpression(
-                filter: p => p.SupplierID == Guid.Parse(supplierId) || p.PaymentDate >= startDate || p.PaymentDate <= endDate && !p.IsDisable,
+                filter: p => p.SupplierID == Guid.Parse(supplierId) || p.PaymentDate >= startDate && p.PaymentDate <= endDate,
                 pageNumber: 0,
                 pageSize: 0
             );
@@ -445,7 +488,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy tất cả các thanh toán trong hệ thống trong khoảng thời gian xác định
             var payments = await _paymentRepository.GetAllDataByExpression(
-                filter: p => p.PaymentDate >= startDate || p.PaymentDate <= endDate || !p.IsDisable,
+                filter: p => p.PaymentDate >= startDate && p.PaymentDate <= endDate || !p.IsDisable,
                 pageNumber: 0,
                 pageSize: 0
             );
@@ -509,7 +552,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy các giao dịch của supplier trong khoảng thời gian
             var transactions = await _transactionRepository.GetAllDataByExpression(
-                filter: t => t.Order.SupplierID == Guid.Parse(supplierId) || t.TransactionDate >= startDate || t.TransactionDate <= endDate,
+                filter: t => t.Order.SupplierID == Guid.Parse(supplierId) || t.TransactionDate >= startDate && t.TransactionDate <= endDate,
                 pageNumber: 0,
                 pageSize: 0,
                 includes: t => t.Order

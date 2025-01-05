@@ -17,20 +17,6 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             _dashboardService = dashboardService;
         }
 
-        [HttpGet("best-selling-categories")]
-        public async Task<ActionResult<List<BestSellingCategoryDto>>> GetBestSellingCategories(DateTime startDate, DateTime endDate)
-        {
-            try
-            {
-                var result = await _dashboardService.GetBestSellingCategoriesAsync(startDate, endDate);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
         [HttpGet("best-selling-categories-by-supplier-id/{supplierId}")]
         public async Task<ActionResult<List<BestSellingCategoryDto>>> GetBestSellingCategoriesForSupplier(string supplierId, DateTime startDate, DateTime endDate)
         {
@@ -61,25 +47,11 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-month-order-cost-statistics-by-supplier-id/{supplierId}")]
-        public async Task<ActionResult<List<MonthlyOrderCostDto>>> GetMonthlyOrderCostStatisticsAsync(DateTime startDate, DateTime endDate)
+        public async Task<ActionResult<List<MonthlyOrderCostDto>>> GetMonthlyOrderCostStatisticsBySupplierIDAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             try
             {
-                var result = await _dashboardService.GetMonthlyOrderCostStatisticsAsync(startDate, endDate);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet("get-account-order-statistics-by-account-id/{accountId}")]
-        public async Task<ActionResult<StaffOrderStatisticsDto>> GetStaffOrderStatisticsAsync(string accountId, DateTime startDate, DateTime endDate)
-        {
-            try
-            {
-                var result = await _dashboardService.GetStaffOrderStatisticsAsync(accountId, startDate, endDate);
+                var result = await _dashboardService.GetMonthlyOrderCostStatisticsBySupplierIDAsync(supplierId, startDate, endDate);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -139,18 +111,46 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return Ok(result);
         }
 
-        [HttpGet("system-rating-statistics")]
-        public async Task<IActionResult> GetSystemRatingStatistics()
-        {
-            var result = await _dashboardService.GetSystemRatingStatisticsAsync();
-            return Ok(result);
-        }
-
         // payment
         [HttpGet("supplier-payment-statistics/{supplierId}")]
         public async Task<IActionResult> GetSupplierPaymentStatistics(string supplierId, DateTime startDate, DateTime endDate)
         {
             var result = await _dashboardService.GetSupplierPaymentStatisticsAsync(supplierId, startDate, endDate);
+            return Ok(result);
+        }
+
+        [HttpGet("supplier-transaction-statistics/{supplierId}")]
+        public async Task<IActionResult> GetSupplierTransactionStatistics(string supplierId, DateTime startDate, DateTime endDate)
+        {
+            var result = await _dashboardService.GetSupplierTransactionStatisticsAsync(supplierId, startDate, endDate);
+            return Ok(result);
+        }
+
+        [HttpGet("get-order-status-statistics-by-supplier-id/{supplierId}")]
+        public async Task<IActionResult> GetOrderStatusStatisticsBySupplierAsync(string supplierId)
+        {
+            var result = await _dashboardService.GetOrderStatusStatisticsBySupplierAsync(supplierId);
+            return Ok(result);
+        }
+
+        [HttpGet("get-account-order-statistics-by-account-id/{accountId}")]
+        public async Task<ActionResult<StaffOrderStatisticsDto>> GetStaffOrderStatisticsAsync(string accountId, DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var result = await _dashboardService.GetStaffOrderStatisticsAsync(accountId, startDate, endDate);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("system-rating-statistics")]
+        public async Task<IActionResult> GetSystemRatingStatistics()
+        {
+            var result = await _dashboardService.GetSystemRatingStatisticsAsync();
             return Ok(result);
         }
 
@@ -161,12 +161,18 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return Ok(result);
         }
 
-        // transaction
-        [HttpGet("supplier-transaction-statistics/{supplierId}")]
-        public async Task<IActionResult> GetSupplierTransactionStatistics(string supplierId, DateTime startDate, DateTime endDate)
+        [HttpGet("best-selling-categories")]
+        public async Task<ActionResult<List<BestSellingCategoryDto>>> GetBestSellingCategories(DateTime startDate, DateTime endDate)
         {
-            var result = await _dashboardService.GetSupplierTransactionStatisticsAsync(supplierId, startDate, endDate);
-            return Ok(result);
+            try
+            {
+                var result = await _dashboardService.GetBestSellingCategoriesAsync(startDate, endDate);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("system-transaction-statistics")]
@@ -195,18 +201,25 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             return Ok(result);
         }
         
-        [HttpGet("get-order-status-statistics-by-supplier-id/{supplierId}")]
-        public async Task<IActionResult> GetOrderStatusStatisticsBySupplierAsync(string supplierId)
-        {
-            var result = await _dashboardService.GetOrderStatusStatisticsBySupplierAsync(supplierId);
-            return Ok(result);
-        }
-
         [HttpGet("get-order-status-statistics")]
         public async Task<IActionResult> GetOrderStatusStatisticsAsync( )
         {
             var result = await _dashboardService.GetOrderStatusStatisticsAsync();
             return Ok(result);
+        }
+
+        [HttpGet("get-month-order-cost-statistics")]
+        public async Task<ActionResult<List<MonthlyOrderCostDto>>> GetMonthlyOrderCostStatisticsAsync(DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var result = await _dashboardService.GetMonthlyOrderCostStatisticsAsync(startDate, endDate);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpGet("get-system-total-money-statistics")]

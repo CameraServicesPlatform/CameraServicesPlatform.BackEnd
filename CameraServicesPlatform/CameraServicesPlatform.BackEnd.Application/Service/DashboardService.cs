@@ -738,7 +738,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
             );
 
-            var totalSales = ordersResult.Items.Sum(order => order.TotalAmount);
+            var totalSales = ordersResult.Items.Where(order => order.OrderStatus != OrderStatus.Cancelled).Sum(order => order.TotalAmount);
             var totalOrders = ordersResult.Items.Count;
             var pendingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Pending);
             var completedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Completed);

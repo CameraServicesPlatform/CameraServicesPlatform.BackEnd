@@ -1831,6 +1831,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ReturnDate = order.ReturnDate,
                     IsPayment = order.IsPayment,
                     ReservationMoney = order.ReservationMoney,
+                    CancelMessage = order.CancelMessage,
 
                     OrderDetails = order.OrderDetail.Select(od => new OrderDetailResponse
                     {

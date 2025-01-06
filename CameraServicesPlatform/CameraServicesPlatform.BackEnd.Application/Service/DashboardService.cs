@@ -3,14 +3,8 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
-using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
 using CameraServicesPlatform.BackEnd.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -24,6 +18,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Account> _accountRepository;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Contract> _contractRepository;
+        private readonly IRepository<Report> _reportRepository;
+        private readonly IRepository<Supplier> _supplierRepository;
+        private readonly IRepository<Staff> _staffRepository;
+        private readonly IRepository<Category> _categoryRepository;
+        private readonly IRepository<Combo> _comboRepository;
+        private readonly IRepository<ProductReport> _productReportRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -36,6 +36,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Account> accountRepository,
             IRepository<Product> productRepository,
             IRepository<Contract> contractRepository,
+            IRepository<Report> reportRepository,
+            IRepository<Supplier> supplierRepository,
+            IRepository<Staff> staffRepository,
+            IRepository<Category> categoryRepository,
+            IRepository<Combo> comboRepository,
+            IRepository<ProductReport> productReportRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
@@ -49,6 +55,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _accountRepository = accountRepository;
             _productRepository = productRepository;
             _contractRepository = contractRepository;
+            _reportRepository = reportRepository;
+            _supplierRepository = supplierRepository;
+            _staffRepository = staffRepository;
+            _categoryRepository = categoryRepository;
+            _comboRepository = comboRepository;
+            _orderRepository = orderRepository;
+            _productReportRepository = productReportRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -104,7 +117,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public async Task<SupplierOrderStatisticsDto> GetSupplierOrderStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(
-                x => x.SupplierID == Guid.Parse(supplierId) ,
+                x => x.SupplierID == Guid.Parse(supplierId),
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -740,7 +753,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var purchaseOrders = await _orderRepository.GetAllDataByExpression(
-                x =>  x.OrderType == OrderType.Purchase,
+                x => x.OrderType == OrderType.Purchase,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -896,10 +909,63 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 1,
                 int.MaxValue
             );
-            totalMoney +=(double) completedOrders.Items.Sum(order => order.TotalAmount);
+            totalMoney += (double)completedOrders.Items.Sum(order => order.TotalAmount);
 
             return totalMoney;
         }
 
+        public async Task<int> GetUserCountAsync()
+        {
+            var users = await _accountRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return users.Items.Count;
+        }
+
+        public async Task<int> GetReportCountAsync()
+        {
+            var reports = await _reportRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return reports.Items.Count;
+        }
+
+        public async Task<int> GetProductCountAsync()
+        {
+            var products = await _productRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return products.Items.Count;
+        }
+
+        public async Task<int> GetSupplierCountAsync()
+        {
+            var suppliers = await _supplierRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return suppliers.Items.Count;
+        }
+
+        public async Task<int> GetStaffCountAsync()
+        {
+            var staff = await _staffRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return staff.Items.Count;
+        }
+
+        public async Task<int> GetCategoryCountAsync()
+        {
+            var categories = await _categoryRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return categories.Items.Count;
+        }
+
+        public async Task<int> GetComboCountAsync()
+        {
+            var combos = await _comboRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return combos.Items.Count;
+        }
+
+        public async Task<int> GetOrderCountAsync()
+        {
+            var orders = await _orderRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return orders.Items.Count;
+        }
+
+        public async Task<int> GetProductReportCountAsync()
+        {
+            var productReports = await _productReportRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return productReports.Items.Count;
+        }
     }
 }

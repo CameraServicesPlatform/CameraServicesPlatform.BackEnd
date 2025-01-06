@@ -32,5 +32,15 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<List<MonthlyOrderCostDto>> GetMonthlyPurchaseOrderCostStatisticsAsync(DateTime startDate, DateTime endDate);
         Task<double> GetSystemTotalMoneyAsync();
         Task<List<OrderStatusStatisticsDto>> GetOrderStatusStatisticsAsync();
+
+        Task<int> GetUserCountAsync();
+        Task<int> GetReportCountAsync();
+        Task<int> GetProductCountAsync();
+        Task<int> GetSupplierCountAsync();
+        Task<int> GetStaffCountAsync();
+        Task<int> GetCategoryCountAsync();
+        Task<int> GetComboCountAsync();
+        Task<int> GetOrderCountAsync();
+        Task<int> GetProductReportCountAsync();
     }
 }

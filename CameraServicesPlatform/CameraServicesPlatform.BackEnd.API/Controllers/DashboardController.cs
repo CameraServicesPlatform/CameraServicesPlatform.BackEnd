@@ -228,5 +228,68 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             var result = await _dashboardService.GetSystemTotalMoneyAsync();
             return Ok(result);
         }
+
+        [HttpGet("get-user-count")]
+        public async Task<IActionResult> GetUserCountAsync()
+        {
+            var count = await _dashboardService.GetUserCountAsync();
+            return Ok(count);
+        }
+
+        [HttpGet("get-report-count")]
+        public async Task<IActionResult> GetReportCountAsync()
+        {
+            var count = await _dashboardService.GetReportCountAsync();
+            return Ok(count);
+        }
+
+        [HttpGet("get-product-count")]
+        public async Task<IActionResult> GetProductCountAsync()
+        {
+            var count = await _dashboardService.GetProductCountAsync();
+            return Ok(count);
+        }
+
+        [HttpGet("get-supplier-count")]
+        public async Task<IActionResult> GetSupplierCountAsync()
+        {
+            var count = await _dashboardService.GetSupplierCountAsync();
+            return Ok(count);
+        }
+
+        [HttpGet("get-staff-count")]
+        public async Task<IActionResult> GetStaffCountAsync()
+        {
+            var count = await _dashboardService.GetStaffCountAsync();
+            return Ok(count);
+        }
+
+        [HttpGet("get-category-count")]
+        public async Task<IActionResult> GetCategoryCountAsync()
+        {
+            var count = await _dashboardService.GetCategoryCountAsync();
+            return Ok(count);
+        }
+
+        [HttpGet("get-combo-count")]
+        public async Task<IActionResult> GetComboCountAsync()
+        {
+            var count = await _dashboardService.GetComboCountAsync();
+            return Ok(count);
+        }
+
+        [HttpGet("get-order-count")]
+        public async Task<IActionResult> GetOrderCountAsync()
+        {
+            var count = await _dashboardService.GetOrderCountAsync();
+            return Ok(count);
+        }
+
+        [HttpGet("get-product-report-count")]
+        public async Task<IActionResult> GetProductReportCountAsync()
+        {
+            var count = await _dashboardService.GetProductReportCountAsync();
+            return Ok(count);
+        }
     }
 }

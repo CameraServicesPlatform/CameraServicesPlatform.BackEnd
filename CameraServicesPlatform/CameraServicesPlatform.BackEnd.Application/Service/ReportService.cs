@@ -31,7 +31,16 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
+        public static class DateTimeHelper
+        {
+            private static readonly TimeZoneInfo VietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
 
+            // Convert UTC DateTime to Vietnam Time
+            public static DateTime ToVietnamTime(DateTime utcDateTime)
+            {
+                return TimeZoneInfo.ConvertTimeFromUtc(utcDateTime, VietnamTimeZone);
+            }
+        }
         public async Task<AppActionResult> CreateReport(ReportRequest request)
         {
             var result = new AppActionResult();
@@ -42,7 +51,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     AccountId = request.AccountId,
                     ReportType = request.ReportType,
                     ReportDetails = request.ReportDetails,
-                };
+                    ReportDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
+            };
 
                 await _reportRepository.Insert(report);
                 await _unitOfWork.SaveChangesAsync();

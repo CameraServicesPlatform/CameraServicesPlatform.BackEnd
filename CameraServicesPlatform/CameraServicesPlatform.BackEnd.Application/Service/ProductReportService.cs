@@ -41,6 +41,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _mapper = mapper;
         }
 
+
         public async Task<AppActionResult> CreateProductReport(ProductReportResponseDto productReportResponse)
         {
             AppActionResult result = new AppActionResult();
@@ -89,6 +90,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     SupplierID = supplierGuid,
                     ProductID = productGuid,
                     StatusType = StatusType.Pending,
+                    StartDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow),
                     EndDate = productReportResponse.EndDate,
                     Reason = productReportResponse.Reason,
                     AccountID = productReportResponse.AccountID

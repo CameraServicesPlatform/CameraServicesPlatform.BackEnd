@@ -7,7 +7,7 @@ using CameraServicesPlatform.BackEnd.Common.Utils;
  using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Google.Apis.Util;
-using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -135,11 +135,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             foreach (AccountResponse item in listMap)
             {
                 // Retrieve User Roles
-                List<IdentityRole> userRole = [];
+                List<IdentityRole> userRole = new(); // Corrected empty list initialization
                 PagedResult<IdentityUserRole<string>> role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
-                foreach (IdentityUserRole<string> itemRole in role.Items!)
+                foreach (IdentityUserRole<string> itemRole in role.Items ?? new List<IdentityUserRole<string>>()) // Null check for Items
                 {
-                    IdentityRole? roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
+                    IdentityRole? roleUser = listRole.Items?.FirstOrDefault(a => a.Id == itemRole.RoleId); // Null check for Items
                     if (roleUser != null)
                     {
                         userRole.Add(roleUser);
@@ -148,31 +148,32 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 item.Role = userRole;
 
-                // Determine MainRole
-                if (userRole.Where(u => u.Name.Equals("ADMIN")).FirstOrDefault() != null)
+                // Determine MainRole with more readable logic
+                if (userRole.Any(u => u.Name.Equals("ADMIN", StringComparison.OrdinalIgnoreCase)))
                 {
                     item.MainRole = "ADMIN";
                 }
-                else if (userRole.Where(u => u.Name.Equals("SUPPLIER")).FirstOrDefault() != null)
+                else if (userRole.Any(u => u.Name.Equals("SUPPLIER", StringComparison.OrdinalIgnoreCase)))
                 {
                     item.MainRole = "SUPPLIER";
                 }
+                else if (userRole.Any(u => u.Name.Equals("STAFF", StringComparison.OrdinalIgnoreCase)))
+                {
+                    item.MainRole = "STAFF";
+                }
                 else
                 {
-                    item.MainRole = userRole.Where(u => u.Name.Equals("STAFF")).FirstOrDefault() != null
-                        ? "STAFF"
-                        : userRole.Count > 0 ? userRole.FirstOrDefault(n => !n.Equals("MEMBER")).Name : "MEMBER";
+                    // Default to "MEMBER" if no matching roles are found
+                    item.MainRole = userRole.FirstOrDefault(u => u.Name != "MEMBER")?.Name ?? "MEMBER";
                 }
 
-                // Retrieve Supplier data
+                // Retrieve Supplier data with null check
                 var supplier = await supplierRepository!.GetSingleByExpressionAsync(s => s.AccountID == item.Id);
                 if (supplier != null)
                 {
                     item.SupplierID = supplier.SupplierID.ToString();
                     item.Supplier = supplier;
                 }
-
-
             }
 
             result.Result = new PagedResult<AccountResponse> { Items = listMap, TotalPages = list.TotalPages };
@@ -197,11 +198,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             foreach (AccountResponse item in listMap)
             {
                 // Retrieve User Roles
-                List<IdentityRole> userRole = [];
+                List<IdentityRole> userRole = new(); // Corrected empty list initialization
                 PagedResult<IdentityUserRole<string>> role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
-                foreach (IdentityUserRole<string> itemRole in role.Items!)
+                foreach (IdentityUserRole<string> itemRole in role.Items ?? new List<IdentityUserRole<string>>()) // Null check for Items
                 {
-                    IdentityRole? roleUser = listRole.Items!.ToList().FirstOrDefault(a => a.Id == itemRole.RoleId);
+                    IdentityRole? roleUser = listRole.Items?.FirstOrDefault(a => a.Id == itemRole.RoleId); // Null check for Items
                     if (roleUser != null)
                     {
                         userRole.Add(roleUser);
@@ -210,36 +211,38 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 item.Role = userRole;
 
-                // Determine MainRole
-                if (userRole.Where(u => u.Name.Equals("ADMIN")).FirstOrDefault() != null)
+                // Determine MainRole with more readable logic
+                if (userRole.Any(u => u.Name.Equals("ADMIN", StringComparison.OrdinalIgnoreCase)))
                 {
                     item.MainRole = "ADMIN";
                 }
-                else if (userRole.Where(u => u.Name.Equals("SUPPLIER")).FirstOrDefault() != null)
+                else if (userRole.Any(u => u.Name.Equals("SUPPLIER", StringComparison.OrdinalIgnoreCase)))
                 {
                     item.MainRole = "SUPPLIER";
                 }
+                else if (userRole.Any(u => u.Name.Equals("STAFF", StringComparison.OrdinalIgnoreCase)))
+                {
+                    item.MainRole = "STAFF";
+                }
                 else
                 {
-                    item.MainRole = userRole.Where(u => u.Name.Equals("STAFF")).FirstOrDefault() != null
-                        ? "STAFF"
-                        : userRole.Count > 0 ? userRole.FirstOrDefault(n => !n.Equals("MEMBER")).Name : "MEMBER";
+                    // Default to "MEMBER" if no matching roles are found
+                    item.MainRole = userRole.FirstOrDefault(u => u.Name != "MEMBER")?.Name ?? "MEMBER";
                 }
 
-                // Retrieve Supplier data
+                // Retrieve Supplier data with null check
                 var supplier = await supplierRepository!.GetSingleByExpressionAsync(s => s.AccountID == item.Id);
                 if (supplier != null)
                 {
                     item.SupplierID = supplier.SupplierID.ToString();
                     item.Supplier = supplier;
                 }
-
-
             }
 
             result.Result = new PagedResult<AccountResponse> { Items = listMap, TotalPages = list.TotalPages };
             return result;
         }
+
 
         public async Task<AppActionResult> GetStaffById(string staffID, int pageIndex, int pageSize)
         {

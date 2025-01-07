@@ -1256,6 +1256,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
                     b.Property<double>("Rating")
                         .HasColumnType("float");
 

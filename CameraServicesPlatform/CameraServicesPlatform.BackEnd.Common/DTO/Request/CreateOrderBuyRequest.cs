@@ -16,6 +16,8 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
         public OrderStatus OrderStatus { get; set; }
         public decimal TotalAmount { get; set; }
         public OrderType OrderType { get; set; }
+        public int OrderQuantity { get; set; }
+
         public string? ShippingAddress { get; set; }
         //public List<OrderDetailRequest> OrderDetailRequests { get; set; }
         public DeliveryStatus? DeliveryMethod { get; set; }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     [DbContext(typeof(CameraServicesPlatformDbContext))]
-    [Migration("20241221162751_[update-Order_CancelDurationUnit_CancelValue]")]
-    partial class updateOrder_CancelDurationUnit_CancelValue
+    [Migration("20250107184750_[updateP]")]
+    partial class updateP
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -568,6 +568,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
 
@@ -663,6 +666,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
                     b.Property<string>("AccountId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ReportDate")
                         .HasColumnType("datetime2");
@@ -846,6 +852,41 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.HasIndex("SupplierID");
 
                     b.ToTable("SupplierReports");
+                });
+
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.SystemAdmin", b =>
+                {
+                    b.Property<Guid>("SystemAdminID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("CancelAcceptDurationUnit")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CancelAcceptVaule")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CancelAcceptVauleCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CancelDurationUnit")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CancelVaule")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CancelVauleCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("ReservationMoney")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("ReservationMoneyCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("SystemAdminID");
+
+                    b.ToTable("SystemAdmins");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Vourcher", b =>

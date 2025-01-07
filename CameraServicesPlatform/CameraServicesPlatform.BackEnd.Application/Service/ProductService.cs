@@ -157,6 +157,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             Brand = productResponse.Brand,
             Status = productResponse.Status,
             Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
+            Quantity = productResponse.Quantity,
             Rating = 0,
             DateOfManufacture = productResponse.DateOfManufacture,
             OriginalPrice = productResponse.OriginalPrice,
@@ -309,6 +310,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     Brand = productResponse.Brand,
                     Status = ProductStatusEnum.AvailableRent,
                     Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
+                    Quantity = 1,
                     Rating = 0,
                     DateOfManufacture = productResponse.DateOfManufacture,
                     OriginalPrice = productResponse.OriginalPrice,
@@ -438,6 +440,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 productExist.PriceBuy = productResponse.PriceBuy;
                 productExist.Brand = productResponse.Brand;
                 productExist.Quality = productResponse.Quality;
+                productExist.Quantity = productResponse.Quantity;
                 productExist.Status = productResponse.Status;
                 productExist.DateOfManufacture = DateTimeHelper.ToVietnamTime(productResponse.DateOfManufacture);
                 productExist.OriginalPrice = productResponse.OriginalPrice;
@@ -621,6 +624,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             PricePerMonth = rentalPrice.Items[0].PricePerMonth,
                             Brand = item.Brand,
                             Quality = item.Quality,
+                            Quantity = item.Quantity,
                             Status = item.Status,
                             Rating = averageRating,
                             CreatedAt = item.CreatedAt,
@@ -645,6 +649,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             PriceBuy = item.PriceBuy,
                             Brand = item.Brand,
                             Quality = item.Quality,
+                            Quantity = item.Quantity,
                             Status = item.Status,
                             Rating = item.Rating,
                             CreatedAt = item.CreatedAt,
@@ -978,6 +983,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             DepositProduct = item.DepositProduct,
                             Brand = item.Brand,
                             Quality = item.Quality,
+                            Quantity = item.Quantity,
                             Status = item.Status,
                             Rating = averageRating,
                             CreatedAt = item.CreatedAt,
@@ -1006,6 +1012,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             PriceBuy = item.PriceBuy,
                             Brand = item.Brand,
                             Quality = item.Quality,
+                            Quantity = item.Quantity,
                             Status = item.Status,
                             Rating = averageRating,
                             CreatedAt = item.CreatedAt,
@@ -1344,6 +1351,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             PricePerMonth = rentalPrice.Items[0].PricePerMonth,
                             Brand = item.Brand,
                             Quality = item.Quality,
+                            Quantity = item.Quantity,
                             Status = item.Status,
                             Rating = averageRating,
                             CreatedAt = item.CreatedAt,
@@ -1572,6 +1580,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             PricePerMonth = rentalPrice.Items[0].PricePerMonth,
                             Brand = item.Brand,
                             Quality = item.Quality,
+                            Quantity = item.Quantity,
                             Status = item.Status,
                             Rating = averageRating,
                             CreatedAt = item.CreatedAt,
@@ -1879,6 +1888,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         PriceBuy = item.PriceBuy,
                         Brand = item.Brand,
                         Quality = item.Quality,
+                        Quantity = item.Quantity,
                         Status = item.Status,
                         Rating = averageRating,
                         CreatedAt = item.CreatedAt,
@@ -2027,6 +2037,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         PricePerMonth = rentalPrice.Items[0].PricePerMonth,
                         Brand = item.Brand,
                         Quality = item.Quality,
+                        Quantity = item.Quantity,
                         Status = item.Status,
                         Rating = averageRating,
                         CreatedAt = item.CreatedAt,
@@ -2180,6 +2191,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             PricePerMonth = rentalPrice.Items[0].PricePerMonth,
                             Brand = item.Brand,
                             Quality = item.Quality,
+                            Quantity = item.Quantity,
                             Status = item.Status,
                             Rating = averageRating,
                             CreatedAt = item.CreatedAt,
@@ -2474,6 +2486,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             PriceBuy = itemPro.PriceBuy,
                             Brand = itemPro.Brand,
                             Quality = itemPro.Quality,
+                            Quantity = itemPro.Quantity,
                             Status = itemPro.Status,
                             Rating = itemPro.Rating,
                             CreatedAt = itemPro.CreatedAt,
@@ -2567,6 +2580,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     PriceBuy = item.PriceBuy,
                     Brand = item.Brand,
                     Quality = item.Quality,
+                    Quantity = item.Quantity,
                     Status = item.Status,
                     Rating = item.Rating,
                     CreatedAt = item.CreatedAt,
@@ -2644,6 +2658,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     PriceBuy = item.PriceBuy,
                     Brand = item.Brand,
                     Quality = item.Quality,
+                    Quantity = item.Quantity,
                     Status = item.Status,
                     Rating = item.Rating,
                     CreatedAt = item.CreatedAt,

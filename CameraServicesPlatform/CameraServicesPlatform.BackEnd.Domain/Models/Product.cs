@@ -36,7 +36,7 @@ public class Product
     public BrandEnum? Brand { get; set; }
 
     public string Quality { get; set; }
-    public int Quantity { get; set; } = 1;
+    public int Quantity { get; set; } 
 
     public ProductStatusEnum Status { get; set; }
 

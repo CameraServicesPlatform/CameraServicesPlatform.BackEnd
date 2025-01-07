@@ -7,7 +7,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 {
     public class ProductResponseDto
     {
-        public string SerialNumber { get; set; }
+        public string? SerialNumber { get; set; }
 
          public string SupplierID { get; set; }
 
@@ -18,6 +18,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
 
         public string? ProductDescription { get; set; }
         public string Quality { get; set; }
+        public int Quantity { get; set; }
 
         public double? PriceRent { get; set; }
         public double? PriceBuy { get; set; }

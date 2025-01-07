@@ -157,6 +157,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             Brand = productResponse.Brand,
             Status = productResponse.Status,
             Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
+            Quantity = productResponse.Quantity,
             Rating = 0,
             DateOfManufacture = productResponse.DateOfManufacture,
             OriginalPrice = productResponse.OriginalPrice,
@@ -309,6 +310,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     Brand = productResponse.Brand,
                     Status = ProductStatusEnum.AvailableRent,
                     Quality = productResponse.Quality,  // You might want to replace this with a dynamic value.
+                    Quantity = 1,
                     Rating = 0,
                     DateOfManufacture = productResponse.DateOfManufacture,
                     OriginalPrice = productResponse.OriginalPrice,
@@ -438,6 +440,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 productExist.PriceBuy = productResponse.PriceBuy;
                 productExist.Brand = productResponse.Brand;
                 productExist.Quality = productResponse.Quality;
+                productExist.Quantity = productResponse.Quantity;
                 productExist.Status = productResponse.Status;
                 productExist.DateOfManufacture = DateTimeHelper.ToVietnamTime(productResponse.DateOfManufacture);
                 productExist.OriginalPrice = productResponse.OriginalPrice;
@@ -793,6 +796,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         PricePerMonth = rentalPrice.Items[0].PricePerMonth,
                         Brand = product.Brand,
                         Quality = product.Quality,
+                        Quantity = product.Quantity,
                         Status = product.Status,
                         Rating = averageRating,
                         DateOfManufacture = product.DateOfManufacture,
@@ -825,6 +829,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         PriceBuy = product.PriceBuy,
                         Brand = product.Brand,
                         Quality = product.Quality,
+                        Quantity = product.Quantity,
                         Status = product.Status,
                         Rating = averageRating,
                         CreatedAt = product.CreatedAt,

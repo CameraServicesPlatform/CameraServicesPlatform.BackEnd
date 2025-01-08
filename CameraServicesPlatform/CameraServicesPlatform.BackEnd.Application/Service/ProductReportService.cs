@@ -173,6 +173,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         StartDate = item.StartDate,
                         EndDate = item.EndDate,
                         Reason = item.Reason,
+                        Message = item.Message,
                         AccountID = item.AccountID,
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt
@@ -230,6 +231,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     StartDate = productReportExist.StartDate,
                     EndDate = productReportExist.EndDate,
                     Reason = productReportExist.Reason,
+                    Message = productReportExist.Message,
                     AccountID = productReportExist.AccountID,
                     CreatedAt = productReportExist.CreatedAt,
                     UpdatedAt = productReportExist.UpdatedAt
@@ -292,6 +294,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         StartDate = item.StartDate,
                         EndDate = item.EndDate,
                         Reason = item.Reason,
+                        Message = item.Message,
                         AccountID = item.AccountID,
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt
@@ -356,6 +359,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         StartDate = item.StartDate,
                         EndDate = item.EndDate,
                         Reason = item.Reason,
+                        Message = item.Message,
                         AccountID = item.AccountID,
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt

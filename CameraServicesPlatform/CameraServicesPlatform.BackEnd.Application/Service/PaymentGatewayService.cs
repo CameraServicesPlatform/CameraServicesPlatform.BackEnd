@@ -412,11 +412,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                                 if (orderDb.OrderType == OrderType.Purchase)
                                 {
                                     product.Status = ProductStatusEnum.Sold;
+                                    product.Quantity = (int)(product.Quantity - orderDb.OrderQuantity);
                                     _productRepository.Update(product);
                                 }
                                 else
                                 {
                                     product.Status = ProductStatusEnum.Rented;
+                                    product.Quality = "Cũ";
                                     _productRepository.Update(product);
                                 }
 

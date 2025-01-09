@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class updateFieldOrder : Migration
+    public partial class updateProductss : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -150,6 +150,25 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Policies", x => x.PolicyID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SystemAdmins",
+                columns: table => new
+                {
+                    SystemAdminID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ReservationMoney = table.Column<double>(type: "float", nullable: true),
+                    CancelDurationUnit = table.Column<int>(type: "int", nullable: true),
+                    CancelVaule = table.Column<int>(type: "int", nullable: true),
+                    CancelAcceptDurationUnit = table.Column<int>(type: "int", nullable: true),
+                    CancelAcceptVaule = table.Column<int>(type: "int", nullable: true),
+                    ReservationMoneyCreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CancelVauleCreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CancelAcceptVauleCreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SystemAdmins", x => x.SystemAdminID);
                 });
 
             migrationBuilder.CreateTable(
@@ -431,9 +450,12 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     Deposit = table.Column<double>(type: "float", nullable: true),
                     AccountId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     OrderDetailID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CancelMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsExtend = table.Column<bool>(type: "bit", nullable: true),
                     IsPayment = table.Column<bool>(type: "bit", nullable: true),
-                    ReservationMoney = table.Column<double>(type: "float", nullable: true)
+                    ReservationMoney = table.Column<double>(type: "float", nullable: true),
+                    CancelDurationUnit = table.Column<int>(type: "int", nullable: true),
+                    CancelVaule = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -468,6 +490,7 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     DateOfManufacture = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Brand = table.Column<int>(type: "int", nullable: true),
                     Quality = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     Rating = table.Column<double>(type: "float", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -1259,6 +1282,9 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 
             migrationBuilder.DropTable(
                 name: "SupplierRequests");
+
+            migrationBuilder.DropTable(
+                name: "SystemAdmins");
 
             migrationBuilder.DropTable(
                 name: "Transactions");

@@ -22,8 +22,9 @@ public class ProductUpdateResponseDto
         public BrandEnum? Brand { get; set; }
 
         public string Quality { get; set; }
+ 
         public int Quantity { get; set; }
-
+ 
         public ProductStatusEnum Status { get; set; }
         public DateTime DateOfManufacture { get; set; }
         public double? OriginalPrice { get; set; }

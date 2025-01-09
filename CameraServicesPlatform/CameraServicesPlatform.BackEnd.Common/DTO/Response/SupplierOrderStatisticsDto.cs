@@ -19,9 +19,6 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public int PaymentFailOrders { get; set; }
         public int CancelingOrders { get; set; }
         public int PaymentOrders { get; set; }
-        public int PendingRefundOrders { get; set; }
-        public int RefundOrders { get; set; }
-        public int DepositReturnOrders { get; set; }
         public int ExtendOrders { get; set; }
     }
 }

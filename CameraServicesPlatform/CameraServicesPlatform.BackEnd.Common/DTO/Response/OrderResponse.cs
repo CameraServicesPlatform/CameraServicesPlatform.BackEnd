@@ -21,6 +21,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public DateTime? RentalStartDate { get; set; }
         public DateTime? RentalEndDate { get; set; }
         public RentalDurationUnit? DurationUnit { get; set; }
+        public string? CancelMessage { get; set; }
         public int DurationValue { get; set; }
         public DateTime? ReturnDate { get; set; }
         public bool? IsPayment { get; set; }

@@ -7,6 +7,7 @@ using CameraServicesPlatform.BackEnd.Common.Utils;
  using CameraServicesPlatform.BackEnd.Domain.Data;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Google.Apis.Util;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -118,79 +119,130 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
         public async Task<AppActionResult> GetAllAccountActive(int pageIndex, int pageSize)
         {
-            AppActionResult result = new AppActionResult();
-            try
+            AppActionResult result = new();
+            Expression<Func<Account, bool>>? filter = s => s.IsVerified == true;
+            PagedResult<Account> list = await _accountRepository.GetAllDataByExpression(filter, pageIndex, pageSize, null, false, null);
+
+            IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+            IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
+            PagedResult<IdentityRole> listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
+
+            // Add repositories for Supplier and Staff
+            IRepository<Supplier>? supplierRepository = Resolve<IRepository<Supplier>>();
+            IRepository<Staff>? staffRepository = Resolve<IRepository<Staff>>();
+
+            List<AccountResponse> listMap = _mapper.Map<List<AccountResponse>>(list.Items);
+            foreach (AccountResponse item in listMap)
             {
-                Expression<Func<Account, bool>>? filter = s => s.IsVerified == true;
-
-                var Result = await _accountRepository.GetAllDataByExpression(
-                    filter,
-                    pageIndex,
-                    pageSize,
-                    orderBy: s => s.Email
-                   
-                );
-
-                var responses = Result.Items.Select(account =>
+                // Retrieve User Roles
+                List<IdentityRole> userRole = new(); // Corrected empty list initialization
+                PagedResult<IdentityUserRole<string>> role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
+                foreach (IdentityUserRole<string> itemRole in role.Items ?? new List<IdentityUserRole<string>>()) // Null check for Items
                 {
-                    var response = _mapper.Map<AccountResponse>(account);
-                    return response;
-                }).ToList();
+                    IdentityRole? roleUser = listRole.Items?.FirstOrDefault(a => a.Id == itemRole.RoleId); // Null check for Items
+                    if (roleUser != null)
+                    {
+                        userRole.Add(roleUser);
+                    }
+                }
 
-                var pagedResult = new PagedResult<AccountResponse>
+                item.Role = userRole;
+
+                // Determine MainRole with more readable logic
+                if (userRole.Any(u => u.Name.Equals("ADMIN", StringComparison.OrdinalIgnoreCase)))
                 {
-                    Items = responses,
-                   
-                };
+                    item.MainRole = "ADMIN";
+                }
+                else if (userRole.Any(u => u.Name.Equals("SUPPLIER", StringComparison.OrdinalIgnoreCase)))
+                {
+                    item.MainRole = "SUPPLIER";
+                }
+                else if (userRole.Any(u => u.Name.Equals("STAFF", StringComparison.OrdinalIgnoreCase)))
+                {
+                    item.MainRole = "STAFF";
+                }
+                else
+                {
+                    // Default to "MEMBER" if no matching roles are found
+                    item.MainRole = userRole.FirstOrDefault(u => u.Name != "MEMBER")?.Name ?? "MEMBER";
+                }
 
-                result.Result = pagedResult;
-                result.IsSuccess = true;
-            }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
+                // Retrieve Supplier data with null check
+                var supplier = await supplierRepository!.GetSingleByExpressionAsync(s => s.AccountID == item.Id);
+                if (supplier != null)
+                {
+                    item.SupplierID = supplier.SupplierID.ToString();
+                    item.Supplier = supplier;
+                }
             }
 
+            result.Result = new PagedResult<AccountResponse> { Items = listMap, TotalPages = list.TotalPages };
             return result;
         }
 
         public async Task<AppActionResult> GetAllAccountNotActive(int pageIndex, int pageSize)
         {
-            AppActionResult result = new AppActionResult();
-            try
+            AppActionResult result = new();
+            Expression<Func<Account, bool>>? filter = s => s.IsVerified == false;
+            PagedResult<Account> list = await _accountRepository.GetAllDataByExpression(filter, pageIndex, pageSize, null, false, null);
+
+            IRepository<IdentityUserRole<string>>? userRoleRepository = Resolve<IRepository<IdentityUserRole<string>>>();
+            IRepository<IdentityRole>? roleRepository = Resolve<IRepository<IdentityRole>>();
+            PagedResult<IdentityRole> listRole = await roleRepository!.GetAllDataByExpression(null, 1, 100, null, false, null);
+
+            // Add repositories for Supplier and Staff
+            IRepository<Supplier>? supplierRepository = Resolve<IRepository<Supplier>>();
+            IRepository<Staff>? staffRepository = Resolve<IRepository<Staff>>();
+
+            List<AccountResponse> listMap = _mapper.Map<List<AccountResponse>>(list.Items);
+            foreach (AccountResponse item in listMap)
             {
-                Expression<Func<Account, bool>>? filter = s => s.IsVerified == false;
-
-                var Result = await _accountRepository.GetAllDataByExpression(
-                    filter,
-                    pageIndex,
-                    pageSize,
-                    orderBy: s => s.Email
-                    
-                );
-
-                var responses = Result.Items.Select(account =>
+                // Retrieve User Roles
+                List<IdentityRole> userRole = new(); // Corrected empty list initialization
+                PagedResult<IdentityUserRole<string>> role = await userRoleRepository!.GetAllDataByExpression(a => a.UserId == item.Id, 1, 100, null, false, null);
+                foreach (IdentityUserRole<string> itemRole in role.Items ?? new List<IdentityUserRole<string>>()) // Null check for Items
                 {
-                    var response = _mapper.Map<AccountResponse>(account);
-                    return response;
-                }).ToList();
+                    IdentityRole? roleUser = listRole.Items?.FirstOrDefault(a => a.Id == itemRole.RoleId); // Null check for Items
+                    if (roleUser != null)
+                    {
+                        userRole.Add(roleUser);
+                    }
+                }
 
-                var pagedResult = new PagedResult<AccountResponse>
+                item.Role = userRole;
+
+                // Determine MainRole with more readable logic
+                if (userRole.Any(u => u.Name.Equals("ADMIN", StringComparison.OrdinalIgnoreCase)))
                 {
-                    Items = responses,
+                    item.MainRole = "ADMIN";
+                }
+                else if (userRole.Any(u => u.Name.Equals("SUPPLIER", StringComparison.OrdinalIgnoreCase)))
+                {
+                    item.MainRole = "SUPPLIER";
+                }
+                else if (userRole.Any(u => u.Name.Equals("STAFF", StringComparison.OrdinalIgnoreCase)))
+                {
+                    item.MainRole = "STAFF";
+                }
+                else
+                {
+                    // Default to "MEMBER" if no matching roles are found
+                    item.MainRole = userRole.FirstOrDefault(u => u.Name != "MEMBER")?.Name ?? "MEMBER";
+                }
 
-                };
-
-                result.Result = pagedResult;
-                result.IsSuccess = true;
+                // Retrieve Supplier data with null check
+                var supplier = await supplierRepository!.GetSingleByExpressionAsync(s => s.AccountID == item.Id);
+                if (supplier != null)
+                {
+                    item.SupplierID = supplier.SupplierID.ToString();
+                    item.Supplier = supplier;
+                }
             }
-            catch (Exception ex)
-            {
-                result = BuildAppActionResultError(result, ex.Message);
-            }
 
+            result.Result = new PagedResult<AccountResponse> { Items = listMap, TotalPages = list.TotalPages };
             return result;
         }
+
 
         public async Task<AppActionResult> GetStaffById(string staffID, int pageIndex, int pageSize)
         {

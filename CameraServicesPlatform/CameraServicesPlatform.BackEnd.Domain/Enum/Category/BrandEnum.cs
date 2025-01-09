@@ -17,6 +17,20 @@ namespace CameraServicesPlatform.BackEnd.Domain.Enum.Category
         Leica,
         Pentax,
         Hasselblad,
-        Sigma
+        Sigma,
+        GoPro,
+        DJI,
+        Polaroid,
+        Kodak,
+        Blackmagic_Design,
+        Phase_One,
+        Z_Cam,
+        RED_Digital_Cinema,
+        Arri,
+        YI_Technology,
+        Instax,
+        Lomography,
+        Samsung,
+        CineAlta
     }
 }

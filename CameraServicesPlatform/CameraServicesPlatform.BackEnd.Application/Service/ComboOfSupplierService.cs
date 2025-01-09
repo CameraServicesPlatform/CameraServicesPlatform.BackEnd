@@ -73,13 +73,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var getCombo = await _comboRepository.GetByExpression(x => x.ComboId == Guid.Parse(request.ComboId));
 
                 var activeCombos = await _comboSupplierRepository.GetAllDataByExpression(
-                    a => a.ComboId == Guid.Parse(request.ComboId) && a.SupplierID == Guid.Parse(request.SupplierID) && a.IsDisable == false,
+                    a => a.SupplierID == Guid.Parse(request.SupplierID) && a.IsDisable == false,
                     1,
                     int.MaxValue, null,
                     isAscending: true,
                     null);
 
-                if (activeCombos.Items.Any())
+                if (activeCombos != null)
                 {
                     var latestActiveCombo = activeCombos.Items.OrderByDescending(c => c.EndTime).FirstOrDefault();
                     if (latestActiveCombo != null)
@@ -88,6 +88,26 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         {
                             newStartTime = latestActiveCombo.EndTime.AddDays(1);
 
+                            switch (getCombo.DurationCombo)
+                            {
+                                case DurationCombo.oneMonth:
+                                    newEndTime = newStartTime.AddMonths(1);
+                                    break;
+                                case DurationCombo.twoMonth:
+                                    newEndTime = newStartTime.AddMonths(2);
+                                    break;
+                                case DurationCombo.threeMonth:
+                                    newEndTime = newStartTime.AddMonths(3);
+                                    break;
+                                case DurationCombo.fiveMonth:
+                                    newEndTime = newStartTime.AddMonths(5);
+                                    break;
+                                default:
+                                    throw new InvalidOperationException("DurationUnit is not supported.");
+                            }
+                        }
+                        else
+                        {
                             switch (getCombo.DurationCombo)
                             {
                                 case DurationCombo.oneMonth:
@@ -240,8 +260,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
 
                 var vietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
-                Expression<Func<ComboOfSupplier, bool>> filter = a =>
-                    a.EndTime < vietnamTime;
+                Expression<Func<ComboOfSupplier, bool>> filter = a => vietnamTime > a.EndTime;
 
                 var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
                     filter,
@@ -256,35 +275,52 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var item in pagedResult.Items)
                 {
-                    if (item.IsSendMailExpired == false)
+                    var relatedEndTimes = await _comboSupplierRepository.GetAllDataByExpression(
+                        x => x.SupplierID == item.SupplierID,
+                        0, 
+                        int.MaxValue, 
+                        null,
+                        isAscending: false,
+                        null
+                    );
+                    var latestEndTime = relatedEndTimes.Items.Max(x => x.EndTime);
+
+                    if (vietnamTime > latestEndTime)
                     {
                         item.IsSendMailExpired = true;
                         item.IsDisable = true;
                         _comboSupplierRepository.Update(item);
+
                         var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == item.SupplierID);
                         var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
                         supplier.IsDisable = true;
                         await _supplierRepository.Update(supplier);
                         await _unitOfWork.SaveChangesAsync();
-                        var listProduct = await _productRepository.GetAllDataByExpression(
-                        x => x.SupplierID == item.SupplierID,
-                        pageIndex,
-                        pageSize,
-                        null,
-                        isAscending: true,
-                        null
-                        );
-                        var combo = await _comboRepository.GetById(item.ComboId);
-                        foreach (var items in listProduct.Items)
-                        {
-                            if (items.IsDisable == false)
-                            {
-                                items.IsDisable = true;
-                                _productRepository.Update(items);
-                                await _unitOfWork.SaveChangesAsync();
-                            }
 
+                        var listProduct = await _productRepository.GetAllDataByExpression(
+                            x => x.SupplierID == item.SupplierID,
+                            pageIndex,
+                            pageSize,
+                            null,
+                            isAscending: true,
+                            null
+                        );
+
+                        var combo = await _comboRepository.GetById(item.ComboId);
+
+                        if (listProduct != null)
+                        {
+                            foreach (var product in listProduct.Items)
+                            {
+                                if (!product.IsDisable)
+                                {
+                                    product.IsDisable = true;
+                                    _productRepository.Update(product);
+                                    await _unitOfWork.SaveChangesAsync();
+                                }
+                            }
                         }
+
                         ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
                         {
                             ComboOfSupplierId = item.ComboOfSupplierId.ToString(),
@@ -294,28 +330,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             EndTime = item.EndTime,
                             IsDisable = true
                         };
+
                         listComboOfSupplier.Add(comboResponse);
-
-                        var products = await _productRepository.GetAllDataByExpression(
-                            p => p.SupplierID == supplier.SupplierID,
-                            1,
-                            int.MaxValue,
-                            null,
-                            isAscending: true,
-                            null);
-                        if (products != null)
-                        {
-                            foreach (var product in products.Items)
-                            {
-                                product.IsDisable = true;
-                                await _productRepository.Update(product);
-                            }
-                        }
-                        await SendComboPurchaseConfirmationEmail(supplierAccount, item, combo);
-                        await _unitOfWork.SaveChangesAsync();
+                        await SendMailComboExpired(supplierAccount, item, combo);
                     }
-
                 }
+
                 result.Result = listComboOfSupplier;
                 result.IsSuccess = true;
             }
@@ -337,7 +357,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var vietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow).AddDays(3);
                 Expression<Func<ComboOfSupplier, bool>> filter = a =>
-                    a.EndTime < vietnamTime;
+                    a.EndTime < vietnamTime && a.IsDisable == false;
 
                 var pagedResult = await _comboSupplierRepository.GetAllDataByExpression(
                     filter,
@@ -359,7 +379,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         var supplier = await _supplierRepository.GetByExpression(x => x.SupplierID == item.SupplierID);
                         var supplierAccount = await _accountRepository.GetById(supplier.AccountID);
                         var combo = await _comboRepository.GetById(item.ComboId);
-                        await SendComboPurchaseConfirmationEmail(supplierAccount, item, combo);
+                        await SendMailComboNearExpired(supplierAccount, item, combo);
                         await _unitOfWork.SaveChangesAsync();
                         ComboOfSupplierResponse comboResponse = new ComboOfSupplierResponse
                         {
@@ -374,7 +394,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
 
                 }
-                result.Result = listComboOfSupplier;
+                result.Result = pagedResult;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -534,7 +554,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             IEmailService? emailService = Resolve<IEmailService>();
 
-            // Nội dung chi tiết hóa đơn combo
             var comboDetailsString =
                 $"<b>Tên Combo:</b> {comboDetails.ComboName}<br />" +
                 $"<b>Mã Combo:</b> {combo.ComboId}<br />" +
@@ -543,7 +562,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 $"<b>Thời gian kết thúc:</b> {combo.EndTime:dd/MM/yyyy HH:mm}<br />";
 
 
-            // Tổng hợp email
             var emailMessage =
                 $"Kính chào {supplierAccount.FirstName},<br /><br />" +
                 $"Combo quý khách đăng kí đã hết hạn. Dưới đây là thông tin chi tiết về combo của bạn:<br /><br />" +

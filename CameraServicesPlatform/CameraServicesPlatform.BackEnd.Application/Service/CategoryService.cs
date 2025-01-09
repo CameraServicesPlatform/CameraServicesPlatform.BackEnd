@@ -4,6 +4,8 @@ using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using Microsoft.AspNetCore.Identity;
+using PdfSharp.Pdf.Filters;
+using PdfSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing.Printing;
@@ -42,7 +44,17 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 var listCategory = Resolve<IRepository<Category>>();
-
+                var pagedResult = await _repository.GetByExpression(
+                    null,
+                    a => a.CategoryName == categoryResponse.CategoryName
+                );
+                if( pagedResult.CategoryID != null )
+                {
+                    result.IsSuccess = false;
+                    result.Messages[0] = "Category name exist";
+                    result = BuildAppActionResultError(result, result.Messages[0]);
+                    return result;
+                }
                 Category category = new Category()
                 {
                     CategoryID = Guid.NewGuid(),

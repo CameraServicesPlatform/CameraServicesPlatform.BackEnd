@@ -169,6 +169,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
                 order.DeliveriesMethod = request.DeliveryMethod;
+                order.OrderQuantity = request.OrderQuantity;
 
                 // Retrieve product price and apply any voucher discount if applicable
                 var product = await _productRepository.GetById(productID);
@@ -177,6 +178,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new Exception("Product not found.");
                 }
 
+                var productEntity = await _productRepository.GetById(product.ProductID);
+                if (productEntity.Quantity < request.OrderQuantity)
+                {
+                    throw new Exception("Product not enough.");
+                }
                 double discount = 0;
                 if (!string.IsNullOrEmpty(request.VourcherID))
                 {
@@ -198,7 +204,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductPrice = product.PriceBuy ?? 0,
                     Discount = discount,
                     ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
-                    ProductPriceTotal = (product.PriceBuy ?? 0) - discount
+                    ProductPriceTotal = (double)((product.PriceBuy ?? 0) * order.OrderQuantity - discount)
                 };
                 // Set the order's total amount and save the order and order detail
                 order.TotalAmount = orderDetail.ProductPriceTotal;
@@ -215,12 +221,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 await _unitOfWork.SaveChangesAsync();
 
                 // Update product status to 'Sold'
-                var productEntity = await _productRepository.GetById(product.ProductID);
                 if (productEntity != null)
                 {
                     productEntity.Status = ProductStatusEnum.Sold;
                     _productRepository.Update(productEntity);
                 }
+
+                
                 await _unitOfWork.SaveChangesAsync();
 
                 // Send confirmation email and map created order to response
@@ -274,6 +281,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     throw new Exception("Sản phẫm đã được bán");
                 }
 
+                if(product.Quantity < request.OrderQuantity)
+                {
+                    throw new Exception("Sản phẫm không đủ");
+                }
+
                 // Map request to Order entity and set order properties
                 var order = _mapper.Map<Order>(request);
                 order.OrderID = Guid.NewGuid();
@@ -286,6 +298,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 order.OrderStatus = OrderStatus.Pending;
                 order.OrderType = OrderType.Purchase;
                 order.DeliveriesMethod = request.DeliveryMethod;
+                order.OrderQuantity = request.OrderQuantity;
 
                 // Retrieve product price and apply any voucher discount if applicable
 
@@ -310,7 +323,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ProductPrice = product.PriceBuy ?? 0,
                     Discount = discount,
                     ProductQuality = product.Quality,  // Assuming a quantity of 1 for a single product order
-                    ProductPriceTotal = (product.PriceBuy ?? 0) - discount
+                    ProductPriceTotal = (double)((product.PriceBuy ?? 0) * order.OrderQuantity - discount)
                 };
                 // Set the order's total amount and save the order and order detail
                 order.TotalAmount = orderDetail.ProductPriceTotal;
@@ -387,7 +400,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         AccountID = orderDb.Id,
                         Amount = (double)orderDb.TotalAmount,
                         MemberName = $"{getAccount!.FirstName} {getAccount.LastName}",
-                        OrderID = orderDb.Id.ToString(),
+                        OrderID = orderDb.OrderID.ToString(),
                     };
                     var createPayment = await paymentGatewayService!.CreatePaymentUrlVnpay(payment, context);
                     
@@ -1831,6 +1844,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     ReturnDate = order.ReturnDate,
                     IsPayment = order.IsPayment,
                     ReservationMoney = order.ReservationMoney,
+                    CancelMessage = order.CancelMessage,
 
                     OrderDetails = order.OrderDetail.Select(od => new OrderDetailResponse
                     {

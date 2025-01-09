@@ -8,7 +8,9 @@ public class Product
 {
     [Key]
     public Guid ProductID { get; set; }
+ 
     public string? SerialNumber { get; set; } 
+ 
 
     public Guid? SupplierID { get; set; }
 
@@ -36,7 +38,9 @@ public class Product
     public BrandEnum? Brand { get; set; }
 
     public string Quality { get; set; }
-    public int Quantity { get; set; } 
+ 
+    public int Quantity { get; set; }
+ 
 
     public ProductStatusEnum Status { get; set; }
 

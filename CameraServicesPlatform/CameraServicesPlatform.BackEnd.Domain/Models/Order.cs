@@ -50,5 +50,8 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public CancelDurationUnit? CancelDurationUnit { get; set; }
         public int? CancelVaule { get; set; }
 
+        public int? OrderQuantity { get; set; }
+
+
     }
 }

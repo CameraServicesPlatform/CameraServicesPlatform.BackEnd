@@ -20,5 +20,6 @@ namespace CameraServicesPlatform.BackEnd.Domain.Models
         public DateTime ReportDate { get; set; } 
 
         public ReportStatus Status { get; set; }
+        public string? Message { get; set; }
     }
 }

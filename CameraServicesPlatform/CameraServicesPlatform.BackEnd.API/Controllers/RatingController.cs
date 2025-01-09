@@ -75,7 +75,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-ratings-by-product-id")]
-        public async Task<AppActionResult> GetRatingsByProduct(string productId, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetRatingsByProduct(string productId, int pageIndex, int pageSize)
         {
             return await _ratingService.GetRatingsByProduct(productId, pageIndex, pageSize);
         }
@@ -87,9 +87,21 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-ratings")]
-        public async Task<AppActionResult> GetAllRatings( int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllRatings( int pageIndex , int pageSize)
         {
             return await _ratingService.GetAllRating(pageIndex, pageSize);
+        }
+
+        [HttpGet("get-ratings-by-account-id")]
+        public async Task<AppActionResult> GetRatingsByAccountID(string accountId, int pageIndex, int pageSize)
+        {
+            return await _ratingService.GetRatingsByAccountID(accountId, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-ratings-by-product-and-account-id")]
+        public async Task<AppActionResult> GetRatingsByProductAndAccountID(string productId, string accountId, int pageIndex, int pageSize)
+        {
+            return await _ratingService.GetRatingsByProductAndAccountID(productId, accountId, pageIndex, pageSize);
         }
     }
 }

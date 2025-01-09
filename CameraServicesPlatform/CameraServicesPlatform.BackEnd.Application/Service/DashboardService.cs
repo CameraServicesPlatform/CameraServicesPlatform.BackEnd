@@ -3,14 +3,8 @@ using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
 using CameraServicesPlatform.BackEnd.Domain.Enum.Order;
-using CameraServicesPlatform.BackEnd.Domain.Enum.Payment;
 using CameraServicesPlatform.BackEnd.Domain.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -24,6 +18,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<Account> _accountRepository;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Contract> _contractRepository;
+        private readonly IRepository<Report> _reportRepository;
+        private readonly IRepository<Supplier> _supplierRepository;
+        private readonly IRepository<Staff> _staffRepository;
+        private readonly IRepository<Category> _categoryRepository;
+        private readonly IRepository<Combo> _comboRepository;
+        private readonly IRepository<ProductReport> _productReportRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -36,6 +36,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Account> accountRepository,
             IRepository<Product> productRepository,
             IRepository<Contract> contractRepository,
+            IRepository<Report> reportRepository,
+            IRepository<Supplier> supplierRepository,
+            IRepository<Staff> staffRepository,
+            IRepository<Category> categoryRepository,
+            IRepository<Combo> comboRepository,
+            IRepository<ProductReport> productReportRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
@@ -49,14 +55,69 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _accountRepository = accountRepository;
             _productRepository = productRepository;
             _contractRepository = contractRepository;
+            _reportRepository = reportRepository;
+            _supplierRepository = supplierRepository;
+            _staffRepository = staffRepository;
+            _categoryRepository = categoryRepository;
+            _comboRepository = comboRepository;
+            _orderRepository = orderRepository;
+            _productReportRepository = productReportRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
+        /*public async Task<SupplierOrderStatisticsDto> GetSupplierOrderStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
+        {
+            var ordersResult = await _orderRepository.GetAllDataByExpression(
+                x => x.SupplierID == Guid.Parse(supplierId) || x.OrderDate >= startDate && x.OrderDate <= endDate,
+                1,
+                int.MaxValue,
+                includes: new Expression<Func<Order, object>>[]
+                    {
+                o => o.OrderDetail,
+                    }
+            );
+
+            var totalSales = ordersResult.Items.Sum(order => order.TotalAmount);
+            var totalOrders = ordersResult.Items.Count;
+            var pendingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Pending);
+            var completedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Completed);
+            var canceledOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Cancelled);
+            var approvedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Approved);
+            var placedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Placed);
+            var shippedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Shipped);
+            var paymentFailOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.PaymentFail);
+            var cancelingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Canceling);
+            var paymentOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Payment);
+            var pendingRefundOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.PendingRefund);
+            var refundOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Refund);
+            var depositReturnOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.DepositReturn);
+            var extendOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Extend);
+
+            return new SupplierOrderStatisticsDto
+            {
+                TotalSales = (double)totalSales,
+                TotalOrders = totalOrders,
+                PendingOrders = pendingOrders,
+                CompletedOrders = completedOrders,
+                CanceledOrders = canceledOrders,
+                ApprovedOrders = approvedOrders,
+                PlacedOrders = placedOrders,
+                ShippedOrders = shippedOrders,
+                PaymentFailOrders = paymentFailOrders,
+                CancelingOrders = cancelingOrders,
+                PaymentOrders = paymentOrders,
+                PendingRefundOrders = pendingRefundOrders,
+                RefundOrders = refundOrders,
+                DepositReturnOrders = depositReturnOrders,
+                ExtendOrders = extendOrders
+            };
+        }*/
+
         public async Task<SupplierOrderStatisticsDto> GetSupplierOrderStatisticsAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(
-                x => x.SupplierID == Guid.Parse(supplierId) || x.OrderDate >= startDate || x.OrderDate <= endDate,
+                x => x.SupplierID == Guid.Parse(supplierId),
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -100,11 +161,10 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 ExtendOrders = extendOrders
             };
         }
-
         public async Task<StaffOrderStatisticsDto> GetStaffOrderStatisticsAsync(string accountId, DateTime startDate, DateTime endDate)
         {
             var ordersResult = await _orderRepository.GetAllDataByExpression(
-                x => x.Id == accountId || x.OrderDate >= startDate || x.OrderDate <= endDate,
+                x => x.Id == accountId || x.OrderDate >= startDate && x.OrderDate <= endDate,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -154,28 +214,66 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             monthlyCosts.AddRange(groupedData);
             return monthlyCosts;
         }
-        public async Task<List<ProductStatisticsDto>> GetSupplierProductStatisticsAsync(string supplierId)
+        public async Task<List<MonthlyOrderCostDto>> GetMonthlyOrderCostStatisticsBySupplierIDAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
-            var products = await _productRepository.GetAllDataByExpression(
-                x => x.SupplierID == Guid.Parse(supplierId),
-                1, int.MaxValue
+            var monthlyCosts = new List<MonthlyOrderCostDto>();
 
+            if (!Guid.TryParse(supplierId, out Guid supplierGuid))
+            {
+                throw new ArgumentException("Invalid supplier ID format.", nameof(supplierId));
+            }
+
+            var orders = await _orderRepository.GetAllDataByExpression(
+                x => x.SupplierID == supplierGuid || x.OrderDate >= startDate && x.OrderDate <= endDate,
+                1,
+                int.MaxValue,
+                includes: new Expression<Func<Order, object>>[]
+                {
+            o => o.OrderDetail
+                }
             );
 
-            var productStatistics = new List<ProductStatisticsDto>();
-
-            foreach (var product in products.Items)
-            {
-                var orderDetails = await _orderDetailRepository.GetAllDataByExpression(
-                    od => od.ProductID == product.ProductID,
-                    1, int.MaxValue
-                );
-
-                productStatistics.Add(new ProductStatisticsDto
+            var groupedData = orders.Items
+                .GroupBy(order => new { order.OrderDate.Year, order.OrderDate.Month })
+                .Select(g => new MonthlyOrderCostDto
                 {
-                    ProductId = product.ProductID.ToString(),
-                    ProductName = product.ProductName
-                });
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1),
+                    TotalCost = g.Sum(order => order.TotalAmount)
+                })
+                .ToList();
+
+            monthlyCosts.AddRange(groupedData);
+            return monthlyCosts;
+        }
+
+        public async Task<List<ProductStatisticsDto>> GetSupplierProductStatisticsAsync(string supplierId)
+        {
+            if (!Guid.TryParse(supplierId, out Guid supplierGuid))
+            {
+                throw new ArgumentException("Invalid supplier ID format.", nameof(supplierId));
+            }
+
+            var productStatistics = new List<ProductStatisticsDto>();
+            var orders = await _orderRepository.GetAllDataByExpression(
+                o => o.SupplierID == supplierGuid,
+                1, int.MaxValue,
+                includes: new Expression<Func<Order, object>>[]
+                {
+            o => o.OrderDetail,
+                }
+            );
+
+            foreach (var order in orders.Items)
+            {
+                foreach (var detail in order.OrderDetail)
+                {
+                    var product = await _productRepository.GetByExpression(x => x.ProductID == detail.ProductID, x => x.Category);
+                    productStatistics.Add(new ProductStatisticsDto
+                    {
+                        ProductId = product.ProductID.ToString(),
+                        ProductName = product.ProductName
+                    });
+                }
             }
 
             return productStatistics;
@@ -225,8 +323,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
         public async Task<List<BestSellingCategoryDto>> GetBestSellingCategoriesForSupplierAsync(string supplierId, DateTime startDate, DateTime endDate)
         {
+            if (!Guid.TryParse(supplierId, out Guid supplierGuid))
+            {
+                throw new ArgumentException("Invalid supplier ID format.", nameof(supplierId));
+            }
+
             var orders = await _orderRepository.GetAllDataByExpression(
-                o => o.OrderDate >= startDate || o.OrderDate <= endDate || o.SupplierID == Guid.Parse(supplierId),
+                o => o.SupplierID == supplierGuid || o.OrderDate >= startDate && o.OrderDate <= endDate,
                 1, int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
                 {
@@ -281,9 +384,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             var orders = await _orderRepository.GetAllDataByExpression(
                 filter: o => o.SupplierID == Guid.Parse(supplierId)
-                             && o.OrderDate >= startDate
-                             && o.OrderDate <= endDate
-                             && o.OrderStatus == OrderStatus.Completed,
+                             && o.OrderStatus == OrderStatus.Completed
+                             || o.OrderDate >= startDate
+                             && o.OrderDate <= endDate,
                 pageNumber: 0,
                 pageSize: 0
             );
@@ -393,7 +496,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy tất cả thanh toán thuộc về supplier trong khoảng thời gian xác định
             var payments = await _paymentRepository.GetAllDataByExpression(
-                filter: p => p.SupplierID == Guid.Parse(supplierId) || p.PaymentDate >= startDate || p.PaymentDate <= endDate && !p.IsDisable,
+                filter: p => p.SupplierID == Guid.Parse(supplierId) || p.PaymentDate >= startDate && p.PaymentDate <= endDate,
                 pageNumber: 0,
                 pageSize: 0
             );
@@ -445,7 +548,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy tất cả các thanh toán trong hệ thống trong khoảng thời gian xác định
             var payments = await _paymentRepository.GetAllDataByExpression(
-                filter: p => p.PaymentDate >= startDate || p.PaymentDate <= endDate || !p.IsDisable,
+                filter: p => p.PaymentDate >= startDate && p.PaymentDate <= endDate || !p.IsDisable,
                 pageNumber: 0,
                 pageSize: 0
             );
@@ -509,7 +612,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         {
             // Lấy các giao dịch của supplier trong khoảng thời gian
             var transactions = await _transactionRepository.GetAllDataByExpression(
-                filter: t => t.Order.SupplierID == Guid.Parse(supplierId) || t.TransactionDate >= startDate || t.TransactionDate <= endDate,
+                filter: t => t.Order.SupplierID == Guid.Parse(supplierId) || t.TransactionDate >= startDate && t.TransactionDate <= endDate,
                 pageNumber: 0,
                 pageSize: 0,
                 includes: t => t.Order
@@ -650,7 +753,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var purchaseOrders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate || x.OrderDate <= endDate || x.OrderType == OrderType.Purchase,
+                x => x.OrderType == OrderType.Purchase,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -677,7 +780,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var rentalOrders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate || x.OrderDate <= endDate || x.OrderType == OrderType.Rental,
+                 x => x.OrderType == OrderType.Rental,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -704,7 +807,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var monthlyCosts = new List<MonthlyOrderCostDto>();
 
             var rentalOrders = await _orderRepository.GetAllDataByExpression(
-                x => x.OrderDate >= startDate || x.OrderDate <= endDate,
+                null,
                 1,
                 int.MaxValue,
                 includes: new Expression<Func<Order, object>>[]
@@ -738,7 +841,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
             );
 
-            var totalSales = ordersResult.Items.Sum(order => order.TotalAmount);
+            var totalSales = ordersResult.Items.Where(order => order.OrderStatus != OrderStatus.Cancelled).Sum(order => order.TotalAmount);
             var totalOrders = ordersResult.Items.Count;
             var pendingOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Pending);
             var completedOrders = ordersResult.Items.Count(x => x.OrderStatus == OrderStatus.Completed);
@@ -806,10 +909,63 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 1,
                 int.MaxValue
             );
-            totalMoney +=(double) completedOrders.Items.Sum(order => order.TotalAmount);
+            totalMoney += (double)completedOrders.Items.Sum(order => order.TotalAmount);
 
             return totalMoney;
         }
 
+        public async Task<int> GetUserCountAsync()
+        {
+            var users = await _accountRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return users.Items.Count;
+        }
+
+        public async Task<int> GetReportCountAsync()
+        {
+            var reports = await _reportRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return reports.Items.Count;
+        }
+
+        public async Task<int> GetProductCountAsync()
+        {
+            var products = await _productRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return products.Items.Count;
+        }
+
+        public async Task<int> GetSupplierCountAsync()
+        {
+            var suppliers = await _supplierRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return suppliers.Items.Count;
+        }
+
+        public async Task<int> GetStaffCountAsync()
+        {
+            var staff = await _staffRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return staff.Items.Count;
+        }
+
+        public async Task<int> GetCategoryCountAsync()
+        {
+            var categories = await _categoryRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return categories.Items.Count;
+        }
+
+        public async Task<int> GetComboCountAsync()
+        {
+            var combos = await _comboRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return combos.Items.Count;
+        }
+
+        public async Task<int> GetOrderCountAsync()
+        {
+            var orders = await _orderRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return orders.Items.Count;
+        }
+
+        public async Task<int> GetProductReportCountAsync()
+        {
+            var productReports = await _productReportRepository.GetAllDataByExpression(null, 1, int.MaxValue);
+            return productReports.Items.Count;
+        }
     }
 }

@@ -15,5 +15,9 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> DeleteReport(string contractId);
         Task<AppActionResult> GetReportById(string contractId);
         Task<AppActionResult> GetAllReport(int pageIndex, int pageSize);
+
+        Task<AppActionResult> RejectReport(ReportUpdateRequest request);
+        Task<AppActionResult> ApprovedReport(ReportUpdateRequest request);
+        Task<AppActionResult> GetReportByAccountId(string accountId, int pageIndex, int pageSize);
     }
 }

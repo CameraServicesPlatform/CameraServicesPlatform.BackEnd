@@ -38,6 +38,43 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
+        [HttpPut("reject-report-by-id")]
+        public async Task<IActionResult> RejectReport(ReportUpdateRequest request)
+        {
+            try
+            {
+                var response = await _reportService.RejectReport(request);
+                if (!response.IsSuccess)
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("approved-report-by-id")]
+        public async Task<IActionResult> ApprovedReport(ReportUpdateRequest request)
+        {
+            try
+            {
+                var response = await _reportService.ApprovedReport(request);
+                if (!response.IsSuccess)
+                {
+                    return BadRequest(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         [HttpPut("update-report-by-id")]
         public async Task<IActionResult> UpdateReport(string reportId, [FromBody] ReportRequest request)
         {
@@ -82,6 +119,25 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             try 
             {
                 var response = await _reportService.GetReportById(reportId);
+                if (!response.IsSuccess)
+                {
+                    return NotFound(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("get-report-by-account-id")]
+        public async Task<IActionResult> GetReportByAccountId(string accountId, int pageIndex, int pageSize)
+        {
+            try
+            {
+                var response = await _reportService.GetReportByAccountId(accountId, pageIndex, pageSize);
                 if (!response.IsSuccess)
                 {
                     return NotFound(response);

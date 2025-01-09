@@ -378,7 +378,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 await _unitOfWork.SaveChangesAsync();
 
-                result.Result = productResponse;
+                result.Result = product;
                 result.IsSuccess = true;
             }
             catch (Exception ex)
@@ -548,7 +548,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Product, bool>>? filter = a => a.IsDisable == false;
+                Expression<Func<Product, bool>>? filter = null;
                 List<ProductGetAllResponse> listProduct = new List<ProductGetAllResponse>();
                 var pagedResult = await _productRepository.GetAllDataByExpression(
                     filter,
@@ -796,6 +796,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         PricePerMonth = rentalPrice.Items[0].PricePerMonth,
                         Brand = product.Brand,
                         Quality = product.Quality,
+                        Quantity = product.Quantity,
                         Status = product.Status,
                         Rating = averageRating,
                         DateOfManufacture = product.DateOfManufacture,
@@ -828,6 +829,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         PriceBuy = product.PriceBuy,
                         Brand = product.Brand,
                         Quality = product.Quality,
+                        Quantity = product.Quantity,
                         Status = product.Status,
                         Rating = averageRating,
                         CreatedAt = product.CreatedAt,
@@ -1056,7 +1058,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    null
+                    includes: new Expression<Func<Product, object>>[]
+                        {o => o.Category,    }
                 );
 
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
@@ -1230,7 +1233,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 if (!string.IsNullOrEmpty(categoryFilter))
                 {
-                    filter = a => a.CategoryID == categoryNameFilter && a.IsDisable == false;
+                    filter = a => a.CategoryID == categoryNameFilter;
                 }
 
                 var pagedResult = await _productRepository.GetAllDataByExpression(
@@ -1239,7 +1242,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     pageSize,
                     orderBy: a => a.Supplier!.SupplierName,
                     isAscending: true,
-                    null
+                        includes: new Expression<Func<Product, object>>[]
+                        {o => o.Category,    }
                 );
                 List<ProductByIdResponse> listProduct = new List<ProductByIdResponse>();
                 foreach (var item in pagedResult.Items)

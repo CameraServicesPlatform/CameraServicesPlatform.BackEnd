@@ -13,7 +13,7 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
     {
         public string ProductID { get; set; }
 
-        public string SerialNumber { get; set; }
+        public string? SerialNumber { get; set; }
 
         public string? SupplierID { get; set; }
 
@@ -38,7 +38,9 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public BrandEnum? Brand { get; set; }
 
         public string Quality { get; set; }
+ 
         public int Quantity { get; set; } 
+ 
 
         public ProductStatusEnum Status { get; set; }
 

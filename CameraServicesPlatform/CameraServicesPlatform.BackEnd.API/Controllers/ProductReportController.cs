@@ -73,6 +73,18 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         {
             return await _productReportService.DeleteProductReport(productReportId);
         }
+
+        [HttpGet("get-product-report-by-productId-and-account-id")]
+        public async Task<AppActionResult> GetProductReportByProductIdAndAccountID(string productId, string accountId, int pageIndex, int pageSize)
+        {
+            return await _productReportService.GetProductReportByProductIdAndAccountID(productId, accountId, pageIndex, pageSize);
+        }
+
+        [HttpGet("get-product-report-by-account-id")]
+        public async Task<AppActionResult> GetProductReportByAccountID(string accountId, int pageIndex, int pageSize)
+        {
+            return await _productReportService.GetProductReportByAccountID( accountId, pageIndex, pageSize);
+        }
     }
 }
 

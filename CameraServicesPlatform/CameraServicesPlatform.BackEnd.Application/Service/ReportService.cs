@@ -159,6 +159,45 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> GetReportByAccountId(string accountId, int pageIndex, int pageSize)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var report = await _reportRepository.GetAllDataByExpression(
+                    filter: r => r.AccountId == accountId,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize
+                );
+                if (report == null)
+                {
+                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, "Báo cáo không tồn tại!");
+                    return result;
+                }
+
+                var responses = report.Items.Select(RB =>
+                {
+                    var response = _mapper.Map<ReportResponse>(RB);
+                    response.ReportID = RB.ReportID.ToString();
+                    return response;
+                }).ToList();
+                var pagedResult = new PagedResult<ReportResponse>
+                {
+                    Items = responses
+                };
+
+                result.IsSuccess = true;
+                result.Result = pagedResult;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
+
         public async Task<AppActionResult> UpdateReport(string reportId, ReportRequest request)
         {
             var result = new AppActionResult();

@@ -21,6 +21,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<ProductReport> _repository;
         private readonly IRepository<Supplier> _supplierRepository;
         private readonly IRepository<Product> _productRepository;
+        private readonly IRepository<Account> _accountRepository;
+
 
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -28,7 +30,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public ProductReportService(
             IRepository<ProductReport> repository,
             IRepository<Supplier> supplierRepository,
-             IRepository<Product> productRepository,
+            IRepository<Product> productRepository,
+            IRepository<Account> accountRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
@@ -38,6 +41,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _unitOfWork = unitOfWork;
             _productRepository = productRepository;
             _supplierRepository = supplierRepository;
+            _accountRepository = accountRepository;
             _mapper = mapper;
         }
 
@@ -383,10 +387,24 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == accountId);
+
+                if (getAccount == null)
+                {
+                    throw new Exception("Account not found.");
+                }
+
                 if (!Guid.TryParse(productId, out Guid ProductID))
                 {
                     result = BuildAppActionResultError(result, "Invalid product ID format.");
                     return result;
+                }
+
+                var Product = await _productRepository.GetByExpression(x => x.ProductID == ProductID);
+
+                if (Product == null)
+                {
+                    throw new Exception("Product not found.");
                 }
 
                 var pagedResult = await _repository.GetAllDataByExpression(
@@ -448,7 +466,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-               
+
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == accountId);
+                if (getAccount == null)
+                {
+                    throw new Exception("Account not found.");
+                }
 
                 var pagedResult = await _repository.GetAllDataByExpression(
                     a => a.AccountID == accountId,

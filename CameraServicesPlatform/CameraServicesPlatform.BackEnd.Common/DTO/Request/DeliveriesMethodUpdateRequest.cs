@@ -1,18 +1,14 @@
-﻿using CameraServicesPlatform.BackEnd.Domain.Enum.Delivery;
-using CameraServicesPlatform.BackEnd.Domain.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
+namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 {
-    public class DeliveriesMethodResponse
+    public class DeliveriesMethodUpdateRequest
     {
         public string DeliveriesMethodID { get; set; }
-
         public string DeliveriesMethodName { get; set; }
         public string OrderID { get; set; }
         public string Description { get; set; }

@@ -13,6 +13,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         
          Task<AppActionResult> GetDeliveriesMethodById(string deliveriesMethodId);
         Task<AppActionResult> GetAllDeliveriesMethod(int pageIndex, int pageSize);
+        Task<AppActionResult> CreateDeliveriesMethod(DeliveriesMethodRequest request);
+        Task<AppActionResult> UpdateDeliveriesMethod(DeliveriesMethodUpdateRequest request);
     }
 }
 

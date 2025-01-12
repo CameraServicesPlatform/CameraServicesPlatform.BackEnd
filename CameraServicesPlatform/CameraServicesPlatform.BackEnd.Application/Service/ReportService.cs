@@ -18,16 +18,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     public class ReportService : GenericBackendService, IReportService
     {
         private readonly IRepository<Report> _reportRepository;
+        private readonly IRepository<Account> _accountRepository;
+
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         public ReportService(
             IRepository<Report> reportRepository,
+            IRepository<Account> accountRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
             _reportRepository = reportRepository;
+            _accountRepository = accountRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -164,6 +168,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var result = new AppActionResult();
             try
             {
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == accountId);
+
+                if (getAccount == null)
+                {
+                    throw new Exception("Account not found.");
+                }
+
                 var report = await _reportRepository.GetAllDataByExpression(
                     filter: r => r.AccountId == accountId,
                     pageNumber: pageIndex,

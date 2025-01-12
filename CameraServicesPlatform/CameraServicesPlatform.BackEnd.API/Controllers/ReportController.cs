@@ -132,6 +132,25 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
+        [HttpGet("get-report-by-account-id")]
+        public async Task<IActionResult> GetReportByAccountId(string accountId, int pageIndex, int pageSize)
+        {
+            try
+            {
+                var response = await _reportService.GetReportByAccountId(accountId, pageIndex, pageSize);
+                if (!response.IsSuccess)
+                {
+                    return NotFound(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("get-all-reports")]
         public async Task<AppActionResult> GetAllReports(int pageIndex = 1, int pageSize = 10)
         {

@@ -16,6 +16,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
         Task<AppActionResult> GetRatingsByProduct(string productId, int pageIndex, int pageSize);
         Task<AppActionResult> GetAllRating(int pageIndex, int pageSize);
         Task<AppActionResult> GetRatingById(string ratingId);
+        Task<AppActionResult> GetRatingsByProductAndAccountID(string productId, string accountId, int pageIndex, int pageSize);
+        Task<AppActionResult> GetRatingsByAccountID(string accountId, int pageIndex, int pageSize);
 
     }
 }

@@ -18,5 +18,6 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
 
         Task<AppActionResult> RejectReport(ReportUpdateRequest request);
         Task<AppActionResult> ApprovedReport(ReportUpdateRequest request);
+        Task<AppActionResult> GetReportByAccountId(string accountId, int pageIndex, int pageSize);
     }
 }

@@ -186,6 +186,105 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> GetRatingsByProductAndAccountID(string productId, string accountId, int pageIndex, int pageSize)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(productId, out Guid RatingProductID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+                if (RatingProductID == Guid.Empty)
+                {
+                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, "Không tìm thấy sản phẩm");
+                    return result;
+                }
+
+                var pagedResult = await _ratingRepository.GetAllDataByExpression(
+                    x => x.ProductID == RatingProductID && x.AccountID == accountId,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize
+                );
+
+                if (pagedResult.Items.Count == 0)
+                {
+                    result.IsSuccess = true;
+                    result = BuildAppActionResultError(result, "Không tìm thấy đánh giá cho sản phẩm này");
+                    result.Result = new
+                    {
+                        AverageRating = 0,
+                        ReviewComments = new List<string>()
+                    };
+                    return result;
+                }
+
+                var averageRating = pagedResult.Items.Average(r => r.RatingValue);
+                averageRating = Math.Min(averageRating, 5);
+
+                var reviewComments = pagedResult.Items.Select(r => r.ReviewComment).ToList();
+
+                result.IsSuccess = true;
+                result.Result = new
+                {
+                    AverageRating = averageRating,
+                    ReviewComments = reviewComments
+                };
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetRatingsByAccountID(string accountId, int pageIndex, int pageSize)
+        {
+            var result = new AppActionResult();
+            try
+            {
+
+                var pagedResult = await _ratingRepository.GetAllDataByExpression(
+                    x => x.AccountID == accountId,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize
+                );
+
+                if (pagedResult.Items.Count == 0)
+                {
+                    result.IsSuccess = true;
+                    result = BuildAppActionResultError(result, "Không tìm thấy đánh giá cho sản phẩm này");
+                    result.Result = new
+                    {
+                        AverageRating = 0,
+                        ReviewComments = new List<string>()
+                    };
+                    return result;
+                }
+
+                var averageRating = pagedResult.Items.Average(r => r.RatingValue);
+                averageRating = Math.Min(averageRating, 5);
+
+                var reviewComments = pagedResult.Items.Select(r => r.ReviewComment).ToList();
+
+                result.IsSuccess = true;
+                result.Result = new
+                {
+                    AverageRating = averageRating,
+                    ReviewComments = reviewComments
+                };
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
         public async Task<AppActionResult> UpdateRating(string ratingId, RatingRequest request)
         {
             var result = new AppActionResult();

@@ -18,16 +18,20 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     public class ReportService : GenericBackendService, IReportService
     {
         private readonly IRepository<Report> _reportRepository;
+        private readonly IRepository<Account> _accountRepository;
+
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         public ReportService(
             IRepository<Report> reportRepository,
+            IRepository<Account> accountRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
             _reportRepository = reportRepository;
+            _accountRepository = accountRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -158,6 +162,52 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             }
             return result;
         }
+
+        public async Task<AppActionResult> GetReportByAccountId(string accountId, int pageIndex, int pageSize)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == accountId);
+
+                if (getAccount == null)
+                {
+                    throw new Exception("Account not found.");
+                }
+
+                var report = await _reportRepository.GetAllDataByExpression(
+                    filter: r => r.AccountId == accountId,
+                    pageNumber: pageIndex,
+                    pageSize: pageSize
+                );
+                if (report == null)
+                {
+                    result.IsSuccess = false;
+                    result = BuildAppActionResultError(result, "Báo cáo không tồn tại!");
+                    return result;
+                }
+
+                var responses = report.Items.Select(RB =>
+                {
+                    var response = _mapper.Map<ReportResponse>(RB);
+                    response.ReportID = RB.ReportID.ToString();
+                    return response;
+                }).ToList();
+                var pagedResult = new PagedResult<ReportResponse>
+                {
+                    Items = responses
+                };
+
+                result.IsSuccess = true;
+                result.Result = pagedResult;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+            return result;
+        }
+
 
         public async Task<AppActionResult> UpdateReport(string reportId, ReportRequest request)
         {

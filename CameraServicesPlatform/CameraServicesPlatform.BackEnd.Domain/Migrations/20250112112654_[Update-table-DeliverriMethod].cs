@@ -1,29 +1,29 @@
-﻿/*using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace CameraServicesPlatform.BackEnd.Domain.Migrations
 {
     /// <inheritdoc />
-    public partial class updateOrderCancelMessage : Migration
+    public partial class UpdatetableDeliverriMethod : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "CancelMessage",
-                table: "Orders",
+                name: "DeliveriesMethodName",
+                table: "DeliveriesMethod",
                 type: "nvarchar(max)",
-                nullable: true);
+                nullable: false,
+                defaultValue: "");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "CancelMessage",
-                table: "Orders");
+                name: "DeliveriesMethodName",
+                table: "DeliveriesMethod");
         }
     }
 }
-*/

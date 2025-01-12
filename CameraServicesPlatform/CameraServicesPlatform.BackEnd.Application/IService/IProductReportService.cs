@@ -22,5 +22,8 @@ namespace CameraServicesPlatform.BackEnd.Application.IService
 
         Task<AppActionResult> RejectProductReport(ProductReportRequest productReportRequest);
         Task<AppActionResult> ApprovedProductReport(ProductReportRequest productReportRequest);
+
+        Task<AppActionResult> GetProductReportByProductIdAndAccountID(string productId, string accountId, int pageIndex, int pageSize);
+        Task<AppActionResult> GetProductReportByAccountID(string accountId, int pageIndex, int pageSize);
     }
 }

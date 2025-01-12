@@ -21,6 +21,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IRepository<ProductReport> _repository;
         private readonly IRepository<Supplier> _supplierRepository;
         private readonly IRepository<Product> _productRepository;
+        private readonly IRepository<Account> _accountRepository;
+
 
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
@@ -28,7 +30,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public ProductReportService(
             IRepository<ProductReport> repository,
             IRepository<Supplier> supplierRepository,
-             IRepository<Product> productRepository,
+            IRepository<Product> productRepository,
+            IRepository<Account> accountRepository,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider
@@ -38,6 +41,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _unitOfWork = unitOfWork;
             _productRepository = productRepository;
             _supplierRepository = supplierRepository;
+            _accountRepository = accountRepository;
             _mapper = mapper;
         }
 
@@ -326,6 +330,151 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 var pagedResult = await _repository.GetAllDataByExpression(
                     a => a.Product.ProductID == Guid.Parse(productId),
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                List<ProductReportResponse> listProductReport = new List<ProductReportResponse>();
+                string status = null;
+
+                foreach (var item in pagedResult.Items)
+                {
+
+                    if (item.StatusType == StatusType.Pending)
+                    {
+                        status = "Pending";
+                    }
+                    else
+                    {
+                        if (item.StatusType == StatusType.Approved)
+                        {
+                            status = "Approved";
+                        }
+                        else status = "Reject";
+                    }
+                    ProductReportResponse productReportResponse = new ProductReportResponse
+                    {
+                        ProductReportID = item.ProductReportID.ToString(),
+                        SupplierID = item.SupplierID.ToString(),
+                        ProductID = item.ProductID.ToString(),
+                        StatusType = status,
+                        StartDate = item.StartDate,
+                        EndDate = item.EndDate,
+                        Reason = item.Reason,
+                        Message = item.Message,
+                        AccountID = item.AccountID,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt
+                    };
+                    listProductReport.Add(productReportResponse);
+                }
+                result.Result = listProductReport;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetProductReportByProductIdAndAccountID(string productId, string accountId, int pageIndex, int pageSize)
+        {
+
+            AppActionResult result = new AppActionResult();
+            try
+            {
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == accountId);
+
+                if (getAccount == null)
+                {
+                    throw new Exception("Account not found.");
+                }
+
+                if (!Guid.TryParse(productId, out Guid ProductID))
+                {
+                    result = BuildAppActionResultError(result, "Invalid product ID format.");
+                    return result;
+                }
+
+                var Product = await _productRepository.GetByExpression(x => x.ProductID == ProductID);
+
+                if (Product == null)
+                {
+                    throw new Exception("Product not found.");
+                }
+
+                var pagedResult = await _repository.GetAllDataByExpression(
+                    a => a.Product.ProductID == ProductID && a.AccountID == accountId,
+                    pageIndex,
+                    pageSize,
+                    null,
+                    isAscending: true,
+                    null
+                );
+                List<ProductReportResponse> listProductReport = new List<ProductReportResponse>();
+                string status = null;
+
+                foreach (var item in pagedResult.Items)
+                {
+
+                    if (item.StatusType == StatusType.Pending)
+                    {
+                        status = "Pending";
+                    }
+                    else
+                    {
+                        if (item.StatusType == StatusType.Approved)
+                        {
+                            status = "Approved";
+                        }
+                        else status = "Reject";
+                    }
+                    ProductReportResponse productReportResponse = new ProductReportResponse
+                    {
+                        ProductReportID = item.ProductReportID.ToString(),
+                        SupplierID = item.SupplierID.ToString(),
+                        ProductID = item.ProductID.ToString(),
+                        StatusType = status,
+                        StartDate = item.StartDate,
+                        EndDate = item.EndDate,
+                        Reason = item.Reason,
+                        Message = item.Message,
+                        AccountID = item.AccountID,
+                        CreatedAt = item.CreatedAt,
+                        UpdatedAt = item.UpdatedAt
+                    };
+                    listProductReport.Add(productReportResponse);
+                }
+                result.Result = listProductReport;
+                result.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
+        public async Task<AppActionResult> GetProductReportByAccountID( string accountId, int pageIndex, int pageSize)
+        {
+
+            AppActionResult result = new AppActionResult();
+            try
+            {
+
+                var getAccount = await _accountRepository.GetByExpression(x => x.Id == accountId);
+                if (getAccount == null)
+                {
+                    throw new Exception("Account not found.");
+                }
+
+                var pagedResult = await _repository.GetAllDataByExpression(
+                    a => a.AccountID == accountId,
                     pageIndex,
                     pageSize,
                     null,

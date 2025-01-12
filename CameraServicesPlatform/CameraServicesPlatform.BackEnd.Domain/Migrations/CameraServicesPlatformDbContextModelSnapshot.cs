@@ -321,17 +321,23 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("DeliveriesMethodName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MethodName")
-                        .HasColumnType("int");
+                    b.Property<Guid?>("OrderID")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("DeliveriesMethodID");
+
+                    b.HasIndex("OrderID");
 
                     b.ToTable("DeliveriesMethod");
                 });
@@ -1532,6 +1538,15 @@ namespace CameraServicesPlatform.BackEnd.Domain.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.DeliveriesMethod", b =>
+                {
+                    b.HasOne("CameraServicesPlatform.BackEnd.Domain.Models.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderID");
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("CameraServicesPlatform.BackEnd.Domain.Models.Extend", b =>

@@ -363,6 +363,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 if(accountExist.Items[0].AccountNumber == null || accountExist.Items[0].BankName == null || accountExist.Items[0].AccountHolder == null)
                 {
                     await SendUpdateBankInformation(accountExist.Items[0]);
+                    result.Messages[0] = "Vui lòng cập nhật thông tin tài khoản ngân hàng";
                 }
                 else
                 {

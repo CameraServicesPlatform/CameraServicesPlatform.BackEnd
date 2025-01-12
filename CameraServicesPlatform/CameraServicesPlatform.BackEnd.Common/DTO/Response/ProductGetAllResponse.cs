@@ -41,13 +41,13 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
         public int Quantity { get; set; }
 
         public ProductStatusEnum Status { get; set; }
+        public string? ContractTemplateID { get; set; }
 
         public double Rating { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
 
         public List<ProductImage> listImage { get; set; } = null!;
 

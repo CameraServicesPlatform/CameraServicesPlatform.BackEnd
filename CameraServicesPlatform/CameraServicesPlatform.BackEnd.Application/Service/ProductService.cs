@@ -216,8 +216,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         }
 
         await _unitOfWork.SaveChangesAsync();
-
-        result.Result = productResponse;
+        result.Result = product;
         result.IsSuccess = true;
     }
     catch (Exception ex)

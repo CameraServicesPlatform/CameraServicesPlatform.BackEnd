@@ -89,7 +89,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     {
                         if (latestActiveCombo.EndTime > dateNow)
                         {
-                            newStartTime = latestActiveCombo.EndTime.AddDays(1);
+                            newStartTime = latestActiveCombo.EndTime;
 
                             switch (getCombo.DurationCombo)
                             {
@@ -152,6 +152,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
                 }
 
+                await Task.Delay(50);
                 ComboOfSupplier comboNew = new ComboOfSupplier
                 {
                     ComboOfSupplierId = Guid.NewGuid(),
@@ -171,6 +172,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var supplierAccount = await _accountRepository.GetByExpression(x => x.Id == supplier.AccountID);
                 supplier.IsDisable = false;
                 await _supplierRepository.Update(supplier);
+                await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
 
                 var products = await _productRepository.GetAllDataByExpression(
@@ -186,7 +188,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     product.IsDisable = false;
                     await _productRepository.Update(product);
                 }
-
+                await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
 
                 var paymentCombo = new CreateComboPaymentDTO
@@ -199,8 +201,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var payMethod = await paymentGatewayService.CreateComboPayment(paymentCombo, context);
 
                 await comboOfSupplier.Insert(comboNew);
+                await Task.Delay(50);
                 await SendComboPurchaseConfirmationEmail(supplierAccount, comboNew, combo);
-
+                await Task.Delay(50);
                 await _unitOfWork.SaveChangesAsync();
                 result.Result = payMethod;
                 result.IsSuccess = true;

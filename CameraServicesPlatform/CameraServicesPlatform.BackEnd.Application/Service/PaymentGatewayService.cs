@@ -411,7 +411,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             {
                                 if (orderDb.OrderType == OrderType.Purchase)
                                 {
-                                    product.Status = ProductStatusEnum.Sold;
+                                    product.Status = ProductStatusEnum.AvailableSell;
                                     product.Quantity = (int)(product.Quantity - orderDb.OrderQuantity);
                                     _productRepository.Update(product);
                                 }

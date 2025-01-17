@@ -11,6 +11,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static CameraServicesPlatform.BackEnd.Application.Service.OrderService;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
@@ -56,7 +57,13 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
                 foreach (var item in pagedResult.Items)
                 {
-
+                    var vietnamTime = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                    if (vietnamTime >= item.ExpirationDate)
+                    {
+                        item.IsActive = false;
+                        await _repository.Update(item);
+                        await _unitOfWork.SaveChangesAsync();
+                    }
                     VoucherResponse voucherResponse = new VoucherResponse
                     {
                         VourcherID = item.VourcherID.ToString(),

@@ -18,7 +18,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-voucher")]
-        public async Task<AppActionResult> GetAllVoucher(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllVoucher(int pageIndex = 1, int pageSize = 100)
         {
             return await _voucherService.GetAllVoucher(pageIndex, pageSize);
         }

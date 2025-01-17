@@ -52,10 +52,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             AppActionResult result = new AppActionResult();
             try
             {
-                Expression<Func<Supplier, bool>>? filter = a => a.IsDisable == false;
 
                 var pagedResult = await _repository.GetAllDataByExpression(
-                    filter,
+                    null,
                     pageIndex,
                     pageSize,
                     orderBy: a => a.SupplierName,

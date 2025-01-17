@@ -114,7 +114,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-return-detail")]
-        public async Task<AppActionResult> GetAllReturnDetail(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllReturnDetail(int pageIndex = 1, int pageSize = 100)
         {
             return await _returnDetailService.GetAllReturnDetail(pageIndex, pageSize);
         }

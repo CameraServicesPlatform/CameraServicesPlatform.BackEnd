@@ -225,6 +225,38 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> GetReturnDetailByOrderId(string OrderId)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderId, out Guid ReturnDetailOrderID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+
+                var returnDetail = await _returnDetailRepository.GetByExpression(x => x.OrderID == ReturnDetailOrderID);
+                if (returnDetail == null)
+                {
+                    result = BuildAppActionResultError(result, "Không tìm thấy đơn trả!");
+                    return result;
+                }
+
+                var response = _mapper.Map<ReturnDetailResponse>(returnDetail);
+                response.ReturnID = returnDetail.ReturnID.ToString();
+                response.OrderID = returnDetail.OrderID.ToString();
+                result.IsSuccess = true;
+                result.Result = response;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
         public async Task<AppActionResult> GetReturnDetailByOrderID(string OrderID, int pageIndex, int pageSize)
         {
             var result = new AppActionResult();

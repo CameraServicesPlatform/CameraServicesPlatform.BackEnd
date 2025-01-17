@@ -261,7 +261,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                // Check if product name already exists for the supplier
                 var productNameExist = await _productRepository.GetByExpression(
                     a => a.ProductName.Equals(productResponse.ProductName) && a.SupplierID.Equals(supplierGuid),
                     null
@@ -271,13 +270,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, $"Tên sản phẩm đã tồn tại trong shop!");
                     return result;
                 }
-                if (productResponse.DepositProduct > 1000000)
-                {
-                    result = BuildAppActionResultError(result, $"Tiền giư chỗ phải bé hơn 1000000 VNĐ");
-                    return result;
-                }
 
-                // Check if Serial Number already exists
                 var productSerialExist = await _productRepository.GetAllDataByExpression(
                     a => a.SerialNumber.Equals(productResponse.SerialNumber),
                     1,
@@ -292,14 +285,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                // Parse CategoryID and validate it
                 if (!Guid.TryParse(productResponse.CategoryID, out var categoryGuid))
                 {
                     result = BuildAppActionResultError(result, $"CategoryID không hợp lệ!");
                     return result;
                 }
 
-                // Create new Product
                 Product product = new Product()
                 {
                     ProductID = Guid.NewGuid(),

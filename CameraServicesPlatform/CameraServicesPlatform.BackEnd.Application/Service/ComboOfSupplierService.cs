@@ -17,6 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IMapper _mapper;
         private IRepository<ComboOfSupplier> _comboSupplierRepository;
+        private IRepository<Vourcher> _vourcherRepository;
         private readonly IRepository<Payment> _paymentRepository;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Combo> _comboRepository;
@@ -28,6 +29,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public ComboOfSupplierService(
             IRepository<ComboOfSupplier> comboSupplierRepository,
             IRepository<Combo> comboRepository,
+            IRepository<Vourcher> vourcherRepository,
             IUnitOfWork unitOfWork,
             IRepository<Payment> paymentRepository,
             IMapper mapper,
@@ -43,6 +45,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _comboRepository = comboRepository;
             _supplierRepository = supplierRepository;
             _productRepository = productRepository;
+            _vourcherRepository = vourcherRepository;
             _accountRepository = accountRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -297,6 +300,27 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         await _supplierRepository.Update(supplier);
                         await _unitOfWork.SaveChangesAsync();
 
+                        var listVourcher= await _vourcherRepository.GetAllDataByExpression(
+                            x => x.SupplierID == item.SupplierID,
+                            pageIndex,
+                            pageSize,
+                            null,
+                            isAscending: true,
+                            null
+                        );
+
+                        if (listVourcher != null)
+                        {
+                            foreach (var vourcher in listVourcher.Items)
+                            {
+                                if (vourcher.IsActive)
+                                {
+                                    vourcher.IsActive = false;
+                                    _vourcherRepository.Update(vourcher);
+                                    await _unitOfWork.SaveChangesAsync();
+                                }
+                            }
+                        }
                         var listProduct = await _productRepository.GetAllDataByExpression(
                             x => x.SupplierID == item.SupplierID,
                             pageIndex,

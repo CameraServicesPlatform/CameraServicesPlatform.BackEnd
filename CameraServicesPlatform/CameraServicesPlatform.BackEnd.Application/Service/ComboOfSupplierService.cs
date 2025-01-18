@@ -109,25 +109,25 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                                     throw new InvalidOperationException("DurationUnit is not supported.");
                             }
                         }
-                        else
+                    }
+                    else
+                    {
+                        switch (getCombo.DurationCombo)
                         {
-                            switch (getCombo.DurationCombo)
-                            {
-                                case DurationCombo.oneMonth:
-                                    newEndTime = newStartTime.AddMonths(1);
-                                    break;
-                                case DurationCombo.twoMonth:
-                                    newEndTime = newStartTime.AddMonths(2);
-                                    break;
-                                case DurationCombo.threeMonth:
-                                    newEndTime = newStartTime.AddMonths(3);
-                                    break;
-                                case DurationCombo.fiveMonth:
-                                    newEndTime = newStartTime.AddMonths(5);
-                                    break;
-                                default:
-                                    throw new InvalidOperationException("DurationUnit is not supported.");
-                            }
+                            case DurationCombo.oneMonth:
+                                newEndTime = newStartTime.AddMonths(1);
+                                break;
+                            case DurationCombo.twoMonth:
+                                newEndTime = newStartTime.AddMonths(2);
+                                break;
+                            case DurationCombo.threeMonth:
+                                newEndTime = newStartTime.AddMonths(3);
+                                break;
+                            case DurationCombo.fiveMonth:
+                                newEndTime = newStartTime.AddMonths(5);
+                                break;
+                            default:
+                                throw new InvalidOperationException("DurationUnit is not supported.");
                         }
                     }
                 }

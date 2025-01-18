@@ -58,6 +58,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 returnDetail.PenaltyApplied = request.PenaltyApplied;
                 returnDetail.OrderID = request.OrderID;
                 returnDetail.Condition = request.Condition;
+                returnDetail.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                returnDetail.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 returnDetail.ReturnDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 returnDetail.IsDisable = false;
                 
@@ -108,6 +110,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 returnDetail.PenaltyApplied = 0;
                 returnDetail.OrderID = request.OrderID;
                 returnDetail.Condition = request.Condition;
+                returnDetail.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                returnDetail.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 returnDetail.ReturnDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 returnDetail.IsDisable = true;
 
@@ -324,7 +328,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 existingRT.ReturnDate = request.ReturnDate;
                 existingRT.Condition = request.Condition;
                 existingRT.PenaltyApplied = request.PenaltyApplied;
-                existingRT.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                existingRT.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
 
 
                 await _returnDetailRepository.Update(existingRT);

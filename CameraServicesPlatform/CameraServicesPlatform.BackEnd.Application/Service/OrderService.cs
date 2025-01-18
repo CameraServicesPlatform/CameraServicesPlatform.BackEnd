@@ -1461,6 +1461,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     {
                         var product = await _productRepository.GetByExpression(x => x.ProductID == orderDetail.ProductID);
                         product.Status = ProductStatusEnum.AvailableSell;
+                        product.Quantity = (int)(product.Quantity + order.OrderQuantity);
                         _productRepository.Update(product);
                         await Task.Delay(100);
                         await _unitOfWork.SaveChangesAsync();

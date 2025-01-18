@@ -45,10 +45,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             {
                 var listCategory = Resolve<IRepository<Category>>();
                 var pagedResult = await _repository.GetByExpression(
-                    null,
                     a => a.CategoryName == categoryResponse.CategoryName
                 );
-                if( pagedResult.CategoryID != null )
+                if( pagedResult != null )
                 {
                     result.IsSuccess = false;
                     result.Messages[0] = "Category name exist";

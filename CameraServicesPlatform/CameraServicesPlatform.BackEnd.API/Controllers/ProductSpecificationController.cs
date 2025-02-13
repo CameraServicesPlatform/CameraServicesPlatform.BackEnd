@@ -18,13 +18,13 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-product-specification")]
-        public async Task<AppActionResult> GetAllProductSpecification(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllProductSpecification(int pageIndex = 1, int pageSize = 100)
         {
             return await _productSpecificationService.GetAllProductSpecification(pageIndex, pageSize);
         }
 
         [HttpGet("get-product-specification-by-id")]
-        public async Task<AppActionResult> GetProductSpecificationById(string id, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetProductSpecificationById(string id, int pageIndex = 1, int pageSize = 100)
         {
             return await _productSpecificationService.GetProductSpecificationById(id, pageIndex, pageSize);
         }

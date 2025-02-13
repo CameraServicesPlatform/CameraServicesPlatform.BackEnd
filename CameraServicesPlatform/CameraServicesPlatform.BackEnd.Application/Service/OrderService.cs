@@ -223,7 +223,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 // Update product status to 'Sold'
                 if (productEntity != null)
                 {
-                    productEntity.Status = ProductStatusEnum.Sold;
+                    productEntity.Status = ProductStatusEnum.AvailableSell;
+                    productEntity.Quantity = product.Quantity - request.OrderQuantity;
                     _productRepository.Update(productEntity);
                 }
 
@@ -273,7 +274,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var product = await _productRepository.GetById(productID);
                 if (product == null)
                 {
-                    throw new Exception("Không tìm thấy sản phẩm thuê.");
+                    throw new Exception("Không tìm thấy sản phẩm bán.");
                 }
 
                 if (product.Status == ProductStatusEnum.Sold)
@@ -342,7 +343,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var productEntity = await _productRepository.GetById(product.ProductID);
                 if (productEntity != null)
                 {
-                    productEntity.Status = ProductStatusEnum.Sold;
+                    productEntity.Status = ProductStatusEnum.AvailableSell;
                     _productRepository.Update(productEntity);
                 }
                 await _unitOfWork.SaveChangesAsync();
@@ -1460,6 +1461,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     {
                         var product = await _productRepository.GetByExpression(x => x.ProductID == orderDetail.ProductID);
                         product.Status = ProductStatusEnum.AvailableSell;
+                        product.Quantity = (int)(product.Quantity + order.OrderQuantity);
                         _productRepository.Update(product);
                         await Task.Delay(100);
                         await _unitOfWork.SaveChangesAsync();

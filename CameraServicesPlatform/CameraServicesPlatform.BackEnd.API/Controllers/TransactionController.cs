@@ -28,7 +28,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }*/
 
         [HttpGet("get-all-transaction")]
-        public async Task<AppActionResult> GetAllTransaction(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllTransaction(int pageIndex = 1, int pageSize = 100)
         {
             return await _transactionService.GetAllTransaction(pageIndex, pageSize);
         }
@@ -41,7 +41,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         
         
         [HttpGet("get-transaction-by-supplier-id")]
-        public async Task<AppActionResult> GetTransactionBySupplierId(string id, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetTransactionBySupplierId(string id, int pageIndex = 1, int pageSize = 100)
         {
             return await _transactionService.GetTransactionBySupplierId(id, pageIndex, pageSize);
         }

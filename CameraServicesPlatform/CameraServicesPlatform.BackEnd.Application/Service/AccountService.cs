@@ -144,7 +144,7 @@ public class AccountService : GenericBackendService, IAccountService
             Account account = _mapper.Map<Account>(dto);
             account.VerifyCode = verifyCode;
             account.IsVerified = isGoogle;
-
+            
             IdentityResult createAccountResult;
 
             // Upload ảnh căn cước công dân lên Firebase nếu có
@@ -168,7 +168,7 @@ public class AccountService : GenericBackendService, IAccountService
             // Cập nhật đường dẫn ảnh vào Account nếu cần
             account.FrontOfCitizenIdentificationCard = frontCardImageUrl;
             account.BackOfCitizenIdentificationCard = backCardImageUrl;
-
+            
 
             if (!isGoogle)
             {
@@ -196,6 +196,7 @@ public class AccountService : GenericBackendService, IAccountService
                     supplier.AccountID = account.Id;
                     supplier.CreatedAt = DateTime.UtcNow;
                     supplier.UpdatedAt = DateTime.UtcNow;
+                    supplier.IsDisable = true;
 
                     _ = await _supplierRepository.Insert(supplier);
                     await Task.Delay(100);
@@ -243,7 +244,7 @@ public class AccountService : GenericBackendService, IAccountService
                     supplier.AccountID = account.Id;
                     supplier.CreatedAt = DateTime.UtcNow;
                     supplier.UpdatedAt = DateTime.UtcNow;
-
+                    supplier.IsDisable = true;
                     _ = await _supplierRepository.Insert(supplier);
                     await _unitOfWork.SaveChangeAsync();
 

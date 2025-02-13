@@ -122,6 +122,9 @@ public class MappingConfig
             config.CreateMap<SystemAdminRequestDTO, SystemAdmin>();
             config.CreateMap<SystemAdmin, SystemAdminResponseDTO>();
 
+            //map DeliveriesMethod
+            config.CreateMap<DeliveriesMethod, DeliveriesMethodResponse>();
+
 
 
 

@@ -862,7 +862,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 TotalSales = (double)totalSales,
                 TotalOrders = totalOrders,
                 PendingOrders = pendingOrders,
-                CompletedOrders = completedOrders,
+                CompletedOrders = completedOrders + pendingRefundOrders + refundOrders + depositReturnOrders,
                 CanceledOrders = canceledOrders,
                 ApprovedOrders = approvedOrders,
                 PlacedOrders = placedOrders,
@@ -870,9 +870,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 PaymentFailOrders = paymentFailOrders,
                 CancelingOrders = cancelingOrders,
                 PaymentOrders = paymentOrders,
-                PendingRefundOrders = pendingRefundOrders,
-                RefundOrders = refundOrders,
-                DepositReturnOrders = depositReturnOrders,
                 ExtendOrders = extendOrders
             };
         }

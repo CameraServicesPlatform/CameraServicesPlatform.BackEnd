@@ -13,8 +13,9 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Response
     {
        
         public Guid ProductID { get; set; }
-
         public Guid VourcherID { get; set; }
+        public DateTime CreateAt { get; set; }
+        public DateTime UpdateAt { get; set; }
 
     }
 }

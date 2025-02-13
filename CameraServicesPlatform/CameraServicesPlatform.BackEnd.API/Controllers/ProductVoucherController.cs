@@ -19,19 +19,19 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-product-voucher")]
-        public async Task<AppActionResult> GetAllProductVoucher(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllProductVoucher(int pageIndex = 1, int pageSize = 100)
         {
             return await _productVoucherService.GetAllProductVoucher(pageIndex, pageSize);
         }
 
         [HttpGet("get-product-voucher-by-id")]
-        public async Task<AppActionResult> GetProductVoucherById(string id, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetProductVoucherById(string id, int pageIndex = 1, int pageSize = 100)
         {
             return await _productVoucherService.GetProductVoucherById(id, pageIndex, pageSize);
         }
 
         [HttpGet("get-product-voucher-by-product-id")]
-        public async Task<AppActionResult> GetProductVoucherByProductId(string ProductId, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetProductVoucherByProductId(string ProductId, int pageIndex = 1, int pageSize = 100)
         {
             return await _productVoucherService.GetProductVoucherByProductId(ProductId, pageIndex, pageSize);
         }

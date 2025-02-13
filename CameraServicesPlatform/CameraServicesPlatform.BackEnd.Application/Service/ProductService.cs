@@ -29,6 +29,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         private readonly IMapper _mapper;
         private IRepository<Product> _productRepository;
         private IRepository<ProductImage> _productImageRepository;
+        private IRepository<ContractTemplate> _contractTemplateRepository;
         private IRepository<Account> _accountRepository;
         private IRepository<Rating> _ratingRepository;
         private IRepository<RentalPrice> _rentalPriceRepository;
@@ -54,6 +55,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             IRepository<Order> orderRepository,
             IRepository<ProductVoucher> productVoucherRepository,
             IRepository<ProductSpecification> productSpecificationRepository,
+            IRepository<ContractTemplate> contractTemplateRepository ,
             IUnitOfWork unitOfWork,
             IMapper mapper,
             IServiceProvider serviceProvider,
@@ -72,6 +74,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _productVoucherRepository = productVoucherRepository;
             _productSpecificationRepository = productSpecificationRepository;
             _orderRepository = orderRepository;
+            _contractTemplateRepository = contractTemplateRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
@@ -213,8 +216,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         }
 
         await _unitOfWork.SaveChangesAsync();
-
-        result.Result = productResponse;
+        result.Result = product;
         result.IsSuccess = true;
     }
     catch (Exception ex)
@@ -259,7 +261,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                // Check if product name already exists for the supplier
                 var productNameExist = await _productRepository.GetByExpression(
                     a => a.ProductName.Equals(productResponse.ProductName) && a.SupplierID.Equals(supplierGuid),
                     null
@@ -269,13 +270,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result = BuildAppActionResultError(result, $"Tên sản phẩm đã tồn tại trong shop!");
                     return result;
                 }
-                if (productResponse.DepositProduct > 1000000)
-                {
-                    result = BuildAppActionResultError(result, $"Tiền giư chỗ phải bé hơn 1000000 VNĐ");
-                    return result;
-                }
 
-                // Check if Serial Number already exists
                 var productSerialExist = await _productRepository.GetAllDataByExpression(
                     a => a.SerialNumber.Equals(productResponse.SerialNumber),
                     1,
@@ -290,14 +285,12 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     return result;
                 }
 
-                // Parse CategoryID and validate it
                 if (!Guid.TryParse(productResponse.CategoryID, out var categoryGuid))
                 {
                     result = BuildAppActionResultError(result, $"CategoryID không hợp lệ!");
                     return result;
                 }
 
-                // Create new Product
                 Product product = new Product()
                 {
                     ProductID = Guid.NewGuid(),
@@ -585,6 +578,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         isAscending: true,
                         null
                     );
+                    
                     int totalRentals = 0;
                     if (item.PriceBuy == null)
                     {
@@ -605,6 +599,24 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
                     if (rentalPrice.Items.Count() > 0)
                     {
+                        var contract = _contractTemplateRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                        );
+                        string contractId;
+                        if (contract.Result.Items.Count() == 0)
+                        {
+                            contractId = null;
+                        }
+                        else
+                        {
+                            contractId = contract.Result.Items[0].ContractTemplateId.ToString();
+                        }
+
                         ProductGetAllResponse productResponse = new ProductGetAllResponse
                         {
                             ProductID = item.ProductID.ToString(),
@@ -629,7 +641,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
-                            listImage = productImage.Items
+                            listImage = productImage.Items,
+                            ContractTemplateID = contractId
                         };
                         listProduct.Add(productResponse);
                     }
@@ -654,7 +667,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             Rating = item.Rating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
-                            listImage = productImage.Items
+                            listImage = productImage.Items,
+                            ContractTemplateID = null
                         };
                         listProduct.Add(productResponse);
                     }
@@ -886,6 +900,25 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     isAscending: true,
                     null
                     );
+
+                    var contract = _contractTemplateRepository.GetAllDataByExpression(
+                        a => a.ProductID.Equals(item.ProductID),
+                        pageIndex,
+                        pageSize,
+                        null,
+                        isAscending: true,
+                        null
+                        );
+                    string contractId;
+                    if (contract.Result.Items.Count() == 0)
+                    {
+                        contractId = null;
+                    }
+                    else
+                    {
+                        contractId = contract.Result.Items[0].ContractTemplateId.ToString();
+                    }
+
                     List<ProductVoucherResponse> listProductVoucher = new List<ProductVoucherResponse>();
 
                     foreach (var a in productVoucher.Items)
@@ -990,10 +1023,11 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             Rating = averageRating,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
+                            ContractTemplateID = contractId,
                             listImage = productImage.Items,
                             listVoucher = listProductVoucher,
                             listProductSpecification = listProductSpecification
-
+                           
                         };
                         listProduct.Add(productResponse);
 
@@ -1017,6 +1051,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                             Quantity = item.Quantity,
                             Status = item.Status,
                             Rating = averageRating,
+                            ContractTemplateID = contractId,
                             CreatedAt = item.CreatedAt,
                             UpdatedAt = item.UpdatedAt,
                             listImage = productImage.Items,

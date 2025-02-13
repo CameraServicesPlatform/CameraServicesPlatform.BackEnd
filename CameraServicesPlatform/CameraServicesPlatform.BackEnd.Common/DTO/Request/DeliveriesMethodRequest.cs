@@ -10,10 +10,11 @@ namespace CameraServicesPlatform.BackEnd.Common.DTO.Request
 {
     public class DeliveriesMethodRequest
     {
-        public string MethodName { get; set; }
 
+        public string DeliveriesMethodName { get; set; }
+        public string OrderID { get; set; }
         public string Description { get; set; }
-
-        
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

@@ -152,7 +152,7 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-reports")]
-        public async Task<AppActionResult> GetAllReports(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllReports(int pageIndex = 1, int pageSize = 100)
         {
             return await _reportService.GetAllReport(pageIndex, pageSize);
         }

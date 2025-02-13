@@ -58,6 +58,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 returnDetail.PenaltyApplied = request.PenaltyApplied;
                 returnDetail.OrderID = request.OrderID;
                 returnDetail.Condition = request.Condition;
+                returnDetail.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                returnDetail.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 returnDetail.ReturnDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 returnDetail.IsDisable = false;
                 
@@ -108,6 +110,8 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 returnDetail.PenaltyApplied = 0;
                 returnDetail.OrderID = request.OrderID;
                 returnDetail.Condition = request.Condition;
+                returnDetail.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                returnDetail.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 returnDetail.ReturnDate = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
                 returnDetail.IsDisable = true;
 
@@ -225,6 +229,38 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             return result;
         }
 
+        public async Task<AppActionResult> GetReturnDetailByOrderId(string OrderId)
+        {
+            var result = new AppActionResult();
+            try
+            {
+                if (!Guid.TryParse(OrderId, out Guid ReturnDetailOrderID))
+                {
+                    result = BuildAppActionResultError(result, "ID không hợp lệ!");
+                    return result;
+                }
+
+                var returnDetail = await _returnDetailRepository.GetByExpression(x => x.OrderID == ReturnDetailOrderID);
+                if (returnDetail == null)
+                {
+                    result = BuildAppActionResultError(result, "Không tìm thấy đơn trả!");
+                    return result;
+                }
+
+                var response = _mapper.Map<ReturnDetailResponse>(returnDetail);
+                response.ReturnID = returnDetail.ReturnID.ToString();
+                response.OrderID = returnDetail.OrderID.ToString();
+                result.IsSuccess = true;
+                result.Result = response;
+            }
+            catch (Exception ex)
+            {
+                result = BuildAppActionResultError(result, ex.Message);
+            }
+
+            return result;
+        }
+
         public async Task<AppActionResult> GetReturnDetailByOrderID(string OrderID, int pageIndex, int pageSize)
         {
             var result = new AppActionResult();
@@ -292,7 +328,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 existingRT.ReturnDate = request.ReturnDate;
                 existingRT.Condition = request.Condition;
                 existingRT.PenaltyApplied = request.PenaltyApplied;
-                existingRT.CreatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
+                existingRT.UpdatedAt = DateTimeHelper.ToVietnamTime(DateTime.UtcNow);
 
 
                 await _returnDetailRepository.Update(existingRT);

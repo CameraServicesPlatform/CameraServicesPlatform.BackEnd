@@ -216,22 +216,21 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result.Result = new
                     {
                         AverageRating = 0,
-                        ReviewComments = new List<string>()
+                        Ratings = new List<RatingResponse>()
                     };
                     return result;
                 }
-
-                var averageRating = pagedResult.Items.Average(r => r.RatingValue);
-                averageRating = Math.Min(averageRating, 5);
-
-                var reviewComments = pagedResult.Items.Select(r => r.ReviewComment).ToList();
+                var ratingResponses = pagedResult.Items.Select(rating =>
+                {
+                    var ratingResponse = _mapper.Map<RatingResponse>(rating);
+                    ratingResponse.RatingID = rating.RatingID.ToString();
+                    ratingResponse.ProductID = rating.ProductID.ToString();
+                    ratingResponse.AccountID = rating.AccountID.ToString();
+                    return ratingResponse;
+                }).ToList();
 
                 result.IsSuccess = true;
-                result.Result = new
-                {
-                    AverageRating = averageRating,
-                    ReviewComments = reviewComments
-                };
+                result.Result = ratingResponses;
             }
             catch (Exception ex)
             {
@@ -246,7 +245,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             var result = new AppActionResult();
             try
             {
-
                 var pagedResult = await _ratingRepository.GetAllDataByExpression(
                     x => x.AccountID == accountId,
                     pageNumber: pageIndex,
@@ -260,22 +258,21 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     result.Result = new
                     {
                         AverageRating = 0,
-                        ReviewComments = new List<string>()
+                        Ratings = new List<RatingResponse>()
                     };
                     return result;
                 }
-
-                var averageRating = pagedResult.Items.Average(r => r.RatingValue);
-                averageRating = Math.Min(averageRating, 5);
-
-                var reviewComments = pagedResult.Items.Select(r => r.ReviewComment).ToList();
+                var ratingResponses = pagedResult.Items.Select(rating =>
+                {
+                    var ratingResponse = _mapper.Map<RatingResponse>(rating);
+                    ratingResponse.RatingID = rating.RatingID.ToString();
+                    ratingResponse.ProductID = rating.ProductID.ToString();
+                    ratingResponse.AccountID = rating.AccountID.ToString();
+                    return ratingResponse;
+                }).ToList();
 
                 result.IsSuccess = true;
-                result.Result = new
-                {
-                    AverageRating = averageRating,
-                    ReviewComments = reviewComments
-                };
+                result.Result = ratingResponses;
             }
             catch (Exception ex)
             {
@@ -284,6 +281,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
 
             return result;
         }
+
 
         public async Task<AppActionResult> UpdateRating(string ratingId, RatingRequest request)
         {

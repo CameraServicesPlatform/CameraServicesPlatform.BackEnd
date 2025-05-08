@@ -18,19 +18,19 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
         }
 
         [HttpGet("get-all-category")]
-        public async Task<AppActionResult> GetAllCategory(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllCategory(int pageIndex = 1, int pageSize = 100)
         {
             return await _categoryService.GetAllCategory(pageIndex, pageSize);
         }
 
         [HttpGet("get-category-by-id")]
-        public async Task<AppActionResult> GetCategoryById(string id, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetCategoryById(string id, int pageIndex = 1, int pageSize = 100)
         {
             return await _categoryService.GetCategoryById(id, pageIndex, pageSize);
         }
 
         [HttpGet("get-category-by-name")]
-        public async Task<AppActionResult> GetCategoryByName(string filter, int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetCategoryByName(string filter, int pageIndex = 1, int pageSize = 100)
         {
             return await _categoryService.GetCategoryByName(filter, pageIndex, pageSize);
         }

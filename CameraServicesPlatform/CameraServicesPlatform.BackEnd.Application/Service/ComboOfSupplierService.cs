@@ -17,6 +17,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
     {
         private readonly IMapper _mapper;
         private IRepository<ComboOfSupplier> _comboSupplierRepository;
+        private IRepository<Vourcher> _vourcherRepository;
         private readonly IRepository<Payment> _paymentRepository;
         private readonly IRepository<Product> _productRepository;
         private readonly IRepository<Combo> _comboRepository;
@@ -28,6 +29,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
         public ComboOfSupplierService(
             IRepository<ComboOfSupplier> comboSupplierRepository,
             IRepository<Combo> comboRepository,
+            IRepository<Vourcher> vourcherRepository,
             IUnitOfWork unitOfWork,
             IRepository<Payment> paymentRepository,
             IMapper mapper,
@@ -43,6 +45,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             _comboRepository = comboRepository;
             _supplierRepository = supplierRepository;
             _productRepository = productRepository;
+            _vourcherRepository = vourcherRepository;
             _accountRepository = accountRepository;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -86,7 +89,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     {
                         if (latestActiveCombo.EndTime > dateNow)
                         {
-                            newStartTime = latestActiveCombo.EndTime.AddDays(1);
+                            newStartTime = latestActiveCombo.EndTime;
 
                             switch (getCombo.DurationCombo)
                             {
@@ -106,25 +109,25 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                                     throw new InvalidOperationException("DurationUnit is not supported.");
                             }
                         }
-                        else
+                    }
+                    else
+                    {
+                        switch (getCombo.DurationCombo)
                         {
-                            switch (getCombo.DurationCombo)
-                            {
-                                case DurationCombo.oneMonth:
-                                    newEndTime = newStartTime.AddMonths(1);
-                                    break;
-                                case DurationCombo.twoMonth:
-                                    newEndTime = newStartTime.AddMonths(2);
-                                    break;
-                                case DurationCombo.threeMonth:
-                                    newEndTime = newStartTime.AddMonths(3);
-                                    break;
-                                case DurationCombo.fiveMonth:
-                                    newEndTime = newStartTime.AddMonths(5);
-                                    break;
-                                default:
-                                    throw new InvalidOperationException("DurationUnit is not supported.");
-                            }
+                            case DurationCombo.oneMonth:
+                                newEndTime = newStartTime.AddMonths(1);
+                                break;
+                            case DurationCombo.twoMonth:
+                                newEndTime = newStartTime.AddMonths(2);
+                                break;
+                            case DurationCombo.threeMonth:
+                                newEndTime = newStartTime.AddMonths(3);
+                                break;
+                            case DurationCombo.fiveMonth:
+                                newEndTime = newStartTime.AddMonths(5);
+                                break;
+                            default:
+                                throw new InvalidOperationException("DurationUnit is not supported.");
                         }
                     }
                 }
@@ -149,6 +152,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     }
                 }
 
+                await Task.Delay(50);
                 ComboOfSupplier comboNew = new ComboOfSupplier
                 {
                     ComboOfSupplierId = Guid.NewGuid(),
@@ -168,6 +172,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var supplierAccount = await _accountRepository.GetByExpression(x => x.Id == supplier.AccountID);
                 supplier.IsDisable = false;
                 await _supplierRepository.Update(supplier);
+                await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
 
                 var products = await _productRepository.GetAllDataByExpression(
@@ -183,7 +188,7 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                     product.IsDisable = false;
                     await _productRepository.Update(product);
                 }
-
+                await Task.Delay(100);
                 await _unitOfWork.SaveChangesAsync();
 
                 var paymentCombo = new CreateComboPaymentDTO
@@ -196,8 +201,9 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                 var payMethod = await paymentGatewayService.CreateComboPayment(paymentCombo, context);
 
                 await comboOfSupplier.Insert(comboNew);
+                await Task.Delay(50);
                 await SendComboPurchaseConfirmationEmail(supplierAccount, comboNew, combo);
-
+                await Task.Delay(50);
                 await _unitOfWork.SaveChangesAsync();
                 result.Result = payMethod;
                 result.IsSuccess = true;
@@ -297,6 +303,27 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         await _supplierRepository.Update(supplier);
                         await _unitOfWork.SaveChangesAsync();
 
+                        var listVourcher= await _vourcherRepository.GetAllDataByExpression(
+                            x => x.SupplierID == item.SupplierID,
+                            pageIndex,
+                            pageSize,
+                            null,
+                            isAscending: true,
+                            null
+                        );
+
+                        if (listVourcher != null)
+                        {
+                            foreach (var vourcher in listVourcher.Items)
+                            {
+                                if (vourcher.IsActive)
+                                {
+                                    vourcher.IsActive = false;
+                                    _vourcherRepository.Update(vourcher);
+                                    await _unitOfWork.SaveChangesAsync();
+                                }
+                            }
+                        }
                         var listProduct = await _productRepository.GetAllDataByExpression(
                             x => x.SupplierID == item.SupplierID,
                             pageIndex,

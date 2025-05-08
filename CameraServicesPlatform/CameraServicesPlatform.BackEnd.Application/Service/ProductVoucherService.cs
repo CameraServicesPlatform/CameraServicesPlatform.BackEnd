@@ -2,32 +2,38 @@
 using CameraServicesPlatform.BackEnd.Application.IRepository;
 using CameraServicesPlatform.BackEnd.Application.IService;
 using CameraServicesPlatform.BackEnd.Common.DTO.Response;
+using CameraServicesPlatform.BackEnd.Domain.Enum.Status;
 using CameraServicesPlatform.BackEnd.Domain.Models;
 using CameraServicesPlatform.BackEnd.Domain.Models.CameraServicesPlatform.BackEnd.Domain.Models;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using static CameraServicesPlatform.BackEnd.Application.Service.OrderService;
 
 namespace CameraServicesPlatform.BackEnd.Application.Service
 {
     public class ProductVoucherService : GenericBackendService, IProductVoucherService
     {
         private readonly IRepository<ProductVoucher> _repository;
+        private readonly IRepository<Vourcher> _vourcherRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
         public ProductVoucherService(
             IRepository<ProductVoucher> repository,
             IUnitOfWork unitOfWork,
+            IRepository<Vourcher> vourcherRepository,
             IMapper mapper,
             IServiceProvider serviceProvider
         ) : base(serviceProvider)
         {
             _repository = repository;
             _unitOfWork = unitOfWork;
+            _vourcherRepository = vourcherRepository;
             _mapper = mapper;
         }
 
@@ -56,7 +62,6 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
                         ProductVoucherID = item.ProductVoucherID.ToString(),
                         VourcherID = item.VourcherID.ToString(),
                         ProductID = item.ProductID.ToString(),
-
                         CreatedAt = item.CreatedAt,
                         UpdatedAt = item.UpdatedAt,
                     };
@@ -237,11 +242,14 @@ namespace CameraServicesPlatform.BackEnd.Application.Service
             try
             {
                 var listProductVoucher = Resolve<IRepository<ProductVoucher>>();
+                
                 ProductVoucher productVoucher = new ProductVoucher()
                 {
                     ProductVoucherID = Guid.NewGuid(),
                     ProductID = voucherResponse.ProductID,
-                    VourcherID = voucherResponse.VourcherID
+                    VourcherID = voucherResponse.VourcherID,
+                    CreatedAt = DateTimeHelper.ToVietnamTime(voucherResponse.CreateAt),
+                    UpdatedAt = DateTimeHelper.ToVietnamTime(voucherResponse.UpdateAt)
                 };
 
                 await listProductVoucher.Insert(productVoucher);

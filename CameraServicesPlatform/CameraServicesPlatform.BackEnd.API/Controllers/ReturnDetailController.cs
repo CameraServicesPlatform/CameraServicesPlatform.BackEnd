@@ -113,8 +113,27 @@ namespace CameraServicesPlatform.BackEnd.API.Controllers
             }
         }
 
+        [HttpGet("get-return-detail-by-order-id")]
+        public async Task<IActionResult> GetReturnDetailByOrderId(string OrderId)
+        {
+            try
+            {
+                var response = await _returnDetailService.GetReturnDetailByOrderId(OrderId);
+                if (!response.IsSuccess)
+                {
+                    return NotFound(response);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpGet("get-all-return-detail")]
-        public async Task<AppActionResult> GetAllReturnDetail(int pageIndex = 1, int pageSize = 10)
+        public async Task<AppActionResult> GetAllReturnDetail(int pageIndex = 1, int pageSize = 100)
         {
             return await _returnDetailService.GetAllReturnDetail(pageIndex, pageSize);
         }
